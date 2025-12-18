@@ -17,11 +17,17 @@ import argparse
 import json
 import os
 import sys
+import io
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 import yaml
+
+# Set UTF-8 encoding for stdout on Windows
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 
 class RiskLevel(Enum):
@@ -95,18 +101,21 @@ class ImpactAnalyzer:
     def _load_atom(self, path: Path):
         """Load a single atom."""
         try:
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 data = yaml.safe_load(f)
-            if data and 'atom_id' in data:
+            # Support both 'atom_id' and 'id' field names
+            atom_id = data.get('atom_id') or data.get('id')
+            if data and atom_id:
                 data['_path'] = str(path)
-                self.atoms[data['atom_id']] = data
+                data['atom_id'] = atom_id  # Normalize to 'atom_id'
+                self.atoms[atom_id] = data
         except Exception as e:
             print(f"Warning: Failed to load {path}: {e}", file=sys.stderr)
     
     def _load_module(self, path: Path):
         """Load a single module."""
         try:
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 data = yaml.safe_load(f)
             if data and 'module_id' in data:
                 data['_path'] = str(path)
@@ -207,10 +216,12 @@ class ImpactAnalyzer:
                 full_path = self.repo_root / path
                 if full_path.exists():
                     try:
-                        with open(full_path) as f:
+                        with open(full_path, encoding='utf-8') as f:
                             data = yaml.safe_load(f)
-                        if data and 'atom_id' in data:
-                            atom_ids.append(data['atom_id'])
+                        # Support both 'atom_id' and 'id' field names
+                        atom_id = data.get('atom_id') or data.get('id')
+                        if data and atom_id:
+                            atom_ids.append(atom_id)
                     except:
                         pass
         
