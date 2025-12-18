@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-from api.routes import graph, atoms
+from api.routes import graph, atoms, modules
 
 
 def get_admin_token():
@@ -12,18 +12,26 @@ def get_admin_token():
     return token
 
 
-app = FastAPI(title="GNDP API")
+app = FastAPI(
+    title="GNDP API",
+    description="Graph-Native Documentation Platform API",
+    version="0.1.0"
+)
+
+# CORS configuration - restrict in production
+allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8000").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
 app.include_router(graph.router)
 app.include_router(atoms.router)
+app.include_router(modules.router)
 
 
 @app.get("/health")
