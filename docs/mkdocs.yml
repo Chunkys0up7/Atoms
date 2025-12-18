@@ -1,0 +1,266 @@
+# =============================================================================
+# GNDP Documentation Site Configuration
+# MkDocs with Material theme + custom atom/graph extensions
+# =============================================================================
+
+site_name: Knowledge Graph Documentation
+site_description: Graph-Native Documentation Platform - Atoms, Modules, and Workflows
+site_author: Documentation Team
+site_url: https://docs.yourcompany.com
+
+# Repository
+repo_name: org/gndp-docs
+repo_url: https://github.com/org/gndp-docs
+edit_uri: edit/main/docs/
+
+# Theme Configuration
+theme:
+  name: material
+  custom_dir: overrides  # Custom templates for atom rendering
+  
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  font:
+    text: Inter
+    code: JetBrains Mono
+  
+  features:
+    - navigation.instant        # XHR loading for speed
+    - navigation.tracking       # URL updates with scroll
+    - navigation.tabs          # Top-level nav as tabs
+    - navigation.tabs.sticky   # Tabs stay visible
+    - navigation.sections      # Render sections as groups
+    - navigation.expand        # Expand all by default
+    - navigation.indexes       # Section index pages
+    - navigation.top           # Back to top button
+    - search.suggest           # Search suggestions
+    - search.highlight         # Highlight search terms
+    - search.share             # Share search results
+    - content.code.copy        # Copy code button
+    - content.code.annotate    # Code annotations
+    - content.tabs.link        # Link content tabs
+    - toc.follow               # TOC follows scroll
+  
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+      lang: en
+  
+  - tags:
+      tags_file: tags.md
+  
+  # Auto-generate nav from directory structure
+  - awesome-pages:
+      collapse_single_pages: false
+      strict: false
+  
+  # Generate atom index pages
+  - gen-files:
+      scripts:
+        - scripts/gen_atom_index.py
+        - scripts/gen_module_index.py
+        - scripts/gen_graph_pages.py
+  
+  # Enable macros for dynamic content
+  - macros:
+      module_name: macros/gndp_macros
+      include_dir: includes
+  
+  # Git revision date
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+  
+  # Minify HTML output
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+
+# Markdown Extensions
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  
+  # PyMdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: org
+      repo: gndp-docs
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: graph
+          class: graph-viz
+          format: !!python/name:macros.gndp_macros.render_graph
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Extra Configuration
+extra:
+  # Social links
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/org
+    - icon: fontawesome/brands/slack
+      link: https://yourcompany.slack.com
+  
+  # Version provider (for versioned docs)
+  version:
+    provider: mike
+    default: latest
+  
+  # Analytics
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+  
+  # GNDP-specific configuration
+  gndp:
+    atoms_dir: atoms
+    modules_dir: modules
+    graph_endpoint: /api/graph
+    enable_live_graph: true
+    risk_colors:
+      LOW: "#10B981"
+      MEDIUM: "#F59E0B"
+      HIGH: "#EF4444"
+      CRITICAL: "#7C3AED"
+
+# Extra CSS
+extra_css:
+  - stylesheets/gndp.css
+  - stylesheets/graph.css
+  - stylesheets/atoms.css
+
+# Extra JavaScript
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - https://d3js.org/d3.v7.min.js
+  - javascripts/graph-viz.js
+  - javascripts/atom-links.js
+  - javascripts/search-enhance.js
+
+# Navigation Structure (auto-generated sections marked with # AUTO)
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Overview: getting-started/index.md
+    - Quick Start: getting-started/quickstart.md
+    - Concepts: getting-started/concepts.md
+  
+  - Atoms:  # AUTO-GENERATED
+    - atoms/index.md
+    - Processes: atoms/processes/
+    - Decisions: atoms/decisions/
+    - Roles: atoms/roles/
+    - Systems: atoms/systems/
+    - Documents: atoms/documents/
+    - Regulations: atoms/regulations/
+    - Metrics: atoms/metrics/
+    - Risks: atoms/risks/
+  
+  - Modules:  # AUTO-GENERATED
+    - modules/index.md
+    - Loan Origination: modules/loan-origination/
+    - Underwriting: modules/underwriting/
+    - Closing: modules/closing/
+    - Servicing: modules/servicing/
+  
+  - Graph Explorer:
+    - graph/index.md
+    - Full Graph: graph/full.md
+    - By Module: graph/by-module.md
+    - Impact Analysis: graph/impact.md
+    - Dependencies: graph/dependencies.md
+  
+  - Workflows:
+    - workflows/index.md
+    - BPM: workflows/bpm.md
+    - SOPs: workflows/sop.md
+    - Customer Journeys: workflows/journeys.md
+    - Custom: workflows/custom.md
+  
+  - Search & Query:
+    - search/index.md
+    - RAG Interface: search/rag.md
+    - Impact Queries: search/impact.md
+    - Path Finder: search/paths.md
+  
+  - Admin:
+    - admin/index.md
+    - Schema Reference: admin/schemas.md
+    - API Reference: admin/api.md
+    - Change Log: admin/changelog.md
+
+# Watch for changes (dev mode)
+watch:
+  - includes
+  - macros
+  - overrides

@@ -1,0 +1,7 @@
+{
+  "name": "GNDP: Graph-Native Documentation Platform",
+  "description": "A sophisticated documentation system treating docs as interconnected atomic units with graph-based RAG, impact analysis, and CI/CD governance.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

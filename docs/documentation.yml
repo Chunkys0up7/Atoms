@@ -1,0 +1,423 @@
+# =============================================================================
+# GNDP Documentation CI/CD Pipeline
+# 
+# This workflow:
+# 1. Validates atom/module schemas on every PR
+# 2. Runs impact analysis for changed atoms
+# 3. Routes approvals based on risk score
+# 4. Builds and deploys documentation on merge
+# =============================================================================
+
+name: GNDP Documentation Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'atoms/**'
+      - 'modules/**'
+      - 'schemas/**'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'atoms/**'
+      - 'modules/**'
+      - 'schemas/**'
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  # ===========================================================================
+  # SCHEMA VALIDATION
+  # ===========================================================================
+  validate:
+    name: Validate Schemas
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml jsonschema
+
+      - name: Validate atom schemas
+        run: |
+          python scripts/validate_schemas.py \
+            --atoms-dir atoms/ \
+            --modules-dir modules/ \
+            --schema-dir schemas/
+
+      - name: Check for orphan atoms
+        run: |
+          python scripts/check_orphans.py \
+            --atoms-dir atoms/ \
+            --modules-dir modules/
+
+  # ===========================================================================
+  # IMPACT ANALYSIS (PR only)
+  # ===========================================================================
+  impact-analysis:
+    name: Impact Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: validate
+    
+    outputs:
+      risk_level: ${{ steps.analyze.outputs.risk_level }}
+      risk_score: ${{ steps.analyze.outputs.risk_score }}
+      affected_count: ${{ steps.analyze.outputs.affected_count }}
+    
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install pyyaml networkx
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            atoms/**/*.yaml
+            atoms/**/*.yml
+            modules/**/*.yaml
+            modules/**/*.yml
+
+      - name: Run impact analysis
+        id: analyze
+        run: |
+          python scripts/impact_analysis.py \
+            --changed-files "${{ steps.changed-files.outputs.all_changed_files }}" \
+            --output-format github \
+            >> $GITHUB_OUTPUT
+
+      - name: Generate impact report
+        run: |
+          python scripts/impact_analysis.py \
+            --changed-files "${{ steps.changed-files.outputs.all_changed_files }}" \
+            --output-format markdown \
+            > impact-report.md
+
+      - name: Post impact report to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('impact-report.md', 'utf8');
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('## 📊 Impact Analysis Report')
+            );
+            
+            const body = `## 📊 Impact Analysis Report\n\n${report}`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  # ===========================================================================
+  # APPROVAL ROUTING
+  # ===========================================================================
+  approval-routing:
+    name: Route Approval
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: impact-analysis
+    
+    steps:
+      - name: Determine required reviewers
+        id: reviewers
+        run: |
+          RISK_LEVEL="${{ needs.impact-analysis.outputs.risk_level }}"
+          
+          case $RISK_LEVEL in
+            LOW)
+              echo "reviewers=" >> $GITHUB_OUTPUT
+              echo "auto_approve=true" >> $GITHUB_OUTPUT
+              ;;
+            MEDIUM)
+              echo "reviewers=@org/docs-team" >> $GITHUB_OUTPUT
+              echo "auto_approve=false" >> $GITHUB_OUTPUT
+              ;;
+            HIGH)
+              echo "reviewers=@org/docs-team,@org/tech-leads" >> $GITHUB_OUTPUT
+              echo "auto_approve=false" >> $GITHUB_OUTPUT
+              ;;
+            CRITICAL)
+              echo "reviewers=@org/docs-team,@org/tech-leads,@org/compliance" >> $GITHUB_OUTPUT
+              echo "auto_approve=false" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Request reviews
+        if: steps.reviewers.outputs.auto_approve != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewers = '${{ steps.reviewers.outputs.reviewers }}'.split(',').filter(Boolean);
+            
+            if (reviewers.length > 0) {
+              const teams = reviewers
+                .filter(r => r.startsWith('@org/'))
+                .map(r => r.replace('@org/', ''));
+              
+              if (teams.length > 0) {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  team_reviewers: teams
+                });
+              }
+            }
+
+      - name: Add risk label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const riskLevel = '${{ needs.impact-analysis.outputs.risk_level }}';
+            const labelColors = {
+              'LOW': '10B981',
+              'MEDIUM': 'F59E0B',
+              'HIGH': 'EF4444',
+              'CRITICAL': '7C3AED'
+            };
+            
+            const labelName = `risk:${riskLevel.toLowerCase()}`;
+            
+            // Create label if it doesn't exist
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: labelName,
+                color: labelColors[riskLevel],
+                description: `${riskLevel} risk change`
+              });
+            } catch (e) {
+              // Label already exists
+            }
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [labelName]
+            });
+
+  # ===========================================================================
+  # BUILD DOCUMENTATION
+  # ===========================================================================
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Python dependencies
+        run: |
+          pip install \
+            mkdocs \
+            mkdocs-material \
+            mkdocs-awesome-pages-plugin \
+            mkdocs-gen-files \
+            mkdocs-macros-plugin \
+            mkdocs-git-revision-date-localized-plugin \
+            mkdocs-minify-plugin \
+            pyyaml \
+            jinja2 \
+            networkx
+
+      - name: Generate documentation from graph
+        run: |
+          python scripts/build_docs.py \
+            --source . \
+            --output docs/ \
+            --templates templates/
+
+      - name: Build MkDocs site
+        run: mkdocs build --strict
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: site/
+          retention-days: 7
+
+      - name: Upload graph JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-data
+          path: docs/api/graph/
+          retention-days: 7
+
+  # ===========================================================================
+  # DEPLOY (main branch only)
+  # ===========================================================================
+  deploy:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    
+    permissions:
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: site/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ===========================================================================
+  # SYNC TO NEO4J (optional)
+  # ===========================================================================
+  sync-graph:
+    name: Sync to Neo4j
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download graph data
+        uses: actions/download-artifact@v4
+        with:
+          name: graph-data
+          path: graph-data/
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install neo4j driver
+        run: pip install neo4j
+
+      - name: Sync to Neo4j
+        if: env.NEO4J_URI != ''
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: |
+          python scripts/sync_neo4j.py \
+            --graph-json graph-data/full.json \
+            --uri "$NEO4J_URI" \
+            --user "$NEO4J_USER" \
+            --password "$NEO4J_PASSWORD"
+
+  # ===========================================================================
+  # UPDATE RAG INDEX (optional)
+  # ===========================================================================
+  update-rag:
+    name: Update RAG Index
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install openai chromadb tiktoken pyyaml
+
+      - name: Generate embeddings
+        if: env.OPENAI_API_KEY != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/generate_embeddings.py \
+            --atoms-dir atoms/ \
+            --modules-dir modules/ \
+            --output rag-index/
+
+      - name: Upload RAG index
+        if: env.OPENAI_API_KEY != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: rag-index
+          path: rag-index/
+          retention-days: 30
