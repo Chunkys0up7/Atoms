@@ -11,7 +11,8 @@
       "Bash(python docs/build_docs.py:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(python docs/impact_analysis.py:*)"
+      "Bash(python docs/impact_analysis.py:*)",
+      "Bash(python builder.py:*)"
     ]
   }
 }

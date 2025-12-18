@@ -2,14 +2,16 @@
 """Builder orchestrator for GNDP project.
 
 Provides a small CLI to run common pipeline steps locally or in CI:
-- validate (calls docs/build_docs.py --validate)
-- build (calls docs/build_docs.py --build)
-- sync (calls scripts/sync_neo4j.py)
-- embeddings (calls scripts/generate_embeddings.py)
+- validate (runs schema validation + integrity checks)
+- build (generates documentation from atoms/modules)
+- sync (syncs graph to Neo4j)
+- embeddings (generates embeddings for RAG)
 - all (runs validate->build->sync->embeddings)
 
 This is intentionally lightweight: it shells out to existing scripts so CI
 and local runs reuse the same logic.
+
+Following agent.md and claude.md CI/CD integration patterns.
 """
 import argparse
 import subprocess
@@ -33,11 +35,13 @@ def main():
     if args.action in ("validate", "build", "all"):
         # Prefer calling python module directly
         if args.action == "validate" or args.action == "all":
-            print("Running validation: docs/build_docs.py --validate")
-            run("python docs/build_docs.py --validate")
+            print("Running schema validation")
+            run("python scripts/validate_schemas.py")
+            print("Running integrity check")
+            run("python scripts/check_orphans.py", check=False)  # Non-critical warnings
         if args.action == "build" or args.action == "all":
-            print("Running build: docs/build_docs.py --build")
-            run("python docs/build_docs.py --build")
+            print("Running documentation build")
+            run("python docs/build_docs.py --source . --output docs/generated")
 
     if args.action in ("sync", "all"):
         dry = "--dry-run" if args.dry_run else ""
