@@ -1,0 +1,8 @@
+id: app-0029
+type: Applicant
+name: Casey Smith
+ssn: '357844231'
+phone: +1-555-246-5063
+email: casey.smith29@example.com
+address: 4427 Birch Blvd, Lakeview, ST 95707
+created_at: '2025-12-18T17:18:46.150636'

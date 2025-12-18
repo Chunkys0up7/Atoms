@@ -1,0 +1,8 @@
+id: app-0042
+type: Applicant
+name: Casey Smith
+phone: +1-555-389-5675
+email: casey.smith42@example.com
+address: 6905 Cedar Lane, Rivertown, ST 38940
+created_at: '2025-12-18T17:18:46.349586'
+note: missing_ssn

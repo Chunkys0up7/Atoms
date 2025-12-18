@@ -1,0 +1,9 @@
+id: loan-98bfa99d
+type: LoanApplication
+applicant_id: app-0018
+property_id: prop-0018
+amount: 193053
+term_years: 20
+interest_rate: 5.453
+status: underwriting
+created_at: '2025-12-18T17:18:46.023947'

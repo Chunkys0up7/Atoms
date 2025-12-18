@@ -1,0 +1,9 @@
+id: loan-90e07e21
+type: LoanApplication
+applicant_id: app-0074
+property_id: prop-0074
+amount: 195486
+term_years: 20
+interest_rate: 4.45
+status: declined
+created_at: '2025-12-18T17:18:46.970860'

@@ -1,0 +1,9 @@
+id: loan-10dc1117
+type: LoanApplication
+applicant_id: app-0022
+property_id: prop-0022
+amount: 470934
+term_years: 20
+interest_rate: 2.626
+status: underwriting
+created_at: '2025-12-18T17:18:46.084278'

@@ -1,0 +1,9 @@
+id: loan-3b3d5e6d
+type: LoanApplication
+applicant_id: app-0023
+property_id: prop-0023
+amount: 561913
+term_years: 30
+interest_rate: 4.173
+status: funded
+created_at: '2025-12-18T17:18:46.094570'

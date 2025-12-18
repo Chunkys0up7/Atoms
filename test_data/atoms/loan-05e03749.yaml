@@ -1,0 +1,9 @@
+id: loan-05e03749
+type: LoanApplication
+applicant_id: app-0045
+property_id: prop-0045
+amount: 753123
+term_years: 30
+interest_rate: 3.751
+status: underwriting
+created_at: '2025-12-18T17:18:46.423010'

@@ -1,0 +1,9 @@
+id: loan-7e5a06d7
+type: LoanApplication
+applicant_id: app-0055
+property_id: prop-0055
+amount: 219948
+term_years: 15
+interest_rate: 5.886
+status: funded
+created_at: '2025-12-18T17:18:46.612750'

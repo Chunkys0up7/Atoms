@@ -1,0 +1,9 @@
+id: loan-6ac98f56
+type: LoanApplication
+applicant_id: app-0010
+property_id: prop-0010
+amount: 256667
+term_years: 30
+interest_rate: 5.889
+status: approved
+created_at: '2025-12-18T17:18:45.936195'

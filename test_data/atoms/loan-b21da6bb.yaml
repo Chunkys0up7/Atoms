@@ -1,0 +1,9 @@
+id: loan-b21da6bb
+type: LoanApplication
+applicant_id: app-0014
+property_id: prop-0014
+amount: 428983
+term_years: 30
+interest_rate: 3.169
+status: underwriting
+created_at: '2025-12-18T17:18:45.980765'

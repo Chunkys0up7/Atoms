@@ -30,7 +30,7 @@ def sanitize_relation_type(t: str) -> str:
     if not t:
         return "RELATED"
     s = re.sub(r"[^A-Za-z0-9_]+", "_", t)
-    s = s.strip("_")
+    s = re.sub(r"_+", "_", s)
     return s[:64] or "RELATED"
 
 

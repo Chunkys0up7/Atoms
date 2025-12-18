@@ -1,0 +1,8 @@
+id: app-0071
+type: Applicant
+name: Taylor Johnson
+ssn: '995055005'
+phone: +1-555-238-4036
+email: taylor.johnson71@example.com
+address: 9508 Maple St, Lakeview, ST 86955
+created_at: '2025-12-18T17:18:46.893067'

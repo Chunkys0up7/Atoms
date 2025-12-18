@@ -1,0 +1,9 @@
+id: loan-1f9bdbe7
+type: LoanApplication
+applicant_id: app-0002
+property_id: prop-0002
+amount: 319712
+term_years: 30
+interest_rate: 2.721
+status: submitted
+created_at: '2025-12-18T17:18:45.844298'

@@ -1,0 +1,8 @@
+id: app-0063
+type: Applicant
+name: Alex Lee
+ssn: '519527927'
+phone: +1-555-770-9981
+email: alex.lee63@example.com
+address: 6805 Birch Blvd, Lakeview, ST 41512
+created_at: '2025-12-18T17:18:46.789922'

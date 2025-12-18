@@ -1,0 +1,8 @@
+id: app-0022
+type: Applicant
+name: Casey Johnson
+ssn: '704381900'
+phone: +1-555-381-8463
+email: casey.johnson22@example.com
+address: 2133 Maple St, Rivertown, ST 16139
+created_at: '2025-12-18T17:18:46.075597'

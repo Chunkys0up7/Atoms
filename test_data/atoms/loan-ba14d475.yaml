@@ -1,0 +1,9 @@
+id: loan-ba14d475
+type: LoanApplication
+applicant_id: app-0049
+property_id: prop-0049
+amount: 203546
+term_years: 30
+interest_rate: 4.891
+status: submitted
+created_at: '2025-12-18T17:18:46.486089'

@@ -1,0 +1,9 @@
+id: loan-fe82dead
+type: LoanApplication
+applicant_id: app-0041
+property_id: prop-0041
+amount: 277855
+term_years: 20
+interest_rate: 3.365
+status: underwriting
+created_at: '2025-12-18T17:18:46.347561'

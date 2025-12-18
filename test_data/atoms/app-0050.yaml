@@ -1,0 +1,8 @@
+id: app-0050
+type: Applicant
+name: Jordan Smith
+ssn: '708193038'
+phone: +1-555-499-1695
+email: jordan.smith50@example.com
+address: 2040 Cedar Lane, Springfield, ST 49896
+created_at: '2025-12-18T17:18:46.490781'

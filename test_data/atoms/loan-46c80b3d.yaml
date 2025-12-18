@@ -1,0 +1,9 @@
+id: loan-46c80b3d
+type: LoanApplication
+applicant_id: app-0026
+property_id: prop-0026
+amount: 266826
+term_years: 30
+interest_rate: 2.518
+status: underwriting
+created_at: '2025-12-18T17:18:46.126288'

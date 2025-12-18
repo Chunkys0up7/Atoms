@@ -1,0 +1,9 @@
+id: loan-970bfe68
+type: LoanApplication
+applicant_id: app-0062
+property_id: prop-0062
+amount: 518201
+term_years: 15
+interest_rate: 2.732
+status: approved
+created_at: '2025-12-18T17:18:46.786615'

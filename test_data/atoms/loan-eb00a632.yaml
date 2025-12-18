@@ -1,0 +1,9 @@
+id: loan-eb00a632
+type: LoanApplication
+applicant_id: app-0035
+property_id: prop-0035
+amount: 385838
+term_years: 20
+interest_rate: 3.617
+status: submitted
+created_at: '2025-12-18T17:18:46.262363'

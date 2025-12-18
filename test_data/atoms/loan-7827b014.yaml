@@ -1,0 +1,9 @@
+id: loan-7827b014
+type: LoanApplication
+applicant_id: app-0056
+property_id: prop-0056
+amount: 122231
+term_years: 15
+interest_rate: 5.063
+status: declined
+created_at: '2025-12-18T17:18:46.705133'

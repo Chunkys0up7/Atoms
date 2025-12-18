@@ -1,0 +1,9 @@
+id: loan-a34595a9
+type: LoanApplication
+applicant_id: app-0050
+property_id: prop-0050
+amount: 635643
+term_years: 15
+interest_rate: 5.961
+status: approved
+created_at: '2025-12-18T17:18:46.504319'

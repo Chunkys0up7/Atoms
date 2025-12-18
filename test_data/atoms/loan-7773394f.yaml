@@ -1,0 +1,9 @@
+id: loan-7773394f
+type: LoanApplication
+applicant_id: app-0020
+property_id: prop-0020
+amount: 625665
+term_years: 30
+interest_rate: 5.723
+status: funded
+created_at: '2025-12-18T17:18:46.046512'

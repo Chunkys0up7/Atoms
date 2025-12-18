@@ -1,0 +1,9 @@
+id: loan-6603f6af
+type: LoanApplication
+applicant_id: app-0013
+property_id: prop-0013
+amount: 253941
+term_years: 15
+interest_rate: 6.168
+status: approved
+created_at: '2025-12-18T17:18:45.969476'

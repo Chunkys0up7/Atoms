@@ -1,0 +1,8 @@
+id: app-0065
+type: Applicant
+name: Alex Garcia
+ssn: '932105501'
+phone: +1-555-885-1148
+email: alex.garcia65@example.com
+address: 3485 Elm St, Lakeview, ST 22028
+created_at: '2025-12-18T17:18:46.814380'

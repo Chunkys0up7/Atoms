@@ -1,0 +1,8 @@
+id: app-0004
+type: Applicant
+name: Jamie Brown
+ssn: '163238725'
+phone: +1-555-464-1164
+email: jamie.brown4@example.com
+address: 1277 Maple St, Rivertown, ST 56878
+created_at: '2025-12-18T17:18:45.857811'

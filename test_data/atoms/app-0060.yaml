@@ -1,0 +1,8 @@
+id: app-0060
+type: Applicant
+name: Alex Smith
+ssn: '808409897'
+phone: +1-555-538-2458
+email: alex.smith60@example.com
+address: 8155 Pine Rd, Springfield, ST 12724
+created_at: '2025-12-18T17:18:46.749706'

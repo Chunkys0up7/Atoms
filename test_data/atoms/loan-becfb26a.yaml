@@ -1,0 +1,9 @@
+id: loan-becfb26a
+type: LoanApplication
+applicant_id: app-0054
+property_id: prop-0054
+amount: 755371
+term_years: 30
+interest_rate: 4.05
+status: underwriting
+created_at: '2025-12-18T17:18:46.596588'

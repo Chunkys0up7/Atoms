@@ -1,0 +1,8 @@
+id: app-0005
+type: Applicant
+name: Cameron Smith
+ssn: '817162076'
+phone: +1-555-273-9964
+email: cameron.smith5@example.com
+address: 2198 Maple St, Rivertown, ST 68011
+created_at: '2025-12-18T17:18:45.870060'

@@ -1,0 +1,8 @@
+id: app-0012
+type: Applicant
+name: Taylor Smith
+ssn: '178502593'
+phone: +1-555-434-6767
+email: taylor.smith12@example.com
+address: 8648 Birch Blvd, Rivertown, ST 14297
+created_at: '2025-12-18T17:18:45.949748'

@@ -1,0 +1,9 @@
+id: loan-dcb4c0fe
+type: LoanApplication
+applicant_id: app-0065
+property_id: prop-0065
+amount: 183873
+term_years: 15
+interest_rate: 5.208
+status: underwriting
+created_at: '2025-12-18T17:18:46.822836'

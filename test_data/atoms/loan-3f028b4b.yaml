@@ -1,0 +1,9 @@
+id: loan-3f028b4b
+type: LoanApplication
+applicant_id: app-0019
+property_id: prop-0019
+amount: 83675
+term_years: 15
+interest_rate: 6.487
+status: approved
+created_at: '2025-12-18T17:18:46.035616'

@@ -1,0 +1,9 @@
+id: loan-965e2e75
+type: LoanApplication
+applicant_id: app-0034
+property_id: prop-0034
+amount: 482708
+term_years: 15
+interest_rate: 3.304
+status: underwriting
+created_at: '2025-12-18T17:18:46.244560'

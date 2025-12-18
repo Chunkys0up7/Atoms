@@ -1,0 +1,9 @@
+id: loan-ed84b863
+type: LoanApplication
+applicant_id: app-0053
+property_id: prop-0053
+amount: 541389
+term_years: 30
+interest_rate: 5.803
+status: underwriting
+created_at: '2025-12-18T17:18:46.567632'
