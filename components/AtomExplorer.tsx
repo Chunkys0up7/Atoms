@@ -24,7 +24,16 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-4xl font-black text-white tracking-tight mb-2">Global Registry</h2>
-            <p className="text-slate-500 text-sm font-medium">System-wide documentation index. Manage and audit atomic units of work.</p>
+            <p className="text-slate-500 text-sm font-medium">
+              System-wide documentation index. Manage indivisible 
+              <span className="text-blue-500 ml-1 group relative cursor-help">
+                Atomic Units
+                <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 bg-slate-800 text-[10px] p-2 rounded-lg border border-slate-700 shadow-2xl z-50">
+                  <span className="font-black text-white uppercase block mb-1">Methodology Tip:</span>
+                  Atoms are the smallest indivisible units that cover exactly one concept or task.
+                </div>
+              </span>.
+            </p>
           </div>
           <div className="flex flex-col items-end">
              <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Total Indexed Units</div>
@@ -50,7 +59,7 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as any)}
           >
-            <option value="ALL">Filtered by: All Types</option>
+            <option value="ALL">All Node Types</option>
             {Object.values(AtomType).map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
@@ -88,7 +97,9 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ATOM_COLORS[atom.type] }}></div>
                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-600">{atom.type}</span>
                  </div>
-                 <span className="text-[10px] mono text-slate-700 font-bold uppercase tracking-widest group-hover:text-slate-500 transition-colors">v{atom.version}</span>
+                 <div className="group relative">
+                  <span className="text-[10px] mono text-slate-700 font-bold uppercase tracking-widest group-hover:text-slate-500 transition-colors">v{atom.version}</span>
+                 </div>
               </div>
             </div>
           ))}

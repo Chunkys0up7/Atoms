@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import Sidebar, { ViewType } from './components/Sidebar';
+import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
 import AtomExplorer from './components/AtomExplorer';
 import ModuleExplorer from './components/ModuleExplorer';
@@ -11,11 +11,12 @@ import ValidationCenter from './components/ValidationCenter';
 import Publisher from './components/Publisher';
 import IngestionEngine from './components/IngestionEngine';
 import OntologyView from './components/OntologyView';
+import Glossary from './components/Glossary';
 import { MOCK_ATOMS, MOCK_MODULES, ATOM_COLORS } from './constants';
-import { Atom, Module } from './types';
+import { Atom, Module, ViewType } from './types';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<ViewType>('ontology');
+  const [view, setView] = useState<ViewType>('ingestion');
   const [selectedAtom, setSelectedAtom] = useState<Atom | null>(null);
   const [atoms, setAtoms] = useState<Atom[]>(MOCK_ATOMS);
   const [modules, setModules] = useState<Module[]>(MOCK_MODULES);
@@ -43,6 +44,8 @@ const App: React.FC = () => {
     switch (view) {
       case 'ontology':
         return <OntologyView />;
+      case 'glossary':
+        return <Glossary />;
       case 'explorer':
         return <AtomExplorer atoms={atoms} onSelect={(a) => { setSelectedAtom(a); }} />;
       case 'modules':
@@ -73,7 +76,7 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col relative min-w-0">
         <header className="h-20 border-b border-slate-800 bg-[#0a0f1d]/80 backdrop-blur-2xl flex items-center justify-between px-10 shrink-0 z-10">
           <div className="flex items-center gap-4">
-             <div className="text-[10px] uppercase font-black text-slate-500 tracking-[0.3em]">System Intelligence</div>
+             <div className="text-[10px] uppercase font-black text-slate-500 tracking-[0.3em]">Registry Status</div>
              <span className="text-slate-700 font-light">/</span>
              <div className="text-sm font-bold text-slate-200 uppercase tracking-tighter">
                {view.replace('_', ' ').charAt(0).toUpperCase() + view.replace('_', ' ').slice(1)}
@@ -81,16 +84,18 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-6">
+             <div className="hidden lg:flex items-center gap-4 mr-4">
+               <div className="flex flex-col items-end">
+                 <span className="text-[8px] font-black text-slate-600 uppercase">Active Ontology</span>
+                 <span className="text-[10px] font-bold text-slate-300">NASA Atomic v1.2</span>
+               </div>
+             </div>
              {uncommittedChanges > 0 && (
                <button onClick={handleSync} className="flex items-center gap-2 bg-blue-600/10 px-4 py-2 rounded-xl border border-blue-500/30 text-blue-400 hover:bg-blue-600/20 transition-all">
                  {isSyncing ? <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div> : <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
-                 <span className="text-[10px] font-black uppercase tracking-widest">Commit Changes ({uncommittedChanges})</span>
+                 <span className="text-[10px] font-black uppercase tracking-widest">Commit changes ({uncommittedChanges})</span>
                </button>
              )}
-             <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
-               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Node: Graph-Active</span>
-             </div>
              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-600 flex items-center justify-center text-xs font-black text-white shadow-xl">JD</div>
           </div>
         </header>
@@ -123,12 +128,19 @@ const App: React.FC = () => {
                 </div>
               </section>
               <section>
-                <h5 className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-3">Summary</h5>
+                <h5 className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-3">Unit Summary</h5>
                 <p className="text-sm text-slate-400 leading-relaxed font-medium">{selectedAtom.content.summary}</p>
+              </section>
+              <section>
+                <h5 className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-3">Pointer Context</h5>
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                  <div className="text-[9px] font-black text-slate-600 uppercase mb-2">Ontology Domain</div>
+                  <div className="text-xs font-bold text-slate-300">{selectedAtom.ontologyDomain}</div>
+                </div>
               </section>
             </div>
             <div className="p-8 border-t border-slate-800 bg-[#0d1324] flex gap-3">
-              <button onClick={() => { setView('impact'); setSelectedAtom(null); }} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-blue-900/30">Simulate Change</button>
+              <button onClick={() => { setView('impact'); setSelectedAtom(null); }} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-blue-900/30">Impact Analysis</button>
             </div>
           </div>
         )}

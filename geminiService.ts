@@ -1,8 +1,68 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { Atom, Module, Phase, Journey, DocTemplateType } from "./types";
+import { Atom, Module, Phase, Journey, DocTemplateType, GlossaryItem } from "./types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// RAG-Enhanced Knowledge Assistant
+export const chatWithKnowledgeBase = async (query: string, atoms: Atom[], glossary: GlossaryItem[]) => {
+  // Step 1: Retrieval (Filter relevant context)
+  const queryLower = query.toLowerCase();
+  
+  // Find atoms that might be relevant
+  const relevantAtoms = atoms.filter(a => 
+    a.name.toLowerCase().includes(queryLower) || 
+    a.id.toLowerCase().includes(queryLower) ||
+    a.content.summary?.toLowerCase().includes(queryLower) ||
+    a.ontologyDomain.toLowerCase().includes(queryLower)
+  ).slice(0, 5);
+
+  // Find glossary terms that might be relevant
+  const relevantGlossary = glossary.filter(g => 
+    g.term.toLowerCase().includes(queryLower) || 
+    g.definition.toLowerCase().includes(queryLower)
+  ).slice(0, 3);
+
+  const atomContext = relevantAtoms.length > 0 
+    ? `RELEVANT ATOMS:\n${relevantAtoms.map(a => `- ${a.id}: ${a.name} (Domain: ${a.ontologyDomain})\n  Summary: ${a.content.summary}`).join('\n')}`
+    : "No directly matching atoms found in registry.";
+
+  const glossaryContext = relevantGlossary.length > 0
+    ? `RELEVANT TERMINOLOGY:\n${relevantGlossary.map(g => `- ${g.term}: ${g.definition}`).join('\n')}`
+    : "No directly matching glossary terms.";
+
+  const prompt = `
+    You are the GNDP RAG Assistant, an expert in Graph-Native Documentation and NASA-inspired Atomic Design.
+    Your mission is to answer user queries using the provided documentation context and glossary definitions.
+    
+    CONTEXT DATA:
+    ${atomContext}
+    
+    ${glossaryContext}
+    
+    INSTRUCTIONS:
+    1. Be functional and precise. If the information isn't in the context, say so, but offer to search for broader concepts.
+    2. Use the terminology from the glossary (e.g., refer to 'Atoms' as the smallest indivisible units).
+    3. If answering about a specific atom, reference its ID.
+    4. Format your output using clear Markdown.
+    
+    USER QUERY: "${query}"
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        systemInstruction: "You are a professional technical support agent for the Graph-Native Documentation Platform (GNDP). You specialize in RAG-based retrieval and atomic documentation methodologies."
+      }
+    });
+    return response.text;
+  } catch (error) {
+    console.error("AI Assistant Error:", error);
+    return "I encountered an error accessing the knowledge base. Please try a more specific query.";
+  }
+};
 
 export const parseDocumentToGraph = async (documentText: string, existingAtoms: Atom[]) => {
   const existingContext = existingAtoms.map(a => ({ id: a.id, name: a.name, summary: a.content.summary, domain: a.ontologyDomain }));
@@ -35,7 +95,7 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
         "isNew": true,
         "edges": [{"type": "...", "targetId": "..."}]
       }],
-      "proposedModule": { "id": "module-...", "name": "...", "atoms": ["atom-id-1"] },
+      "proposedModule": { "id": "module-...", "name": "...", "atoms": ["atom-id-1"], "phases": ["phase-name"] },
       "proposedPhase": { "id": "phase-...", "name": "...", "modules": ["module-id-1"] }
     }
   `;
@@ -46,7 +106,7 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        systemInstruction: "You are a lead graph-native systems architect. You transform monolithic documentation into a semantic network of interconnected atoms. You prioritize concept reuse and strict edge typing to prevent ambiguity."
+        systemInstruction: "You are a lead graph-native systems architect. You transform monolithic documentation into a semantic network of interconnected atoms."
       }
     });
     return JSON.parse(response.text);
@@ -75,7 +135,7 @@ export const compileDocument = async (atoms: Atom[], module: Module, templateTyp
       model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
-        systemInstruction: "You are an expert technical writer specializing in semantic documentation networks. You synthesize atomic graph data into high-fidelity, context-aware professional documents."
+        systemInstruction: "You are an expert technical writer specializing in semantic documentation networks."
       }
     });
     return response.text;
@@ -104,25 +164,11 @@ export const generateImpactAnalysis = async (targetId: string, context: { target
       model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
-        systemInstruction: "You are a graph reasoning engine. You perform deep impact analysis by traversing semantic edges to identify hidden risks in documentation changes."
+        systemInstruction: "You are a graph reasoning engine performing deep impact analysis."
       }
     });
     return response.text;
   } catch (error) {
     return "Simulation analysis failed.";
   }
-};
-
-export const chatWithKnowledgeBase = async (query: string, atoms: Atom[]) => {
-  const context = atoms.map(a => `${a.id}: ${a.name} [Domain: ${a.ontologyDomain}]`).join('\n');
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `You are the GNDP Semantic Assistant.
-    You answer queries by traversing the documentation graph.
-    Indexed Units:
-    ${context}
-    
-    Query: ${query}`
-  });
-  return response.text;
 };

@@ -20,23 +20,20 @@ export enum AtomType {
 }
 
 export enum EdgeType {
-  // --- NASA / Atomic Methodology Edges ---
-  DEPENDS_ON = 'DEPENDS_ON',        // A requires B to be complete
-  ENABLES = 'ENABLES',              // Completing A allows B to begin
-  RELATED_TO = 'RELATED_TO',        // Conceptually connected
-  COMPONENT_OF = 'COMPONENT_OF',    // A is part of B (Composition)
-  USES_COMPONENT = 'USES_COMPONENT',// A references B (Pointer)
-  PARALLEL_WITH = 'PARALLEL_WITH',  // Simultaneous execution
-  ESCALATES_TO = 'ESCALATES_TO',    // Exception path
-  GOVERNED_BY = 'GOVERNED_BY',      // Regulatory requirement
-  DATA_FLOWS_TO = 'DATA_FLOWS_TO',   // Output of A feeds input of B
-
-  // --- Semantic Documentation Network Edges ---
-  IMPLEMENTS = 'IMPLEMENTS',        // A procedure implements a policy
-  REFERENCES = 'REFERENCES',        // Standard citation
-  SUPERSEDES = 'SUPERSEDES',        // Versioning/Deprecation
-  REQUIRES_KNOWLEDGE_OF = 'REQUIRES_KNOWLEDGE_OF', // Prerequisite concept
-  PERFORMED_BY = 'PERFORMED_BY'     // Role mapping
+  DEPENDS_ON = 'DEPENDS_ON',
+  ENABLES = 'ENABLES',
+  RELATED_TO = 'RELATED_TO',
+  COMPONENT_OF = 'COMPONENT_OF',
+  USES_COMPONENT = 'USES_COMPONENT',
+  PARALLEL_WITH = 'PARALLEL_WITH',
+  ESCALATES_TO = 'ESCALATES_TO',
+  GOVERNED_BY = 'GOVERNED_BY',
+  DATA_FLOWS_TO = 'DATA_FLOWS_TO',
+  IMPLEMENTS = 'IMPLEMENTS',
+  REFERENCES = 'REFERENCES',
+  SUPERSEDES = 'SUPERSEDES',
+  REQUIRES_KNOWLEDGE_OF = 'REQUIRES_KNOWLEDGE_OF',
+  PERFORMED_BY = 'PERFORMED_BY'
 }
 
 export type Criticality = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -55,7 +52,7 @@ export interface AtomContent {
 }
 
 export interface Atom {
-  id: string; // atom-cust-..., atom-bo-..., atom-sys-...
+  id: string;
   category: AtomCategory;
   type: AtomType;
   name: string;
@@ -63,7 +60,7 @@ export interface Atom {
   status: 'ACTIVE' | 'DRAFT' | 'DEPRECATED';
   owner: string;
   team: string;
-  ontologyDomain: string; // Ownership of the vocabulary/schema segment
+  ontologyDomain: string;
   criticality: Criticality;
   phaseId?: string;
   moduleId?: string;
@@ -77,32 +74,40 @@ export interface Atom {
   };
 }
 
+export interface GlossaryItem {
+  term: string;
+  definition: string;
+  category: string;
+}
+
 export interface Module {
-  id: string; // module-...
+  id: string;
   name: string;
   description: string;
   owner: string;
-  atoms: string[]; // List of Atom IDs
+  atoms: string[];
   phaseId?: string;
 }
 
 export interface Phase {
-  id: string; // phase-...
+  id: string;
   name: string;
   description: string;
-  modules: string[]; // List of Module IDs
+  modules: string[];
   journeyId?: string;
   targetDurationDays: number;
 }
 
 export interface Journey {
-  id: string; // journey-...
+  id: string;
   name: string;
   description: string;
-  phases: string[]; // List of Phase IDs
+  phases: string[];
 }
 
 export type NodeLevel = 'ATOM' | 'MODULE' | 'PHASE' | 'JOURNEY';
+
+export type ViewType = 'explorer' | 'modules' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary';
 
 export interface ValidationIssue {
   type: string;

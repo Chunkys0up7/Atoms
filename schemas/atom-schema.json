@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gndp.example.com/schemas/atom-schema.json",
+  "title": "GNDP Atom Schema",
+  "description": "Schema for validating GNDP atom YAML files",
+  "type": "object",
+  "required": ["id", "type", "title", "summary", "metadata", "upstream_ids", "downstream_ids", "tags"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z]+-[0-9]{3}$",
+      "description": "Unique identifier in format TYPE-NNN (e.g., REQ-001, DES-002)"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["requirement", "design", "procedure", "validation", "policy", "risk"],
+      "description": "Type of atom"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 200,
+      "description": "Human-readable title"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500,
+      "description": "Brief summary (one sentence)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full markdown content (optional)"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["priority", "status", "owner", "created", "updated"],
+      "properties": {
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Priority level"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "review", "approved", "deprecated"],
+          "description": "Current status"
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 2,
+          "description": "Team or individual owner (no email addresses)"
+        },
+        "created": {
+          "type": "string",
+          "format": "date",
+          "description": "Creation date (YYYY-MM-DD)"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date",
+          "description": "Last update date (YYYY-MM-DD)"
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of reviewer teams"
+        },
+        "compliance_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["GDPR", "CCPA", "SOC2", "HIPAA", "PCI-DSS"]
+          },
+          "description": "Compliance framework tags"
+        },
+        "effort_estimate": {
+          "type": "string",
+          "description": "Effort estimate (e.g., '2 weeks', '3 days')"
+        },
+        "run_frequency": {
+          "type": "string",
+          "description": "For procedures: how often to run"
+        },
+        "review_frequency": {
+          "type": "string",
+          "description": "For policies/risks: how often to review"
+        }
+      },
+      "additionalProperties": true
+    },
+    "upstream_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]+-[0-9]{3}$"
+      },
+      "description": "List of atom IDs this atom depends on"
+    },
+    "downstream_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]+-[0-9]{3}$"
+      },
+      "description": "List of atom IDs that depend on this atom"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 50
+      },
+      "minItems": 1,
+      "description": "Searchable tags"
+    }
+  },
+  "additionalProperties": false
+}

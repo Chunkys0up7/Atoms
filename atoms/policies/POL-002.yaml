@@ -101,9 +101,10 @@ metadata:
     - GDPR
     - CCPA
     - SOC2
-  upstream_ids:
+upstream_ids:
   - REQ-005
   - DES-005
+  - RISK-003
 downstream_ids: []
 tags:
   - policy
