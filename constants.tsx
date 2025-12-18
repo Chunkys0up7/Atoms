@@ -1,6 +1,21 @@
 
 import { AtomType, EdgeType, Atom, Module, Phase, Journey, AtomCategory } from './types';
 
+// API Configuration
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+export const API_ENDPOINTS = {
+  health: `${API_BASE_URL}/health`,
+  atoms: `${API_BASE_URL}/api/atoms`,
+  atom: (id: string) => `${API_BASE_URL}/api/atoms/${id}`,
+  modules: `${API_BASE_URL}/api/modules`,
+  module: (id: string) => `${API_BASE_URL}/api/modules/${id}`,
+  graphFull: `${API_BASE_URL}/api/graph/full`,
+  graphByType: (type: string) => `${API_BASE_URL}/api/graph/type/${type}`,
+  graphByModule: (moduleId: string) => `${API_BASE_URL}/api/graph/module/${moduleId}`,
+  triggerSync: `${API_BASE_URL}/api/trigger/sync`,
+};
+
 export const ATOM_COLORS: Record<AtomType, string> = {
   [AtomType.PROCESS]: '#3b82f6',
   [AtomType.DECISION]: '#f59e0b',
