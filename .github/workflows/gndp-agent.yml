@@ -10,6 +10,8 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    env:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,11 +37,11 @@ jobs:
           python docs/impact_analysis.py --pr ${{ github.event.pull_request.number }} || true
 
       - name: Call Claude helper
-        if: ${{ secrets.CLAUDE_API_KEY != '' }}
+        if: ${{ env.CLAUDE_API_KEY != '' }}
         env:
-          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          mkdir -p artifacts
           python scripts/claude_helper.py --pr ${{ github.event.pull_request.number }} --out artifacts/claude_report.json || true
 
       - name: Post PR report
