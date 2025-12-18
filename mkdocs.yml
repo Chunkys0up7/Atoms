@@ -1,0 +1,148 @@
+site_name: GNDP Knowledge Graph
+site_description: Graph-Native Documentation Platform for interconnected documentation
+site_author: GNDP Team
+site_url: https://chunkys0up7.github.io/Atoms
+
+# Repository
+repo_url: https://github.com/Chunkys0up7/Atoms
+repo_name: Chunkys0up7/Atoms
+edit_uri: edit/main/
+
+# Theme Configuration
+theme:
+  name: material
+  palette:
+    # Light mode
+    - scheme: default
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - toc.integrate
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])'
+      lang: en
+  - awesome-pages
+  - minify:
+      minify_html: true
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation
+nav:
+  - Home: index.md
+  - Atoms:
+      - Overview: generated/atoms/index.md
+      - Requirements: generated/atoms/requirements/
+      - Designs: generated/atoms/designs/
+      - Procedures: generated/atoms/procedures/
+      - Validations: generated/atoms/validations/
+      - Policies: generated/atoms/policys/
+      - Risks: generated/atoms/risks/
+  - Modules:
+      - Overview: generated/modules/index.md
+      - Authentication: generated/modules/auth_system/index.md
+      - API Gateway: generated/modules/api_gateway/index.md
+      - Data Layer: generated/modules/data_layer/index.md
+      - Knowledge Graph: generated/modules/knowledge_graph/index.md
+      - AI Agent: generated/modules/ai_agent/index.md
+  - Graph Visualization: graph.md
+  - Documentation:
+      - Architecture: docs/GNDP-Architecture.md
+      - Action Plan: docs/ACTION_PLAN.md
+      - Agent Integration: docs/agent.md
+      - Claude Integration: docs/claude.md
+      - Implementation Roadmap: docs/implementation-roadmap.md
+  - Contributing: CONTRIBUTING.md
+
+# Extra CSS and JavaScript
+extra_css:
+  - stylesheets/gndp.css
+
+extra_javascript:
+  - javascripts/graph-viz.js
+
+# Extra Configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Chunkys0up7/Atoms
+
+  generator: false  # Remove "Made with Material for MkDocs"
+
+  version:
+    provider: mike
+
+# Copyright
+copyright: Copyright &copy; 2025 GNDP Project
+
+# Development server
+dev_addr: 127.0.0.1:8000

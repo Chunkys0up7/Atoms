@@ -1,0 +1,205 @@
+/* GNDP Custom Styles */
+
+/* Atom type colors */
+:root {
+  --atom-requirement: #3B82F6;
+  --atom-design: #8B5CF6;
+  --atom-procedure: #10B981;
+  --atom-validation: #F59E0B;
+  --atom-policy: #EC4899;
+  --atom-risk: #EF4444;
+}
+
+/* Atom cards */
+.atom-card {
+  border-left: 4px solid var(--atom-color, #999);
+  padding: 1rem;
+  margin: 1rem 0;
+  background: var(--md-code-bg-color);
+  border-radius: 4px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.atom-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.atom-card[data-type="requirement"] { border-left-color: var(--atom-requirement); }
+.atom-card[data-type="design"] { border-left-color: var(--atom-design); }
+.atom-card[data-type="procedure"] { border-left-color: var(--atom-procedure); }
+.atom-card[data-type="validation"] { border-left-color: var(--atom-validation); }
+.atom-card[data-type="policy"] { border-left-color: var(--atom-policy); }
+.atom-card[data-type="risk"] { border-left-color: var(--atom-risk); }
+
+/* Atom header */
+.atom-header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.atom-id {
+  font-family: var(--md-code-font-family);
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--md-primary-fg-color);
+}
+
+.atom-type {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  background: var(--md-accent-fg-color);
+  color: white;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.atom-status {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.atom-status.status-draft { background: #94A3B8; color: white; }
+.atom-status.status-active { background: #10B981; color: white; }
+.atom-status.status-deprecated { background: #EF4444; color: white; }
+
+/* Risk indicators */
+.risk-indicator {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.risk-indicator.low {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.risk-indicator.medium {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.risk-indicator.high {
+  background: #FED7AA;
+  color: #9A3412;
+}
+
+.risk-indicator.critical {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Relationship links */
+.atom-links {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.atom-links strong {
+  color: var(--md-default-fg-color--light);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.atom-links a {
+  display: inline-block;
+  margin-right: 0.5rem;
+  margin-bottom: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.atom-links a:hover {
+  border-color: var(--md-primary-fg-color);
+  background: var(--md-primary-fg-color--light);
+}
+
+/* Graph container */
+.graph-container {
+  width: 100%;
+  height: 600px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 4px;
+  background: var(--md-code-bg-color);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Module overview */
+.module-overview {
+  padding: 1.5rem;
+  background: var(--md-code-bg-color);
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.module-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.module-stat {
+  padding: 1rem;
+  background: var(--md-default-bg-color);
+  border-radius: 4px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.module-stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--md-primary-fg-color);
+}
+
+.module-stat-label {
+  font-size: 0.875rem;
+  color: var(--md-default-fg-color--light);
+  text-transform: uppercase;
+}
+
+/* Table enhancements */
+.md-typeset table:not([class]) {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--md-primary-fg-color--light);
+  font-weight: 600;
+}
+
+.md-typeset table:not([class]) tr:hover {
+  background: var(--md-default-bg-color--lightest);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .atom-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .module-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .graph-container {
+    height: 400px;
+  }
+}
