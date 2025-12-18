@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    {
+      "id": "REQ-001",
+      "type": "requirement",
+      "label": "User Authentication System"
+    },
+    {
+      "id": "REQ-002",
+      "type": "requirement",
+      "label": "Data Storage and Persistence Layer"
+    },
+    {
+      "id": "REQ-003",
+      "type": "requirement",
+      "label": "REST API and GraphQL Gateway"
+    },
+    {
+      "id": "REQ-004",
+      "type": "requirement",
+      "label": "Graph Database Integration for Knowledge Management"
+    },
+    {
+      "id": "REQ-005",
+      "type": "requirement",
+      "label": "AI-Powered Impact Analysis and Code Review"
+    }
+  ],
+  "edges": []
+}

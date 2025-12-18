@@ -1,0 +1,235 @@
+{
+  "nodes": [
+    {
+      "id": "REQ-001",
+      "type": "requirement",
+      "label": "User Authentication System",
+      "description": "Implement secure user authentication with OAuth 2.0 and JWT token-based session management",
+      "status": "DRAFT",
+      "owner": "security-team",
+      "team": "",
+      "url": "atoms/requirements/req_001.md"
+    },
+    {
+      "id": "REQ-002",
+      "type": "requirement",
+      "label": "Data Storage and Persistence Layer",
+      "description": "Implement scalable data storage with PostgreSQL for relational data and Redis for caching",
+      "status": "DRAFT",
+      "owner": "infrastructure-team",
+      "team": "",
+      "url": "atoms/requirements/req_002.md"
+    },
+    {
+      "id": "REQ-003",
+      "type": "requirement",
+      "label": "REST API and GraphQL Gateway",
+      "description": "Implement unified API gateway supporting both REST and GraphQL protocols with rate limiting and authentication",
+      "status": "DRAFT",
+      "owner": "backend-team",
+      "team": "",
+      "url": "atoms/requirements/req_003.md"
+    },
+    {
+      "id": "REQ-004",
+      "type": "requirement",
+      "label": "Graph Database Integration for Knowledge Management",
+      "description": "Integrate Neo4j graph database for storing and querying knowledge graph with atoms, modules, and relationships",
+      "status": "DRAFT",
+      "owner": "backend-team",
+      "team": "",
+      "url": "atoms/requirements/req_004.md"
+    },
+    {
+      "id": "REQ-005",
+      "type": "requirement",
+      "label": "AI-Powered Impact Analysis and Code Review",
+      "description": "Integrate Claude AI for automated impact analysis, PR summarization, and reviewer recommendation",
+      "status": "DRAFT",
+      "owner": "devops-team",
+      "team": "",
+      "url": "atoms/requirements/req_005.md"
+    },
+    {
+      "id": "DES-001",
+      "type": "design",
+      "label": "Authentication System Architecture",
+      "description": "System design for OAuth 2.0 and JWT-based authentication with token rotation and MFA support",
+      "status": "DRAFT",
+      "owner": "backend-team",
+      "team": "",
+      "url": "atoms/designs/des_001.md"
+    },
+    {
+      "id": "DES-002",
+      "type": "design",
+      "label": "Data Layer Architecture with PostgreSQL and Redis",
+      "description": "Detailed design for data persistence, caching strategy, and connection pooling",
+      "status": "DRAFT",
+      "owner": "infrastructure-team",
+      "team": "",
+      "url": "atoms/designs/des_002.md"
+    },
+    {
+      "id": "DES-003",
+      "type": "design",
+      "label": "Unified API Gateway with REST and GraphQL",
+      "description": "API gateway design supporting both REST and GraphQL protocols with shared authentication and rate limiting",
+      "status": "DRAFT",
+      "owner": "backend-team",
+      "team": "",
+      "url": "atoms/designs/des_003.md"
+    },
+    {
+      "id": "DES-004",
+      "type": "design",
+      "label": "Neo4j Graph Database Integration Architecture",
+      "description": "Design for bidirectional sync between YAML files and Neo4j graph database with Cypher query patterns",
+      "status": "DRAFT",
+      "owner": "backend-team",
+      "team": "",
+      "url": "atoms/designs/des_004.md"
+    },
+    {
+      "id": "DES-005",
+      "type": "design",
+      "label": "AI-Powered Impact Analysis with Claude",
+      "description": "Design for Claude API integration following claude.md guidelines for PR analysis and impact scoring",
+      "status": "DRAFT",
+      "owner": "devops-team",
+      "team": "",
+      "url": "atoms/designs/des_005.md"
+    },
+    {
+      "id": "PROC-001",
+      "type": "procedure",
+      "label": "Authentication Service Deployment",
+      "description": "Standard operating procedure for deploying authentication service updates to production",
+      "status": "DRAFT",
+      "owner": "devops-team",
+      "team": "",
+      "url": "atoms/procedures/proc_001.md"
+    },
+    {
+      "id": "PROC-002",
+      "type": "procedure",
+      "label": "Database Backup and Recovery",
+      "description": "Procedures for PostgreSQL and Redis backup, verification, and disaster recovery",
+      "status": "DRAFT",
+      "owner": "infrastructure-team",
+      "team": "",
+      "url": "atoms/procedures/proc_002.md"
+    },
+    {
+      "id": "PROC-003",
+      "type": "procedure",
+      "label": "API Gateway Deployment and Rolling Update",
+      "description": "Procedure for deploying API gateway changes with zero downtime using blue-green deployment",
+      "status": "DRAFT",
+      "owner": "backend-team",
+      "team": "",
+      "url": "atoms/procedures/proc_003.md"
+    },
+    {
+      "id": "PROC-004",
+      "type": "procedure",
+      "label": "Neo4j Synchronization and Maintenance",
+      "description": "Procedure for synchronizing YAML atoms to Neo4j and performing routine database maintenance",
+      "status": "DRAFT",
+      "owner": "infrastructure-team",
+      "team": "",
+      "url": "atoms/procedures/proc_004.md"
+    },
+    {
+      "id": "PROC-005",
+      "type": "procedure",
+      "label": "Claude AI Impact Analysis Workflow",
+      "description": "Procedure for running Claude-powered impact analysis on pull requests following claude.md guidelines",
+      "status": "DRAFT",
+      "owner": "devops-team",
+      "team": "",
+      "url": "atoms/procedures/proc_005.md"
+    },
+    {
+      "id": "VAL-001",
+      "type": "validation",
+      "label": "Authentication System Test Plan",
+      "description": "Comprehensive test suite for authentication service including unit, integration, and security tests",
+      "status": "DRAFT",
+      "owner": "qa-team",
+      "team": "",
+      "url": "atoms/validations/val_001.md"
+    },
+    {
+      "id": "VAL-002",
+      "type": "validation",
+      "label": "Database Backup and Recovery Validation",
+      "description": "Test procedures to validate backup integrity and recovery processes",
+      "status": "DRAFT",
+      "owner": "infrastructure-team",
+      "team": "",
+      "url": "atoms/validations/val_002.md"
+    },
+    {
+      "id": "VAL-003",
+      "type": "validation",
+      "label": "API Gateway Testing and Load Validation",
+      "description": "Test plan for REST and GraphQL APIs including functional, performance, and security testing",
+      "status": "DRAFT",
+      "owner": "qa-team",
+      "team": "",
+      "url": "atoms/validations/val_003.md"
+    },
+    {
+      "id": "POL-001",
+      "type": "policy",
+      "label": "Access Control and RBAC Policy",
+      "description": "Role-based access control policy defining user roles, permissions, and authentication requirements",
+      "status": "DRAFT",
+      "owner": "security-team",
+      "team": "",
+      "url": "atoms/policys/pol_001.md"
+    },
+    {
+      "id": "POL-002",
+      "type": "policy",
+      "label": "AI/ML Usage and Data Privacy Policy",
+      "description": "Policy governing use of AI services (Claude API) including data privacy, PII handling, and compliance requirements",
+      "status": "DRAFT",
+      "owner": "security-team",
+      "team": "",
+      "url": "atoms/policys/pol_002.md"
+    },
+    {
+      "id": "RISK-001",
+      "type": "risk",
+      "label": "Authentication System Security Vulnerabilities",
+      "description": "Security risks related to authentication implementation including brute force, token theft, and OAuth vulnerabilities",
+      "status": "DRAFT",
+      "owner": "security-team",
+      "team": "",
+      "url": "atoms/risks/risk_001.md"
+    },
+    {
+      "id": "RISK-002",
+      "type": "risk",
+      "label": "Data Loss and Corruption Risks",
+      "description": "Risks related to database failures, backup corruption, and data integrity issues",
+      "status": "DRAFT",
+      "owner": "infrastructure-team",
+      "team": "",
+      "url": "atoms/risks/risk_002.md"
+    },
+    {
+      "id": "RISK-003",
+      "type": "risk",
+      "label": "AI Service Dependency and Privacy Risks",
+      "description": "Risks related to Claude API availability, costs, and potential data exposure",
+      "status": "DRAFT",
+      "owner": "devops-team",
+      "team": "",
+      "url": "atoms/risks/risk_003.md"
+    }
+  ],
+  "edges": []
+}

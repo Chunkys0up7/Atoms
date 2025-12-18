@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    {
+      "id": "PROC-001",
+      "type": "procedure",
+      "label": "Authentication Service Deployment"
+    },
+    {
+      "id": "PROC-002",
+      "type": "procedure",
+      "label": "Database Backup and Recovery"
+    },
+    {
+      "id": "PROC-003",
+      "type": "procedure",
+      "label": "API Gateway Deployment and Rolling Update"
+    },
+    {
+      "id": "PROC-004",
+      "type": "procedure",
+      "label": "Neo4j Synchronization and Maintenance"
+    },
+    {
+      "id": "PROC-005",
+      "type": "procedure",
+      "label": "Claude AI Impact Analysis Workflow"
+    }
+  ],
+  "edges": []
+}

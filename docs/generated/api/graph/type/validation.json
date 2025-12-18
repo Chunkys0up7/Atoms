@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "VAL-001",
+      "type": "validation",
+      "label": "Authentication System Test Plan"
+    },
+    {
+      "id": "VAL-002",
+      "type": "validation",
+      "label": "Database Backup and Recovery Validation"
+    },
+    {
+      "id": "VAL-003",
+      "type": "validation",
+      "label": "API Gateway Testing and Load Validation"
+    }
+  ],
+  "edges": []
+}

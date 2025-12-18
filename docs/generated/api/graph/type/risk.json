@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "RISK-001",
+      "type": "risk",
+      "label": "Authentication System Security Vulnerabilities"
+    },
+    {
+      "id": "RISK-002",
+      "type": "risk",
+      "label": "Data Loss and Corruption Risks"
+    },
+    {
+      "id": "RISK-003",
+      "type": "risk",
+      "label": "AI Service Dependency and Privacy Risks"
+    }
+  ],
+  "edges": []
+}

@@ -139,17 +139,24 @@ class GNDPParser:
     def _parse_atom_file(self, file_path: Path) -> None:
         """Parse a single atom YAML file."""
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 data = yaml.safe_load(f)
             
             if not data:
                 return
             
+            # Support both 'id' and 'atom_id' field names
+            atom_id = data.get('atom_id') or data.get('id', '')
+            # Support both 'title' and 'name' field names
+            name = data.get('name') or data.get('title', '')
+            # Support both 'summary' and 'description' field names
+            description = data.get('description') or data.get('summary', '')
+
             atom = AtomData(
-                atom_id=data.get('atom_id', ''),
+                atom_id=atom_id,
                 atom_type=data.get('type', 'UNKNOWN'),
-                name=data.get('name', ''),
-                description=data.get('description', ''),
+                name=name,
+                description=description,
                 version=data.get('version', '1.0.0'),
                 status=data.get('status', 'DRAFT'),
                 metadata=data.get('metadata', {}),
@@ -167,7 +174,7 @@ class GNDPParser:
     def _parse_module_file(self, file_path: Path) -> None:
         """Parse a single module YAML file."""
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 data = yaml.safe_load(f)
             
             if not data:
@@ -598,7 +605,7 @@ class DocumentationGenerator:
         # Write file
         output_path = self.config.output_dir / atom.url_path
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(content)
+        output_path.write_text(content, encoding='utf-8')
     
     def _generate_module_page(self, module: ModuleData) -> None:
         """Generate markdown page for a module."""
@@ -639,12 +646,12 @@ class DocumentationGenerator:
         # Write file
         output_path = self.config.output_dir / module.url_path
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(content)
-        
+        output_path.write_text(content, encoding='utf-8')
+
         # Write module graph JSON
         graph_path = self.config.output_dir / 'api' / 'graph' / 'module' / f"{module.module_id}.json"
         graph_path.parent.mkdir(parents=True, exist_ok=True)
-        graph_path.write_text(module_graph.to_json())
+        graph_path.write_text(module_graph.to_json(), encoding='utf-8')
     
     def _build_module_graph(self, module: ModuleData) -> GraphData:
         """Build graph data for a specific module."""
@@ -740,8 +747,8 @@ class DocumentationGenerator:
             items_title="Atoms by Type",
             items=items
         )
-        
-        (self.config.output_dir / 'atoms' / 'index.md').write_text(content)
+
+        (self.config.output_dir / 'atoms' / 'index.md').write_text(content, encoding='utf-8')
         
         # Modules index
         module_items = []
@@ -754,8 +761,8 @@ class DocumentationGenerator:
             items_title="Modules",
             items=module_items
         )
-        
-        (self.config.output_dir / 'modules' / 'index.md').write_text(content)
+
+        (self.config.output_dir / 'modules' / 'index.md').write_text(content, encoding='utf-8')
     
     def _generate_graph_json(self) -> None:
         """Generate full graph JSON for visualization."""
@@ -764,7 +771,7 @@ class DocumentationGenerator:
         # Full graph
         full_graph_path = self.config.output_dir / 'api' / 'graph' / 'full.json'
         full_graph_path.parent.mkdir(parents=True, exist_ok=True)
-        full_graph_path.write_text(graph.to_json())
+        full_graph_path.write_text(graph.to_json(), encoding='utf-8')
         
         # Graphs by type
         for atom_type in set(a.atom_type for a in self.parser.atoms.values()):
@@ -786,7 +793,7 @@ class DocumentationGenerator:
             
             type_path = self.config.output_dir / 'api' / 'graph' / 'type' / f"{atom_type.lower()}.json"
             type_path.parent.mkdir(parents=True, exist_ok=True)
-            type_path.write_text(type_graph.to_json())
+            type_path.write_text(type_graph.to_json(), encoding='utf-8')
     
     def _copy_static_files(self) -> None:
         """Copy static files to output."""

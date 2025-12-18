@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    {
+      "id": "DES-001",
+      "type": "design",
+      "label": "Authentication System Architecture"
+    },
+    {
+      "id": "DES-002",
+      "type": "design",
+      "label": "Data Layer Architecture with PostgreSQL and Redis"
+    },
+    {
+      "id": "DES-003",
+      "type": "design",
+      "label": "Unified API Gateway with REST and GraphQL"
+    },
+    {
+      "id": "DES-004",
+      "type": "design",
+      "label": "Neo4j Graph Database Integration Architecture"
+    },
+    {
+      "id": "DES-005",
+      "type": "design",
+      "label": "AI-Powered Impact Analysis with Claude"
+    }
+  ],
+  "edges": []
+}

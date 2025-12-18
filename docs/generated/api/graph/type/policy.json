@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {
+      "id": "POL-001",
+      "type": "policy",
+      "label": "Access Control and RBAC Policy"
+    },
+    {
+      "id": "POL-002",
+      "type": "policy",
+      "label": "AI/ML Usage and Data Privacy Policy"
+    }
+  ],
+  "edges": []
+}
