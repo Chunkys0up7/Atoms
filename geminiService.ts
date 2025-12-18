@@ -1,52 +1,42 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { Atom } from "./types";
+import { Atom, Module, Phase, Journey, DocTemplateType } from "./types";
 
-// Initialize with process.env.API_KEY directly
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const parseDocumentToGraph = async (documentText: string, existingAtoms: Atom[]) => {
-  // Provide context of existing atoms to prevent duplication (RAG/Entity Resolution)
-  const existingContext = existingAtoms.map(a => ({ id: a.id, name: a.name, summary: a.content.summary }));
-
+  const existingContext = existingAtoms.map(a => ({ id: a.id, name: a.name, summary: a.content.summary, domain: a.ontologyDomain }));
   const prompt = `
-    TASK: ATOMIZE DOCUMENTATION & PERFORM ENTITY RESOLUTION
+    TASK: ATOMIC RECONSTRUCTION & ENTITY RESOLUTION
+    METHODOLOGY: NASA-Inspired Atomic Design & Semantic Documentation Networks
     
-    NEW DOCUMENT CONTENT:
-    """
-    ${documentText}
-    """
+    NEW DOCUMENT CONTENT: """${documentText}"""
+    EXISTING CANONICAL ATOMS: ${JSON.stringify(existingContext)}
     
-    EXISTING CANONICAL ATOMS (REFERENCE THESE TO PREVENT DUPLICATES):
-    ${JSON.stringify(existingContext)}
+    ID PREFIXING RULES:
+    - Customer actions: atom-cust-[name]
+    - Back-office tasks: atom-bo-[name]
+    - Automated system actions: atom-sys-[name]
     
-    INSTRUCTIONS:
-    1. BREAKDOWN: Identify discrete Atoms (Process, Decision, Regulation, Role).
-    2. DEDUPLICATION: Compare identified concepts with EXISTING CANONICAL ATOMS. 
-       - If a concept matches an existing atom semantically, REUSE its ID. 
-       - Do not create a new ID for "Identity Check" if "VERIFY-ID" already exists.
-    3. RELATIONSHIPS: Map how these atoms connect (TRIGGERS, REQUIRES, etc).
-    4. STRUCTURE: Define Phases and a Module for this specific document.
-    
+    ONTOLOGY & RELATIONSHIP RULES:
+    1. ENTITY CLASSIFICATION: Categorize atoms strictly as PROCESS, DECISION, GATEWAY, ROLE, SYSTEM, DOCUMENT, REGULATION, POLICY, or CONTROL.
+    2. SEMANTIC EDGES: Use rich edge types (IMPLEMENTS, ENABLES, DEPENDS_ON, SUPERSEDES, DATA_FLOWS_TO, REQUIRES_KNOWLEDGE_OF).
+    3. VOCABULARY CONSISTENCY: Map new concepts to the 'ontologyDomain' of existing atoms if they overlap.
+
     OUTPUT FORMAT: JSON ONLY
     {
-      "proposedAtoms": [
-        {
-          "isNew": boolean, 
-          "id": "string",
-          "type": "PROCESS | DECISION | ROLE | REGULATION",
-          "name": "string",
-          "phase": "string",
-          "content": { "summary": "string", "steps": [] },
-          "edges": [{ "type": "string", "targetId": "string" }]
-        }
-      ],
-      "proposedModule": {
-        "id": "MOD-NEW",
-        "name": "string",
-        "phases": ["string array"],
-        "atoms": ["id array"]
-      }
+      "proposedAtoms": [{ 
+        "id": "atom-...", 
+        "name": "...", 
+        "category": "CUSTOMER_FACING | BACK_OFFICE | SYSTEM", 
+        "type": "PROCESS | SYSTEM | etc.",
+        "ontologyDomain": "...",
+        "content": { "summary": "..." }, 
+        "isNew": true,
+        "edges": [{"type": "...", "targetId": "..."}]
+      }],
+      "proposedModule": { "id": "module-...", "name": "...", "atoms": ["atom-id-1"] },
+      "proposedPhase": { "id": "phase-...", "name": "...", "modules": ["module-id-1"] }
     }
   `;
 
@@ -56,25 +46,28 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        systemInstruction: "You are a graph-native documentation architect. Your goal is to maintain a dry (Don't Repeat Yourself) knowledge base. Always prioritize linking to existing canonical atoms over creating new ones."
+        systemInstruction: "You are a lead graph-native systems architect. You transform monolithic documentation into a semantic network of interconnected atoms. You prioritize concept reuse and strict edge typing to prevent ambiguity."
       }
     });
-    
     return JSON.parse(response.text);
   } catch (error) {
     console.error("Ingestion Error:", error);
-    throw new Error("AI parser failed to resolve document structure.");
+    throw new Error("AI parser failed to resolve atomic structure.");
   }
 };
 
-export const generateImpactAnalysis = async (atomId: string, graphContext: any, simulationParams: any) => {
+export const compileDocument = async (atoms: Atom[], module: Module, templateType: DocTemplateType) => {
   const prompt = `
-    CONTROL ROOM SIMULATION: ${atomId}
-    Current State: ${JSON.stringify(graphContext.target, null, 2)}
-    Simulation Parameters: ${JSON.stringify(simulationParams, null, 2)}
-    Neighbors: ${JSON.stringify(graphContext.neighbors.map((n: any) => ({ id: n.id, type: n.type, metrics: n.metrics })), null, 2)}
+    TASK: COMPILE SEMANTIC DOCUMENT FROM ATOMIC UNITS
+    TEMPLATE: ${templateType}
+    HIERARCHY: Module '${module.name}' (Module ID: ${module.id})
+    ATOMS: ${JSON.stringify(atoms)}
     
-    Task: Forecast automation impact, risk cascade to regulations, and documentation overhead.
+    INSTRUCTIONS:
+    1. POINTER REFERENCE: Treat every node as a single source of truth. Reference by ID.
+    2. GRAPH-BASED REASONING: Construct the narrative by traversing the semantic edges.
+    3. Mention explicitly how a procedure 'IMPLEMENTS' a policy or 'DEPENDS_ON' a system check.
+    4. Maintain vocabulary consistency as defined in the ontology domains.
   `;
 
   try {
@@ -82,20 +75,54 @@ export const generateImpactAnalysis = async (atomId: string, graphContext: any, 
       model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
-        systemInstruction: "You are a senior enterprise architect specializing in graph-native business process optimization."
+        systemInstruction: "You are an expert technical writer specializing in semantic documentation networks. You synthesize atomic graph data into high-fidelity, context-aware professional documents."
       }
     });
     return response.text;
   } catch (error) {
-    return "Simulation Engine Error.";
+    console.error("Compilation Error:", error);
+    return "Failed to compile document.";
   }
 };
 
-export const chatWithKnowledgeBase = async (query: string, atoms: any[]) => {
-  const context = atoms.map(a => `${a.id}: ${a.name} (${a.type}) - ${a.content.summary}`).join('\n');
+export const generateImpactAnalysis = async (targetId: string, context: { target?: Atom, neighbors: Atom[] }, params: any) => {
+  const prompt = `
+    INTERDEPENDENCY MAPPING & FORECAST: ${targetId}
+    Mindset: Graph-Based Reasoning over Documentation Ontology
+    Context: ${JSON.stringify(context)}
+    Params: ${JSON.stringify(params)}
+    
+    Analysis Requirements:
+    - Direct impacts (immediate neighbors)
+    - Downstream cascade (transitive dependencies)
+    - Potential for 'vocabulary drift' or ontology conflicts
+    - Broken 'IMPLEMENTS' or 'GOVERNED_BY' chains
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: prompt,
+      config: {
+        systemInstruction: "You are a graph reasoning engine. You perform deep impact analysis by traversing semantic edges to identify hidden risks in documentation changes."
+      }
+    });
+    return response.text;
+  } catch (error) {
+    return "Simulation analysis failed.";
+  }
+};
+
+export const chatWithKnowledgeBase = async (query: string, atoms: Atom[]) => {
+  const context = atoms.map(a => `${a.id}: ${a.name} [Domain: ${a.ontologyDomain}]`).join('\n');
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Context:\n${context}\n\nQuery: ${query}`
+    contents: `You are the GNDP Semantic Assistant.
+    You answer queries by traversing the documentation graph.
+    Indexed Units:
+    ${context}
+    
+    Query: ${query}`
   });
   return response.text;
 };

@@ -10,16 +10,16 @@ import AIAssistant from './components/AIAssistant';
 import ValidationCenter from './components/ValidationCenter';
 import Publisher from './components/Publisher';
 import IngestionEngine from './components/IngestionEngine';
+import OntologyView from './components/OntologyView';
 import { MOCK_ATOMS, MOCK_MODULES, ATOM_COLORS } from './constants';
 import { Atom, Module } from './types';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<ViewType>('modules');
+  const [view, setView] = useState<ViewType>('ontology');
   const [selectedAtom, setSelectedAtom] = useState<Atom | null>(null);
   const [atoms, setAtoms] = useState<Atom[]>(MOCK_ATOMS);
   const [modules, setModules] = useState<Module[]>(MOCK_MODULES);
 
-  // Sync state simulation
   const [isSyncing, setIsSyncing] = useState(false);
   const [uncommittedChanges, setUncommittedChanges] = useState(0);
 
@@ -32,21 +32,17 @@ const App: React.FC = () => {
   };
 
   const handleIngest = (data: { atoms: Atom[], module: Module }) => {
-    // Separate new atoms from those the AI resolved to existing ones
     const newAtoms = data.atoms.filter(na => !atoms.some(a => a.id === na.id));
-    
-    // Add new atoms to master list
     setAtoms(prev => [...prev, ...newAtoms]);
-    
-    // Add module
     setModules(prev => [...prev, data.module]);
-    
     setUncommittedChanges(prev => prev + newAtoms.length + 1);
     setView('modules');
   };
 
   const renderContent = () => {
     switch (view) {
+      case 'ontology':
+        return <OntologyView />;
       case 'explorer':
         return <AtomExplorer atoms={atoms} onSelect={(a) => { setSelectedAtom(a); }} />;
       case 'modules':
@@ -56,11 +52,11 @@ const App: React.FC = () => {
       case 'edges':
         return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { setSelectedAtom(a); }} />;
       case 'health':
-        return <ValidationCenter atoms={atoms} onFocusAtom={(a) => { setSelectedAtom(a); setView('explorer'); }} />;
+        return <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { setSelectedAtom(a); setView('explorer'); }} />;
       case 'impact':
         return <ImpactAnalysisUI atoms={atoms} />;
       case 'publisher':
-        return <Publisher atoms={atoms} />;
+        return <Publisher atoms={atoms} modules={modules} />;
       case 'assistant':
         return <AIAssistant atoms={atoms} />;
       case 'ingestion':
@@ -77,40 +73,25 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col relative min-w-0">
         <header className="h-20 border-b border-slate-800 bg-[#0a0f1d]/80 backdrop-blur-2xl flex items-center justify-between px-10 shrink-0 z-10">
           <div className="flex items-center gap-4">
-             <div className="text-[10px] uppercase font-black text-slate-500 tracking-[0.3em]">
-               System Intelligence
-             </div>
+             <div className="text-[10px] uppercase font-black text-slate-500 tracking-[0.3em]">System Intelligence</div>
              <span className="text-slate-700 font-light">/</span>
-             <div className="text-sm font-bold text-slate-200">
+             <div className="text-sm font-bold text-slate-200 uppercase tracking-tighter">
                {view.replace('_', ' ').charAt(0).toUpperCase() + view.replace('_', ' ').slice(1)}
              </div>
           </div>
           
           <div className="flex items-center gap-6">
              {uncommittedChanges > 0 && (
-               <button 
-                onClick={handleSync}
-                className="flex items-center gap-2 bg-blue-600/10 px-4 py-2 rounded-xl border border-blue-500/30 text-blue-400 hover:bg-blue-600/20 transition-all"
-               >
-                 {isSyncing ? (
-                   <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                 ) : (
-                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                   </svg>
-                 )}
+               <button onClick={handleSync} className="flex items-center gap-2 bg-blue-600/10 px-4 py-2 rounded-xl border border-blue-500/30 text-blue-400 hover:bg-blue-600/20 transition-all">
+                 {isSyncing ? <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div> : <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
                  <span className="text-[10px] font-black uppercase tracking-widest">Commit Changes ({uncommittedChanges})</span>
                </button>
              )}
-
              <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Node: Graph-Active</span>
              </div>
-             
-             <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-600 flex items-center justify-center text-xs font-black text-white shadow-xl">
-               JD
-             </div>
+             <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-600 flex items-center justify-center text-xs font-black text-white shadow-xl">JD</div>
           </div>
         </header>
         
@@ -125,13 +106,8 @@ const App: React.FC = () => {
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">Atom Inspector</span>
                 <h3 className="font-black text-white text-lg tracking-tight uppercase">{selectedAtom.id}</h3>
               </div>
-              <button 
-                onClick={() => setSelectedAtom(null)} 
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors text-slate-500 hover:text-white"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+              <button onClick={() => setSelectedAtom(null)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors text-slate-500 hover:text-white">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             
@@ -143,54 +119,16 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="text-[10px] font-black bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-slate-300 uppercase tracking-widest">{selectedAtom.type}</span>
-                  <span className={`text-[10px] font-black border px-3 py-1 rounded-full uppercase tracking-widest ${
-                    selectedAtom.criticality === 'CRITICAL' ? 'bg-red-900/20 border-red-500/30 text-red-400' :
-                    selectedAtom.criticality === 'HIGH' ? 'bg-amber-900/20 border-amber-500/30 text-amber-400' :
-                    'bg-slate-800/40 border-slate-700 text-slate-400'
-                  }`}>
-                    {selectedAtom.criticality} RISK
-                  </span>
+                  <span className={`text-[10px] font-black border px-3 py-1 rounded-full uppercase tracking-widest ${selectedAtom.criticality === 'CRITICAL' ? 'bg-red-900/20 border-red-500/30 text-red-400' : selectedAtom.criticality === 'HIGH' ? 'bg-amber-900/20 border-amber-500/30 text-amber-400' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>{selectedAtom.criticality} RISK</span>
                 </div>
               </section>
-
               <section>
                 <h5 className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-3">Summary</h5>
                 <p className="text-sm text-slate-400 leading-relaxed font-medium">{selectedAtom.content.summary}</p>
               </section>
-
-              {selectedAtom.edges.length > 0 && (
-                <section>
-                  <h5 className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-4">Network Connections</h5>
-                  <div className="grid grid-cols-1 gap-2">
-                    {selectedAtom.edges.map((edge, i) => {
-                      const target = atoms.find(a => a.id === edge.targetId);
-                      return (
-                        <div 
-                          key={i} 
-                          onClick={() => target && setSelectedAtom(target)}
-                          className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center justify-between hover:border-slate-600 transition-all group/edge cursor-pointer shadow-sm"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="text-[8px] font-black px-2 py-1 bg-slate-800 rounded border border-slate-700 text-slate-500 uppercase tracking-widest group-hover/edge:text-blue-400 transition-colors">
-                              {edge.type}
-                            </div>
-                            <span className="text-[10px] font-black text-slate-300 group-hover/edge:text-white">{edge.targetId}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
             </div>
-            
             <div className="p-8 border-t border-slate-800 bg-[#0d1324] flex gap-3">
-              <button 
-                onClick={() => { setView('impact'); setSelectedAtom(null); }}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-blue-900/30"
-              >
-                Simulate Change
-              </button>
+              <button onClick={() => { setView('impact'); setSelectedAtom(null); }} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-blue-900/30">Simulate Change</button>
             </div>
           </div>
         )}

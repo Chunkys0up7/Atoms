@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-export type ViewType = 'explorer' | 'modules' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher';
+export type ViewType = 'explorer' | 'modules' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -13,8 +13,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
     {
       title: 'Discovery',
       items: [
+        { id: 'ontology', label: 'Ontology', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
         { id: 'explorer', label: 'Global Registry', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
-        { id: 'modules', label: 'Process Modules', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
+        { id: 'modules', label: 'Journeys & Modules', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
       ]
     },
     {
@@ -74,9 +75,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                   </svg>
                   <span className="flex-1 text-left">{item.label}</span>
-                  {item.id === 'health' && (
-                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
-                  )}
                 </button>
               ))}
             </div>

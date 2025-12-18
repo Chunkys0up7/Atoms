@@ -1,5 +1,5 @@
 
-import { AtomType, EdgeType, Atom, Module } from './types';
+import { AtomType, EdgeType, Atom, Module, Phase, Journey, AtomCategory } from './types';
 
 export const ATOM_COLORS: Record<AtomType, string> = {
   [AtomType.PROCESS]: '#3b82f6',
@@ -11,111 +11,110 @@ export const ATOM_COLORS: Record<AtomType, string> = {
   [AtomType.REGULATION]: '#ec4899',
   [AtomType.METRIC]: '#06b6d4',
   [AtomType.RISK]: '#ef4444',
+  [AtomType.POLICY]: '#f472b6',
+  [AtomType.CONTROL]: '#2dd4bf',
 };
 
 export const MOCK_ATOMS: Atom[] = [
   {
-    id: 'PROC-LO-001',
+    id: 'atom-cust-income-w2-upload',
+    category: AtomCategory.CUSTOMER_FACING,
     type: AtomType.PROCESS,
-    name: 'Receive Loan Application',
-    version: '3.2.1',
+    name: 'Customer Uploads W-2',
+    version: '1.0.0',
     status: 'ACTIVE',
-    owner: 'intake_supervisor',
-    team: 'loan_operations',
+    owner: 'Customer',
+    team: 'Borrower Experience',
+    ontologyDomain: 'Loan Origination',
     criticality: 'MEDIUM',
-    phase: 'Intake',
-    metrics: { automation_level: 0.2, avg_cycle_time_mins: 45, error_rate: 0.05, compliance_score: 0.98 },
+    moduleId: 'module-income-verification',
+    metrics: { automation_level: 0.1, avg_cycle_time_mins: 72 * 60, error_rate: 0.05, compliance_score: 1.0 },
     content: {
-      summary: 'Initial intake and validation of borrower loan application.',
-      steps: ['Receive application', 'Validate fields', 'Generate unique identifier'],
-      exceptions: [{ condition: 'Missing SSN', action: 'Return to borrower' }]
+      summary: 'Single customer action in borrower portal to provide income proof.',
+      steps: ['Log into portal', 'Select W-2 document type', 'Upload file']
     },
-    edges: [
-      { type: EdgeType.TRIGGERS, targetId: 'PROC-LO-002', description: 'Moves to secondary validation' },
-      { type: EdgeType.PERFORMED_BY, targetId: 'ROLE-LO-005' },
-      { type: EdgeType.GOVERNED_BY, targetId: 'REG-LO-012' }
-    ]
+    edges: [{ type: EdgeType.ENABLES, targetId: 'atom-bo-income-w2-review' }]
   },
   {
-    id: 'PROC-LO-002',
+    id: 'atom-bo-income-w2-review',
+    category: AtomCategory.BACK_OFFICE,
     type: AtomType.PROCESS,
-    name: 'Validate Completeness',
+    name: 'Processor Reviews W-2',
     version: '1.0.0',
     status: 'ACTIVE',
-    owner: 'intake_clerk',
-    team: 'loan_operations',
-    criticality: 'MEDIUM',
-    phase: 'Intake',
-    metrics: { automation_level: 0.1, avg_cycle_time_mins: 30, error_rate: 0.08, compliance_score: 0.95 },
-    content: { summary: 'Secondary validation of document authenticity.', steps: ['Scan docs', 'Check signatures'] },
-    edges: [{ type: EdgeType.TRIGGERS, targetId: 'DEC-LO-001', description: 'Begin decisioning' }]
-  },
-  {
-    id: 'DEC-LO-001',
-    type: AtomType.DECISION,
-    name: 'Application Complete?',
-    version: '1.0.0',
-    status: 'ACTIVE',
-    owner: 'system',
-    team: 'automated',
+    owner: 'Processor',
+    team: 'Loan Operations',
+    ontologyDomain: 'Loan Origination',
     criticality: 'HIGH',
-    phase: 'Intake',
-    metrics: { automation_level: 0.9, avg_cycle_time_mins: 2, error_rate: 0.01, compliance_score: 1.0 },
-    content: { summary: 'Binary decision gate for workflow progress.' },
-    edges: [
-      { type: EdgeType.TRIGGERS, targetId: 'PROC-LO-004', label: 'YES' },
-      { type: EdgeType.TRIGGERS, targetId: 'PROC-LO-001', label: 'NO' }
-    ]
+    moduleId: 'module-income-verification',
+    metrics: { automation_level: 0.0, avg_cycle_time_mins: 4 * 60, error_rate: 0.02, compliance_score: 0.99 },
+    content: {
+      summary: 'Single back-office review task to verify W-2 data.',
+      exceptions: [{ condition: 'Blurry Document', action: 'atom-bo-income-w2-stip-request' }]
+    },
+    edges: [{ type: EdgeType.ENABLES, targetId: 'atom-bo-income-calculation' }]
   },
   {
-    id: 'REG-LO-012',
-    type: AtomType.REGULATION,
-    name: 'TRID Initial Disclosure',
-    version: '2024.1',
-    status: 'ACTIVE',
-    owner: 'compliance_officer',
-    team: 'legal',
-    criticality: 'CRITICAL',
-    metrics: { automation_level: 0, avg_cycle_time_mins: 0, error_rate: 0, compliance_score: 1.0 },
-    content: { summary: 'Strict federal timing requirements for initial TILA-RESPA disclosures.' },
-    edges: []
-  },
-  {
-    id: 'ROLE-LO-005',
-    type: AtomType.ROLE,
-    name: 'Loan Officer',
+    id: 'atom-bo-income-calculation',
+    category: AtomCategory.BACK_OFFICE,
+    type: AtomType.PROCESS,
+    name: 'Calculate Income',
     version: '1.0.0',
     status: 'ACTIVE',
-    owner: 'hr_ops',
-    team: 'human_resources',
-    criticality: 'LOW',
-    content: { summary: 'Primary point of contact for borrower interactions.' },
-    edges: []
+    owner: 'Processor',
+    team: 'Loan Operations',
+    ontologyDomain: 'Loan Origination',
+    criticality: 'CRITICAL',
+    moduleId: 'module-income-verification',
+    metrics: { automation_level: 0.5, avg_cycle_time_mins: 2 * 60, error_rate: 0.01, compliance_score: 1.0 },
+    content: { summary: 'Single calculation task resulting in verified income value.' },
+    edges: [{ type: EdgeType.DATA_FLOWS_TO, targetId: 'atom-sys-dti-engine' }]
   },
   {
-    id: 'PROC-LO-004',
-    type: AtomType.PROCESS,
-    name: 'Assign Processor',
-    version: '1.2.0',
+    id: 'atom-sys-dti-engine',
+    category: AtomCategory.SYSTEM,
+    type: AtomType.SYSTEM,
+    name: 'DTI Calculation Engine',
+    version: '2.1.0',
     status: 'ACTIVE',
-    owner: 'workflow_manager',
-    team: 'operations',
-    criticality: 'MEDIUM',
-    phase: 'Processing',
-    metrics: { automation_level: 0.5, avg_cycle_time_mins: 15, error_rate: 0.03, compliance_score: 0.99 },
-    content: { summary: 'Assigning high-priority files to specialized queues.' },
+    owner: 'System',
+    team: 'Core Engineering',
+    ontologyDomain: 'Calculations & Algorithms',
+    criticality: 'CRITICAL',
+    moduleId: 'module-income-verification',
+    metrics: { automation_level: 1.0, avg_cycle_time_mins: 0.1, error_rate: 0.001, compliance_score: 1.0 },
+    content: { summary: 'Automated backend calculation of Debt-to-Income ratio.' },
     edges: []
   }
 ];
 
 export const MOCK_MODULES: Module[] = [
   {
-    id: 'MOD-INTAKE',
-    name: 'Loan Application Life Cycle',
-    type: 'BPM_WORKFLOW',
-    description: 'The end-to-end journey from initial contact to processing readiness.',
-    owner: 'Director of Lending Operations',
-    phases: ['Intake', 'Correction', 'Processing', 'Closing'],
-    atoms: ['PROC-LO-001', 'PROC-LO-002', 'DEC-LO-001', 'PROC-LO-004']
+    id: 'module-income-verification',
+    name: 'Income Verification',
+    description: 'Workflow containing all income-related atoms.',
+    owner: 'Processing Lead',
+    atoms: ['atom-cust-income-w2-upload', 'atom-bo-income-w2-review', 'atom-bo-income-calculation', 'atom-sys-dti-engine'],
+    phaseId: 'phase-processing'
+  }
+];
+
+export const MOCK_PHASES: Phase[] = [
+  {
+    id: 'phase-processing',
+    name: 'Processing',
+    description: 'Customer milestone containing multiple operational modules.',
+    modules: ['module-income-verification'],
+    journeyId: 'journey-purchase-conventional',
+    targetDurationDays: 5
+  }
+];
+
+export const MOCK_JOURNEYS: Journey[] = [
+  {
+    id: 'journey-purchase-conventional',
+    name: 'Purchase Loan Journey',
+    description: 'Complete end-to-end process from application to funding.',
+    phases: ['phase-processing']
   }
 ];
