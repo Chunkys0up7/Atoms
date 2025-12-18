@@ -27,4 +27,5 @@ jobs:
 
       - name: Run unit tests
         run: |
-          python -m unittest discover -s tests -p "test_*.py" -v
+          # Use absolute path to avoid "Start directory is not importable" in CI
+          python -m unittest discover -s "$GITHUB_WORKSPACE/tests" -p "test_*.py" -v
