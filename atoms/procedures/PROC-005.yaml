@@ -1,0 +1,276 @@
+id: PROC-005
+type: procedure
+title: Claude AI Impact Analysis Workflow
+summary: Procedure for running Claude-powered impact analysis on pull requests following claude.md guidelines
+content: |
+  # Claude AI Impact Analysis Procedure
+
+  ## Automated Workflow (GitHub Actions)
+
+  ### Trigger Conditions
+  - Pull request opened or synchronized
+  - Changes to: `atoms/**` or `modules/**`
+  - Not triggered for: draft PRs, dependency updates
+
+  ### Workflow Steps
+
+  ```yaml
+  # Executed by: .github/workflows/gndp-agent.yml
+
+  1. Checkout code with full history
+  2. Install Python dependencies (anthropic, pyyaml, pydantic)
+  3. Analyze changed files
+  4. Call Claude API for impact analysis
+  5. Post results as PR comment
+  6. Apply labels based on risk level
+  ```
+
+  ## Manual Invocation
+
+  ### Local Testing
+  ```bash
+  # Set API key
+  export CLAUDE_API_KEY=sk-ant-...
+
+  # Run impact analysis
+  python scripts/claude_helper.py \
+    --local \
+    --atoms atoms/requirements/REQ-001.yaml \
+    --output analysis_result.json
+
+  # View results
+  cat analysis_result.json | jq '.'
+  ```
+
+  ### For Specific PR
+  ```bash
+  # Set credentials
+  export CLAUDE_API_KEY=sk-ant-...
+  export GITHUB_TOKEN=ghp_...
+
+  # Run analysis
+  python scripts/claude_helper.py \
+    --pr 123 \
+    --repo Chunkys0up7/Atoms \
+    --post-comment
+
+  # Output will be posted as PR comment
+  ```
+
+  ## Claude API Integration (Following claude.md)
+
+  ### Safety Checklist
+  - [ ] PII removed from context (no emails, names, internal URLs)
+  - [ ] Content truncated to max 4000 tokens
+  - [ ] Temperature set to 0.0 for deterministic output
+  - [ ] Fallback mechanism ready if API fails
+  - [ ] Rate limiting respected (1000 requests/day)
+  - [ ] Response validation enabled
+
+  ### Context Building
+  ```python
+  # Per claude.md guidelines
+
+  def build_context(changed_atoms: list[dict]) -> str:
+      """Build safe, truncated context for Claude."""
+      context = {
+          'changed_atoms': [
+              {
+                  'id': atom['id'],
+                  'type': atom['type'],
+                  'title': atom['title'],
+                  'summary': atom['summary'][:200],  # Truncate
+                  'priority': atom['metadata']['priority'],
+                  'status': atom['metadata']['status']
+              }
+              for atom in changed_atoms[:20]  # Limit count
+          ],
+          'downstream_count': count_downstream(changed_atoms),
+          'affected_modules': get_affected_modules(changed_atoms)[:10]
+      }
+
+      # Ensure under token limit
+      json_str = json.dumps(context)
+      if len(json_str) > 16000:  # ~4000 tokens
+          context['changed_atoms'] = context['changed_atoms'][:10]
+
+      return json.dumps(context, indent=2)
+  ```
+
+  ### API Call Pattern
+  ```python
+  import anthropic
+
+  client = anthropic.Anthropic(api_key=os.environ['CLAUDE_API_KEY'])
+
+  def analyze_with_claude(context: str, pr_title: str) -> dict:
+      prompt = f"""Context: {context}
+  Change: {pr_title}
+
+  Task: Provide a JSON object with keys:
+  - summary (string): One paragraph explaining the change impact
+  - risk_level (string): LOW | MEDIUM | HIGH | CRITICAL
+  - affected_modules (array): Module IDs impacted
+  - suggested_reviewers (array): Usernames who should review
+  - downstream_effects (number): Estimated atoms affected
+
+  Rules:
+  - CRITICAL if > 50 atoms affected or security changes
+  - HIGH if > 20 atoms affected
+  - MEDIUM if > 5 atoms affected
+  - LOW otherwise
+
+  Only return valid JSON.
+  """
+
+      message = client.messages.create(
+          model="claude-sonnet-4-5-20250929",
+          max_tokens=1024,
+          temperature=0.0,  # Deterministic for CI
+          messages=[{"role": "user", "content": prompt}]
+      )
+
+      response_text = message.content[0].text
+
+      try:
+          return json.loads(response_text)
+      except json.JSONDecodeError:
+          # Fallback to deterministic analysis
+          return fallback_analysis(context, pr_title)
+  ```
+
+  ## Response Handling
+
+  ### Validation
+  ```python
+  from pydantic import BaseModel, validator
+
+  class ImpactAnalysis(BaseModel):
+      summary: str
+      risk_level: str
+      affected_modules: list[str]
+      suggested_reviewers: list[str]
+      downstream_effects: int
+
+      @validator('risk_level')
+      def validate_risk(cls, v):
+          if v not in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']:
+              raise ValueError('Invalid risk level')
+          return v
+
+      @validator('suggested_reviewers')
+      def validate_reviewers(cls, reviewers):
+          # Sanitize against org members
+          valid_reviewers = get_org_members()
+          return [r for r in reviewers if r in valid_reviewers]
+
+  def parse_response(response_text: str) -> dict:
+      data = json.loads(response_text)
+      validated = ImpactAnalysis(**data)
+      return validated.dict()
+  ```
+
+  ### Fallback Mechanism
+  ```python
+  def fallback_analysis(context: dict, pr_title: str) -> dict:
+      """Rule-based analysis when Claude API fails."""
+      num_atoms_changed = len(context.get('changed_atoms', []))
+      num_downstream = context.get('downstream_count', 0)
+
+      # Deterministic risk scoring
+      if num_downstream > 50:
+          risk_level = "CRITICAL"
+      elif num_downstream > 20:
+          risk_level = "HIGH"
+      elif num_downstream > 5:
+          risk_level = "MEDIUM"
+      else:
+          risk_level = "LOW"
+
+      return {
+          "summary": f"{pr_title}. Changes affect {num_atoms_changed} atoms with {num_downstream} downstream dependencies.",
+          "risk_level": risk_level,
+          "affected_modules": context.get('affected_modules', []),
+          "suggested_reviewers": get_codeowners_for_atoms(context['changed_atoms']),
+          "downstream_effects": num_downstream,
+          "analysis_method": "fallback"
+      }
+  ```
+
+  ## PR Comment Formatting
+
+  ```python
+  def format_pr_comment(analysis: dict) -> str:
+      risk_emoji = {
+          "LOW": "🟢",
+          "MEDIUM": "🟡",
+          "HIGH": "🟠",
+          "CRITICAL": "🔴"
+      }
+
+      emoji = risk_emoji[analysis['risk_level']]
+
+      return f"""## Impact Analysis {emoji}
+
+  **Risk Level**: {analysis['risk_level']}
+
+  {analysis['summary']}
+
+  ### Details
+  - **Downstream Effects**: {analysis['downstream_effects']} atoms impacted
+  - **Affected Modules**: {', '.join(analysis['affected_modules']) or 'None'}
+  - **Suggested Reviewers**: {', '.join([f"@{r}" for r in analysis['suggested_reviewers']])}
+
+  ### Approval Requirements
+  {get_approval_requirements(analysis['risk_level'])}
+
+  ---
+  🤖 Generated by GNDP Agent with Claude Sonnet 4.5
+  """
+  ```
+
+  ## Troubleshooting
+
+  ### Issue: API Rate Limit Exceeded
+  ```bash
+  # Check daily usage
+  python scripts/check_claude_usage.py
+
+  # Solution: Use fallback analysis
+  python scripts/claude_helper.py --fallback-only
+  ```
+
+  ### Issue: Malformed JSON Response
+  ```bash
+  # Examine raw response
+  tail -f /logs/claude_responses.log
+
+  # Solution: Improve prompt or use fallback
+  ```
+
+  ### Issue: Incorrect Risk Level
+  ```bash
+  # Review analysis logic
+  python scripts/claude_helper.py --pr 123 --explain
+
+  # Adjust prompt or fallback rules in:
+  # scripts/claude_helper.py:analyze_with_claude()
+  ```
+
+metadata:
+  priority: medium
+  status: approved
+  owner: devops-team
+  created: 2025-12-18
+  updated: 2025-12-18
+  run_frequency: on_pr_events
+upstream_ids:
+  - DES-005
+  - REQ-005
+downstream_ids: []
+tags:
+  - procedure
+  - claude
+  - ai
+  - impact-analysis
+  - ci-cd

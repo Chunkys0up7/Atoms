@@ -1,0 +1,342 @@
+id: DES-004
+type: design
+title: Neo4j Graph Database Integration Architecture
+summary: Design for bidirectional sync between YAML files and Neo4j graph database with Cypher query patterns
+content: |
+  # Neo4j Integration Design
+
+  ## Architecture
+  ```
+  ┌──────────────────┐
+  │   YAML Files     │
+  │  (Source of      │
+  │   Truth)         │
+  └────────┬─────────┘
+           │
+           │  Sync Process
+           ▼
+  ┌──────────────────┐      ┌──────────────────┐
+  │  Sync Service    │─────▶│    Neo4j DB      │
+  │  (Python)        │◀─────│   (Graph Store)  │
+  └──────────────────┘      └──────────────────┘
+           │                          │
+           │                          ▼
+           │                  ┌──────────────────┐
+           │                  │  Cypher Queries  │
+           │                  │  - Impact        │
+           │                  │  - Traversal     │
+           │                  │  - Analytics     │
+           │                  └──────────────────┘
+           ▼
+  ┌──────────────────┐
+  │  Version Store   │
+  │  (PostgreSQL)    │
+  └──────────────────┘
+  ```
+
+  ## Graph Data Model
+
+  ### Node Labels and Properties
+  ```cypher
+  // Atom Node
+  CREATE (a:Atom {
+    id: "REQ-001",
+    type: "requirement",
+    title: "User Authentication System",
+    summary: "...",
+    priority: "critical",
+    status: "approved",
+    owner: "security-team",
+    created_at: datetime(),
+    updated_at: datetime(),
+    content_hash: "sha256:abc123..."
+  })
+
+  // Module Node
+  CREATE (m:Module {
+    id: "auth-system",
+    name: "Authentication System",
+    description: "...",
+    criticality: "high",
+    owner: "backend-team"
+  })
+  ```
+
+  ### Relationship Types
+  ```cypher
+  // Dependency relationships
+  (a:Atom)-[:DEPENDS_ON]->(b:Atom)
+  (a:Atom)-[:IMPLEMENTS]->(b:Atom)
+  (a:Atom)-[:VALIDATES]->(b:Atom)
+  (a:Atom)-[:MITIGATES]->(r:Atom {type: "risk"})
+
+  // Module relationships
+  (m:Module)-[:CONTAINS]->(a:Atom)
+  (m1:Module)-[:DEPENDS_ON]->(m2:Module)
+
+  // Metadata relationships
+  (a:Atom)-[:OWNED_BY]->(o:Owner {name: "team-name"})
+  (a:Atom)-[:TAGGED_WITH]->(t:Tag {name: "security"})
+  ```
+
+  ## Sync Process
+
+  ### Full Sync Algorithm
+  ```python
+  async def full_sync():
+      """Complete sync from YAML to Neo4j."""
+      # 1. Load all YAML files
+      atoms = load_all_atoms()
+      modules = load_all_modules()
+
+      # 2. Calculate content hashes
+      for atom in atoms:
+          atom['content_hash'] = sha256(atom['content'])
+
+      # 3. Begin Neo4j transaction
+      async with neo4j_session() as session:
+          # 4. Clear old data (with backup)
+          await session.run("MATCH (n) DETACH DELETE n")
+
+          # 5. Create all nodes
+          for atom in atoms:
+              await session.run("""
+                  CREATE (a:Atom {
+                      id: $id,
+                      type: $type,
+                      title: $title,
+                      summary: $summary,
+                      priority: $priority,
+                      status: $status,
+                      owner: $owner,
+                      created_at: datetime($created_at),
+                      updated_at: datetime($updated_at),
+                      content_hash: $content_hash
+                  })
+              """, **atom)
+
+          # 6. Create all relationships
+          for atom in atoms:
+              for downstream_id in atom['downstream_ids']:
+                  await session.run("""
+                      MATCH (a:Atom {id: $from_id})
+                      MATCH (b:Atom {id: $to_id})
+                      CREATE (a)-[:DEPENDS_ON {
+                          created_at: datetime()
+                      }]->(b)
+                  """, from_id=atom['id'], to_id=downstream_id)
+
+          # 7. Create indexes
+          await create_indexes(session)
+
+          # 8. Commit transaction
+          await session.commit()
+
+      # 9. Store sync metadata
+      await store_sync_metadata({
+          'timestamp': datetime.now(),
+          'atoms_count': len(atoms),
+          'modules_count': len(modules)
+      })
+  ```
+
+  ### Incremental Sync (Delta)
+  ```python
+  async def incremental_sync(changed_files: list[str]):
+      """Sync only changed atoms."""
+      for file_path in changed_files:
+          atom = load_yaml(file_path)
+          atom['content_hash'] = sha256(atom['content'])
+
+          async with neo4j_session() as session:
+              # Check if atom exists
+              result = await session.run("""
+                  MATCH (a:Atom {id: $id})
+                  RETURN a.content_hash as old_hash
+              """, id=atom['id'])
+
+              record = await result.single()
+
+              if not record:
+                  # New atom - create
+                  await create_atom_node(session, atom)
+              elif record['old_hash'] != atom['content_hash']:
+                  # Changed atom - update
+                  await update_atom_node(session, atom)
+
+              # Update relationships
+              await sync_relationships(session, atom)
+  ```
+
+  ## Cypher Query Patterns
+
+  ### 1. Downstream Impact Analysis
+  ```cypher
+  // Find all atoms affected by changing atom X
+  MATCH path = (a:Atom {id: $atom_id})-[:DEPENDS_ON*1..10]->(downstream)
+  RETURN DISTINCT
+    downstream.id as atom_id,
+    downstream.type as type,
+    downstream.priority as priority,
+    length(path) as depth,
+    [rel in relationships(path) | type(rel)] as relationship_chain
+  ORDER BY depth ASC
+  ```
+
+  ### 2. Critical Path Analysis
+  ```cypher
+  // Find shortest path between two atoms
+  MATCH path = shortestPath(
+    (start:Atom {id: $start_id})-[:DEPENDS_ON*]->( end:Atom {id: $end_id})
+  )
+  RETURN
+    [node in nodes(path) | node.id] as atom_chain,
+    length(path) as path_length
+  ```
+
+  ### 3. Circular Dependency Detection
+  ```cypher
+  // Find all cycles in the graph
+  MATCH (a:Atom)-[:DEPENDS_ON*]->(a)
+  RETURN DISTINCT a.id as atom_id
+  ```
+
+  ### 4. Module Impact Score
+  ```cypher
+  // Calculate impact score for a module
+  MATCH (m:Module)-[:CONTAINS]->(a:Atom)
+  OPTIONAL MATCH (a)-[:DEPENDS_ON*]->(downstream)
+  WITH m, count(DISTINCT downstream) as downstream_count
+  RETURN
+    m.id as module_id,
+    downstream_count as impact_score
+  ORDER BY impact_score DESC
+  ```
+
+  ### 5. Orphaned Atoms
+  ```cypher
+  // Find atoms with no relationships
+  MATCH (a:Atom)
+  WHERE NOT (a)-[:DEPENDS_ON]-()
+    AND NOT ()-[:DEPENDS_ON]->(a)
+  RETURN a.id, a.type, a.title
+  ```
+
+  ### 6. Approval Readiness
+  ```cypher
+  // Check if all upstream dependencies are approved
+  MATCH (a:Atom {id: $atom_id})
+  OPTIONAL MATCH (a)-[:DEPENDS_ON]->(upstream)
+  WITH a, collect(upstream.status) as upstream_statuses
+  RETURN
+    a.id,
+    CASE
+      WHEN all(status IN upstream_statuses WHERE status = 'approved')
+      THEN true
+      ELSE false
+    END as ready_for_approval
+  ```
+
+  ## Indexes and Constraints
+
+  ```cypher
+  // Unique constraints
+  CREATE CONSTRAINT atom_id_unique ON (a:Atom) ASSERT a.id IS UNIQUE;
+  CREATE CONSTRAINT module_id_unique ON (m:Module) ASSERT m.id IS UNIQUE;
+
+  // Indexes for performance
+  CREATE INDEX atom_type FOR (a:Atom) ON (a.type);
+  CREATE INDEX atom_status FOR (a:Atom) ON (a.status);
+  CREATE INDEX atom_priority FOR (a:Atom) ON (a.priority);
+  CREATE INDEX atom_owner FOR (a:Atom) ON (a.owner);
+
+  // Full-text search index
+  CREATE FULLTEXT INDEX atom_search FOR (a:Atom) ON EACH [a.title, a.summary];
+  ```
+
+  ## Backup and Recovery
+
+  ### Backup Strategy
+  ```bash
+  # Daily full backup
+  neo4j-admin backup \
+    --backup-dir=/backups/neo4j/$(date +%Y%m%d) \
+    --database=gndp
+
+  # Retention: 7 days
+  find /backups/neo4j -type d -mtime +7 -exec rm -rf {} \;
+  ```
+
+  ### Recovery Process
+  ```bash
+  # Stop Neo4j
+  systemctl stop neo4j
+
+  # Restore from backup
+  neo4j-admin restore \
+    --from=/backups/neo4j/20251218 \
+    --database=gndp \
+    --force
+
+  # Start Neo4j
+  systemctl start neo4j
+
+  # Verify data integrity
+  cypher-shell "MATCH (n) RETURN count(n)"
+  ```
+
+  ## Monitoring and Metrics
+
+  ### Key Metrics
+  - Sync duration (target: < 60 seconds for 10,000 atoms)
+  - Query latency (target: < 200ms p95)
+  - Graph size (nodes + relationships)
+  - Failed sync attempts
+  - Circular dependency count
+
+  ### Health Checks
+  ```python
+  async def health_check():
+      async with neo4j_session() as session:
+          # Check connection
+          result = await session.run("RETURN 1")
+          assert await result.single()
+
+          # Check atom count
+          result = await session.run("MATCH (a:Atom) RETURN count(a) as count")
+          atom_count = (await result.single())['count']
+
+          # Check for cycles
+          result = await session.run("""
+              MATCH (a:Atom)-[:DEPENDS_ON*]->(a)
+              RETURN count(DISTINCT a) as cycles
+          """)
+          cycle_count = (await result.single())['cycles']
+
+          return {
+              'status': 'healthy',
+              'atom_count': atom_count,
+              'cycle_count': cycle_count
+          }
+  ```
+
+metadata:
+  priority: high
+  status: approved
+  owner: backend-team
+  reviewers:
+    - infrastructure-team
+    - data-team
+  created: 2025-12-18
+  updated: 2025-12-18
+upstream_ids:
+  - REQ-004
+  - REQ-002
+downstream_ids:
+  - PROC-004
+tags:
+  - design
+  - neo4j
+  - graph-database
+  - cypher
+  - sync

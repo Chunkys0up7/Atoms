@@ -1,0 +1,78 @@
+id: POL-001
+type: policy
+title: Access Control and RBAC Policy
+summary: Role-based access control policy defining user roles, permissions, and authentication requirements
+content: |
+  # Access Control Policy
+
+  ## User Roles
+
+  ### Administrator
+  - Full system access
+  - User management
+  - Configuration changes
+  - Security settings
+  - Audit log access
+
+  ### Editor
+  - Create, read, update, delete atoms
+  - Create, read, update, delete modules
+  - Submit PRs for approval
+  - View impact analysis
+  - Cannot: manage users, change security settings
+
+  ### Reviewer
+  - Read all atoms and modules
+  - Approve/reject PRs
+  - View impact analysis
+  - Add comments to PRs
+  - Cannot: create/modify atoms, manage users
+
+  ### Viewer
+  - Read-only access to approved atoms
+  - Read-only access to public modules
+  - Cannot: modify data, approve PRs, access drafts
+
+  ## Authentication Requirements
+
+  ### MFA Required For
+  - Administrator role
+  - Production database access
+  - Security-sensitive operations
+  - API key generation
+
+  ### Session Timeout
+  - Administrators: 15 minutes inactivity
+  - Editors/Reviewers: 30 minutes inactivity
+  - Viewers: 60 minutes inactivity
+
+  ## API Access
+  - All API requests require authentication
+  - API keys must be rotated every 90 days
+  - Rate limits enforced per user role
+  - Audit logging for all API calls
+
+  ## Compliance
+  - SOC 2 Type II controls
+  - GDPR user data handling
+  - Principle of least privilege
+  - Separation of duties
+
+metadata:
+  priority: critical
+  status: approved
+  owner: security-team
+  reviewers:
+    - compliance-team
+    - legal-team
+  created: 2025-12-18
+  updated: 2025-12-18
+upstream_ids:
+  - REQ-001
+downstream_ids: []
+tags:
+  - policy
+  - access-control
+  - rbac
+  - security
+  - compliance

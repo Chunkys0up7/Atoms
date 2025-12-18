@@ -1,0 +1,51 @@
+id: REQ-003
+type: requirement
+title: REST API and GraphQL Gateway
+summary: Implement unified API gateway supporting both REST and GraphQL protocols with rate limiting and authentication
+content: |
+  The system shall expose data and functionality through standardized API interfaces:
+
+  ## REST API
+  - RESTful endpoints following OpenAPI 3.0 specification
+  - JSON request/response format
+  - Hypermedia links (HATEOAS) for resource navigation
+  - Pagination for list endpoints (max 100 items per page)
+  - Field filtering and sparse fieldsets
+
+  ## GraphQL API
+  - Schema-first design with SDL (Schema Definition Language)
+  - Query complexity analysis and depth limiting (max depth: 10)
+  - DataLoader for efficient batching and caching
+  - Subscription support for real-time updates
+
+  ## Common Features
+  - API versioning via URL path (/v1/, /v2/)
+  - Comprehensive error responses with error codes
+  - Request/response compression (gzip, brotli)
+  - CORS configuration for web clients
+
+  ## Rate Limiting
+  - 1000 requests per hour for authenticated users
+  - 100 requests per hour for anonymous users
+  - Separate limits for computationally expensive operations
+
+metadata:
+  priority: high
+  status: approved
+  owner: backend-team
+  created: 2025-12-18
+  updated: 2025-12-18
+  effort_estimate: 4 weeks
+upstream_ids:
+  - REQ-001
+  - REQ-002
+downstream_ids:
+  - DES-003
+  - VAL-003
+  - PROC-003
+tags:
+  - api
+  - rest
+  - graphql
+  - gateway
+  - rate-limiting

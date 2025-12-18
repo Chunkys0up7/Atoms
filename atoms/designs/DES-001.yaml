@@ -1,0 +1,133 @@
+id: DES-001
+type: design
+title: Authentication System Architecture
+summary: System design for OAuth 2.0 and JWT-based authentication with token rotation and MFA support
+content: |
+  # Authentication System Design
+
+  ## Architecture Overview
+  ```
+  ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+  │   Client    │─────▶│   API GW     │─────▶│  Auth Svc   │
+  │ (Web/Mobile)│◀─────│  (FastAPI)   │◀─────│  (Python)   │
+  └─────────────┘      └──────────────┘      └─────────────┘
+                              │                      │
+                              │                      ▼
+                              │              ┌─────────────┐
+                              │              │   Redis     │
+                              │              │  (Sessions) │
+                              │              └─────────────┘
+                              ▼
+                       ┌──────────────┐
+                       │  PostgreSQL  │
+                       │   (Users)    │
+                       └──────────────┘
+  ```
+
+  ## Components
+
+  ### 1. Authentication Service
+  - **Technology**: Python with passlib for bcrypt
+  - **Endpoints**:
+    - POST /auth/login - Email/password login
+    - POST /auth/oauth/{provider} - OAuth callback handler
+    - POST /auth/refresh - Token refresh
+    - POST /auth/logout - Session termination
+    - POST /auth/mfa/setup - TOTP setup
+    - POST /auth/mfa/verify - TOTP verification
+
+  ### 2. Token Management
+  - **Access Token**:
+    - Format: JWT with RS256 signing
+    - Payload: user_id, roles, permissions, exp
+    - Expiry: 15 minutes
+  - **Refresh Token**:
+    - Format: Secure random 32-byte token
+    - Storage: Redis with user_id as key
+    - Expiry: 7 days, sliding window
+    - Rotation: New token issued on each refresh
+
+  ### 3. Session Storage (Redis)
+  ```json
+  {
+    "session:{refresh_token}": {
+      "user_id": "uuid",
+      "device_id": "string",
+      "ip_address": "string",
+      "user_agent": "string",
+      "created_at": "timestamp",
+      "last_used": "timestamp"
+    }
+  }
+  ```
+
+  ### 4. User Database Schema (PostgreSQL)
+  ```sql
+  CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),  -- NULL for OAuth-only users
+    email_verified BOOLEAN DEFAULT FALSE,
+    mfa_enabled BOOLEAN DEFAULT FALSE,
+    mfa_secret VARCHAR(32),
+    failed_attempts INT DEFAULT 0,
+    locked_until TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE oauth_connections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    provider VARCHAR(50) NOT NULL,
+    provider_user_id VARCHAR(255) NOT NULL,
+    access_token TEXT,
+    refresh_token TEXT,
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(provider, provider_user_id)
+  );
+
+  CREATE TABLE audit_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    event_type VARCHAR(50) NOT NULL,
+    ip_address INET,
+    user_agent TEXT,
+    success BOOLEAN,
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+  ```
+
+  ## Security Considerations
+  - All tokens transmitted via HTTPS only
+  - Refresh tokens stored in HTTP-only, Secure, SameSite=Strict cookies
+  - Rate limiting implemented at API gateway level
+  - Audit logging for all authentication events
+  - Account lockout after 10 failed attempts (1 hour cooldown)
+
+  ## Error Handling
+  - Generic error messages to prevent user enumeration
+  - Detailed errors logged server-side with correlation IDs
+  - Circuit breaker for OAuth provider failures
+
+metadata:
+  priority: critical
+  status: approved
+  owner: backend-team
+  reviewers:
+    - security-team
+    - architecture-team
+  created: 2025-12-18
+  updated: 2025-12-18
+upstream_ids:
+  - REQ-001
+downstream_ids:
+  - PROC-001
+  - VAL-001
+tags:
+  - design
+  - authentication
+  - architecture
+  - security

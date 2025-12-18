@@ -1,0 +1,143 @@
+id: PROC-001
+type: procedure
+title: Authentication Service Deployment
+summary: Standard operating procedure for deploying authentication service updates to production
+content: |
+  # Authentication Service Deployment Procedure
+
+  ## Prerequisites
+  - [ ] All unit tests passing
+  - [ ] Integration tests passing
+  - [ ] Security scan completed (no HIGH or CRITICAL vulnerabilities)
+  - [ ] Code review approved by 2 team members
+  - [ ] Database migrations tested in staging
+  - [ ] Rollback plan documented
+
+  ## Deployment Steps
+
+  ### 1. Pre-Deployment (15 minutes before)
+  ```bash
+  # Verify staging environment
+  curl https://staging-api.example.com/health
+  # Expected: {"status": "healthy"}
+
+  # Run final smoke tests
+  pytest tests/smoke/ --env=staging
+
+  # Notify team in Slack
+  /deploy-notify auth-service staging->production
+  ```
+
+  ### 2. Database Migration (if needed)
+  ```bash
+  # Backup production database
+  pg_dump -h prod-db.example.com -U admin gndp_production > backup_$(date +%Y%m%d_%H%M%S).sql
+
+  # Run migrations (non-destructive only)
+  alembic upgrade head
+
+  # Verify migration
+  psql -h prod-db.example.com -U admin -d gndp_production -c "\dt"
+  ```
+
+  ### 3. Deploy to Production
+  ```bash
+  # Pull latest image
+  docker pull ghcr.io/org/auth-service:v1.2.3
+
+  # Rolling update (zero downtime)
+  kubectl set image deployment/auth-service \
+    auth-service=ghcr.io/org/auth-service:v1.2.3
+
+  # Watch rollout status
+  kubectl rollout status deployment/auth-service -w
+  ```
+
+  ### 4. Health Checks
+  ```bash
+  # Check all pods are running
+  kubectl get pods -l app=auth-service
+
+  # Verify health endpoint
+  curl https://api.example.com/auth/health
+  # Expected: {"status": "healthy", "version": "1.2.3"}
+
+  # Check error rates (should be < 0.1%)
+  # View in Grafana: Auth Service Dashboard
+  ```
+
+  ### 5. Smoke Tests in Production
+  ```bash
+  # Test login flow
+  curl -X POST https://api.example.com/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"test@example.com","password":"test123"}'
+
+  # Test token refresh
+  curl -X POST https://api.example.com/auth/refresh \
+    -H "Authorization: Bearer <test_token>"
+
+  # Run automated smoke tests
+  pytest tests/smoke/ --env=production --quick
+  ```
+
+  ### 6. Monitoring (30 minutes post-deploy)
+  - Monitor error rates in Datadog
+  - Check latency metrics (p50, p95, p99)
+  - Review authentication success rate
+  - Check Redis connection pool utilization
+  - Monitor database query performance
+
+  ## Rollback Procedure
+
+  If any issues detected:
+
+  ```bash
+  # Immediate rollback
+  kubectl rollout undo deployment/auth-service
+
+  # Verify rollback
+  kubectl rollout status deployment/auth-service -w
+
+  # Check health
+  curl https://api.example.com/auth/health
+
+  # If database migration was applied, rollback:
+  alembic downgrade -1
+
+  # Notify team
+  /deploy-notify auth-service ROLLBACK "Reason: <description>"
+  ```
+
+  ## Post-Deployment
+
+  - [ ] Update deployment log in Notion
+  - [ ] Send deployment summary to #engineering channel
+  - [ ] Schedule post-mortem if issues occurred
+  - [ ] Update runbook if new learnings
+
+  ## Emergency Contacts
+
+  - On-call Engineer: PagerDuty
+  - Security Team: security@example.com
+  - Infrastructure Team: infra@example.com
+
+metadata:
+  priority: critical
+  status: approved
+  owner: devops-team
+  reviewers:
+    - backend-team
+    - security-team
+  created: 2025-12-18
+  updated: 2025-12-18
+  run_frequency: on_each_deployment
+upstream_ids:
+  - DES-001
+downstream_ids:
+  - VAL-001
+tags:
+  - procedure
+  - deployment
+  - authentication
+  - ops

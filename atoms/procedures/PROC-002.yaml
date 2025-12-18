@@ -1,0 +1,239 @@
+id: PROC-002
+type: procedure
+title: Database Backup and Recovery
+summary: Procedures for PostgreSQL and Redis backup, verification, and disaster recovery
+content: |
+  # Database Backup and Recovery Procedure
+
+  ## Automated Backup Schedule
+
+  ### PostgreSQL Backups
+  ```bash
+  # Full backup (daily at 2 AM UTC)
+  0 2 * * * /scripts/backup_postgres.sh
+
+  # Incremental backup (every 6 hours)
+  0 */6 * * * /scripts/backup_postgres_incremental.sh
+  ```
+
+  ### Redis Backups
+  ```bash
+  # Snapshot (every 4 hours)
+  0 */4 * * * /scripts/backup_redis.sh
+  ```
+
+  ## Manual Backup Procedures
+
+  ### PostgreSQL Full Backup
+  ```bash
+  #!/bin/bash
+  # backup_postgres.sh
+
+  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+  BACKUP_DIR="/backups/postgres"
+  DB_NAME="gndp_production"
+
+  # Create backup directory
+  mkdir -p $BACKUP_DIR/$TIMESTAMP
+
+  # Dump database
+  pg_dump -h prod-db.example.com \
+    -U admin \
+    -Fc \  # Custom format (compressed)
+    -f $BACKUP_DIR/$TIMESTAMP/$DB_NAME.dump \
+    $DB_NAME
+
+  # Verify backup
+  pg_restore --list $BACKUP_DIR/$TIMESTAMP/$DB_NAME.dump > /dev/null
+
+  if [ $? -eq 0 ]; then
+    echo "Backup successful: $TIMESTAMP"
+
+    # Upload to S3
+    aws s3 cp $BACKUP_DIR/$TIMESTAMP/ \
+      s3://gndp-backups/postgres/$TIMESTAMP/ \
+      --recursive
+
+    # Cleanup local backups older than 7 days
+    find $BACKUP_DIR -type d -mtime +7 -exec rm -rf {} \;
+  else
+    echo "Backup verification failed!"
+    exit 1
+  fi
+  ```
+
+  ### Redis Snapshot
+  ```bash
+  #!/bin/bash
+  # backup_redis.sh
+
+  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+  BACKUP_DIR="/backups/redis"
+
+  mkdir -p $BACKUP_DIR
+
+  # Trigger BGSAVE
+  redis-cli -h prod-redis.example.com BGSAVE
+
+  # Wait for save to complete
+  while [ $(redis-cli -h prod-redis.example.com LASTSAVE) -eq $LAST_SAVE ]; do
+    sleep 1
+  done
+
+  # Copy RDB file
+  scp redis-server:/var/lib/redis/dump.rdb \
+    $BACKUP_DIR/dump_$TIMESTAMP.rdb
+
+  # Upload to S3
+  aws s3 cp $BACKUP_DIR/dump_$TIMESTAMP.rdb \
+    s3://gndp-backups/redis/
+
+  # Cleanup local backups older than 3 days
+  find $BACKUP_DIR -type f -mtime +3 -delete
+  ```
+
+  ## Backup Verification
+
+  ### Weekly Restore Test (Sunday 3 AM)
+  ```bash
+  #!/bin/bash
+  # test_restore.sh
+
+  # Get latest backup
+  LATEST_BACKUP=$(aws s3 ls s3://gndp-backups/postgres/ | sort | tail -n 1 | awk '{print $2}')
+
+  # Download backup
+  aws s3 cp s3://gndp-backups/postgres/$LATEST_BACKUP/ /tmp/test_restore/ --recursive
+
+  # Create test database
+  psql -h test-db.example.com -U admin -c "CREATE DATABASE restore_test"
+
+  # Restore
+  pg_restore -h test-db.example.com \
+    -U admin \
+    -d restore_test \
+    /tmp/test_restore/gndp_production.dump
+
+  # Run validation queries
+  ROW_COUNT=$(psql -h test-db.example.com -U admin -d restore_test \
+    -t -c "SELECT count(*) FROM content.atoms")
+
+  if [ $ROW_COUNT -gt 0 ]; then
+    echo "✓ Restore test passed: $ROW_COUNT atoms restored"
+  else
+    echo "✗ Restore test failed"
+    # Alert on-call
+    curl -X POST $PAGERDUTY_WEBHOOK \
+      -d '{"event_type":"trigger","description":"Backup restore test failed"}'
+  fi
+
+  # Cleanup
+  psql -h test-db.example.com -U admin -c "DROP DATABASE restore_test"
+  rm -rf /tmp/test_restore
+  ```
+
+  ## Disaster Recovery Procedures
+
+  ### Scenario 1: Database Corruption
+  ```bash
+  # 1. Identify corruption
+  psql -h prod-db.example.com -c "SELECT pg_relation_size('content.atoms')"
+
+  # 2. Determine recovery point
+  aws s3 ls s3://gndp-backups/postgres/ | tail -n 5
+
+  # 3. Create new database instance
+  # (Use RDS snapshot or provision new server)
+
+  # 4. Restore from backup
+  pg_restore -h new-db.example.com \
+    -U admin \
+    -d gndp_production \
+    --clean \
+    --if-exists \
+    /path/to/backup.dump
+
+  # 5. Apply WAL logs for PITR (if needed)
+  # Restore to specific timestamp
+  pg_restore --target-time='2025-12-18 14:30:00 UTC'
+
+  # 6. Update application connection strings
+  kubectl set env deployment/api \
+    DATABASE_URL=postgresql://admin@new-db.example.com/gndp_production
+
+  # 7. Verify data integrity
+  psql -h new-db.example.com -c "SELECT count(*) FROM content.atoms"
+  ```
+
+  ### Scenario 2: Complete Data Loss
+  ```bash
+  # Recovery Time Objective (RTO): 4 hours
+  # Recovery Point Objective (RPO): 6 hours (last incremental backup)
+
+  # 1. Provision infrastructure
+  terraform apply -var="environment=disaster-recovery"
+
+  # 2. Restore PostgreSQL from latest full backup
+  aws s3 cp s3://gndp-backups/postgres/<latest>/ /restore/ --recursive
+  pg_restore -h new-db.example.com -d gndp_production /restore/gndp_production.dump
+
+  # 3. Restore Redis from latest snapshot
+  aws s3 cp s3://gndp-backups/redis/<latest>.rdb /var/lib/redis/dump.rdb
+  systemctl restart redis
+
+  # 4. Deploy application
+  kubectl apply -f k8s/production/
+
+  # 5. Update DNS
+  aws route53 change-resource-record-sets \
+    --hosted-zone-id Z123456 \
+    --change-batch file://dns-update.json
+
+  # 6. Verify all services
+  ./scripts/health_check_all.sh
+  ```
+
+  ## Monitoring and Alerts
+
+  ### Backup Alerts
+  - Backup failure: PagerDuty HIGH
+  - Backup size anomaly (> 20% change): Slack warning
+  - Restore test failure: PagerDuty HIGH
+  - Backup age > 8 hours: Slack warning
+
+  ### Metrics to Track
+  - Backup duration
+  - Backup file size
+  - Restore test success rate
+  - Time to restore (RTO actual)
+
+  ## Retention Policy
+
+  | Backup Type | Frequency | Retention |
+  |-------------|-----------|-----------|
+  | PostgreSQL Full | Daily | 30 days |
+  | PostgreSQL Incremental | 6 hours | 7 days |
+  | Redis Snapshot | 4 hours | 3 days |
+  | WAL Archives | Continuous | 7 days |
+
+metadata:
+  priority: critical
+  status: approved
+  owner: infrastructure-team
+  reviewers:
+    - dba-team
+    - security-team
+  created: 2025-12-18
+  updated: 2025-12-18
+  run_frequency: automated_and_on_demand
+upstream_ids:
+  - DES-002
+  - REQ-002
+downstream_ids:
+  - VAL-002
+tags:
+  - procedure
+  - backup
+  - disaster-recovery
+  - database
+  - ops
