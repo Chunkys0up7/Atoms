@@ -1,0 +1,40 @@
+name: GNDP Backend Jobs
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  neo4j-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Sync graph to Neo4j
+        env:
+          NEO4J_BOLT_URI: ${{ secrets.NEO4J_BOLT_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: python scripts/sync_neo4j.py --graph docs/api/graph/full.json --dry-run
+
+  embeddings:
+    runs-on: ubuntu-latest
+    needs: neo4j-sync
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Generate embeddings (RAG index)
+        env:
+          EMBEDDINGS_API_KEY: ${{ secrets.EMBEDDINGS_API_KEY }}
+        run: python scripts/generate_embeddings.py --atoms atoms/ --output rag-index/ --dry-run
