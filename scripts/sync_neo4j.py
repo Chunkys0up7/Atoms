@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
-"""Minimal Neo4j sync helper.
+"""Neo4j sync helper.
 
-This script is a safe stub: with `--dry-run` it will validate files and
-print intended actions. With proper `NEO4J_BOLT_URI`/user/password it can be
-extended to perform actual writes.
+This script validates a graph JSON and optionally upserts nodes and
+relationships to a Neo4j instance using the official `neo4j` driver.
+Use `--dry-run` to only validate inputs. Relationship types are sanitized
+to alphanumeric/underscore to avoid injection into Cypher.
 """
+from __future__ import annotations
+
 import argparse
-import os
-import sys
 import json
+import os
+import re
+import sys
+from typing import Tuple
 
 
-def validate_graph(path):
+def validate_graph(path: str) -> Tuple[int, int]:
     if not os.path.exists(path):
         raise FileNotFoundError(path)
     with open(path, "r", encoding="utf-8") as fh:
@@ -21,7 +26,46 @@ def validate_graph(path):
     return len(nodes), len(edges)
 
 
-def main():
+def sanitize_relation_type(t: str) -> str:
+    if not t:
+        return "RELATED"
+    s = re.sub(r"[^A-Za-z0-9_]+", "_", t)
+    s = s.strip("_")
+    return s[:64] or "RELATED"
+
+
+def upsert_to_neo4j(path: str, uri: str, user: str, password: str) -> None:
+    from neo4j import GraphDatabase
+
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    nodes = data.get("nodes", [])
+    edges = data.get("edges", [])
+
+    with driver.session() as session:
+        for n in nodes:
+            nid = n.get("id")
+            label = n.get("type") or "Atom"
+            props = {k: v for k, v in n.items() if k not in ("id", "type")}
+            cypher = (
+                "MERGE (x:Atom {id:$id}) SET x.type=$type, x += $props, x.label = $label"
+            )
+            session.run(cypher, id=nid, type=label, props=props, label=label)
+
+        for e in edges:
+            src = e.get("source")
+            tgt = e.get("target")
+            etype = sanitize_relation_type(e.get("type", "RELATED"))
+            props = {k: v for k, v in e.items() if k not in ("source", "target", "type")}
+            cypher = (
+                f"MATCH (a:Atom {{id:$src}}), (b:Atom {{id:$tgt}}) MERGE (a)-[r:`{etype}`]->(b) SET r += $props"
+            )
+            session.run(cypher, src=src, tgt=tgt, props=props)
+
+
+def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--graph", required=True)
     p.add_argument("--dry-run", action="store_true")
@@ -35,7 +79,7 @@ def main():
         sys.exit(1)
 
     if args.dry_run:
-        print("Dry run: would connect to Neo4j and upsert nodes/edges if credentials provided.")
+        print("Dry run: validated graph, no DB actions performed")
         return
 
     uri = os.environ.get("NEO4J_BOLT_URI")
@@ -45,35 +89,12 @@ def main():
         print("Missing Neo4j credentials; run with --dry-run for validation.", file=sys.stderr)
         sys.exit(1)
 
-    # Lazy import to avoid requiring neo4j in dry-run cases.
     try:
-        from neo4j import GraphDatabase
+        upsert_to_neo4j(args.graph, uri, user, password)
+        print("Neo4j sync complete")
     except Exception as e:
-        print("neo4j driver not installed:", e, file=sys.stderr)
+        print("Neo4j sync failed:", e, file=sys.stderr)
         sys.exit(1)
-
-    driver = GraphDatabase.driver(uri, auth=(user, password))
-    with driver.session() as session:
-        # Example minimal upsert: create nodes by id and label
-        with open(args.graph, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
-        for node in data.get("nodes", []):
-            nid = node.get("id")
-            label = node.get("type", "Atom")
-            props = {k: v for k, v in node.items() if k not in ("id", "type")}
-            session.run(
-                f"MERGE (n:Atom {{id: $id}}) SET n += $props, n.type = $type",
-                id=nid, props=props, type=label,
-            )
-        for edge in data.get("edges", []):
-            src = edge.get("source")
-            tgt = edge.get("target")
-            etype = edge.get("type", "RELATED")
-            session.run(
-                "MATCH (a:Atom {id:$src}), (b:Atom {id:$tgt}) MERGE (a)-[r:`" + etype + "`]->(b)",
-                src=src, tgt=tgt,
-            )
-    print("Neo4j sync complete")
 
 
 if __name__ == "__main__":

@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Generate embeddings for atoms to build a RAG index.
 
-This script is a safe stub that walks the `atoms/` directory, extracts
-short summaries, and (with `--dry-run`) writes a small JSON index. With
-an embeddings API key it can call a provider to persist vectors.
+If `EMBEDDINGS_API_KEY` and `EMBEDDINGS_PROVIDER=openai` are set, this will
+call OpenAI embeddings API. Otherwise it writes a local index in the output
+directory for dry-run/testing.
 """
+from __future__ import annotations
+
 import argparse
 import os
 import json
 from pathlib import Path
+from typing import List, Dict
 
 
-def gather_atoms(atoms_dir):
-    atoms = []
+def gather_atoms(atoms_dir: str) -> List[Dict]:
+    atoms: List[Dict] = []
     p = Path(atoms_dir)
     if not p.exists():
         return atoms
@@ -23,6 +26,46 @@ def gather_atoms(atoms_dir):
             text = ''
         atoms.append({'path': str(f), 'content': text[:2000]})
     return atoms
+
+
+def write_index(atoms: List[Dict], out_dir: str):
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, 'index.json')
+    with open(out_path, 'w', encoding='utf-8') as fh:
+        json.dump({'count': len(atoms), 'items': atoms}, fh, indent=2)
+    print('Wrote local index to', out_path)
+
+
+def generate_openai_embeddings(atoms: List[Dict], out_dir: str):
+    try:
+        import openai
+    except Exception as e:
+        print('OpenAI client not installed:', e)
+        return
+
+    api_key = os.environ.get('EMBEDDINGS_API_KEY')
+    model = os.environ.get('EMBEDDINGS_MODEL', 'text-embedding-3-small')
+    if not api_key:
+        print('Missing EMBEDDINGS_API_KEY')
+        return
+    openai.api_key = api_key
+
+    vectors = []
+    for a in atoms:
+        text = a.get('content', '')[:2000]
+        try:
+            resp = openai.Embedding.create(model=model, input=text)
+            emb = resp['data'][0]['embedding']
+        except Exception as e:
+            print('Embedding call failed for', a.get('path'), e)
+            emb = []
+        vectors.append({'path': a.get('path'), 'embedding': emb})
+
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, 'embeddings.json')
+    with open(out_path, 'w', encoding='utf-8') as fh:
+        json.dump({'items': vectors}, fh)
+    print('Wrote embeddings to', out_path)
 
 
 def main():
@@ -36,20 +79,15 @@ def main():
     print(f'Found {len(atoms)} atom files')
 
     if args.dry_run:
-        os.makedirs(args.output, exist_ok=True)
-        out_path = os.path.join(args.output, 'index.json')
-        with open(out_path, 'w', encoding='utf-8') as fh:
-            json.dump({'count': len(atoms), 'items': atoms}, fh, indent=2)
-        print('Dry run: wrote', out_path)
+        write_index(atoms, args.output)
         return
 
-    api_key = os.environ.get('EMBEDDINGS_API_KEY')
-    if not api_key:
-        print('Missing EMBEDDINGS_API_KEY; run with --dry-run to validate', )
-        return
-
-    # Placeholder: integrate with a real embeddings provider here.
-    print('Embedding generation would run here (provider integration required)')
+    provider = os.environ.get('EMBEDDINGS_PROVIDER', 'openai')
+    if provider == 'openai':
+        generate_openai_embeddings(atoms, args.output)
+    else:
+        print('Unknown provider', provider)
+        write_index(atoms, args.output)
 
 
 if __name__ == '__main__':
