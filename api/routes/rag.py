@@ -3,6 +3,12 @@ from pydantic import BaseModel
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import os
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from api.neo4j_client import get_neo4j_client
 
 router = APIRouter()
 
@@ -84,24 +90,52 @@ def entity_rag(query: str, top_k: int = 5, atom_type: Optional[str] = None) -> L
 
 
 def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-    """Path RAG: Relationship traversal.
+    """Path RAG: Relationship traversal using Neo4j.
 
-    This implements graph-aware RAG:
-    1. Find seed atoms via vector search
-    2. Traverse relationships to find connected atoms
-    3. Return expanded context
+    This implements graph-aware RAG following RAG.md dual-index approach:
+    1. Find seed atoms via vector search (Chroma)
+    2. Traverse relationships to find connected atoms (Neo4j)
+    3. Return expanded context with relationship metadata
     """
-    # First, get seed atoms
+    # First, get seed atoms from vector search
     seed_atoms = entity_rag(query, top_k=3)
 
     if not seed_atoms:
         return []
 
-    # TODO: Integrate with Neo4j or graph.json to traverse relationships
-    # For now, return seed atoms (placeholder for full graph traversal)
-    expanded_atoms = seed_atoms.copy()
+    # Try Neo4j graph traversal first
+    neo4j_client = get_neo4j_client()
 
-    # Read graph data to find related atoms
+    if neo4j_client and neo4j_client.is_connected():
+        # Use Neo4j for graph traversal (bounded 2-3 hops)
+        expanded_atoms = seed_atoms.copy()
+
+        for seed_atom in seed_atoms:
+            atom_id = seed_atom.get('id')
+            if not atom_id:
+                continue
+
+            # Get full context (2-hop bidirectional traversal)
+            try:
+                related_atoms = neo4j_client.find_full_context(atom_id, max_depth=2, limit=10)
+                for related in related_atoms:
+                    # Avoid duplicates
+                    if not any(a.get('id') == related['id'] for a in expanded_atoms):
+                        expanded_atoms.append({
+                            'id': related['id'],
+                            'type': related.get('type', 'unknown'),
+                            'title': related.get('title', ''),
+                            'source': 'neo4j_graph',
+                            'relationship': 'connected'
+                        })
+            except Exception as e:
+                print(f"Neo4j traversal error for {atom_id}: {e}")
+                continue
+
+        return expanded_atoms
+
+    # Fallback to graph.json if Neo4j not available
+    expanded_atoms = seed_atoms.copy()
     graph_path = Path("docs/generated/api/graph/full.json")
     if not graph_path.exists():
         graph_path = Path("docs/api/graph/full.json")
@@ -111,40 +145,89 @@ def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         with open(graph_path, 'r', encoding='utf-8') as f:
             graph_data = json.load(f)
 
-        # For each seed atom, find connected nodes
         seed_ids = {a['id'] for a in seed_atoms}
         for edge in graph_data.get('edges', []):
             if edge['source'] in seed_ids or edge['target'] in seed_ids:
-                # Add related atom IDs
                 related_id = edge['target'] if edge['source'] in seed_ids else edge['source']
                 if related_id not in seed_ids:
-                    expanded_atoms.append({'id': related_id, 'relationship': edge.get('type', 'related')})
+                    expanded_atoms.append({
+                        'id': related_id,
+                        'relationship': edge.get('type', 'related'),
+                        'source': 'graph_json'
+                    })
 
     return expanded_atoms
 
 
 def impact_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-    """Impact RAG: Change analysis.
+    """Impact RAG: Change impact analysis using Neo4j.
 
-    This implements impact-aware RAG:
-    1. Find target atom(s) via vector search
-    2. Find all downstream dependencies
-    3. Return impact chain
+    This implements impact-aware RAG following RAG.md guidance:
+    1. Find target atom(s) via vector search (Chroma)
+    2. Find all downstream dependencies (Neo4j traversal)
+    3. Return comprehensive impact chain with affected atoms
     """
-    # Get target atoms
+    # Get target atoms from vector search
     target_atoms = entity_rag(query, top_k=2)
 
     if not target_atoms:
         return []
 
-    # TODO: Use impact_analysis.py or Neo4j to compute full impact chain
-    # For now, return targets with placeholder impact data
+    # Try Neo4j for impact analysis
+    neo4j_client = get_neo4j_client()
+
+    if neo4j_client and neo4j_client.is_connected():
+        impact_chain = []
+
+        for target_atom in target_atoms:
+            atom_id = target_atom.get('id')
+            if not atom_id:
+                continue
+
+            # Find downstream impacts (what depends on this atom)
+            try:
+                downstream_atoms = neo4j_client.find_downstream_impacts(atom_id, max_depth=3)
+
+                impact_chain.append({
+                    **target_atom,
+                    'impact_scope': 'downstream',
+                    'affected_count': len(downstream_atoms),
+                    'affected_atoms': [a['id'] for a in downstream_atoms[:10]],  # Limit to top 10
+                    'source': 'neo4j_graph'
+                })
+
+                # Add affected atoms to the chain
+                for affected in downstream_atoms[:5]:  # Top 5 most impacted
+                    impact_chain.append({
+                        'id': affected['id'],
+                        'type': affected.get('type', 'unknown'),
+                        'title': affected.get('title', ''),
+                        'relationship_path': affected.get('relationship_path', []),
+                        'impact_level': 'affected',
+                        'source': 'neo4j_graph'
+                    })
+
+            except Exception as e:
+                print(f"Neo4j impact analysis error for {atom_id}: {e}")
+                # Fallback: return target with no impact data
+                impact_chain.append({
+                    **target_atom,
+                    'impact_scope': 'unknown',
+                    'affected_count': 0,
+                    'error': str(e)
+                })
+
+        return impact_chain
+
+    # Fallback: return targets with basic impact data
     impact_chain = []
     for atom in target_atoms:
         impact_chain.append({
             **atom,
-            'impact_scope': 'downstream',  # Placeholder
-            'affected_count': 0  # Placeholder
+            'impact_scope': 'downstream',
+            'affected_count': 0,
+            'source': 'fallback',
+            'note': 'Neo4j not available - install and configure for full impact analysis'
         })
 
     return impact_chain
@@ -212,13 +295,16 @@ async def query_rag(request: RAGQuery):
 
 @router.get("/api/rag/health")
 def rag_health():
-    """Check RAG system health."""
+    """Check RAG system health (both vector and graph databases)."""
     status = {
         'chromadb_installed': HAS_CHROMA,
         'vector_db_exists': False,
-        'collection_count': 0
+        'collection_count': 0,
+        'neo4j_connected': False,
+        'graph_atom_count': 0
     }
 
+    # Check Chroma vector database
     if HAS_CHROMA:
         try:
             client = init_chroma_client()
@@ -226,6 +312,21 @@ def rag_health():
             status['vector_db_exists'] = True
             status['collection_count'] = collection.count()
         except Exception as e:
-            status['error'] = str(e)
+            status['chroma_error'] = str(e)
+
+    # Check Neo4j graph database
+    neo4j_client = get_neo4j_client()
+    if neo4j_client:
+        neo4j_health = neo4j_client.health_check()
+        status['neo4j_connected'] = neo4j_health.get('connected', False)
+        if neo4j_health.get('connected'):
+            status['graph_atom_count'] = neo4j_health.get('atom_count', 0)
+            status['graph_relationship_count'] = neo4j_health.get('relationship_count', 0)
+            status['neo4j_uri'] = neo4j_health.get('uri', '')
+        else:
+            status['neo4j_error'] = neo4j_health.get('error', 'Unknown error')
+
+    # Overall system status
+    status['dual_index_ready'] = status['vector_db_exists'] and status['neo4j_connected']
 
     return status

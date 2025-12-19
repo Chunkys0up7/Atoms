@@ -1,0 +1,153 @@
+# GNDP Ontology Definition
+# Version: 1.0.0
+# Following RAG.md ontology-first architecture
+
+metadata:
+  version: "1.0.0"
+  created: "2025-12-19"
+  description: "Ontology for Graph-Native Documentation Platform (GNDP)"
+  purpose: "Semantic contract for entity types and relationships in docs-as-code system"
+
+# Competency Questions (CQs) - Drive the ontology design
+competency_questions:
+  - question: "What procedures implement this policy?"
+    entities: [Policy, Procedure]
+    relationships: [implements]
+  
+  - question: "Which systems have dependencies on this control?"
+    entities: [System, Control]
+    relationships: [depends_on]
+  
+  - question: "Show me all process handoffs between departments"
+    entities: [Procedure, Actor, Workflow]
+    relationships: [executes, handoff]
+  
+  - question: "What's the full impact chain if we modify this requirement?"
+    entities: [Requirement, Design, Procedure, Validation]
+    relationships: [requires, implements, validates]
+  
+  - question: "Who owns the responsibility for this procedure?"
+    entities: [Procedure, Actor]
+    relationships: [owns, manages]
+  
+  - question: "Which validation tests verify this design?"
+    entities: [Design, Validation]
+    relationships: [validates]
+  
+  - question: "What risks are mitigated by this control?"
+    entities: [Control, Risk]
+    relationships: [mitigates]
+  
+  - question: "What are all upstream dependencies for this atom?"
+    entities: [Any]
+    relationships: [requires, depends_on, references]
+
+# Entity Types (Atom Types)
+entity_types:
+  requirement:
+    label: "Requirement"
+    description: "Business, functional, or compliance requirements"
+    id_pattern: "^REQ-[0-9]{3}$"
+    examples: ["REQ-001", "REQ-002"]
+  
+  design:
+    label: "Design"
+    description: "Technical designs and architectural decisions"
+    id_pattern: "^DES-[0-9]{3}$"
+    examples: ["DES-001", "DES-002"]
+  
+  procedure:
+    label: "Procedure"
+    description: "Standard operating procedures and workflows"
+    id_pattern: "^PROC-[0-9]{3}$"
+    examples: ["PROC-001"]
+  
+  validation:
+    label: "Validation"
+    description: "Tests, checks, and validation procedures"
+    id_pattern: "^VAL-[0-9]{3}$"
+    examples: ["VAL-001"]
+  
+  policy:
+    label: "Policy"
+    description: "Organizational policies and governance rules"
+    id_pattern: "^POL-[0-9]{3}$"
+    examples: ["POL-001"]
+  
+  risk:
+    label: "Risk"
+    description: "Identified risks and risk scenarios"
+    id_pattern: "^RISK-[0-9]{3}$"
+    examples: ["RISK-001"]
+
+# Relationship Types
+relationship_types:
+  requires:
+    label: "Requires"
+    description: "Dependency relationship - source requires target"
+    inverse: required_by
+  
+  implements:
+    label: "Implements"
+    description: "Implementation relationship - source implements target"
+    inverse: implemented_by
+  
+  validates:
+    label: "Validates"
+    description: "Validation relationship - source validates target"
+    inverse: validated_by
+  
+  depends_on:
+    label: "Depends On"
+    description: "Technical dependency - source depends on target"
+    inverse: depended_on_by
+  
+  mitigates:
+    label: "Mitigates"
+    description: "Risk mitigation - source mitigates target risk"
+    inverse: mitigated_by
+  
+  owns:
+    label: "Owns"
+    description: "Ownership relationship - source owns target"
+    inverse: owned_by
+  
+  affects:
+    label: "Affects"
+    description: "Impact relationship - source affects target"
+    inverse: affected_by
+
+# Traversal Patterns (for RAG queries)
+traversal_patterns:
+  upstream_dependencies:
+    description: "Find all upstream dependencies (what this atom requires)"
+    relationships: [requires, depends_on]
+    direction: outgoing
+    max_depth: 3
+  
+  downstream_impacts:
+    description: "Find all downstream impacts (what depends on this atom)"
+    relationships: [required_by, depends_on, affects]
+    direction: incoming
+    max_depth: 3
+  
+  implementation_chain:
+    description: "Follow requirement → design → procedure → validation chain"
+    relationships: [implemented_by, validated_by]
+    max_depth: 4
+  
+  full_context:
+    description: "Get comprehensive context (2-hop bidirectional)"
+    direction: both
+    max_depth: 2
+
+# Query Templates (for Neo4j Cypher)
+query_templates:
+  find_upstream:
+    cypher: "MATCH (a:Atom {id: $atom_id})-[r:requires|depends_on*1..3]->(upstream) RETURN upstream, r"
+  
+  find_downstream:
+    cypher: "MATCH (a:Atom {id: $atom_id})<-[r:requires|depends_on|affects*1..3]-(downstream) RETURN downstream, r"
+  
+  find_full_context:
+    cypher: "MATCH (a:Atom {id: $atom_id})-[r*0..2]-(related) RETURN DISTINCT related, r LIMIT $limit"
