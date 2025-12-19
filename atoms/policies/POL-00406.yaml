@@ -1,0 +1,8 @@
+id: POL-00406
+type: policy
+title: Policy 406
+summary: 'Auto-generated policy #406 for demo'
+owner: team-b
+created_at: '2025-12-19T14:37:54.532713'
+metadata:
+  priority: high

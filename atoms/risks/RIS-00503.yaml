@@ -1,0 +1,8 @@
+id: RIS-00503
+type: risk
+title: Risk 503
+summary: 'Auto-generated risk #503 for demo'
+owner: security
+created_at: '2025-12-19T14:37:55.264804'
+metadata:
+  priority: low

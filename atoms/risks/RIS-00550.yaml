@@ -1,0 +1,8 @@
+id: RIS-00550
+type: risk
+title: Risk 550
+summary: 'Auto-generated risk #550 for demo'
+owner: ops
+created_at: '2025-12-19T14:37:55.456400'
+metadata:
+  priority: medium

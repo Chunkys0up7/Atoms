@@ -22,7 +22,9 @@
       "Bash(then echo \".env\")",
       "Bash(else echo \".env already in .gitignore\")",
       "Bash(fi)",
-      "Bash(git -C \"/f/Projects/FullSytem\" log --oneline -10)"
+      "Bash(git -C \"/f/Projects/FullSytem\" log --oneline -10)",
+      "Bash(git -C \"f:/Projects/FullSytem\" log --oneline -5)",
+      "Bash(test:*)"
     ]
   }
 }

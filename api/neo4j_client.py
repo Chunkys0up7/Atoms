@@ -6,7 +6,14 @@ implementing traversal patterns defined in the ontology.yaml file.
 """
 
 from neo4j import GraphDatabase
-from neo4j.exceptions import ConnectionError, DatabaseError
+try:
+    # Older driver versions exposed ConnectionError/DatabaseError names
+    from neo4j.exceptions import ConnectionError, DatabaseError
+except Exception:
+    # Newer drivers use different exception classes; map common names for compatibility
+    from neo4j.exceptions import ServiceUnavailable, Neo4jError
+    ConnectionError = ServiceUnavailable
+    DatabaseError = Neo4jError
 import os
 from typing import List, Dict, Any, Optional, Tuple
 

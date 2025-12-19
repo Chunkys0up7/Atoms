@@ -1,0 +1,8 @@
+id: VAL-00340
+type: validation
+title: Validation 340
+summary: 'Auto-generated validation #340 for demo'
+owner: ops
+created_at: '2025-12-19T14:37:53.682038'
+metadata:
+  priority: medium

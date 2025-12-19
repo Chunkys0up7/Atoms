@@ -1,0 +1,8 @@
+id: POL-00499
+type: policy
+title: Policy 499
+summary: 'Auto-generated policy #499 for demo'
+owner: team-a
+created_at: '2025-12-19T14:37:55.236000'
+metadata:
+  priority: medium

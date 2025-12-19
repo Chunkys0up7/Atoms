@@ -1,0 +1,8 @@
+id: VAL-00345
+type: validation
+title: Validation 345
+summary: 'Auto-generated validation #345 for demo'
+owner: ops
+created_at: '2025-12-19T14:37:53.697463'
+metadata:
+  priority: high

@@ -1,0 +1,8 @@
+id: POL-00488
+type: policy
+title: Policy 488
+summary: 'Auto-generated policy #488 for demo'
+owner: security
+created_at: '2025-12-19T14:37:55.190358'
+metadata:
+  priority: high

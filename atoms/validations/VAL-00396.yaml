@@ -1,0 +1,8 @@
+id: VAL-00396
+type: validation
+title: Validation 396
+summary: 'Auto-generated validation #396 for demo'
+owner: security
+created_at: '2025-12-19T14:37:54.494219'
+metadata:
+  priority: high

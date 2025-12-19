@@ -1,0 +1,8 @@
+id: REQ-00033
+type: requirement
+title: Requirement 33
+summary: 'Auto-generated requirement #33 for demo'
+owner: security
+created_at: '2025-12-19T14:37:50.450584'
+metadata:
+  priority: low

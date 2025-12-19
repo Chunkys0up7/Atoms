@@ -1,0 +1,8 @@
+id: POL-00433
+type: policy
+title: Policy 433
+summary: 'Auto-generated policy #433 for demo'
+owner: security
+created_at: '2025-12-19T14:37:54.618995'
+metadata:
+  priority: medium

@@ -1,0 +1,8 @@
+id: POL-00478
+type: policy
+title: Policy 478
+summary: 'Auto-generated policy #478 for demo'
+owner: team-a
+created_at: '2025-12-19T14:37:54.998574'
+metadata:
+  priority: medium

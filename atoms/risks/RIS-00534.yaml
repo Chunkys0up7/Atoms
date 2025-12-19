@@ -1,0 +1,8 @@
+id: RIS-00534
+type: risk
+title: Risk 534
+summary: 'Auto-generated risk #534 for demo'
+owner: security
+created_at: '2025-12-19T14:37:55.407170'
+metadata:
+  priority: medium

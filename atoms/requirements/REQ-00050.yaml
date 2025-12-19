@@ -1,0 +1,8 @@
+id: REQ-00050
+type: requirement
+title: Requirement 50
+summary: 'Auto-generated requirement #50 for demo'
+owner: security
+created_at: '2025-12-19T14:37:51.022280'
+metadata:
+  priority: low

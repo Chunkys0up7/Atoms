@@ -1,0 +1,8 @@
+id: POL-00464
+type: policy
+title: Policy 464
+summary: 'Auto-generated policy #464 for demo'
+owner: team-a
+created_at: '2025-12-19T14:37:54.720024'
+metadata:
+  priority: low

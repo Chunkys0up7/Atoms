@@ -1,0 +1,8 @@
+id: POL-00479
+type: policy
+title: Policy 479
+summary: 'Auto-generated policy #479 for demo'
+owner: security
+created_at: '2025-12-19T14:37:55.052946'
+metadata:
+  priority: high
