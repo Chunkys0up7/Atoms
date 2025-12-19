@@ -13,7 +13,9 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
   const [filterType, setFilterType] = useState<AtomType | 'ALL'>('ALL');
 
   const filteredAtoms = atoms.filter(atom => {
-    const matchesSearch = atom.name.toLowerCase().includes(searchTerm.toLowerCase()) || atom.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const name = atom.name || atom.title || '';
+    const id = atom.id || '';
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'ALL' || atom.type === filterType;
     return matchesSearch && matchesType;
   });

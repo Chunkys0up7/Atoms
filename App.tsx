@@ -33,13 +33,28 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      // Fetch atoms from API
-      const atomsResponse = await fetch(API_ENDPOINTS.atoms);
-      if (!atomsResponse.ok) {
-        throw new Error(`Failed to load atoms: ${atomsResponse.statusText}`);
+      // Fetch atoms from API with summary_only for faster loading
+      // Load all atoms in batches
+      let allAtoms: Atom[] = [];
+      let offset = 0;
+      const batchSize = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const atomsResponse = await fetch(`${API_ENDPOINTS.atoms}?limit=${batchSize}&offset=${offset}&summary_only=true`);
+        if (!atomsResponse.ok) {
+          throw new Error(`Failed to load atoms: ${atomsResponse.statusText}`);
+        }
+        const atomsData = await atomsResponse.json();
+        allAtoms = allAtoms.concat(atomsData.atoms || []);
+        hasMore = atomsData.has_more;
+        offset += batchSize;
+
+        // Safety limit to prevent infinite loops
+        if (offset > 10000) break;
       }
-      const atomsData = await atomsResponse.json();
-      setAtoms(atomsData);
+
+      setAtoms(allAtoms);
 
       // Fetch modules from API
       const modulesResponse = await fetch(API_ENDPOINTS.modules);
