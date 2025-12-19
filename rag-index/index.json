@@ -1,0 +1,327 @@
+{
+  "count": 23,
+  "items": [
+    {
+      "id": "REQ-001",
+      "type": "requirement",
+      "title": "User Authentication System",
+      "summary": "Implement secure user authentication with OAuth 2.0 and JWT token-based session management",
+      "file_path": "atoms\\requirements\\REQ-001.yaml",
+      "metadata": {
+        "type": "requirement",
+        "owner": "security-team",
+        "status": "approved",
+        "tags": "authentication,security,oauth,jwt,compliance",
+        "file_path": "atoms\\requirements\\REQ-001.yaml"
+      }
+    },
+    {
+      "id": "REQ-002",
+      "type": "requirement",
+      "title": "Data Storage and Persistence Layer",
+      "summary": "Implement scalable data storage with PostgreSQL for relational data and Redis for caching",
+      "file_path": "atoms\\requirements\\REQ-002.yaml",
+      "metadata": {
+        "type": "requirement",
+        "owner": "infrastructure-team",
+        "status": "approved",
+        "tags": "database,postgresql,redis,caching,performance",
+        "file_path": "atoms\\requirements\\REQ-002.yaml"
+      }
+    },
+    {
+      "id": "REQ-003",
+      "type": "requirement",
+      "title": "REST API and GraphQL Gateway",
+      "summary": "Implement unified API gateway supporting both REST and GraphQL protocols with rate limiting and authentication",
+      "file_path": "atoms\\requirements\\REQ-003.yaml",
+      "metadata": {
+        "type": "requirement",
+        "owner": "backend-team",
+        "status": "approved",
+        "tags": "api,rest,graphql,gateway,rate-limiting",
+        "file_path": "atoms\\requirements\\REQ-003.yaml"
+      }
+    },
+    {
+      "id": "REQ-004",
+      "type": "requirement",
+      "title": "Graph Database Integration for Knowledge Management",
+      "summary": "Integrate Neo4j graph database for storing and querying knowledge graph with atoms, modules, and relationships",
+      "file_path": "atoms\\requirements\\REQ-004.yaml",
+      "metadata": {
+        "type": "requirement",
+        "owner": "backend-team",
+        "status": "approved",
+        "tags": "neo4j,graph-database,knowledge-graph,sync",
+        "file_path": "atoms\\requirements\\REQ-004.yaml"
+      }
+    },
+    {
+      "id": "REQ-005",
+      "type": "requirement",
+      "title": "AI-Powered Impact Analysis and Code Review",
+      "summary": "Integrate Claude AI for automated impact analysis, PR summarization, and reviewer recommendation",
+      "file_path": "atoms\\requirements\\REQ-005.yaml",
+      "metadata": {
+        "type": "requirement",
+        "owner": "devops-team",
+        "status": "approved",
+        "tags": "ai,claude,impact-analysis,automation,ci-cd",
+        "file_path": "atoms\\requirements\\REQ-005.yaml"
+      }
+    },
+    {
+      "id": "DES-001",
+      "type": "design",
+      "title": "Authentication System Architecture",
+      "summary": "System design for OAuth 2.0 and JWT-based authentication with token rotation and MFA support",
+      "file_path": "atoms\\designs\\DES-001.yaml",
+      "metadata": {
+        "type": "design",
+        "owner": "backend-team",
+        "status": "approved",
+        "tags": "design,authentication,architecture,security",
+        "file_path": "atoms\\designs\\DES-001.yaml"
+      }
+    },
+    {
+      "id": "DES-002",
+      "type": "design",
+      "title": "Data Layer Architecture with PostgreSQL and Redis",
+      "summary": "Detailed design for data persistence, caching strategy, and connection pooling",
+      "file_path": "atoms\\designs\\DES-002.yaml",
+      "metadata": {
+        "type": "design",
+        "owner": "infrastructure-team",
+        "status": "approved",
+        "tags": "design,database,postgresql,redis,caching,performance",
+        "file_path": "atoms\\designs\\DES-002.yaml"
+      }
+    },
+    {
+      "id": "DES-003",
+      "type": "design",
+      "title": "Unified API Gateway with REST and GraphQL",
+      "summary": "API gateway design supporting both REST and GraphQL protocols with shared authentication and rate limiting",
+      "file_path": "atoms\\designs\\DES-003.yaml",
+      "metadata": {
+        "type": "design",
+        "owner": "backend-team",
+        "status": "approved",
+        "tags": "design,api,rest,graphql,gateway",
+        "file_path": "atoms\\designs\\DES-003.yaml"
+      }
+    },
+    {
+      "id": "DES-004",
+      "type": "design",
+      "title": "Neo4j Graph Database Integration Architecture",
+      "summary": "Design for bidirectional sync between YAML files and Neo4j graph database with Cypher query patterns",
+      "file_path": "atoms\\designs\\DES-004.yaml",
+      "metadata": {
+        "type": "design",
+        "owner": "backend-team",
+        "status": "approved",
+        "tags": "design,neo4j,graph-database,cypher,sync",
+        "file_path": "atoms\\designs\\DES-004.yaml"
+      }
+    },
+    {
+      "id": "DES-005",
+      "type": "design",
+      "title": "AI-Powered Impact Analysis with Claude",
+      "summary": "Design for Claude API integration following claude.md guidelines for PR analysis and impact scoring",
+      "file_path": "atoms\\designs\\DES-005.yaml",
+      "metadata": {
+        "type": "design",
+        "owner": "devops-team",
+        "status": "approved",
+        "tags": "design,ai,claude,impact-analysis,github-actions",
+        "file_path": "atoms\\designs\\DES-005.yaml"
+      }
+    },
+    {
+      "id": "PROC-001",
+      "type": "procedure",
+      "title": "Authentication Service Deployment",
+      "summary": "Standard operating procedure for deploying authentication service updates to production",
+      "file_path": "atoms\\procedures\\PROC-001.yaml",
+      "metadata": {
+        "type": "procedure",
+        "owner": "devops-team",
+        "status": "approved",
+        "tags": "procedure,deployment,authentication,ops",
+        "file_path": "atoms\\procedures\\PROC-001.yaml"
+      }
+    },
+    {
+      "id": "PROC-002",
+      "type": "procedure",
+      "title": "Database Backup and Recovery",
+      "summary": "Procedures for PostgreSQL and Redis backup, verification, and disaster recovery",
+      "file_path": "atoms\\procedures\\PROC-002.yaml",
+      "metadata": {
+        "type": "procedure",
+        "owner": "infrastructure-team",
+        "status": "approved",
+        "tags": "procedure,backup,disaster-recovery,database,ops",
+        "file_path": "atoms\\procedures\\PROC-002.yaml"
+      }
+    },
+    {
+      "id": "PROC-003",
+      "type": "procedure",
+      "title": "API Gateway Deployment and Rolling Update",
+      "summary": "Procedure for deploying API gateway changes with zero downtime using blue-green deployment",
+      "file_path": "atoms\\procedures\\PROC-003.yaml",
+      "metadata": {
+        "type": "procedure",
+        "owner": "backend-team",
+        "status": "approved",
+        "tags": "procedure,deployment,api,blue-green",
+        "file_path": "atoms\\procedures\\PROC-003.yaml"
+      }
+    },
+    {
+      "id": "PROC-004",
+      "type": "procedure",
+      "title": "Neo4j Synchronization and Maintenance",
+      "summary": "Procedure for synchronizing YAML atoms to Neo4j and performing routine database maintenance",
+      "file_path": "atoms\\procedures\\PROC-004.yaml",
+      "metadata": {
+        "type": "procedure",
+        "owner": "infrastructure-team",
+        "status": "approved",
+        "tags": "procedure,neo4j,sync,maintenance",
+        "file_path": "atoms\\procedures\\PROC-004.yaml"
+      }
+    },
+    {
+      "id": "PROC-005",
+      "type": "procedure",
+      "title": "Claude AI Impact Analysis Workflow",
+      "summary": "Procedure for running Claude-powered impact analysis on pull requests following claude.md guidelines",
+      "file_path": "atoms\\procedures\\PROC-005.yaml",
+      "metadata": {
+        "type": "procedure",
+        "owner": "devops-team",
+        "status": "approved",
+        "tags": "procedure,claude,ai,impact-analysis,ci-cd",
+        "file_path": "atoms\\procedures\\PROC-005.yaml"
+      }
+    },
+    {
+      "id": "VAL-001",
+      "type": "validation",
+      "title": "Authentication System Test Plan",
+      "summary": "Comprehensive test suite for authentication service including unit, integration, and security tests",
+      "file_path": "atoms\\validations\\VAL-001.yaml",
+      "metadata": {
+        "type": "validation",
+        "owner": "qa-team",
+        "status": "approved",
+        "tags": "validation,testing,authentication,security",
+        "file_path": "atoms\\validations\\VAL-001.yaml"
+      }
+    },
+    {
+      "id": "VAL-002",
+      "type": "validation",
+      "title": "Database Backup and Recovery Validation",
+      "summary": "Test procedures to validate backup integrity and recovery processes",
+      "file_path": "atoms\\validations\\VAL-002.yaml",
+      "metadata": {
+        "type": "validation",
+        "owner": "infrastructure-team",
+        "status": "approved",
+        "tags": "validation,backup,disaster-recovery,database",
+        "file_path": "atoms\\validations\\VAL-002.yaml"
+      }
+    },
+    {
+      "id": "VAL-003",
+      "type": "validation",
+      "title": "API Gateway Testing and Load Validation",
+      "summary": "Test plan for REST and GraphQL APIs including functional, performance, and security testing",
+      "file_path": "atoms\\validations\\VAL-003.yaml",
+      "metadata": {
+        "type": "validation",
+        "owner": "qa-team",
+        "status": "approved",
+        "tags": "validation,testing,api,performance,security",
+        "file_path": "atoms\\validations\\VAL-003.yaml"
+      }
+    },
+    {
+      "id": "POL-001",
+      "type": "policy",
+      "title": "Access Control and RBAC Policy",
+      "summary": "Role-based access control policy defining user roles, permissions, and authentication requirements",
+      "file_path": "atoms\\policies\\POL-001.yaml",
+      "metadata": {
+        "type": "policy",
+        "owner": "security-team",
+        "status": "approved",
+        "tags": "policy,access-control,rbac,security,compliance",
+        "file_path": "atoms\\policies\\POL-001.yaml"
+      }
+    },
+    {
+      "id": "POL-002",
+      "type": "policy",
+      "title": "AI/ML Usage and Data Privacy Policy",
+      "summary": "Policy governing use of AI services (Claude API) including data privacy, PII handling, and compliance requirements",
+      "file_path": "atoms\\policies\\POL-002.yaml",
+      "metadata": {
+        "type": "policy",
+        "owner": "security-team",
+        "status": "approved",
+        "tags": "policy,ai,privacy,claude,compliance,gdpr",
+        "file_path": "atoms\\policies\\POL-002.yaml"
+      }
+    },
+    {
+      "id": "RISK-001",
+      "type": "risk",
+      "title": "Authentication System Security Vulnerabilities",
+      "summary": "Security risks related to authentication implementation including brute force, token theft, and OAuth vulnerabilities",
+      "file_path": "atoms\\risks\\RISK-001.yaml",
+      "metadata": {
+        "type": "risk",
+        "owner": "security-team",
+        "status": "approved",
+        "tags": "risk,security,authentication,vulnerabilities",
+        "file_path": "atoms\\risks\\RISK-001.yaml"
+      }
+    },
+    {
+      "id": "RISK-002",
+      "type": "risk",
+      "title": "Data Loss and Corruption Risks",
+      "summary": "Risks related to database failures, backup corruption, and data integrity issues",
+      "file_path": "atoms\\risks\\RISK-002.yaml",
+      "metadata": {
+        "type": "risk",
+        "owner": "infrastructure-team",
+        "status": "approved",
+        "tags": "risk,data-loss,backup,database,neo4j",
+        "file_path": "atoms\\risks\\RISK-002.yaml"
+      }
+    },
+    {
+      "id": "RISK-003",
+      "type": "risk",
+      "title": "AI Service Dependency and Privacy Risks",
+      "summary": "Risks related to Claude API availability, costs, and potential data exposure",
+      "file_path": "atoms\\risks\\RISK-003.yaml",
+      "metadata": {
+        "type": "risk",
+        "owner": "devops-team",
+        "status": "approved",
+        "tags": "risk,ai,claude,privacy,vendor-management,costs",
+        "file_path": "atoms\\risks\\RISK-003.yaml"
+      }
+    }
+  ]
+}

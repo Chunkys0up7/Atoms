@@ -12,7 +12,12 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(python docs/impact_analysis.py:*)",
-      "Bash(python builder.py:*)"
+      "Bash(python builder.py:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(taskkill /F /FI \"WINDOWTITLE eq python*uvicorn*\")",
+      "Bash(taskkill //F //FI \"WINDOWTITLE eq python*uvicorn*\")",
+      "Bash(cat:*)"
     ]
   }
 }
