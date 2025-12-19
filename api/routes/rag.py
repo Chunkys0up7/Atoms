@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from api.neo4j_client import get_neo4j_client
+from api.claude_client import get_claude_client
 
 router = APIRouter()
 
@@ -265,8 +266,35 @@ async def query_rag(request: RAGQuery):
             context_atoms=[]
         )
 
-    # Build response
-    # TODO: Integrate with Claude API to generate natural language answer
+    # Try to generate natural language answer with Claude
+    claude_client = get_claude_client()
+
+    if claude_client:
+        try:
+            # Generate context-grounded answer using Claude
+            claude_response = claude_client.generate_rag_answer(
+                query=request.query,
+                context_atoms=results,
+                rag_mode=request.rag_mode,
+                max_tokens=1024
+            )
+
+            answer = claude_response.get("answer", "Error generating answer")
+            sources = claude_response.get("sources", [])
+
+            # Extract context atom IDs
+            context_ids = [s["id"] for s in sources if s.get("id")]
+
+            return RAGResponse(
+                answer=answer,
+                sources=sources,
+                context_atoms=context_ids
+            )
+        except Exception as e:
+            print(f"Claude API error: {e}")
+            # Fall through to fallback answer
+
+    # Fallback: Simple answer without Claude
     answer = f"Found {len(results)} relevant atoms. "
     if request.rag_mode == "entity":
         answer += "These atoms are semantically related to your query."
@@ -275,12 +303,14 @@ async def query_rag(request: RAGQuery):
     elif request.rag_mode == "impact":
         answer += "These atoms would be impacted by changes to the queried entity."
 
+    answer += "\n\nNote: Claude API unavailable - install anthropic package for natural language answers."
+
     sources = []
     context_ids = []
     for result in results:
         sources.append({
             'id': result.get('id', ''),
-            'type': result.get('metadata', {}).get('type', 'unknown'),
+            'type': result.get('metadata', {}).get('type', result.get('type', 'unknown')),
             'file_path': result.get('metadata', {}).get('file_path', ''),
             'distance': result.get('distance'),
         })
@@ -295,13 +325,14 @@ async def query_rag(request: RAGQuery):
 
 @router.get("/api/rag/health")
 def rag_health():
-    """Check RAG system health (both vector and graph databases)."""
+    """Check RAG system health (vector DB, graph DB, and LLM)."""
     status = {
         'chromadb_installed': HAS_CHROMA,
         'vector_db_exists': False,
         'collection_count': 0,
         'neo4j_connected': False,
-        'graph_atom_count': 0
+        'graph_atom_count': 0,
+        'claude_api_available': False
     }
 
     # Check Chroma vector database
@@ -326,7 +357,20 @@ def rag_health():
         else:
             status['neo4j_error'] = neo4j_health.get('error', 'Unknown error')
 
+    # Check Claude API
+    claude_client = get_claude_client()
+    if claude_client:
+        status['claude_api_available'] = True
+        status['claude_model'] = claude_client.model
+    else:
+        status['claude_error'] = 'Claude client not initialized - check ANTHROPIC_API_KEY'
+
     # Overall system status
     status['dual_index_ready'] = status['vector_db_exists'] and status['neo4j_connected']
+    status['full_rag_ready'] = (
+        status['vector_db_exists'] and
+        status['neo4j_connected'] and
+        status['claude_api_available']
+    )
 
     return status
