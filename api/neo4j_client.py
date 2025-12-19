@@ -380,15 +380,6 @@ class Neo4jClient:
                 db_info = session.run("CALL dbms.components()").data()
 
                 # Get graph stats
-                stats = session.run(
-                    """
-                    RETURN
-                      count(*) as total_nodes,
-                      (MATCH (a:Atom) RETURN count(a)) as atom_count,
-                      (MATCH ()-[r]->() RETURN count(r)) as relationship_count
-                    """
-                ).single()
-
                 atom_count = session.run("MATCH (a:Atom) RETURN count(a) as count").single()
                 rel_count = session.run("MATCH ()-[r]->() RETURN count(r) as count").single()
 

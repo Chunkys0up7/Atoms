@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Neo4j Graph Database
   neo4j:
@@ -34,7 +32,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - NEO4J_BOLT_URI=bolt://neo4j:7687
+      - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -58,21 +56,23 @@ services:
     networks:
       - gndp-network
 
-  # Frontend (React + Vite)
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: gndp-frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:8000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    networks:
-      - gndp-network
+  # Frontend (React + Vite) - Run separately with 'npm run dev'
+  # Uncomment when you have a frontend/Dockerfile
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: frontend.Dockerfile
+  #   container_name: gndp-frontend
+  #   ports:
+  #     - "5173:5173"
+  #   environment:
+  #     - VITE_API_URL=http://localhost:8000
+  #   volumes:
+  #     - ./components:/app/components
+  #     - ./src:/app/src
+  #     - /app/node_modules
+  #   networks:
+  #     - gndp-network
 
 volumes:
   neo4j_data:

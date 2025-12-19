@@ -24,7 +24,21 @@
       "Bash(fi)",
       "Bash(git -C \"/f/Projects/FullSytem\" log --oneline -10)",
       "Bash(git -C \"f:/Projects/FullSytem\" log --oneline -5)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker-compose exec api python:*)",
+      "Bash(docker-compose exec:*)",
+      "Bash(set:*)",
+      "Bash(set NEO4J_USER=neo4j:*)",
+      "Bash($env:NEO4J_URI=\"bolt://localhost:7687\")",
+      "Bash($env:NEO4J_USER=\"neo4j\")",
+      "Bash($env:NEO4J_PASSWORD=\"password\")",
+      "Bash(NEO4J_URI=bolt://localhost:7687 NEO4J_USER=neo4j NEO4J_PASSWORD=password python scripts/sync_neo4j.py:*)",
+      "Bash(docker cp:*)"
     ]
   }
 }

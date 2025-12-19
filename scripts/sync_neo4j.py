@@ -82,7 +82,7 @@ def main() -> None:
         print("Dry run: validated graph, no DB actions performed")
         return
 
-    uri = os.environ.get("NEO4J_BOLT_URI")
+    uri = os.environ.get("NEO4J_URI") or os.environ.get("NEO4J_BOLT_URI")
     user = os.environ.get("NEO4J_USER")
     password = os.environ.get("NEO4J_PASSWORD")
     if not (uri and user and password):

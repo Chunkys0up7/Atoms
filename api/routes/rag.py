@@ -351,9 +351,10 @@ def rag_health():
         neo4j_health = neo4j_client.health_check()
         status['neo4j_connected'] = neo4j_health.get('connected', False)
         if neo4j_health.get('connected'):
-            status['graph_atom_count'] = neo4j_health.get('atom_count', 0)
-            status['graph_relationship_count'] = neo4j_health.get('relationship_count', 0)
-            status['neo4j_uri'] = neo4j_health.get('uri', '')
+            graph_stats = neo4j_health.get('graph_stats', {})
+            status['graph_atom_count'] = graph_stats.get('atom_count', 0)
+            status['graph_relationship_count'] = graph_stats.get('relationship_count', 0)
+            status['neo4j_uri'] = neo4j_client.uri if hasattr(neo4j_client, 'uri') else ''
         else:
             status['neo4j_error'] = neo4j_health.get('error', 'Unknown error')
 
