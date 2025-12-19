@@ -12,3 +12,10 @@ langchain>=0.1.0
 langchain-community>=0.0.10
 anthropic>=0.18.0
 
+# Testing dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.1
+pytest-asyncio>=0.21.0
+pytest-xdist>=3.3.1
+httpx>=0.24.0
