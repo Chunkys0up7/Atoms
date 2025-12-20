@@ -161,7 +161,6 @@ const ImpactAnalysisUI: React.FC<ImpactAnalysisUIProps> = ({ atoms }) => {
             </>
           )}
         </div>
-        </div>
 
         {/* Right Panel: Output & Forecast */}
         <div style={{ flex: 1, backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
