@@ -18,8 +18,15 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
   useEffect(() => {
     if (!svgRef.current || atoms.length === 0) return;
 
-    const width = svgRef.current.clientWidth;
-    const height = svgRef.current.clientHeight;
+    try {
+      const width = svgRef.current.clientWidth || 800;
+      const height = svgRef.current.clientHeight || 600;
+
+      // Ensure we have valid dimensions
+      if (width === 0 || height === 0) {
+        console.warn('GraphView: Invalid SVG dimensions, skipping render');
+        return;
+      }
 
     // Filter atoms
     const filteredAtoms = atoms
@@ -72,35 +79,45 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
     let simulation: any;
 
     if (layoutMode === 'hierarchy') {
-      // Hierarchical tree layout
-      const root = d3.stratify<any>()
-        .id((d: any) => d.id)
-        .parentId((d: any) => {
-          const parentLink = links.find((l: any) => l.target === d.id);
-          return parentLink ? parentLink.source : null;
-        })(nodes.filter(n => {
-          // Only include nodes that are connected
-          return links.some((l: any) => l.source === n.id || l.target === n.id);
-        }).concat(nodes.filter(n => {
-          // Add disconnected nodes as roots
-          return !links.some((l: any) => l.target === n.id);
-        }).slice(0, 10)));
+      // Hierarchical tree layout - use force layout as fallback if stratify fails
+      try {
+        const root = d3.stratify<any>()
+          .id((d: any) => d.id)
+          .parentId((d: any) => {
+            const parentLink = links.find((l: any) => l.target === d.id);
+            return parentLink ? parentLink.source : null;
+          })(nodes.filter(n => {
+            // Only include nodes that are connected
+            return links.some((l: any) => l.source === n.id || l.target === n.id);
+          }).concat(nodes.filter(n => {
+            // Add disconnected nodes as roots
+            return !links.some((l: any) => l.target === n.id);
+          }).slice(0, 10)));
 
-      const treeLayout = d3.tree<any>()
-        .size([width - 100, height - 100]);
+        const treeLayout = d3.tree<any>()
+          .size([width - 100, height - 100]);
 
-      treeLayout(root);
+        treeLayout(root);
 
-      // Position nodes
-      root.each((d: any) => {
-        const node = nodes.find(n => n.id === d.id);
-        if (node) {
-          (node as any).x = d.x + 50;
-          (node as any).y = d.y + 50;
-          (node as any).fx = d.x + 50;
-          (node as any).fy = d.y + 50;
-        }
-      });
+        // Position nodes
+        root.each((d: any) => {
+          const node = nodes.find(n => n.id === d.id);
+          if (node) {
+            (node as any).x = d.x + 50;
+            (node as any).y = d.y + 50;
+            (node as any).fx = d.x + 50;
+            (node as any).fy = d.y + 50;
+          }
+        });
+      } catch (error) {
+        console.warn('Hierarchical layout failed, using force layout:', error);
+        // Fall back to force layout
+        simulation = d3.forceSimulation(nodes as any)
+          .force("link", d3.forceLink(links).id((d: any) => d.id).distance(100))
+          .force("charge", d3.forceManyBody().strength(-200))
+          .force("center", d3.forceCenter(width / 2, height / 2))
+          .force("collision", d3.forceCollide().radius(30));
+      }
     } else if (layoutMode === 'radial') {
       // Radial layout
       const angleStep = (2 * Math.PI) / nodes.length;
@@ -180,6 +197,10 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
     return () => {
       if (simulation) simulation.stop();
     };
+    } catch (error) {
+      console.error('GraphView render error:', error);
+      // Don't crash the app, just log the error
+    }
   }, [atoms, onSelectAtom, filterType, layoutMode, showLabels, maxNodes]);
 
   const uniqueTypes = Array.from(new Set(atoms.map(a => a.type)));
