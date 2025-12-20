@@ -34,7 +34,7 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      // Fetch atoms from API with summary_only for faster loading
+      // Fetch atoms from API with full data (edges needed for graph/edge explorer)
       // Load all atoms in batches
       let allAtoms: Atom[] = [];
       let offset = 0;
@@ -42,7 +42,7 @@ const App: React.FC = () => {
       let hasMore = true;
 
       while (hasMore) {
-        const atomsResponse = await fetch(`${API_ENDPOINTS.atoms}?limit=${batchSize}&offset=${offset}&summary_only=true`);
+        const atomsResponse = await fetch(`${API_ENDPOINTS.atoms}?limit=${batchSize}&offset=${offset}`);
         if (!atomsResponse.ok) {
           throw new Error(`Failed to load atoms: ${atomsResponse.statusText}`);
         }
