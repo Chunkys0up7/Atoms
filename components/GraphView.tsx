@@ -79,45 +79,19 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
     let simulation: any;
 
     if (layoutMode === 'hierarchy') {
-      // Hierarchical tree layout - use force layout as fallback if stratify fails
-      try {
-        const root = d3.stratify<any>()
-          .id((d: any) => d.id)
-          .parentId((d: any) => {
-            const parentLink = links.find((l: any) => l.target === d.id);
-            return parentLink ? parentLink.source : null;
-          })(nodes.filter(n => {
-            // Only include nodes that are connected
-            return links.some((l: any) => l.source === n.id || l.target === n.id);
-          }).concat(nodes.filter(n => {
-            // Add disconnected nodes as roots
-            return !links.some((l: any) => l.target === n.id);
-          }).slice(0, 10)));
+      // Simple grid layout as fallback since hierarchical often fails with cyclic graphs
+      const cols = Math.ceil(Math.sqrt(nodes.length));
+      const cellWidth = (width - 100) / cols;
+      const cellHeight = (height - 100) / Math.ceil(nodes.length / cols);
 
-        const treeLayout = d3.tree<any>()
-          .size([width - 100, height - 100]);
-
-        treeLayout(root);
-
-        // Position nodes
-        root.each((d: any) => {
-          const node = nodes.find(n => n.id === d.id);
-          if (node) {
-            (node as any).x = d.x + 50;
-            (node as any).y = d.y + 50;
-            (node as any).fx = d.x + 50;
-            (node as any).fy = d.y + 50;
-          }
-        });
-      } catch (error) {
-        console.warn('Hierarchical layout failed, using force layout:', error);
-        // Fall back to force layout
-        simulation = d3.forceSimulation(nodes as any)
-          .force("link", d3.forceLink(links).id((d: any) => d.id).distance(100))
-          .force("charge", d3.forceManyBody().strength(-200))
-          .force("center", d3.forceCenter(width / 2, height / 2))
-          .force("collision", d3.forceCollide().radius(30));
-      }
+      nodes.forEach((n, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        (n as any).x = col * cellWidth + cellWidth / 2 + 50;
+        (n as any).y = row * cellHeight + cellHeight / 2 + 50;
+        (n as any).fx = (n as any).x;
+        (n as any).fy = (n as any).y;
+      });
     } else if (layoutMode === 'radial') {
       // Radial layout
       const angleStep = (2 * Math.PI) / nodes.length;
