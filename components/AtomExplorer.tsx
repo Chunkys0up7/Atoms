@@ -11,12 +11,23 @@ interface AtomExplorerProps {
 const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<AtomType | 'ALL'>('ALL');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newAtom, setNewAtom] = useState({
+    id: '',
+    type: 'PROCESS' as AtomType,
+    title: '',
+    owner: '',
+    description: ''
+  });
 
   const filteredAtoms = atoms.filter(atom => {
     const name = atom.name || atom.title || '';
     const id = atom.id || '';
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'ALL' || atom.type === filterType;
+    // Normalize types for comparison (handle both old lowercase and new uppercase)
+    const atomType = typeof atom.type === 'string' ? atom.type.toUpperCase() : String(atom.type).toUpperCase();
+    const filterTypeUpper = filterType === 'ALL' ? 'ALL' : (typeof filterType === 'string' ? filterType.toUpperCase() : String(filterType).toUpperCase());
+    const matchesType = filterTypeUpper === 'ALL' || atomType === filterTypeUpper;
     return matchesSearch && matchesType;
   });
 
@@ -30,11 +41,20 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
               System-wide documentation units
             </p>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-              Total Units
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+                Total Units
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--color-primary)' }}>{atoms.length}</div>
             </div>
-            <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--color-primary)' }}>{atoms.length}</div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="btn btn-primary"
+              style={{ marginTop: '8px' }}
+            >
+              + Create Atom
+            </button>
           </div>
         </div>
 
@@ -104,6 +124,113 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, onSelect }) => {
           </div>
         )}
       </div>
+
+      {/* Create Atom Modal */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            padding: 'var(--spacing-xl)',
+            width: '500px',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: 'var(--spacing-lg)' }}>Create New Atom</h3>
+
+            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+              <label className="form-label">Atom ID *</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="atom-proc-example"
+                value={newAtom.id}
+                onChange={(e) => setNewAtom({...newAtom, id: e.target.value})}
+              />
+            </div>
+
+            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+              <label className="form-label">Type *</label>
+              <select
+                className="form-input"
+                value={newAtom.type}
+                onChange={(e) => setNewAtom({...newAtom, type: e.target.value as AtomType})}
+              >
+                {Object.values(AtomType).map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+              <label className="form-label">Title *</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Enter title"
+                value={newAtom.title}
+                onChange={(e) => setNewAtom({...newAtom, title: e.target.value})}
+              />
+            </div>
+
+            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+              <label className="form-label">Owner</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Enter owner name"
+                value={newAtom.owner}
+                onChange={(e) => setNewAtom({...newAtom, owner: e.target.value})}
+              />
+            </div>
+
+            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+              <label className="form-label">Description</label>
+              <textarea
+                className="form-input"
+                rows={4}
+                placeholder="Enter description"
+                value={newAtom.description}
+                onChange={(e) => setNewAtom({...newAtom, description: e.target.value})}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'flex-end' }}>
+              <button
+                className="btn"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewAtom({ id: '', type: 'PROCESS', title: '', owner: '', description: '' });
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  alert('Create atom API endpoint not yet implemented. This would POST to /api/atoms');
+                  setShowCreateModal(false);
+                  setNewAtom({ id: '', type: 'PROCESS', title: '', owner: '', description: '' });
+                }}
+                disabled={!newAtom.id || !newAtom.title}
+              >
+                Create Atom
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
