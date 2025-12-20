@@ -87,37 +87,44 @@ const IngestionEngine: React.FC<IngestionEngineProps> = ({ atoms: existingAtoms,
             <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] sticky top-0 bg-slate-950 py-2">
               New Atoms Detected ({newCount})
             </h3>
-            {stagingData.proposedAtoms.filter(a => a.isNew).map((atom, i) => (
-              <div key={i} className="bg-slate-900 border border-slate-800 p-5 rounded-3xl border-l-4 border-l-emerald-500">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="mono text-[10px] text-slate-500 font-bold">{atom.id}</span>
-                  <span className="text-[9px] font-black uppercase text-slate-400">{atom.type}</span>
+            {stagingData.proposedAtoms.filter(a => a.isNew).map((atom, i) => {
+              const displayTitle = atom.title || atom.name || 'Untitled';
+              const displaySummary = atom.summary || (atom.content && atom.content.summary) || '';
+              return (
+                <div key={i} className="bg-slate-900 border border-slate-800 p-5 rounded-3xl border-l-4 border-l-emerald-500">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="mono text-[10px] text-slate-500 font-bold">{atom.id}</span>
+                    <span className="text-[9px] font-black uppercase text-slate-400">{atom.type}</span>
+                  </div>
+                  <h4 className="font-bold text-white mb-1">{displayTitle}</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">{displaySummary}</p>
                 </div>
-                <h4 className="font-bold text-white mb-1">{atom.name}</h4>
-                <p className="text-[11px] text-slate-500 leading-relaxed">{atom.content.summary}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-2">
             <h3 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] sticky top-0 bg-slate-950 py-2">
               Canonical Links (Reused) ({reusedCount})
             </h3>
-            {stagingData.proposedAtoms.filter(a => !a.isNew).map((atom, i) => (
-              <div key={i} className="bg-slate-900/40 border border-slate-800/50 p-5 rounded-3xl opacity-70">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="mono text-[10px] text-blue-400 font-bold">{atom.id}</span>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                    <span className="text-[9px] font-black uppercase text-slate-600">REUSED</span>
+            {stagingData.proposedAtoms.filter(a => !a.isNew).map((atom, i) => {
+              const displayTitle = atom.title || atom.name || 'Untitled';
+              return (
+                <div key={i} className="bg-slate-900/40 border border-slate-800/50 p-5 rounded-3xl opacity-70">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="mono text-[10px] text-blue-400 font-bold">{atom.id}</span>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <span className="text-[9px] font-black uppercase text-slate-600">REUSED</span>
+                    </div>
                   </div>
+                  <h4 className="font-bold text-slate-300 mb-1">{displayTitle}</h4>
+                  <p className="text-[10px] text-slate-600 italic">Atom already exists in Global Registry. Relationships will be updated.</p>
                 </div>
-                <h4 className="font-bold text-slate-300 mb-1">{atom.name}</h4>
-                <p className="text-[10px] text-slate-600 italic">Atom already exists in Global Registry. Relationships will be updated.</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex flex-col gap-4">
@@ -143,7 +150,7 @@ const IngestionEngine: React.FC<IngestionEngineProps> = ({ atoms: existingAtoms,
                  <div className="pt-6 border-t border-slate-800">
                     <div className="text-[9px] font-black text-slate-500 uppercase mb-3">Relationship Map</div>
                     <div className="text-xs text-slate-400 leading-loose">
-                       {stagingData.proposedAtoms.flatMap(a => a.edges).length} total graph edges inferred from text structure.
+                       {stagingData.proposedAtoms.flatMap(a => a.edges || []).length} total graph edges inferred from text structure.
                     </div>
                  </div>
                </div>

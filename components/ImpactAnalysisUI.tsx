@@ -23,9 +23,9 @@ const ImpactAnalysisUI: React.FC<ImpactAnalysisUIProps> = ({ atoms }) => {
     
     const graphContext = {
       target: selectedAtom,
-      neighbors: atoms.filter(a => 
-        a.edges.some(e => e.targetId === selectedId) || 
-        selectedAtom?.edges.some(e => e.targetId === a.id)
+      neighbors: atoms.filter(a =>
+        ((a as any).edges || []).some((e: any) => e.targetId === selectedId) ||
+        ((selectedAtom as any)?.edges || []).some((e: any) => e.targetId === a.id)
       )
     };
 
@@ -60,7 +60,7 @@ const ImpactAnalysisUI: React.FC<ImpactAnalysisUIProps> = ({ atoms }) => {
             >
               <option value="">-- SYSTEM REGISTRY --</option>
               {atoms.map(a => (
-                <option key={a.id} value={a.id}>{a.id} | {a.name}</option>
+                <option key={a.id} value={a.id}>{a.id} | {(a as any).name || (a as any).title || 'Untitled'}</option>
               ))}
             </select>
           </section>

@@ -19,9 +19,9 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
     const width = svgRef.current.clientWidth;
     const height = svgRef.current.clientHeight;
 
-    const nodes = atoms.map(a => ({ id: a.id, name: a.name, type: a.type }));
-    const links = atoms.flatMap(a => 
-      a.edges.map(e => ({ source: a.id, target: e.targetId, type: e.type }))
+    const nodes = atoms.map(a => ({ id: a.id, name: (a as any).name || (a as any).title || a.id, type: a.type }));
+    const links = atoms.flatMap(a =>
+      ((a as any).edges || []).map((e: any) => ({ source: a.id, target: e.targetId, type: e.type }))
     ).filter(l => nodes.some(n => n.id === l.target));
 
     const svg = d3.select(svgRef.current);

@@ -22,6 +22,7 @@ const App: React.FC = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fullAtomData, setFullAtomData] = useState<Atom | null>(null);
 
   // Load data from API on mount
   useEffect(() => {
@@ -62,7 +63,18 @@ const App: React.FC = () => {
         throw new Error(`Failed to load modules: ${modulesResponse.statusText}`);
       }
       const modulesData = await modulesResponse.json();
-      setModules(modulesData);
+
+      // Normalize module data for frontend compatibility
+      const normalizedModules = modulesData.map((mod: any) => ({
+        id: mod.id || mod.module_id,
+        name: mod.name,
+        description: mod.description,
+        owner: mod.owner || (mod.metadata && mod.metadata.owner),
+        atoms: mod.atoms || mod.atom_ids || [],
+        phaseId: mod.phaseId
+      }));
+
+      setModules(normalizedModules);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
       setError(errorMessage);
@@ -70,6 +82,30 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadFullAtomDetails = async (atomId: string) => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.atoms}/${atomId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load atom details: ${response.statusText}`);
+      }
+      const fullAtom = await response.json();
+      setFullAtomData(fullAtom);
+    } catch (err) {
+      console.error('Error loading atom details:', err);
+      // Fallback to summary data if full fetch fails
+      const summaryAtom = atoms.find(a => a.id === atomId);
+      if (summaryAtom) {
+        setFullAtomData(summaryAtom);
+      }
+    }
+  };
+
+  const handleAtomSelect = (atom: Atom) => {
+    setSelectedAtom(atom);
+    // Load full atom details
+    loadFullAtomDetails(atom.id);
   };
 
   const handleIngest = (data: { atoms: Atom[], module: Module }) => {
@@ -105,15 +141,15 @@ const App: React.FC = () => {
       case 'glossary':
         return <Glossary />;
       case 'explorer':
-        return <AtomExplorer atoms={atoms} onSelect={(a) => { setSelectedAtom(a); }} />;
+        return <AtomExplorer atoms={atoms} onSelect={(a) => { handleAtomSelect(a); }} />;
       case 'modules':
-        return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { setSelectedAtom(a); }} />;
+        return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'graph':
-        return <GraphView atoms={atoms} onSelectAtom={(a) => { setSelectedAtom(a); }} />;
+        return <GraphView atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'edges':
-        return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { setSelectedAtom(a); }} />;
+        return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'health':
-        return <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { setSelectedAtom(a); setView('explorer'); }} />;
+        return <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); setView('explorer'); }} />;
       case 'impact':
         return <ImpactAnalysisUI atoms={atoms} />;
       case 'publisher':
@@ -166,109 +202,298 @@ const App: React.FC = () => {
           {renderContent()}
         </div>
 
-        {selectedAtom && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '400px',
-            height: '100%',
-            backgroundColor: '#ffffff',
-            borderLeft: '2px solid var(--color-border)',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: 1000,
-            boxShadow: 'var(--shadow-lg)'
-          }}>
+        {selectedAtom && (() => {
+          const displayAtom = fullAtomData || selectedAtom;
+          return (
             <div style={{
-              padding: 'var(--spacing-lg)',
-              borderBottom: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-bg-tertiary)'
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '500px',
+              height: '100%',
+              backgroundColor: '#ffffff',
+              borderLeft: '2px solid var(--color-border)',
+              display: 'flex',
+              flexDirection: 'column',
+              zIndex: 1000,
+              boxShadow: 'var(--shadow-lg)'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                    Atom Details
+              <div style={{
+                padding: 'var(--spacing-lg)',
+                borderBottom: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-bg-tertiary)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+                      Atom Details
+                    </div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--color-text-primary)' }}>
+                      {displayAtom.id}
+                    </h3>
+                    <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                      {displayAtom.name || displayAtom.title || 'Untitled'}
+                    </div>
                   </div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--color-text-primary)' }}>
-                    {selectedAtom.id}
-                  </h3>
+                  <button
+                    onClick={() => { setSelectedAtom(null); setFullAtomData(null); }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      color: 'var(--color-text-tertiary)'
+                    }}
+                  >
+                    <svg style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-lg)' }}>
+                {/* Basic Info */}
+                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', marginBottom: 'var(--spacing-md)' }}>
+                    <span className="badge badge-info">{displayAtom.type}</span>
+                    {displayAtom.status && <span className="badge badge-success">{displayAtom.status}</span>}
+                    {displayAtom.criticality && <span className="badge" style={{ backgroundColor: displayAtom.criticality === 'CRITICAL' ? '#ef4444' : displayAtom.criticality === 'HIGH' ? '#f59e0b' : '#6b7280' }}>{displayAtom.criticality}</span>}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                    {displayAtom.owner && <div><strong>Owner:</strong> {displayAtom.owner}</div>}
+                    {displayAtom.team && <div><strong>Team:</strong> {displayAtom.team}</div>}
+                    {displayAtom.version && <div><strong>Version:</strong> {displayAtom.version}</div>}
+                    {displayAtom.category && <div><strong>Category:</strong> {displayAtom.category}</div>}
+                  </div>
+                </div>
+
+                {/* Description */}
+                {displayAtom.content?.description && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Description
+                    </h5>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+                      {displayAtom.content.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Summary */}
+                {displayAtom.content?.summary && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Summary
+                    </h5>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+                      {displayAtom.content.summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* Purpose */}
+                {displayAtom.content?.purpose && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Purpose
+                    </h5>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+                      {displayAtom.content.purpose}
+                    </p>
+                  </div>
+                )}
+
+                {/* Business Context */}
+                {displayAtom.content?.business_context && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Business Context
+                    </h5>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+                      {displayAtom.content.business_context}
+                    </p>
+                  </div>
+                )}
+
+                {/* Steps */}
+                {displayAtom.content?.steps && displayAtom.content.steps.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Process Steps
+                    </h5>
+                    <ol style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
+                      {displayAtom.content.steps.map((step: string, i: number) => (
+                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
+                {/* Inputs */}
+                {displayAtom.content?.inputs && displayAtom.content.inputs.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Inputs
+                    </h5>
+                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
+                      {displayAtom.content.inputs.map((input: string, i: number) => (
+                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{input}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Outputs */}
+                {displayAtom.content?.outputs && displayAtom.content.outputs.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Outputs
+                    </h5>
+                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
+                      {displayAtom.content.outputs.map((output: string, i: number) => (
+                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{output}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Prerequisites */}
+                {displayAtom.content?.prerequisites && displayAtom.content.prerequisites.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Prerequisites
+                    </h5>
+                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
+                      {displayAtom.content.prerequisites.map((prereq: string, i: number) => (
+                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{prereq}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Success Criteria */}
+                {displayAtom.content?.success_criteria && displayAtom.content.success_criteria.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Success Criteria
+                    </h5>
+                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
+                      {displayAtom.content.success_criteria.map((criteria: string, i: number) => (
+                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{criteria}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Metrics & Timing */}
+                {displayAtom.metrics && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)', padding: 'var(--spacing-md)', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '8px' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Metrics & Timing
+                    </h5>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)', fontSize: '12px' }}>
+                      <div><strong>Avg Cycle Time:</strong> {displayAtom.metrics.avg_cycle_time_mins} mins ({Math.round(displayAtom.metrics.avg_cycle_time_mins / 60)} hours)</div>
+                      <div><strong>Automation Level:</strong> {Math.round(displayAtom.metrics.automation_level * 100)}%</div>
+                      <div><strong>Error Rate:</strong> {Math.round(displayAtom.metrics.error_rate * 100)}%</div>
+                      <div><strong>Compliance Score:</strong> {Math.round(displayAtom.metrics.compliance_score * 100)}%</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Exceptions */}
+                {displayAtom.content?.exceptions && displayAtom.content.exceptions.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Exceptions
+                    </h5>
+                    <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                      {displayAtom.content.exceptions.map((exc: any, i: number) => (
+                        <div key={i} style={{ marginBottom: 'var(--spacing-sm)', padding: 'var(--spacing-sm)', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '4px' }}>
+                          <div style={{ fontWeight: '600', marginBottom: '4px' }}>Condition: {exc.condition}</div>
+                          <div>Action: {exc.action}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Regulatory Context */}
+                {displayAtom.content?.regulatory_context && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Regulatory Context
+                    </h5>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+                      {displayAtom.content.regulatory_context}
+                    </p>
+                  </div>
+                )}
+
+                {/* Edges/Relationships */}
+                {displayAtom.edges && displayAtom.edges.length > 0 && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Relationships ({displayAtom.edges.length})
+                    </h5>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                      {displayAtom.edges.map((edge: any, i: number) => {
+                        const targetAtom = atoms.find(a => a.id === edge.targetId);
+                        return (
+                          <div key={i} style={{ marginBottom: 'var(--spacing-xs)', padding: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '4px' }}>
+                            <span style={{ fontWeight: '600', color: 'var(--color-primary)' }}>{edge.type}</span>
+                            {' → '}
+                            <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => handleAtomSelect(targetAtom || { id: edge.targetId } as Atom)}>
+                              {targetAtom?.name || edge.targetId}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Module & Phase Info */}
+                {(displayAtom.moduleId || displayAtom.phaseId) && (
+                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
+                      Organization
+                    </h5>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                      {displayAtom.moduleId && (
+                        <div style={{ marginBottom: '4px' }}>
+                          <strong>Module:</strong> {modules.find(m => m.id === displayAtom.moduleId)?.name || displayAtom.moduleId}
+                        </div>
+                      )}
+                      {displayAtom.phaseId && (
+                        <div>
+                          <strong>Phase:</strong> {displayAtom.phaseId.replace('phase-', '').replace('-', ' ')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }}>
                 <button
-                  onClick={() => setSelectedAtom(null)}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    color: 'var(--color-text-tertiary)'
-                  }}
+                  onClick={() => { setView('impact'); setSelectedAtom(null); setFullAtomData(null); }}
+                  className="btn btn-primary"
+                  style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
                 >
-                  <svg style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  View Impact Analysis
+                </button>
+                <button
+                  onClick={() => { setView('edges'); setSelectedAtom(null); setFullAtomData(null); }}
+                  className="btn"
+                  style={{ width: '100%' }}
+                >
+                  View Edge Network
                 </button>
               </div>
             </div>
-
-            <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-lg)' }}>
-              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-sm)' }}>
-                  {selectedAtom.name || selectedAtom.title || 'Untitled'}
-                </h4>
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', marginTop: 'var(--spacing-sm)' }}>
-                  <span className="badge badge-info">{selectedAtom.type}</span>
-                  {selectedAtom.status && <span className="badge badge-success">{selectedAtom.status}</span>}
-                </div>
-              </div>
-
-              {selectedAtom.content && selectedAtom.content.summary && (
-                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                    Summary
-                  </h5>
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
-                    {selectedAtom.content.summary}
-                  </p>
-                </div>
-              )}
-
-              {selectedAtom.ontologyDomain && (
-                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                    Ontology Domain
-                  </h5>
-                  <div style={{ padding: 'var(--spacing-md)', backgroundColor: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '500', color: 'var(--color-text-primary)' }}>
-                      {selectedAtom.ontologyDomain}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {selectedAtom.owner && (
-                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                    Owner
-                  </h5>
-                  <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                    {selectedAtom.owner}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }}>
-              <button
-                onClick={() => { setView('impact'); setSelectedAtom(null); }}
-                className="btn btn-primary"
-                style={{ width: '100%' }}
-              >
-                View Impact Analysis
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </main>
     </div>
   );
