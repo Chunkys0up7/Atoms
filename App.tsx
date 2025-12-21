@@ -9,7 +9,8 @@ import AIAssistant from './components/AIAssistant';
 import ValidationCenter from './components/ValidationCenter';
 import Publisher from './components/Publisher';
 import IngestionEngine from './components/IngestionEngine';
-import OntologyView from './components/OntologyView';
+import OntologyBrowser from './components/OntologyBrowser';
+import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import Glossary from './components/Glossary';
 import { API_ENDPOINTS, ATOM_COLORS } from './constants';
 import { Atom, Module, ViewType } from './types';
@@ -137,15 +138,17 @@ const App: React.FC = () => {
 
     switch (view) {
       case 'ontology':
-        return <OntologyView />;
+        return <OntologyBrowser atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'glossary':
         return <Glossary />;
+      case 'workflow':
+        return <WorkflowBuilderEnhanced atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'explorer':
         return <AtomExplorer atoms={atoms} modules={modules} onSelect={(a) => { handleAtomSelect(a); }} />;
       case 'modules':
         return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'graph':
-        return <GraphView atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+        return <GraphView atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'edges':
         return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'health':

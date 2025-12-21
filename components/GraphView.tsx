@@ -1,10 +1,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { Atom } from '../types';
+import { Atom, Module } from '../types';
 
 interface GraphViewProps {
   atoms: Atom[];
+  modules?: Module[];
   onSelectAtom: (atom: Atom) => void;
 }
 
@@ -14,11 +15,12 @@ const CATEGORY_COLORS = {
   'SYSTEM': '#10b981'
 };
 
-const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
+const GraphView: React.FC<GraphViewProps> = ({ atoms, modules = [], onSelectAtom }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [showEdges, setShowEdges] = useState(true);
-  const [layoutMode, setLayoutMode] = useState<'force' | 'radial' | 'cluster'>('force');
+  const [layoutMode, setLayoutMode] = useState<'force' | 'radial' | 'cluster' | 'hierarchical'>('force');
+  const [showModuleGroups, setShowModuleGroups] = useState(false);
 
   useEffect(() => {
     if (!svgRef.current || atoms.length === 0) return;
@@ -103,7 +105,7 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
 
       simulation = d3.forceSimulation(nodes as any)
         .force('link', d3.forceLink(links).id((d: any) => d.id).distance(100).strength(0.1));
-    } else {
+    } else if (layoutMode === 'cluster') {
       // Cluster layout - group by category
       const categories = Array.from(new Set(nodes.map(n => n.category)));
       const categoryPositions = new Map();
@@ -124,6 +126,78 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
         .force('collision', d3.forceCollide().radius(35))
         .force('x', d3.forceX((d: any) => categoryPositions.get(d.category).x).strength(0.5))
         .force('y', d3.forceY((d: any) => categoryPositions.get(d.category).y).strength(0.5));
+    } else {
+      // Hierarchical layout - group by module/phase
+      const moduleGroups = new Map();
+
+      // Group nodes by moduleId
+      nodes.forEach(node => {
+        const moduleId = node.atom.moduleId || 'unassigned';
+        if (!moduleGroups.has(moduleId)) {
+          moduleGroups.set(moduleId, []);
+        }
+        moduleGroups.get(moduleId).push(node);
+      });
+
+      // Calculate module positions in a grid
+      const moduleIds = Array.from(moduleGroups.keys());
+      const cols = Math.ceil(Math.sqrt(moduleIds.length));
+      const modulePositions = new Map();
+
+      moduleIds.forEach((moduleId, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        modulePositions.set(moduleId, {
+          x: (width / (cols + 1)) * (col + 1),
+          y: (height / (Math.ceil(moduleIds.length / cols) + 1)) * (row + 1)
+        });
+      });
+
+      simulation = d3.forceSimulation(nodes as any)
+        .force('link', d3.forceLink(links).id((d: any) => d.id).distance(80).strength(0.3))
+        .force('charge', d3.forceManyBody().strength(-200))
+        .force('collision', d3.forceCollide().radius(30))
+        .force('x', d3.forceX((d: any) => modulePositions.get(d.atom.moduleId || 'unassigned').x).strength(0.8))
+        .force('y', d3.forceY((d: any) => modulePositions.get(d.atom.moduleId || 'unassigned').y).strength(0.8));
+
+      // Draw module boundary boxes if hierarchical mode is enabled
+      if (showModuleGroups) {
+        setTimeout(() => {
+          moduleIds.forEach(moduleId => {
+            const moduleNodes = moduleGroups.get(moduleId);
+            if (moduleNodes.length === 0) return;
+
+            const xs = moduleNodes.map((n: any) => n.x);
+            const ys = moduleNodes.map((n: any) => n.y);
+            const minX = Math.min(...xs) - 40;
+            const maxX = Math.max(...xs) + 40;
+            const minY = Math.min(...ys) - 40;
+            const maxY = Math.max(...ys) + 40;
+
+            const module = modules.find(m => m.id === moduleId);
+
+            g.insert('rect', ':first-child')
+              .attr('x', minX)
+              .attr('y', minY)
+              .attr('width', maxX - minX)
+              .attr('height', maxY - minY)
+              .attr('fill', '#f8fafc')
+              .attr('stroke', '#cbd5e1')
+              .attr('stroke-width', 2)
+              .attr('stroke-dasharray', '5,5')
+              .attr('rx', 8)
+              .attr('opacity', 0.6);
+
+            g.append('text')
+              .attr('x', minX + 10)
+              .attr('y', minY + 20)
+              .attr('font-size', '12px')
+              .attr('font-weight', '600')
+              .attr('fill', '#475569')
+              .text(module?.name || moduleId);
+          });
+        }, 1000);
+      }
     }
 
     // Draw edges
@@ -247,7 +321,7 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
     return () => {
       simulation.stop();
     };
-  }, [atoms, selectedCategory, showEdges, layoutMode, onSelectAtom]);
+  }, [atoms, selectedCategory, showEdges, layoutMode, showModuleGroups, modules, onSelectAtom]);
 
   const categories = Array.from(new Set(atoms.map(a => a.category)));
 
@@ -293,6 +367,7 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
             <option value="force">Force-Directed</option>
             <option value="radial">Radial</option>
             <option value="cluster">Clustered</option>
+            <option value="hierarchical">Hierarchical (Modules)</option>
           </select>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
@@ -303,6 +378,17 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, onSelectAtom }) => {
             />
             Show Edges
           </label>
+
+          {layoutMode === 'hierarchical' && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={showModuleGroups}
+                onChange={(e) => setShowModuleGroups(e.target.checked)}
+              />
+              Show Module Boundaries
+            </label>
+          )}
 
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '16px', fontSize: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
