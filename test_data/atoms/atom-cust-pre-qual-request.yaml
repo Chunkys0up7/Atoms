@@ -1,0 +1,28 @@
+id: atom-cust-pre-qual-request
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Requests Pre-Qualification
+version: 1.0.0
+status: ACTIVE
+owner: David Thompson
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-pre-application
+moduleId: module-pre-qualification
+content:
+  summary: Customer initiates pre-qualification through online portal or phone call
+  steps:
+  - Customer accesses pre-qualification portal
+  - Customer provides basic information (name, income, desired loan amount)
+  - System creates pre-qualification request
+edges:
+- type: ENABLES
+  targetId: atom-sys-credit-pull
+- type: ENABLES
+  targetId: atom-bo-dti-calculation
+metrics:
+  automation_level: 0.61
+  avg_cycle_time_mins: 2720
+  error_rate: 0.006
+  compliance_score: 0.93

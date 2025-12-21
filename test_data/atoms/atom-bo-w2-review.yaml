@@ -1,0 +1,35 @@
+id: atom-bo-w2-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews W-2 Forms
+version: 1.0.0
+status: DRAFT
+owner: James Martinez
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Processor reviews W-2 forms for accuracy and completeness
+  steps:
+  - Processor opens W-2 documents
+  - Verify W-2 matches application income
+  - Check for multiple employers
+  - Verify tax year consistency
+  - Flag any discrepancies
+  exceptions:
+  - condition: Blurry or unreadable W-2
+    action: Request new W-2 upload
+  - condition: W-2 income doesn't match application
+    action: Escalate to underwriter
+edges:
+- type: ENABLES
+  targetId: atom-sys-income-calculation
+- type: PERFORMED_BY
+  targetId: atom-role-processor
+metrics:
+  automation_level: 0.09
+  avg_cycle_time_mins: 94
+  error_rate: 0.013
+  compliance_score: 0.99

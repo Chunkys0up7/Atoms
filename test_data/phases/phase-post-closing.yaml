@@ -1,0 +1,8 @@
+id: phase-post-closing
+name: Post-Closing
+description: Quality control, document imaging, loan sale preparation, and servicing
+  transfer
+modules:
+- module-quality-control
+journeyId: journey-purchase-conventional
+targetDurationDays: 5

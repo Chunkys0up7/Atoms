@@ -1,0 +1,18 @@
+id: module-credit-analysis
+name: Credit Analysis
+description: Credit report review, credit score analysis, trade line evaluation, and
+  credit risk assessment
+owner: Processing
+atoms:
+- atom-sys-credit-report-pull
+- atom-bo-credit-analysis
+- atom-bo-derogatory-review
+- atom-bo-credit-score-analysis
+- atom-bo-payment-history-review
+- atom-bo-debt-ratio-calculation
+- atom-bo-collection-account-review
+- atom-bo-rental-history-verification
+- atom-bo-credit-inquiry-review
+- atom-bo-credit-dispute-review
+- atom-bo-liability-verification
+phaseId: phase-processing

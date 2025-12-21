@@ -1,0 +1,9 @@
+id: module-asset-verification
+name: Asset Verification
+description: Bank statement review, asset source documentation, and reserve calculation
+owner: Processing
+atoms:
+- atom-cust-bank-statement-upload
+- atom-bo-asset-source-review
+- atom-sys-reserve-calculation
+phaseId: phase-processing

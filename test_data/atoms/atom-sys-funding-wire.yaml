@@ -1,0 +1,28 @@
+id: atom-sys-funding-wire
+category: SYSTEM
+type: PROCESS
+name: System Initiates Funding Wire
+version: 1.0.0
+status: ACTIVE
+owner: Robert Kim
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-closing
+moduleId: module-funding-recording
+content:
+  summary: Automated wire transfer of loan funds to title company
+  steps:
+  - Verify all documents signed
+  - Calculate final funding amount
+  - Initiate wire transfer
+  - Confirm wire receipt
+  - Update loan status to funded
+edges:
+- type: ENABLES
+  targetId: atom-sys-deed-recording
+metrics:
+  automation_level: 0.71
+  avg_cycle_time_mins: 33
+  error_rate: 0.062
+  compliance_score: 0.94

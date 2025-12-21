@@ -1,0 +1,26 @@
+id: atom-bo-derogatory-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Derogatory Items
+version: 1.0.0
+status: DRAFT
+owner: David Thompson
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Review and document explanation for derogatory credit items
+  steps:
+  - Identify all derogatory items
+  - Request explanation letter from borrower
+  - Review explanation for reasonableness
+  - Document in credit analysis
+  - Flag for underwriter review if significant
+edges: []
+metrics:
+  automation_level: 0.05
+  avg_cycle_time_mins: 124
+  error_rate: 0.053
+  compliance_score: 0.98

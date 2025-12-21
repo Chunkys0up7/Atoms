@@ -141,7 +141,7 @@ const App: React.FC = () => {
       case 'glossary':
         return <Glossary />;
       case 'explorer':
-        return <AtomExplorer atoms={atoms} onSelect={(a) => { handleAtomSelect(a); }} />;
+        return <AtomExplorer atoms={atoms} modules={modules} onSelect={(a) => { handleAtomSelect(a); }} />;
       case 'modules':
         return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'graph':

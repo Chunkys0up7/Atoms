@@ -1,0 +1,25 @@
+id: atom-ctrl-credit-policy
+category: BACK_OFFICE
+type: CONTROL
+name: Credit Policy Control
+version: 1.0.0
+status: ACTIVE
+owner: David Thompson
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: null
+moduleId: null
+content:
+  summary: Minimum credit score and credit history requirements
+  steps:
+  - Verify minimum credit score met
+  - Review credit history length
+  - Check for recent credit issues
+  - Apply credit policy exceptions if needed
+edges: []
+metrics:
+  automation_level: 0.12
+  avg_cycle_time_mins: 157
+  error_rate: 0.013
+  compliance_score: 0.94

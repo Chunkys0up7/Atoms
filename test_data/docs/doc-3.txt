@@ -1,1 +1,12 @@
-Example doc 3 for loan demo. Generated: 2025-12-18T17:18:47.137476
+Credit Analysis Report
+
+Credit Scores:
+- Experian: [Score]
+- Equifax: [Score]
+- TransUnion: [Score]
+- Middle Score: [Score]
+
+Trade Lines: [Count]
+Monthly Debt: $[Amount]
+
+Generated: 2025-12-20T19:56:12.248491+00:00

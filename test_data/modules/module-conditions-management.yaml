@@ -1,0 +1,9 @@
+id: module-conditions-management
+name: Conditions Management
+description: Condition generation, condition fulfillment tracking, and condition clearance
+owner: Underwriting
+atoms:
+- atom-sys-condition-generation
+- atom-bo-condition-tracking
+- atom-bo-condition-clearance
+phaseId: phase-underwriting

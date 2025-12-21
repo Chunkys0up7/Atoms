@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-from api.routes import graph, atoms, modules, rag
+from routes import graph, atoms, modules, rag
 
 
 def get_admin_token():

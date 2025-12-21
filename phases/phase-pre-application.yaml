@@ -1,0 +1,7 @@
+id: phase-pre-application
+name: Pre-Application
+description: Initial customer engagement, pre-qualification, and rate shopping
+modules:
+- module-pre-qualification
+journeyId: journey-purchase-conventional
+targetDurationDays: 7

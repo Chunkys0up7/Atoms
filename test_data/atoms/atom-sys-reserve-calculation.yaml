@@ -1,0 +1,30 @@
+id: atom-sys-reserve-calculation
+category: SYSTEM
+type: PROCESS
+name: System Calculates Reserves
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-processing
+moduleId: module-asset-verification
+content:
+  summary: Calculate required and available reserves based on program guidelines
+  steps:
+  - Retrieve verified asset balances
+  - Apply program reserve requirements
+  - Calculate months of reserves
+  - Compare to requirements
+  - Generate reserve worksheet
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+- type: DATA_FLOWS_TO
+  targetId: atom-sys-aus-submission
+metrics:
+  automation_level: 0.82
+  avg_cycle_time_mins: 27
+  error_rate: 0.045
+  compliance_score: 0.93

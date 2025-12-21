@@ -1,0 +1,56 @@
+id: atom-bo-asset-source-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Asset Source
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-asset-verification
+content:
+  summary: Review bank statements for large deposits and source of funds
+  description: Review bank statements for large deposits and source of funds
+  steps:
+  - Review 2 months of bank statements
+  - Identify large deposits (>25% of monthly income)
+  - Request source of funds documentation
+  - Verify sufficient reserves
+  - Document findings
+  purpose: This process enables Processor Reviews Asset Source to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+  exceptions:
+  - condition: Large unexplained deposit
+    action: Request gift letter or explanation
+  - condition: Insufficient reserves
+    action: Request additional asset documentation
+edges:
+- type: ENABLES
+  targetId: atom-sys-reserve-calculation
+- type: ENABLES
+  targetId: atom-bo-gift-letter-review
+- type: ENABLES
+  targetId: atom-bo-large-deposit-review
+- type: RELATED_TO
+  targetId: atom-bo-asset-verification-letter
+- type: RELATED_TO
+  targetId: atom-bo-down-payment-verification
+metrics:
+  automation_level: 0.2
+  avg_cycle_time_mins: 200
+  error_rate: 0.017
+  compliance_score: 0.96

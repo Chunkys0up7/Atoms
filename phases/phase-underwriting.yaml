@@ -1,0 +1,8 @@
+id: phase-underwriting
+name: Underwriting
+description: Risk assessment, loan decision, conditions management, and final approval
+modules:
+- module-underwriting-decision
+- module-conditions-management
+journeyId: journey-purchase-conventional
+targetDurationDays: 5

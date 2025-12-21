@@ -1,0 +1,27 @@
+id: atom-sys-appraisal-received
+category: SYSTEM
+type: PROCESS
+name: System Receives Appraisal Report
+version: 1.0.0
+status: DRAFT
+owner: Robert Kim
+team: Processing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-property-appraisal
+content:
+  summary: Appraisal report uploaded and received in system
+  steps:
+  - Appraiser uploads completed appraisal
+  - System receives and stores appraisal
+  - Notify processor of receipt
+  - Extract key data (value, condition, comps)
+edges:
+- type: ENABLES
+  targetId: atom-bo-appraisal-review
+metrics:
+  automation_level: 1.0
+  avg_cycle_time_mins: 14
+  error_rate: 0.007
+  compliance_score: 0.96

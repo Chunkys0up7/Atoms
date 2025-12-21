@@ -1,0 +1,28 @@
+id: atom-sys-deed-recording
+category: SYSTEM
+type: PROCESS
+name: System Records Deed
+version: 1.0.0
+status: ACTIVE
+owner: David Thompson
+team: Customer Experience
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-closing
+moduleId: module-funding-recording
+content:
+  summary: Record mortgage/deed of trust with county recorder
+  steps:
+  - Submit recorded copy request to title company
+  - Title company records deed
+  - Receive recorded copy
+  - Store in document management system
+  - Update loan status
+edges:
+- type: ENABLES
+  targetId: atom-sys-document-imaging
+metrics:
+  automation_level: 0.76
+  avg_cycle_time_mins: 56
+  error_rate: 0.011
+  compliance_score: 0.99

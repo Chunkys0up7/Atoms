@@ -1,0 +1,34 @@
+id: atom-bo-title-commitment-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Title Commitment
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Processor reviews title commitment to identify any exceptions or requirements
+  description: Title commitment shows what will be covered by title insurance and
+    any exceptions. Processor reviews commitment and ensures all requirements are
+    met.
+  steps: []
+  purpose: This process enables Processor Reviews Title Commitment to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges: []
+metrics:
+  automation_level: 0.46
+  avg_cycle_time_mins: 351
+  error_rate: 0.039
+  compliance_score: 0.86

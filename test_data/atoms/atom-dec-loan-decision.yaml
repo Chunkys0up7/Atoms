@@ -1,0 +1,30 @@
+id: atom-dec-loan-decision
+category: BACK_OFFICE
+type: DECISION
+name: Loan Decision (Approve/Deny/Suspend)
+version: 1.0.0
+status: ACTIVE
+owner: Lisa Anderson
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-underwriting
+moduleId: module-underwriting-decision
+content:
+  summary: Final loan decision based on underwriting analysis
+  steps:
+  - Review all underwriting findings
+  - Apply program guidelines
+  - Make approve/deny/suspend decision
+  - Generate decision letter
+  - Notify customer and loan officer
+edges:
+- type: PERFORMED_BY
+  targetId: atom-role-underwriter
+- type: GOVERNED_BY
+  targetId: atom-ctrl-credit-policy
+metrics:
+  automation_level: 0.24
+  avg_cycle_time_mins: 278
+  error_rate: 0.012
+  compliance_score: 0.97

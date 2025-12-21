@@ -8,8 +8,8 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from api.neo4j_client import get_neo4j_client
-from api.claude_client import get_claude_client
+from neo4j_client import get_neo4j_client
+from claude_client import get_claude_client
 
 router = APIRouter()
 

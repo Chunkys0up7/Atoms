@@ -1,0 +1,33 @@
+id: atom-bo-title-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Title Report
+version: 1.0.0
+status: ACTIVE
+owner: David Thompson
+team: Closing
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Review title report for liens, encumbrances, and ownership issues
+  steps:
+  - Review property ownership
+  - Check for existing liens
+  - Verify seller has clear title
+  - Identify any title issues
+  - Request title insurance commitment
+  exceptions:
+  - condition: Existing liens on property
+    action: Require lien payoff at closing
+  - condition: Title defects
+    action: Require title curative work
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+metrics:
+  automation_level: 0.03
+  avg_cycle_time_mins: 242
+  error_rate: 0.049
+  compliance_score: 0.95

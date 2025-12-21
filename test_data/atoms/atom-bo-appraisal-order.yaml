@@ -1,0 +1,26 @@
+id: atom-bo-appraisal-order
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Orders Property Appraisal
+version: 1.0.0
+status: ACTIVE
+owner: Robert Kim
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-property-appraisal
+content:
+  summary: Order property appraisal from approved appraiser
+  steps:
+  - Select appraiser from approved list
+  - Generate appraisal order
+  - Send order to appraiser
+  - Schedule property inspection
+  - Track appraisal status
+edges: []
+metrics:
+  automation_level: 0.35
+  avg_cycle_time_mins: 60
+  error_rate: 0.028
+  compliance_score: 0.95

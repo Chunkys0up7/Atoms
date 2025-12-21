@@ -1,0 +1,40 @@
+id: atom-bo-notary-coordination
+category: BACK_OFFICE
+type: PROCESS
+name: Closing Coordinator Coordinates Notary
+version: 1.0.0
+status: ACTIVE
+owner: Michael Rodriguez
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-closing
+moduleId: module-closing-preparation
+content:
+  summary: Closing coordinator arranges for notary to witness document signing at
+    closing
+  description: Many loan documents require notarization. Coordinator arranges for
+    qualified notary to be present at closing to witness signatures and notarize documents.
+  steps: []
+  purpose: This process enables Closing Coordinator Coordinates Notary to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-cust-closing-signing
+- type: RELATED_TO
+  targetId: atom-sys-redisclosure-trigger
+- type: RELATED_TO
+  targetId: atom-bo-closing-wire-instructions
+metrics:
+  automation_level: 0.02
+  avg_cycle_time_mins: 115
+  error_rate: 0.091
+  compliance_score: 0.92

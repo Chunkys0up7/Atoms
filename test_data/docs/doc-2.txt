@@ -1,1 +1,11 @@
-Example doc 2 for loan demo. Generated: 2025-12-18T17:18:47.134271
+Income Verification Worksheet
+
+Base Income Calculation:
+- W-2 Income: $[Amount]
+- Tax Return Income: $[Amount]
+- Other Income: $[Amount]
+
+Qualifying Income: $[Amount]
+DTI Ratio: [Ratio]%
+
+Generated: 2025-12-20T19:56:12.128433+00:00

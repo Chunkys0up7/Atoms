@@ -1,0 +1,21 @@
+id: atom-sys-los-platform
+category: SYSTEM
+type: SYSTEM
+name: Loan Origination System (LOS)
+version: 1.0.0
+status: DRAFT
+owner: David Thompson
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: null
+moduleId: null
+content:
+  summary: Primary loan origination system for managing loan applications
+  steps: []
+edges: []
+metrics:
+  automation_level: 0.76
+  avg_cycle_time_mins: 33
+  error_rate: 0.082
+  compliance_score: 0.87

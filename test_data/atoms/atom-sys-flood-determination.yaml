@@ -1,0 +1,25 @@
+id: atom-sys-flood-determination
+category: SYSTEM
+type: PROCESS
+name: System Performs Flood Determination
+version: 1.0.0
+status: DRAFT
+owner: David Thompson
+team: Technology
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Automated flood zone determination for property
+  steps:
+  - Submit property address to flood determination service
+  - Receive flood zone designation
+  - Store flood determination certificate
+  - Flag if flood insurance required
+edges: []
+metrics:
+  automation_level: 0.91
+  avg_cycle_time_mins: 37
+  error_rate: 0.093
+  compliance_score: 0.85

@@ -1,0 +1,27 @@
+id: atom-cust-initial-doc-upload
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Uploads Initial Documents
+version: 1.0.0
+status: ACTIVE
+owner: Robert Kim
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-application-intake
+moduleId: module-application-intake
+content:
+  summary: Customer uploads initial required documents (ID, pay stubs, bank statements)
+  steps:
+  - Customer accesses document upload portal
+  - Customer selects document type
+  - Customer uploads document file
+  - System confirms successful upload
+edges:
+- type: ENABLES
+  targetId: atom-bo-completeness-review
+metrics:
+  automation_level: 0.36
+  avg_cycle_time_mins: 1706
+  error_rate: 0.051
+  compliance_score: 0.98

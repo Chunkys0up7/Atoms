@@ -1,0 +1,33 @@
+id: atom-bo-manual-underwrite
+category: BACK_OFFICE
+type: PROCESS
+name: Underwriter Performs Manual Underwrite
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-underwriting
+moduleId: module-underwriting-decision
+content:
+  summary: Manual underwriting for loans that don't meet AUS guidelines
+  steps:
+  - Underwriter reviews complete file
+  - Analyze credit, income, assets, property
+  - Apply manual underwriting guidelines
+  - Calculate risk factors
+  - Make loan decision
+  - Document decision rationale
+edges:
+- type: ENABLES
+  targetId: atom-dec-loan-decision
+- type: PERFORMED_BY
+  targetId: atom-role-underwriter
+- type: GOVERNED_BY
+  targetId: atom-pol-fair-lending
+metrics:
+  automation_level: 0.12
+  avg_cycle_time_mins: 202
+  error_rate: 0.048
+  compliance_score: 0.91

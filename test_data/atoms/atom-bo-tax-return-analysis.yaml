@@ -1,0 +1,30 @@
+id: atom-bo-tax-return-analysis
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Analyzes Tax Returns
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Detailed analysis of tax returns for self-employed borrowers
+  steps:
+  - Review Schedule C (business income)
+  - Calculate average income over 2 years
+  - Identify write-offs and deductions
+  - Calculate qualifying income
+  - Document analysis in LOS
+edges:
+- type: ENABLES
+  targetId: atom-sys-income-calculation
+- type: PERFORMED_BY
+  targetId: atom-role-processor
+metrics:
+  automation_level: 0.0
+  avg_cycle_time_mins: 445
+  error_rate: 0.052
+  compliance_score: 0.86

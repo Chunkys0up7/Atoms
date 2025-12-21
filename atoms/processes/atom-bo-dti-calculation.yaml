@@ -1,0 +1,42 @@
+id: atom-bo-dti-calculation
+category: BACK_OFFICE
+type: PROCESS
+name: Loan Officer Calculates DTI
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-pre-application
+moduleId: module-pre-qualification
+content:
+  summary: Calculate debt-to-income ratio using stated income and debts
+  description: Calculate debt-to-income ratio using stated income and debts
+  steps:
+  - Retrieve customer income information
+  - Retrieve customer debt obligations
+  - Calculate monthly DTI ratio
+  - Compare against program guidelines
+  purpose: This process enables Loan Officer Calculates DTI to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: PERFORMED_BY
+  targetId: atom-role-loan-officer
+metrics:
+  automation_level: 0.33
+  avg_cycle_time_mins: 378
+  error_rate: 0.068
+  compliance_score: 0.88

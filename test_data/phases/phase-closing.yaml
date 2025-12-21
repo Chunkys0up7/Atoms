@@ -1,0 +1,8 @@
+id: phase-closing
+name: Closing
+description: Document preparation, closing coordination, funding, and recording
+modules:
+- module-closing-preparation
+- module-funding-recording
+journeyId: journey-purchase-conventional
+targetDurationDays: 7

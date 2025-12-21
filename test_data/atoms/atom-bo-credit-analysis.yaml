@@ -1,0 +1,38 @@
+id: atom-bo-credit-analysis
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Analyzes Credit Report
+version: 1.0.0
+status: DRAFT
+owner: Michael Rodriguez
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Detailed review of credit history, scores, and trade lines
+  steps:
+  - Review credit scores from all bureaus
+  - Analyze payment history
+  - Review trade lines and balances
+  - Identify derogatory items
+  - Calculate total monthly debt payments
+  - Document credit analysis
+  exceptions:
+  - condition: Credit score below minimum
+    action: Route to manual underwriting
+  - condition: Recent bankruptcy or foreclosure
+    action: Require explanation letter
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+- type: PERFORMED_BY
+  targetId: atom-role-processor
+- type: GOVERNED_BY
+  targetId: atom-ctrl-credit-policy
+metrics:
+  automation_level: 0.31
+  avg_cycle_time_mins: 409
+  error_rate: 0.049
+  compliance_score: 0.95

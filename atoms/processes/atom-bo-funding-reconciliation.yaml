@@ -1,0 +1,38 @@
+id: atom-bo-funding-reconciliation
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reconciles Funding Amount
+version: 1.0.0
+status: DEPRECATED
+owner: Michael Rodriguez
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-closing
+moduleId: module-funding-recording
+content:
+  summary: Processor reconciles actual funding amount with loan amount and verifies
+    accuracy
+  description: Funding amount must match loan amount exactly. Processor reconciles
+    wire transfer amount with loan documents to ensure accuracy before and after funding.
+  steps: []
+  purpose: This process enables Processor Reconciles Funding Amount to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-sys-deed-recording
+- type: RELATED_TO
+  targetId: atom-bo-funding-package-review
+metrics:
+  automation_level: 0.44
+  avg_cycle_time_mins: 462
+  error_rate: 0.036
+  compliance_score: 0.86

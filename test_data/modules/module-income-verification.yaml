@@ -1,0 +1,12 @@
+id: module-income-verification
+name: Income Verification
+description: W-2 review, pay stub analysis, tax return validation, and income calculation
+owner: Processing
+atoms:
+- atom-cust-w2-upload
+- atom-bo-w2-review
+- atom-cust-tax-return-upload
+- atom-bo-tax-return-analysis
+- atom-sys-income-calculation
+- atom-bo-voi-verification
+phaseId: phase-processing

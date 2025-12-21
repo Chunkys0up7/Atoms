@@ -1,0 +1,41 @@
+id: atom-bo-credit-score-analysis
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Analyzes Credit Scores
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Technology
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Processor reviews credit scores from all three bureaus and determines middle
+    score
+  description: Credit scores from Experian, Equifax, and TransUnion are compared,
+    and the middle score is used for underwriting. Processor verifies scores meet
+    minimum requirements.
+  steps: []
+  purpose: This process enables Processor Analyzes Credit Scores to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-credit-analysis
+- type: RELATED_TO
+  targetId: atom-bo-credit-inquiry-review
+- type: RELATED_TO
+  targetId: atom-bo-liability-verification
+metrics:
+  automation_level: 0.18
+  avg_cycle_time_mins: 82
+  error_rate: 0.028
+  compliance_score: 0.88

@@ -1,0 +1,28 @@
+id: atom-sys-condition-generation
+category: SYSTEM
+type: PROCESS
+name: System Generates Conditions
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Compliance
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-underwriting
+moduleId: module-conditions-management
+content:
+  summary: Automated generation of underwriting conditions based on AUS findings
+  steps:
+  - Parse AUS findings
+  - Generate standard conditions
+  - Generate specific conditions based on findings
+  - Assign conditions to appropriate parties
+  - Notify processor of conditions
+edges:
+- type: ENABLES
+  targetId: atom-bo-condition-tracking
+metrics:
+  automation_level: 0.77
+  avg_cycle_time_mins: 15
+  error_rate: 0.077
+  compliance_score: 0.96

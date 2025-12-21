@@ -1,0 +1,99 @@
+id: atom-cust-w2-upload
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Uploads W-2 Forms
+version: 1.0.0
+status: DEPRECATED
+owner: Amanda White
+team: Processing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Customer uploads W-2 forms for income verification as part of the loan
+    application process
+  description: The W-2 upload process is a critical step in income verification for
+    salaried employees. Customers receive a document request through the loan portal
+    or email, prompting them to upload their most recent W-2 forms (typically the
+    two most recent tax years). W-2 forms provide official documentation of wages,
+    tips, and other compensation reported to the IRS, making them a primary source
+    of income verification. The system accepts various file formats (PDF, JPG, PNG)
+    and performs basic validation to ensure the document is readable and appears to
+    be a W-2 form. This process is essential for verifying the income stated on the
+    loan application and calculating qualifying income.
+  steps:
+  - Customer receives document request notification via email or loan portal
+  - Customer logs into secure loan portal
+  - Customer navigates to document upload section
+  - Customer selects 'W-2 Form' from document type dropdown
+  - Customer selects tax year (e.g., 2023, 2022)
+  - Customer clicks 'Choose File' and selects W-2 PDF or image from their device
+  - System validates file format (PDF, JPG, PNG accepted)
+  - System performs basic image quality check (not blurry, readable)
+  - System extracts basic data from W-2 using OCR (if available)
+  - System stores document in secure document management system
+  - System updates loan file status to show W-2 received
+  - Customer receives confirmation that document was successfully uploaded
+  - System notifies processor that new document is available for review
+  purpose: Obtain official income documentation from customers to verify stated income
+    on the loan application. W-2 forms are required for salaried employees and provide
+    IRS-verified income data that is critical for underwriting decisions.
+  business_context: W-2 uploads are one of the most common document requests in mortgage
+    processing. The process must be user-friendly and secure, as customers are handling
+    sensitive tax documents. The bank must comply with data security regulations (including
+    IRS requirements for handling tax documents) and ensure documents are stored securely.
+    Delays in W-2 uploads are a common cause of loan processing delays, so the system
+    must make it easy for customers to upload documents and provide clear feedback
+    on document status.
+  inputs:
+  - W-2 form file (PDF, JPG, or PNG format)
+  - Tax year for the W-2
+  - Customer authentication (logged into portal)
+  outputs:
+  - Stored W-2 document in document management system
+  - Document status update in LOS
+  - Confirmation notification to customer
+  - Notification to processor of new document
+  prerequisites:
+  - Customer must have active loan application
+  - Customer must have received document request
+  - Customer must have W-2 forms available
+  - Customer must have access to loan portal
+  success_criteria:
+  - Document successfully uploaded and stored
+  - Document is readable and not corrupted
+  - Customer receives confirmation within 30 seconds
+  - Processor is notified within 5 minutes
+  - Document is properly indexed and searchable
+  regulatory_context: W-2 forms contain sensitive tax information protected under
+    IRS regulations and privacy laws. The bank must ensure secure storage, proper
+    access controls, and retention policies compliant with IRS requirements. Documents
+    must be retained for the required period (typically 7 years) and securely destroyed
+    when no longer needed.
+  exceptions:
+  - condition: File format not supported
+    action: Display error message with supported formats and allow customer to retry
+  - condition: File size exceeds 10MB limit
+    action: Display error message requesting customer to compress or split file
+  - condition: Document appears blurry or unreadable
+    action: Accept upload but flag for processor review - processor may request new
+      upload
+  - condition: Customer uploads wrong document type
+    action: Accept upload but flag for processor to review and request correct document
+edges:
+- type: ENABLES
+  targetId: atom-bo-w2-review
+- type: RELATED_TO
+  targetId: atom-bo-voi-verification
+- type: RELATED_TO
+  targetId: atom-cust-pay-stub-upload
+- type: RELATED_TO
+  targetId: atom-bo-pay-stub-review
+- type: RELATED_TO
+  targetId: atom-bo-rental-income-verification
+metrics:
+  automation_level: 0.37
+  avg_cycle_time_mins: 1737
+  error_rate: 0.001
+  compliance_score: 0.89

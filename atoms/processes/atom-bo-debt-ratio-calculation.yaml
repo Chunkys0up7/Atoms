@@ -1,0 +1,41 @@
+id: atom-bo-debt-ratio-calculation
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Calculates Total Debt Ratios
+version: 1.0.0
+status: DRAFT
+owner: Sarah Chen
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Processor calculates front-end and back-end debt-to-income ratios using
+    verified income and debts
+  description: Debt ratios are key underwriting metrics. Front-end ratio is housing
+    payment divided by income. Back-end ratio includes all debts. Both must meet program
+    guidelines.
+  steps: []
+  purpose: This process enables Processor Calculates Total Debt Ratios to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+- type: RELATED_TO
+  targetId: atom-bo-collection-account-review
+- type: RELATED_TO
+  targetId: atom-bo-credit-inquiry-review
+metrics:
+  automation_level: 0.4
+  avg_cycle_time_mins: 182
+  error_rate: 0.065
+  compliance_score: 0.85

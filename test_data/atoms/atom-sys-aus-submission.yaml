@@ -1,0 +1,31 @@
+id: atom-sys-aus-submission
+category: SYSTEM
+type: PROCESS
+name: System Submits to AUS (DU/LP)
+version: 1.0.0
+status: ACTIVE
+owner: Michael Rodriguez
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-underwriting
+moduleId: module-underwriting-decision
+content:
+  summary: Submit loan to automated underwriting system (Desktop Underwriter or Loan
+    Prospector)
+  steps:
+  - Package loan data for AUS
+  - Submit to Fannie Mae DU or Freddie Mac LP
+  - Receive AUS findings
+  - Store findings in LOS
+  - Route based on findings (Approve/Eligible/Refer)
+edges:
+- type: ENABLES
+  targetId: atom-bo-manual-underwrite
+- type: USES_COMPONENT
+  targetId: atom-sys-los-platform
+metrics:
+  automation_level: 0.71
+  avg_cycle_time_mins: 57
+  error_rate: 0.03
+  compliance_score: 0.9

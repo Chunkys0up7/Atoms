@@ -1,0 +1,29 @@
+id: atom-cust-application-submit
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Submits Loan Application
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Customer Experience
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-application-intake
+moduleId: module-application-intake
+content:
+  summary: Customer completes and submits Uniform Residential Loan Application (1003)
+  steps:
+  - Customer logs into application portal
+  - Customer completes 1003 form sections
+  - Customer reviews and submits application
+  - System receives application submission
+edges:
+- type: ENABLES
+  targetId: atom-sys-application-validation
+- type: ENABLES
+  targetId: atom-bo-completeness-review
+metrics:
+  automation_level: 0.45
+  avg_cycle_time_mins: 270
+  error_rate: 0.01
+  compliance_score: 0.87

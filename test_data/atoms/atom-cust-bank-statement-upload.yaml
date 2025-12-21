@@ -1,0 +1,27 @@
+id: atom-cust-bank-statement-upload
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Uploads Bank Statements
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Processing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-asset-verification
+content:
+  summary: Customer uploads 2 months of bank statements for asset verification
+  steps:
+  - Customer receives bank statement request
+  - Customer downloads statements from bank
+  - Customer uploads statements
+  - System confirms receipt
+edges:
+- type: ENABLES
+  targetId: atom-bo-asset-source-review
+metrics:
+  automation_level: 0.67
+  avg_cycle_time_mins: 2459
+  error_rate: 0.014
+  compliance_score: 0.85

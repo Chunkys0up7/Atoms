@@ -1,0 +1,43 @@
+id: atom-bo-title-issue-resolution
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Resolves Title Issues
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Processor works with title company to resolve any liens, judgments, or
+    other title defects
+  description: Title issues must be resolved before closing. Processor coordinates
+    with title company and customer to clear any liens, judgments, or other defects
+    that could prevent clear title transfer.
+  steps: []
+  purpose: This process enables Processor Resolves Title Issues to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+- type: RELATED_TO
+  targetId: atom-bo-flood-insurance-verification
+- type: RELATED_TO
+  targetId: atom-bo-homeowners-insurance-review
+- type: RELATED_TO
+  targetId: atom-bo-survey-review
+metrics:
+  automation_level: 0.35
+  avg_cycle_time_mins: 258
+  error_rate: 0.056
+  compliance_score: 0.93

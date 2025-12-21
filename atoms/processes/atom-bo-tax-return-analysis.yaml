@@ -1,0 +1,53 @@
+id: atom-bo-tax-return-analysis
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Analyzes Tax Returns
+version: 1.0.0
+status: DEPRECATED
+owner: David Thompson
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Detailed analysis of tax returns for self-employed borrowers
+  description: Detailed analysis of tax returns for self-employed borrowers
+  steps:
+  - Review Schedule C (business income)
+  - Calculate average income over 2 years
+  - Identify write-offs and deductions
+  - Calculate qualifying income
+  - Document analysis in LOS
+  purpose: This process enables Processor Analyzes Tax Returns to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-sys-income-calculation
+- type: PERFORMED_BY
+  targetId: atom-role-processor
+- type: RELATED_TO
+  targetId: atom-bo-income-stability-check
+- type: RELATED_TO
+  targetId: atom-bo-bonus-overtime-calculation
+- type: RELATED_TO
+  targetId: atom-bo-employment-verification
+- type: RELATED_TO
+  targetId: atom-bo-alimony-child-support-verification
+metrics:
+  automation_level: 0.11
+  avg_cycle_time_mins: 107
+  error_rate: 0.039
+  compliance_score: 0.92

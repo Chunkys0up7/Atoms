@@ -1,0 +1,10 @@
+id: module-credit-analysis
+name: Credit Analysis
+description: Credit report review, credit score analysis, trade line evaluation, and
+  credit risk assessment
+owner: Processing
+atoms:
+- atom-sys-credit-report-pull
+- atom-bo-credit-analysis
+- atom-bo-derogatory-review
+phaseId: phase-processing

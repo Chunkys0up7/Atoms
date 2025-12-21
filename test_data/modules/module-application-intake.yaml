@@ -1,0 +1,11 @@
+id: module-application-intake
+name: Application Intake
+description: 1003 form completion, initial document upload, and application completeness
+  validation
+owner: Loan Origination
+atoms:
+- atom-cust-application-submit
+- atom-sys-application-validation
+- atom-cust-initial-doc-upload
+- atom-bo-completeness-review
+phaseId: phase-application-intake

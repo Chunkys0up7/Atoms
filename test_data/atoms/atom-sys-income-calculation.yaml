@@ -1,0 +1,32 @@
+id: atom-sys-income-calculation
+category: SYSTEM
+type: PROCESS
+name: System Calculates Qualifying Income
+version: 1.0.0
+status: ACTIVE
+owner: James Martinez
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Automated income calculation engine using verified documents
+  steps:
+  - Extract income data from documents
+  - Apply income calculation rules
+  - Calculate base income
+  - Apply stability factors
+  - Generate income worksheet
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+- type: USES_COMPONENT
+  targetId: atom-sys-los-platform
+- type: DATA_FLOWS_TO
+  targetId: atom-sys-aus-submission
+metrics:
+  automation_level: 0.96
+  avg_cycle_time_mins: 49
+  error_rate: 0.046
+  compliance_score: 0.91

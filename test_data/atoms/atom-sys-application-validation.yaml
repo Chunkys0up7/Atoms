@@ -1,0 +1,29 @@
+id: atom-sys-application-validation
+category: SYSTEM
+type: VALIDATION
+name: System Validates Application Completeness
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Closing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-application-intake
+moduleId: module-application-intake
+content:
+  summary: Automated validation of required fields and application completeness
+  steps:
+  - Check all required fields are populated
+  - Validate data formats (SSN, dates, amounts)
+  - Check for duplicate applications
+  - Generate completeness report
+edges:
+- type: ENABLES
+  targetId: atom-bo-completeness-review
+- type: USES_COMPONENT
+  targetId: atom-sys-los-platform
+metrics:
+  automation_level: 0.82
+  avg_cycle_time_mins: 44
+  error_rate: 0.045
+  compliance_score: 0.86

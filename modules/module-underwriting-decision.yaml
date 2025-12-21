@@ -1,0 +1,22 @@
+id: module-underwriting-decision
+name: Underwriting Decision
+description: Automated underwriting system (AUS) submission, manual underwrite, and
+  loan decision
+owner: Underwriting
+atoms:
+- atom-sys-aus-submission
+- atom-bo-manual-underwrite
+- atom-dec-loan-decision
+- atom-bo-risk-assessment
+- atom-bo-program-eligibility-check
+- atom-bo-compensating-factors-analysis
+- atom-sys-rate-lock-processing
+- atom-bo-underwriting-exception-request
+- atom-bo-exception-approval
+- atom-bo-loan-modification-review
+- atom-sys-aus-findings-review
+- atom-bo-manual-review-trigger
+- atom-bo-loan-denial-documentation
+- atom-bo-adverse-action-letter
+- atom-bo-appeal-review
+phaseId: phase-underwriting

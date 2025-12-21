@@ -1,0 +1,30 @@
+id: atom-sys-credit-pull
+category: SYSTEM
+type: PROCESS
+name: System Pulls Soft Credit
+version: 1.0.0
+status: ACTIVE
+owner: Michael Rodriguez
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-pre-application
+moduleId: module-pre-qualification
+content:
+  summary: Automated soft credit inquiry to assess initial creditworthiness
+  steps:
+  - System calls credit bureau API
+  - Retrieve credit score and basic credit profile
+  - Store soft inquiry result
+edges:
+- type: ENABLES
+  targetId: atom-bo-dti-calculation
+- type: USES_COMPONENT
+  targetId: atom-sys-los-platform
+- type: DATA_FLOWS_TO
+  targetId: atom-bo-credit-analysis
+metrics:
+  automation_level: 0.93
+  avg_cycle_time_mins: 22
+  error_rate: 0.03
+  compliance_score: 0.87

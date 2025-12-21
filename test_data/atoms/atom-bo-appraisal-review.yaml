@@ -1,0 +1,38 @@
+id: atom-bo-appraisal-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Appraisal
+version: 1.0.0
+status: DEPRECATED
+owner: Jennifer Park
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-property-appraisal
+content:
+  summary: Review appraisal for accuracy, value reasonableness, and compliance
+  steps:
+  - Review property description
+  - Verify comparable sales
+  - Check value reasonableness
+  - Review property condition
+  - Verify compliance with guidelines
+  - Flag any issues for underwriter
+  exceptions:
+  - condition: Appraised value below purchase price
+    action: Route to underwriter for LTV adjustment
+  - condition: Property condition issues
+    action: Request repairs or value adjustment
+edges:
+- type: ENABLES
+  targetId: atom-sys-aus-submission
+- type: PERFORMED_BY
+  targetId: atom-role-processor
+- type: DATA_FLOWS_TO
+  targetId: atom-sys-aus-submission
+metrics:
+  automation_level: 0.09
+  avg_cycle_time_mins: 303
+  error_rate: 0.008
+  compliance_score: 0.9

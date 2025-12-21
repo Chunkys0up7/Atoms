@@ -1,0 +1,36 @@
+id: atom-bo-prior-to-funding-conditions
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Tracks Prior-to-Funding Conditions
+version: 1.0.0
+status: ACTIVE
+owner: James Martinez
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-underwriting
+moduleId: module-conditions-management
+content:
+  summary: Processor tracks conditions that must be cleared before loan can be funded
+  description: Prior-to-funding conditions are items that must be resolved before
+    wire transfer can be initiated. These are typically less critical but still required
+    for funding.
+  steps: []
+  purpose: This process enables Processor Tracks Prior-to-Funding Conditions to be
+    completed efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-condition-tracking
+metrics:
+  automation_level: 0.22
+  avg_cycle_time_mins: 57
+  error_rate: 0.074
+  compliance_score: 0.86

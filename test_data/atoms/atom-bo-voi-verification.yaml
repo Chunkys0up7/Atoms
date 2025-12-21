@@ -1,0 +1,28 @@
+id: atom-bo-voi-verification
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Performs VOI (Verification of Income)
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Processing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Request verification of income directly from employer
+  steps:
+  - Generate VOI request form
+  - Send to employer via fax/email
+  - Receive completed VOI
+  - Compare VOI to pay stubs and W-2
+  - Resolve any discrepancies
+edges:
+- type: ENABLES
+  targetId: atom-sys-income-calculation
+metrics:
+  automation_level: 0.46
+  avg_cycle_time_mins: 441
+  error_rate: 0.073
+  compliance_score: 0.91

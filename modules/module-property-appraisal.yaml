@@ -1,0 +1,15 @@
+id: module-property-appraisal
+name: Property Appraisal
+description: Appraisal ordering, property inspection, value determination, and appraisal
+  review
+owner: Processing
+atoms:
+- atom-bo-appraisal-order
+- atom-sys-appraisal-received
+- atom-bo-appraisal-review
+- atom-bo-appraisal-scheduling
+- atom-bo-comparable-sales-review
+- atom-bo-property-condition-review
+- atom-bo-property-type-verification
+- atom-bo-occupancy-verification
+phaseId: phase-processing

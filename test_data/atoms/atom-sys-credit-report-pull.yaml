@@ -1,0 +1,28 @@
+id: atom-sys-credit-report-pull
+category: SYSTEM
+type: PROCESS
+name: System Pulls Full Credit Report
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Closing
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Pull tri-merge credit report from all three bureaus
+  steps:
+  - System calls credit bureau API
+  - Retrieve Experian, Equifax, and TransUnion reports
+  - Merge reports into tri-merge
+  - Calculate middle credit score
+  - Store credit report in LOS
+edges:
+- type: ENABLES
+  targetId: atom-bo-credit-analysis
+metrics:
+  automation_level: 0.7
+  avg_cycle_time_mins: 12
+  error_rate: 0.058
+  compliance_score: 0.86

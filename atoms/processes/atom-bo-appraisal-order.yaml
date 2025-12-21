@@ -1,0 +1,55 @@
+id: atom-bo-appraisal-order
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Orders Property Appraisal
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Technology
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-property-appraisal
+content:
+  summary: Order property appraisal from approved appraiser
+  description: Order property appraisal from approved appraiser
+  steps:
+  - Select appraiser from approved list
+  - Generate appraisal order
+  - Send order to appraiser
+  - Schedule property inspection
+  - Track appraisal status
+  purpose: This process enables Processor Orders Property Appraisal to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-appraisal-scheduling
+- type: RELATED_TO
+  targetId: atom-sys-appraisal-received
+- type: RELATED_TO
+  targetId: atom-bo-appraisal-review
+- type: RELATED_TO
+  targetId: atom-bo-comparable-sales-review
+- type: RELATED_TO
+  targetId: atom-bo-property-condition-review
+- type: RELATED_TO
+  targetId: atom-bo-property-type-verification
+- type: RELATED_TO
+  targetId: atom-bo-occupancy-verification
+metrics:
+  automation_level: 0.15
+  avg_cycle_time_mins: 120
+  error_rate: 0.062
+  compliance_score: 0.87

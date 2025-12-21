@@ -1,0 +1,12 @@
+id: phase-processing
+name: Processing
+description: Document verification, income validation, credit analysis, and property
+  appraisal
+modules:
+- module-income-verification
+- module-asset-verification
+- module-credit-analysis
+- module-property-appraisal
+- module-title-insurance
+journeyId: journey-purchase-conventional
+targetDurationDays: 10

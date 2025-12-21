@@ -1,0 +1,10 @@
+id: module-underwriting-decision
+name: Underwriting Decision
+description: Automated underwriting system (AUS) submission, manual underwrite, and
+  loan decision
+owner: Underwriting
+atoms:
+- atom-sys-aus-submission
+- atom-bo-manual-underwrite
+- atom-dec-loan-decision
+phaseId: phase-underwriting

@@ -1,0 +1,35 @@
+id: atom-sys-identity-verification
+category: SYSTEM
+type: PROCESS
+name: System Performs Identity Verification
+version: 1.0.0
+status: ACTIVE
+owner: David Thompson
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-application-intake
+moduleId: module-application-intake
+content:
+  summary: System verifies customer identity using SSN, address, and other data points
+  description: Identity verification prevents fraud by confirming the applicant is
+    who they claim to be. System uses multiple data sources to verify identity.
+  steps: []
+  purpose: This process enables System Performs Identity Verification to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-fraud-review
+metrics:
+  automation_level: 0.88
+  avg_cycle_time_mins: 20
+  error_rate: 0.064
+  compliance_score: 0.89

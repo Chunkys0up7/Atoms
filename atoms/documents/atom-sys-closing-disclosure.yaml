@@ -1,0 +1,51 @@
+id: atom-sys-closing-disclosure
+category: SYSTEM
+type: DOCUMENT
+name: System Generates Closing Disclosure
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-closing
+moduleId: module-closing-preparation
+content:
+  summary: Generate TRID-compliant Closing Disclosure (CD) form
+  description: Generate TRID-compliant Closing Disclosure (CD) form
+  steps:
+  - Calculate all closing costs
+  - Populate CD with loan terms
+  - Generate initial CD
+  - Send to customer (3 days before closing)
+  - Generate final CD if changes occur
+  purpose: This process enables System Generates Closing Disclosure to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-closing-doc-prep
+- type: GOVERNED_BY
+  targetId: atom-pol-trid-compliance
+- type: ENABLES
+  targetId: atom-bo-closing-disclosure-review
+- type: RELATED_TO
+  targetId: atom-bo-cash-to-close-calculation
+- type: RELATED_TO
+  targetId: atom-bo-closing-wire-instructions
+metrics:
+  automation_level: 0.73
+  avg_cycle_time_mins: 11
+  error_rate: 0.032
+  compliance_score: 0.94

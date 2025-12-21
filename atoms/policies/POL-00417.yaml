@@ -1,8 +1,0 @@
-id: POL-00417
-type: policy
-title: Policy 417
-summary: 'Auto-generated policy #417 for demo'
-owner: security
-created_at: '2025-12-19T14:37:54.566344'
-metadata:
-  priority: low

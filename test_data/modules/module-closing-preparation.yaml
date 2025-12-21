@@ -1,0 +1,9 @@
+id: module-closing-preparation
+name: Closing Preparation
+description: Closing disclosure generation, document preparation, and closing scheduling
+owner: Closing
+atoms:
+- atom-sys-closing-disclosure
+- atom-bo-closing-doc-prep
+- atom-cust-closing-scheduling
+phaseId: phase-closing

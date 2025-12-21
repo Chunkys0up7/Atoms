@@ -1,0 +1,41 @@
+id: atom-bo-gift-letter-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Gift Letter
+version: 1.0.0
+status: DRAFT
+owner: Amanda White
+team: Compliance
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-processing
+moduleId: module-asset-verification
+content:
+  summary: Processor reviews gift letter when customer receives funds from family
+    member for down payment
+  description: Gift letters are required when down payment funds come from a gift
+    rather than the borrower's own assets. Processor verifies the gift letter meets
+    requirements and that gift funds are properly sourced.
+  steps: []
+  purpose: This process enables Processor Reviews Gift Letter to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-large-deposit-review
+- type: RELATED_TO
+  targetId: atom-bo-asset-verification-letter
+- type: RELATED_TO
+  targetId: atom-bo-reserves-verification
+metrics:
+  automation_level: 0.31
+  avg_cycle_time_mins: 102
+  error_rate: 0.016
+  compliance_score: 0.91

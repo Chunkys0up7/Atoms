@@ -1,0 +1,8 @@
+id: phase-application-intake
+name: Application Intake
+description: Formal application submission, initial document collection, and completeness
+  check
+modules:
+- module-application-intake
+journeyId: journey-purchase-conventional
+targetDurationDays: 3

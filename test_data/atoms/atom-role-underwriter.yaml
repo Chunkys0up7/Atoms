@@ -1,0 +1,21 @@
+id: atom-role-underwriter
+category: BACK_OFFICE
+type: ROLE
+name: Underwriter
+version: 1.0.0
+status: DRAFT
+owner: Jennifer Park
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: null
+moduleId: null
+content:
+  summary: Makes loan decisions and manages underwriting conditions
+  steps: []
+edges: []
+metrics:
+  automation_level: 0.12
+  avg_cycle_time_mins: 239
+  error_rate: 0.079
+  compliance_score: 0.9

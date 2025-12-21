@@ -1,0 +1,28 @@
+id: atom-bo-completeness-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Application Completeness
+version: 1.0.0
+status: ACTIVE
+owner: Lisa Anderson
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-application-intake
+moduleId: module-application-intake
+content:
+  summary: Processor reviews application and documents for completeness
+  steps:
+  - Processor opens application in LOS
+  - Review all application sections
+  - Check uploaded documents
+  - Identify missing items
+  - Generate initial document request if needed
+edges:
+- type: PERFORMED_BY
+  targetId: atom-role-processor
+metrics:
+  automation_level: 0.37
+  avg_cycle_time_mins: 190
+  error_rate: 0.012
+  compliance_score: 0.87

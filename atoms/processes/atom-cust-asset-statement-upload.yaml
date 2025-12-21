@@ -1,0 +1,37 @@
+id: atom-cust-asset-statement-upload
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Uploads Asset Statements
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-asset-verification
+content:
+  summary: Customer uploads investment account statements, retirement accounts, and
+    other asset documentation
+  description: Asset statements verify the customer has sufficient funds for down
+    payment and reserves. Customers upload statements from various account types including
+    checking, savings, investment, and retirement accounts.
+  steps: []
+  purpose: This process enables Customer Uploads Asset Statements to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-asset-source-review
+metrics:
+  automation_level: 0.54
+  avg_cycle_time_mins: 1433
+  error_rate: 0.064
+  compliance_score: 0.91

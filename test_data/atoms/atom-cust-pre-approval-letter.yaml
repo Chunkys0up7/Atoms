@@ -1,0 +1,24 @@
+id: atom-cust-pre-approval-letter
+category: CUSTOMER_FACING
+type: DOCUMENT
+name: Customer Receives Pre-Approval Letter
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Technology
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-pre-application
+moduleId: module-pre-qualification
+content:
+  summary: Generate and deliver pre-approval letter to customer
+  steps:
+  - System generates pre-approval letter
+  - Email letter to customer
+  - Customer downloads letter from portal
+edges: []
+metrics:
+  automation_level: 0.65
+  avg_cycle_time_mins: 1345
+  error_rate: 0.075
+  compliance_score: 0.99

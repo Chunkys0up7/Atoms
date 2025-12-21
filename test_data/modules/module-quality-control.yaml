@@ -1,0 +1,10 @@
+id: module-quality-control
+name: Quality Control
+description: Post-closing audit, document imaging, compliance review, and loan sale
+  preparation
+owner: Post-Closing
+atoms:
+- atom-bo-post-closing-audit
+- atom-sys-document-imaging
+- atom-bo-loan-sale-prep
+phaseId: phase-post-closing

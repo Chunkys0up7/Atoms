@@ -1,0 +1,47 @@
+id: atom-bo-loan-sale-prep
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Prepares Loan for Sale
+version: 1.0.0
+status: ACTIVE
+owner: Michael Rodriguez
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: Prepare loan file for sale to secondary market (Fannie/Freddie)
+  description: Prepare loan file for sale to secondary market (Fannie/Freddie)
+  steps:
+  - Verify all documents complete
+  - Prepare loan data file
+  - Submit to loan delivery system
+  - Resolve any delivery errors
+  - Confirm loan purchase
+  purpose: This process enables Processor Prepares Loan for Sale to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-document-audit
+- type: RELATED_TO
+  targetId: atom-bo-loan-delivery-prep
+- type: RELATED_TO
+  targetId: atom-sys-loan-delivery-submission
+metrics:
+  automation_level: 0.01
+  avg_cycle_time_mins: 430
+  error_rate: 0.013
+  compliance_score: 0.9

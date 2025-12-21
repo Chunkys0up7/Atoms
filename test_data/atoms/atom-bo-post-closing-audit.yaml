@@ -1,0 +1,29 @@
+id: atom-bo-post-closing-audit
+category: BACK_OFFICE
+type: PROCESS
+name: QC Auditor Performs Post-Closing Review
+version: 1.0.0
+status: ACTIVE
+owner: David Thompson
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: Quality control review of closed loan file
+  steps:
+  - Select loan for QC review
+  - Review all loan documents
+  - Verify compliance with guidelines
+  - Check for documentation errors
+  - Document findings
+  - Resolve any issues found
+edges:
+- type: ENABLES
+  targetId: atom-sys-document-imaging
+metrics:
+  automation_level: 0.24
+  avg_cycle_time_mins: 217
+  error_rate: 0.059
+  compliance_score: 0.85

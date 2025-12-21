@@ -1,0 +1,30 @@
+id: atom-sys-document-imaging
+category: SYSTEM
+type: PROCESS
+name: System Images Loan Documents
+version: 1.0.0
+status: DRAFT
+owner: David Thompson
+team: Processing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: Scan and store all loan documents in document management system
+  steps:
+  - Scan all paper documents
+  - Index documents by type
+  - Store in document management system
+  - Verify image quality
+  - Archive original documents
+edges:
+- type: ENABLES
+  targetId: atom-bo-loan-sale-prep
+- type: USES_COMPONENT
+  targetId: atom-sys-doc-management
+metrics:
+  automation_level: 0.81
+  avg_cycle_time_mins: 12
+  error_rate: 0.092
+  compliance_score: 0.97

@@ -1,0 +1,38 @@
+id: atom-sys-loan-delivery-submission
+category: SYSTEM
+type: PROCESS
+name: System Submits Loan to Secondary Market
+version: 1.0.0
+status: ACTIVE
+owner: James Martinez
+team: Technology
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: System submits loan file to Fannie Mae or Freddie Mac loan delivery system
+  description: Automated submission to secondary market requires proper file formatting
+    and data validation. System submits loan and receives confirmation of purchase
+    or identifies any errors requiring correction.
+  steps: []
+  purpose: This process enables System Submits Loan to Secondary Market to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: USES_COMPONENT
+  targetId: atom-sys-los-platform
+- type: RELATED_TO
+  targetId: atom-bo-investor-reporting
+metrics:
+  automation_level: 0.89
+  avg_cycle_time_mins: 18
+  error_rate: 0.079
+  compliance_score: 0.95

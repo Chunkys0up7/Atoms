@@ -1,0 +1,26 @@
+id: atom-bo-condition-tracking
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Tracks Condition Fulfillment
+version: 1.0.0
+status: ACTIVE
+owner: Lisa Anderson
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-underwriting
+moduleId: module-conditions-management
+content:
+  summary: Track status of all underwriting conditions
+  steps:
+  - Monitor condition status dashboard
+  - Request documents from customer
+  - Receive condition fulfillment
+  - Update condition status
+  - Notify underwriter when conditions cleared
+edges: []
+metrics:
+  automation_level: 0.4
+  avg_cycle_time_mins: 445
+  error_rate: 0.031
+  compliance_score: 0.86

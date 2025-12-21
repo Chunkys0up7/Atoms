@@ -1,0 +1,34 @@
+id: atom-bo-investor-reporting
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Completes Investor Reporting
+version: 1.0.0
+status: ACTIVE
+owner: Lisa Anderson
+team: Post-Closing
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: Processor completes required reporting to loan investor (Fannie Mae, Freddie
+    Mac, etc.)
+  description: Investors require regular reporting on loan performance and status.
+    Processor completes required reports and submits to investor.
+  steps: []
+  purpose: This process enables Processor Completes Investor Reporting to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges: []
+metrics:
+  automation_level: 0.05
+  avg_cycle_time_mins: 194
+  error_rate: 0.011
+  compliance_score: 1.0

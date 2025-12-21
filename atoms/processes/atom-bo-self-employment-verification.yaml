@@ -1,0 +1,34 @@
+id: atom-bo-self-employment-verification
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Verifies Self-Employment Income
+version: 1.0.0
+status: DRAFT
+owner: Lisa Anderson
+team: Processing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Processor verifies self-employment income using tax returns and profit/loss
+    statements
+  description: Self-employment income requires detailed analysis of tax returns and
+    business financials. Processor calculates qualifying income after business expenses.
+  steps: []
+  purpose: This process enables Processor Verifies Self-Employment Income to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges: []
+metrics:
+  automation_level: 0.29
+  avg_cycle_time_mins: 120
+  error_rate: 0.017
+  compliance_score: 0.9

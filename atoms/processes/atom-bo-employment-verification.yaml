@@ -1,0 +1,35 @@
+id: atom-bo-employment-verification
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Verifies Employment
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Technology
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-income-verification
+content:
+  summary: Processor contacts employer to verify employment status, job title, and
+    income
+  description: Employment verification confirms the customer is currently employed
+    and verifies income information. Processor calls employer or sends verification
+    form.
+  steps: []
+  purpose: This process enables Processor Verifies Employment to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges: []
+metrics:
+  automation_level: 0.5
+  avg_cycle_time_mins: 337
+  error_rate: 0.03
+  compliance_score: 0.9

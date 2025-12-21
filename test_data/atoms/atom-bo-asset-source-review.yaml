@@ -1,0 +1,33 @@
+id: atom-bo-asset-source-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Asset Source
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-asset-verification
+content:
+  summary: Review bank statements for large deposits and source of funds
+  steps:
+  - Review 2 months of bank statements
+  - Identify large deposits (>25% of monthly income)
+  - Request source of funds documentation
+  - Verify sufficient reserves
+  - Document findings
+  exceptions:
+  - condition: Large unexplained deposit
+    action: Request gift letter or explanation
+  - condition: Insufficient reserves
+    action: Request additional asset documentation
+edges:
+- type: ENABLES
+  targetId: atom-sys-reserve-calculation
+metrics:
+  automation_level: 0.11
+  avg_cycle_time_mins: 240
+  error_rate: 0.081
+  compliance_score: 1.0

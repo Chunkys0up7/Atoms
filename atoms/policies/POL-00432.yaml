@@ -1,8 +1,0 @@
-id: POL-00432
-type: policy
-title: Policy 432
-summary: 'Auto-generated policy #432 for demo'
-owner: ops
-created_at: '2025-12-19T14:37:54.614192'
-metadata:
-  priority: medium

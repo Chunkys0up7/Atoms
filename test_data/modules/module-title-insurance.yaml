@@ -1,0 +1,11 @@
+id: module-title-insurance
+name: Title & Insurance
+description: Title search, title insurance, hazard insurance verification, and flood
+  determination
+owner: Processing
+atoms:
+- atom-sys-title-order
+- atom-bo-title-review
+- atom-sys-flood-determination
+- atom-cust-insurance-verification
+phaseId: phase-processing

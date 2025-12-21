@@ -1,0 +1,43 @@
+id: atom-bo-closing-disclosure-review
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Reviews Closing Disclosure
+version: 1.0.0
+status: ACTIVE
+owner: Sarah Chen
+team: Processing
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-closing
+moduleId: module-closing-preparation
+content:
+  summary: Customer reviews Closing Disclosure to verify all costs and loan terms
+    are correct
+  description: TRID requires customers receive Closing Disclosure 3 days before closing.
+    Customer reviews all costs, loan terms, and cash to close to ensure accuracy before
+    signing.
+  steps: []
+  purpose: This process enables Customer Reviews Closing Disclosure to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-closing-doc-prep
+- type: RELATED_TO
+  targetId: atom-bo-notary-coordination
+- type: RELATED_TO
+  targetId: atom-bo-closing-cost-review
+- type: RELATED_TO
+  targetId: atom-bo-cash-to-close-calculation
+metrics:
+  automation_level: 0.48
+  avg_cycle_time_mins: 2741
+  error_rate: 0.071
+  compliance_score: 0.99

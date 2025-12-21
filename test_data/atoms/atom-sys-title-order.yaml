@@ -1,0 +1,25 @@
+id: atom-sys-title-order
+category: SYSTEM
+type: PROCESS
+name: System Orders Title Search
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Closing
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Automated title search order to title company
+  steps:
+  - System generates title order
+  - Send to selected title company
+  - Track title search status
+  - Receive preliminary title report
+edges: []
+metrics:
+  automation_level: 0.77
+  avg_cycle_time_mins: 43
+  error_rate: 0.002
+  compliance_score: 1.0

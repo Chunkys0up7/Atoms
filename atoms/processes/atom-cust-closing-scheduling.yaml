@@ -1,0 +1,45 @@
+id: atom-cust-closing-scheduling
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Schedules Closing
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-closing
+moduleId: module-closing-preparation
+content:
+  summary: Coordinate closing date and time with all parties
+  description: Coordinate closing date and time with all parties
+  steps:
+  - Closing coordinator contacts customer
+  - Customer selects preferred closing date
+  - Coordinate with title company
+  - Confirm all parties available
+  - Schedule closing appointment
+  purpose: This process enables Customer Schedules Closing to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-closing-doc-prep
+- type: RELATED_TO
+  targetId: atom-bo-closing-wire-instructions
+metrics:
+  automation_level: 0.6
+  avg_cycle_time_mins: 147
+  error_rate: 0.066
+  compliance_score: 0.96

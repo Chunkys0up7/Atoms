@@ -1,0 +1,27 @@
+id: atom-cust-insurance-verification
+category: CUSTOMER_FACING
+type: PROCESS
+name: Customer Provides Hazard Insurance
+version: 1.0.0
+status: ACTIVE
+owner: Robert Kim
+team: Loan Origination
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Customer provides proof of hazard insurance coverage
+  steps:
+  - Customer receives insurance request
+  - Customer contacts insurance agent
+  - Customer uploads insurance declaration page
+  - System confirms receipt
+edges:
+- type: ENABLES
+  targetId: atom-bo-closing-doc-prep
+metrics:
+  automation_level: 0.77
+  avg_cycle_time_mins: 2261
+  error_rate: 0.093
+  compliance_score: 0.98

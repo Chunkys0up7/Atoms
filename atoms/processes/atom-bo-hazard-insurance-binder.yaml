@@ -1,0 +1,36 @@
+id: atom-bo-hazard-insurance-binder
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Obtains Hazard Insurance Binder
+version: 1.0.0
+status: ACTIVE
+owner: Lisa Anderson
+team: Compliance
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-title-insurance
+content:
+  summary: Processor obtains insurance binder showing coverage is in place before
+    closing
+  description: Hazard insurance binder confirms coverage is active. Processor obtains
+    binder from insurance agent and verifies it meets lender requirements.
+  steps: []
+  purpose: This process enables Processor Obtains Hazard Insurance Binder to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-survey-review
+metrics:
+  automation_level: 0.43
+  avg_cycle_time_mins: 135
+  error_rate: 0.035
+  compliance_score: 0.94

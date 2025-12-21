@@ -1,0 +1,57 @@
+id: atom-sys-credit-report-pull
+category: SYSTEM
+type: PROCESS
+name: System Pulls Full Credit Report
+version: 1.0.0
+status: DEPRECATED
+owner: Amanda White
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Pull tri-merge credit report from all three bureaus
+  description: Pull tri-merge credit report from all three bureaus
+  steps:
+  - System calls credit bureau API
+  - Retrieve Experian, Equifax, and TransUnion reports
+  - Merge reports into tri-merge
+  - Calculate middle credit score
+  - Store credit report in LOS
+  purpose: This process enables System Pulls Full Credit Report to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-credit-analysis
+- type: ENABLES
+  targetId: atom-bo-credit-score-analysis
+- type: ENABLES
+  targetId: atom-bo-payment-history-review
+- type: ENABLES
+  targetId: atom-bo-collection-account-review
+- type: RELATED_TO
+  targetId: atom-bo-derogatory-review
+- type: RELATED_TO
+  targetId: atom-bo-rental-history-verification
+- type: RELATED_TO
+  targetId: atom-bo-credit-inquiry-review
+- type: RELATED_TO
+  targetId: atom-bo-credit-dispute-review
+metrics:
+  automation_level: 0.86
+  avg_cycle_time_mins: 37
+  error_rate: 0.023
+  compliance_score: 0.86

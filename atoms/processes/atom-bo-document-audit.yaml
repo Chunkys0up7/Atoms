@@ -1,0 +1,37 @@
+id: atom-bo-document-audit
+category: BACK_OFFICE
+type: PROCESS
+name: QC Auditor Performs Document Audit
+version: 1.0.0
+status: ACTIVE
+owner: Robert Kim
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: MEDIUM
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: QC auditor reviews all loan documents for completeness and accuracy
+  description: Document audit ensures all required documents are present, properly
+    executed, and accurate. Auditor checks signatures, dates, and document completeness.
+  steps: []
+  purpose: This process enables QC Auditor Performs Document Audit to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-post-closing-audit
+- type: RELATED_TO
+  targetId: atom-sys-loan-delivery-submission
+metrics:
+  automation_level: 0.03
+  avg_cycle_time_mins: 314
+  error_rate: 0.07
+  compliance_score: 0.91

@@ -1,0 +1,36 @@
+id: atom-bo-payment-history-review
+category: BACK_OFFICE
+type: PROCESS
+name: Processor Reviews Payment History
+version: 1.0.0
+status: DRAFT
+owner: Lisa Anderson
+team: Underwriting
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-processing
+moduleId: module-credit-analysis
+content:
+  summary: Processor reviews 24-month payment history for all trade lines to identify
+    late payments
+  description: Payment history is critical for credit assessment. Processor reviews
+    all accounts for late payments, defaults, or collections and documents findings.
+  steps: []
+  purpose: This process enables Processor Reviews Payment History to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-credit-analysis
+metrics:
+  automation_level: 0.09
+  avg_cycle_time_mins: 122
+  error_rate: 0.073
+  compliance_score: 0.88

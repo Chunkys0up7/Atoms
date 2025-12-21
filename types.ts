@@ -47,7 +47,15 @@ export interface Edge {
 
 export interface AtomContent {
   summary?: string;
+  description?: string;
+  purpose?: string;
+  business_context?: string;
   steps?: string[];
+  inputs?: string[];
+  outputs?: string[];
+  prerequisites?: string[];
+  success_criteria?: string[];
+  regulatory_context?: string;
   exceptions?: { condition: string; action: string }[];
 }
 

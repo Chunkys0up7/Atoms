@@ -1,0 +1,30 @@
+id: atom-bo-condition-clearance
+category: BACK_OFFICE
+type: PROCESS
+name: Underwriter Clears Conditions
+version: 1.0.0
+status: ACTIVE
+owner: Jennifer Park
+team: Risk Management
+ontologyDomain: Home Lending
+criticality: CRITICAL
+phaseId: phase-underwriting
+moduleId: module-conditions-management
+content:
+  summary: Underwriter reviews and clears fulfilled conditions
+  steps:
+  - Review condition fulfillment documents
+  - Verify condition is satisfied
+  - Clear condition in LOS
+  - Check if all conditions cleared
+  - Proceed to final approval if complete
+edges:
+- type: ENABLES
+  targetId: atom-sys-closing-disclosure
+- type: PERFORMED_BY
+  targetId: atom-role-underwriter
+metrics:
+  automation_level: 0.28
+  avg_cycle_time_mins: 279
+  error_rate: 0.062
+  compliance_score: 0.93

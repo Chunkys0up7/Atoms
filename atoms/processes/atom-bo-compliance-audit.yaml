@@ -1,0 +1,33 @@
+id: atom-bo-compliance-audit
+category: BACK_OFFICE
+type: PROCESS
+name: QC Auditor Performs Compliance Audit
+version: 1.0.0
+status: ACTIVE
+owner: Amanda White
+team: Compliance
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: QC auditor reviews loan for compliance with all regulations and guidelines
+  description: Compliance audit ensures loan meets all regulatory requirements. Auditor
+    reviews loan against compliance checklist and documents any issues.
+  steps: []
+  purpose: This process enables QC Auditor Performs Compliance Audit to be completed
+    efficiently and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges: []
+metrics:
+  automation_level: 0.11
+  avg_cycle_time_mins: 341
+  error_rate: 0.037
+  compliance_score: 0.89

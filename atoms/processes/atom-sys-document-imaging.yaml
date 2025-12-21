@@ -1,0 +1,51 @@
+id: atom-sys-document-imaging
+category: SYSTEM
+type: PROCESS
+name: System Images Loan Documents
+version: 1.0.0
+status: ACTIVE
+owner: Lisa Anderson
+team: Compliance
+ontologyDomain: Home Lending
+criticality: HIGH
+phaseId: phase-post-closing
+moduleId: module-quality-control
+content:
+  summary: Scan and store all loan documents in document management system
+  description: Scan and store all loan documents in document management system
+  steps:
+  - Scan all paper documents
+  - Index documents by type
+  - Store in document management system
+  - Verify image quality
+  - Archive original documents
+  purpose: This process enables System Images Loan Documents to be completed efficiently
+    and accurately.
+  business_context: This is a critical component of the home lending process that
+    ensures compliance, accuracy, and customer satisfaction.
+  inputs:
+  - Required data and documents as specified in the process steps
+  outputs:
+  - Processed data and status updates as specified in the process steps
+  prerequisites:
+  - All required upstream processes must be completed
+  success_criteria:
+  - Process completed successfully
+  - All required outputs generated
+  - Status updated in system
+edges:
+- type: ENABLES
+  targetId: atom-bo-loan-sale-prep
+- type: USES_COMPONENT
+  targetId: atom-sys-doc-management
+- type: RELATED_TO
+  targetId: atom-bo-document-audit
+- type: RELATED_TO
+  targetId: atom-bo-data-accuracy-review
+- type: RELATED_TO
+  targetId: atom-bo-servicing-transfer-prep
+metrics:
+  automation_level: 0.98
+  avg_cycle_time_mins: 59
+  error_rate: 0.037
+  compliance_score: 0.89

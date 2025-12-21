@@ -1,8 +1,0 @@
-id: VAL-00337
-type: validation
-title: Validation 337
-summary: 'Auto-generated validation #337 for demo'
-owner: security
-created_at: '2025-12-19T14:37:53.673486'
-metadata:
-  priority: medium
