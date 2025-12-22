@@ -36,6 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
     {
       title: 'Tools',
       items: [
+        { id: 'runtime', label: 'Runtime Simulator', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
         { id: 'assistant', label: 'AI Assistant', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' },
         { id: 'publisher', label: 'Publisher', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
         { id: 'ingestion', label: 'Data Ingestion', icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12' },

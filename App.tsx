@@ -13,6 +13,7 @@ import OntologyBrowser from './components/OntologyBrowser';
 import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
+import RuntimeSimulator from './components/RuntimeSimulator';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
@@ -269,6 +270,8 @@ const App: React.FC = () => {
         return <AIAssistant atoms={atoms} />;
       case 'ingestion':
         return <IngestionEngine atoms={atoms} onIngest={handleIngest} />;
+      case 'runtime':
+        return <RuntimeSimulator />;
       default:
         return <div className="content-area">Select a view from the sidebar</div>;
     }
