@@ -11,8 +11,9 @@ import Publisher from './components/Publisher';
 import IngestionEngine from './components/IngestionEngine';
 import OntologyBrowser from './components/OntologyBrowser';
 import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
+import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
-import { API_ENDPOINTS, ATOM_COLORS } from './constants';
+import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType } from './types';
 import './styles.css';
 
@@ -143,6 +144,18 @@ const App: React.FC = () => {
         return <Glossary />;
       case 'workflow':
         return <WorkflowBuilderEnhanced atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+      case 'phases':
+        return <PhaseExplorer
+          phases={MOCK_PHASES}
+          journeys={MOCK_JOURNEYS}
+          modules={modules}
+          atoms={atoms}
+          onPhaseSelect={(phase) => console.log('Selected phase:', phase)}
+          onNavigateToGraph={(phaseId) => {
+            console.log('Navigate to graph for phase:', phaseId);
+            setView('graph');
+          }}
+        />;
       case 'explorer':
         return <AtomExplorer atoms={atoms} modules={modules} onSelect={(a) => { handleAtomSelect(a); }} />;
       case 'modules':
