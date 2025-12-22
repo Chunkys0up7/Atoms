@@ -14,7 +14,7 @@ import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
-import { Atom, Module, ViewType } from './types';
+import { Atom, Module, ViewType, GraphContext } from './types';
 import './styles.css';
 
 const App: React.FC = () => {
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fullAtomData, setFullAtomData] = useState<Atom | null>(null);
+  const [graphContext, setGraphContext] = useState<GraphContext>({ mode: 'global' });
 
   // Load data from API on mount
   useEffect(() => {
@@ -152,7 +153,7 @@ const App: React.FC = () => {
           atoms={atoms}
           onPhaseSelect={(phase) => console.log('Selected phase:', phase)}
           onNavigateToGraph={(phaseId) => {
-            console.log('Navigate to graph for phase:', phaseId);
+            setGraphContext({ mode: 'phase', phaseId, showModuleBoundaries: true });
             setView('graph');
           }}
         />;
@@ -161,7 +162,15 @@ const App: React.FC = () => {
       case 'modules':
         return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'graph':
-        return <GraphView atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+        return <GraphView
+          atoms={atoms}
+          modules={modules}
+          phases={MOCK_PHASES}
+          journeys={MOCK_JOURNEYS}
+          context={graphContext}
+          onSelectAtom={(a) => { handleAtomSelect(a); }}
+          onContextChange={(ctx) => setGraphContext(ctx)}
+        />;
       case 'edges':
         return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'health':

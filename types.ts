@@ -136,3 +136,12 @@ export interface LintIssue {
 }
 
 export type DocTemplateType = 'SOP' | 'TECHNICAL_DESIGN' | 'EXECUTIVE_SUMMARY' | 'COMPLIANCE_AUDIT';
+
+// Graph Context Modes for Enhanced Visualization
+export type GraphContext =
+  | { mode: 'global'; filters?: { types?: AtomType[]; criticality?: Criticality[] } }
+  | { mode: 'journey'; journeyId: string; highlightPath?: boolean }
+  | { mode: 'phase'; phaseId: string; showModuleBoundaries?: boolean }
+  | { mode: 'module'; moduleId: string; expandDependencies?: boolean }
+  | { mode: 'impact'; atomId: string; depth: number; direction: 'upstream' | 'downstream' | 'both' }
+  | { mode: 'risk'; minCriticality?: Criticality; showControls?: boolean };

@@ -1,12 +1,16 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { Atom, Module } from '../types';
+import { Atom, Module, GraphContext, Phase, Journey } from '../types';
 
 interface GraphViewProps {
   atoms: Atom[];
   modules?: Module[];
+  phases?: Phase[];
+  journeys?: Journey[];
+  context?: GraphContext;
   onSelectAtom: (atom: Atom) => void;
+  onContextChange?: (context: GraphContext) => void;
 }
 
 const CATEGORY_COLORS = {
@@ -15,12 +19,21 @@ const CATEGORY_COLORS = {
   'SYSTEM': '#10b981'
 };
 
-const GraphView: React.FC<GraphViewProps> = ({ atoms, modules = [], onSelectAtom }) => {
+const GraphView: React.FC<GraphViewProps> = ({
+  atoms,
+  modules = [],
+  phases = [],
+  journeys = [],
+  context = { mode: 'global' },
+  onSelectAtom,
+  onContextChange
+}) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [showEdges, setShowEdges] = useState(true);
   const [layoutMode, setLayoutMode] = useState<'force' | 'radial' | 'cluster' | 'hierarchical'>('force');
   const [showModuleGroups, setShowModuleGroups] = useState(false);
+  const [highlightedAtoms, setHighlightedAtoms] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!svgRef.current || atoms.length === 0) return;
@@ -48,10 +61,111 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, modules = [], onSelectAtom
 
     svg.call(zoom as any);
 
-    // Filter atoms
-    const filteredAtoms = selectedCategory === 'ALL'
-      ? atoms
-      : atoms.filter(a => a.category === selectedCategory);
+    // Filter atoms based on context
+    let filteredAtoms = atoms;
+    let highlightedIds = new Set<string>();
+
+    // Apply context-specific filtering
+    if (context.mode === 'journey' && context.journeyId) {
+      // Show atoms in phases of this journey
+      const journey = journeys.find(j => j.id === context.journeyId);
+      if (journey) {
+        const journeyPhases = phases.filter(p => journey.phases.includes(p.id));
+        const phaseModules = modules.filter(m => journeyPhases.some(p => p.modules.includes(m.id)));
+        filteredAtoms = atoms.filter(a => phaseModules.some(m => m.atoms.includes(a.id)));
+      }
+    } else if (context.mode === 'phase' && context.phaseId) {
+      // Show atoms in modules of this phase
+      const phase = phases.find(p => p.id === context.phaseId);
+      if (phase) {
+        const phaseModules = modules.filter(m => phase.modules.includes(m.id));
+        filteredAtoms = atoms.filter(a => phaseModules.some(m => m.atoms.includes(a.id)));
+      }
+    } else if (context.mode === 'module' && context.moduleId) {
+      // Show atoms in this module and optionally dependencies
+      const module = modules.find(m => m.id === context.moduleId);
+      if (module) {
+        filteredAtoms = atoms.filter(a => module.atoms.includes(a.id));
+        if (context.expandDependencies) {
+          // Add atoms that these atoms depend on or enable
+          const expandedIds = new Set(filteredAtoms.map(a => a.id));
+          filteredAtoms.forEach(atom => {
+            atom.edges?.forEach(edge => {
+              const targetAtom = atoms.find(a => a.id === edge.targetId);
+              if (targetAtom && !expandedIds.has(targetAtom.id)) {
+                filteredAtoms.push(targetAtom);
+                expandedIds.add(targetAtom.id);
+              }
+            });
+          });
+        }
+      }
+    } else if (context.mode === 'impact' && context.atomId) {
+      // Show dependency tree from selected atom
+      const sourceAtom = atoms.find(a => a.id === context.atomId);
+      if (sourceAtom) {
+        const impactedIds = new Set<string>([context.atomId]);
+        highlightedIds.add(context.atomId);
+
+        const traverseDependencies = (atomId: string, currentDepth: number) => {
+          if (currentDepth >= context.depth) return;
+
+          const atom = atoms.find(a => a.id === atomId);
+          if (!atom) return;
+
+          atom.edges?.forEach(edge => {
+            if (context.direction === 'downstream' || context.direction === 'both') {
+              if (!impactedIds.has(edge.targetId)) {
+                impactedIds.add(edge.targetId);
+                highlightedIds.add(edge.targetId);
+                traverseDependencies(edge.targetId, currentDepth + 1);
+              }
+            }
+          });
+
+          if (context.direction === 'upstream' || context.direction === 'both') {
+            atoms.forEach(a => {
+              a.edges?.forEach(e => {
+                if (e.targetId === atomId && !impactedIds.has(a.id)) {
+                  impactedIds.add(a.id);
+                  highlightedIds.add(a.id);
+                  traverseDependencies(a.id, currentDepth + 1);
+                }
+              });
+            });
+          }
+        };
+
+        traverseDependencies(context.atomId, 0);
+        filteredAtoms = atoms.filter(a => impactedIds.has(a.id));
+      }
+    } else if (context.mode === 'risk') {
+      // Filter by criticality
+      if (context.minCriticality) {
+        const criticalityOrder = { 'LOW': 0, 'MEDIUM': 1, 'HIGH': 2, 'CRITICAL': 3 };
+        const minLevel = criticalityOrder[context.minCriticality];
+        filteredAtoms = atoms.filter(a => criticalityOrder[a.criticality] >= minLevel);
+      }
+      if (context.showControls) {
+        // Highlight control atoms
+        atoms.filter(a => a.type === 'CONTROL').forEach(a => highlightedIds.add(a.id));
+      }
+    } else if (context.mode === 'global' && context.filters) {
+      // Apply global filters
+      if (context.filters.types) {
+        filteredAtoms = filteredAtoms.filter(a => context.filters!.types!.includes(a.type));
+      }
+      if (context.filters.criticality) {
+        filteredAtoms = filteredAtoms.filter(a => context.filters!.criticality!.includes(a.criticality));
+      }
+    }
+
+    // Apply category filter on top of context filtering
+    if (selectedCategory !== 'ALL') {
+      filteredAtoms = filteredAtoms.filter(a => a.category === selectedCategory);
+    }
+
+    setHighlightedAtoms(highlightedIds);
 
     // Build nodes
     const nodes = filteredAtoms.map(atom => ({
@@ -257,18 +371,40 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, modules = [], onSelectAtom
         onSelectAtom(d.atom);
       });
 
-    // Node circles
+    // Node circles with context-aware styling
     node.append('circle')
       .attr('r', (d: any) => {
-        if (d.criticality === 'CRITICAL') return 20;
-        if (d.criticality === 'HIGH') return 16;
-        if (d.criticality === 'MEDIUM') return 12;
-        return 10;
+        const isHighlighted = highlightedIds.has(d.id);
+        const baseSize = d.criticality === 'CRITICAL' ? 20 : d.criticality === 'HIGH' ? 16 : d.criticality === 'MEDIUM' ? 12 : 10;
+        return isHighlighted ? baseSize + 4 : baseSize;
       })
-      .attr('fill', (d: any) => CATEGORY_COLORS[d.category as keyof typeof CATEGORY_COLORS] || '#64748b')
-      .attr('stroke', '#ffffff')
-      .attr('stroke-width', 2)
-      .attr('opacity', 0.9);
+      .attr('fill', (d: any) => {
+        // Risk mode: color by criticality
+        if (context.mode === 'risk') {
+          const criticalityColors = {
+            'CRITICAL': '#ef4444',
+            'HIGH': '#f97316',
+            'MEDIUM': '#f59e0b',
+            'LOW': '#10b981'
+          };
+          return criticalityColors[d.criticality as keyof typeof criticalityColors] || '#64748b';
+        }
+        // Default: color by category
+        return CATEGORY_COLORS[d.category as keyof typeof CATEGORY_COLORS] || '#64748b';
+      })
+      .attr('stroke', (d: any) => {
+        const isHighlighted = highlightedIds.has(d.id);
+        return isHighlighted ? '#fbbf24' : '#ffffff';
+      })
+      .attr('stroke-width', (d: any) => {
+        const isHighlighted = highlightedIds.has(d.id);
+        return isHighlighted ? 4 : 2;
+      })
+      .attr('opacity', (d: any) => {
+        // In impact mode, dim non-highlighted nodes
+        if (context.mode === 'impact' && !highlightedIds.has(d.id)) return 0.3;
+        return 0.9;
+      });
 
     // Node labels
     node.append('text')
@@ -321,7 +457,7 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, modules = [], onSelectAtom
     return () => {
       simulation.stop();
     };
-  }, [atoms, selectedCategory, showEdges, layoutMode, showModuleGroups, modules, onSelectAtom]);
+  }, [atoms, selectedCategory, showEdges, layoutMode, showModuleGroups, modules, phases, journeys, context, onSelectAtom]);
 
   const categories = Array.from(new Set(atoms.map(a => a.category)));
 
@@ -343,6 +479,39 @@ const GraphView: React.FC<GraphViewProps> = ({ atoms, modules = [], onSelectAtom
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Context Mode Selector */}
+        <div style={{ marginBottom: 'var(--spacing-md)', padding: 'var(--spacing-md)', backgroundColor: '#e0f2fe', borderRadius: '8px', border: '1px solid #0ea5e9' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#0369a1', marginBottom: '8px' }}>
+            CONTEXT MODE: {context.mode.toUpperCase()}
+          </div>
+          <div style={{ fontSize: '11px', color: '#075985' }}>
+            {context.mode === 'global' && 'Showing all atoms with optional filters'}
+            {context.mode === 'journey' && `Showing atoms in journey: ${journeys.find(j => j.id === context.journeyId)?.name || context.journeyId}`}
+            {context.mode === 'phase' && `Showing atoms in phase: ${phases.find(p => p.id === context.phaseId)?.name || context.phaseId}`}
+            {context.mode === 'module' && `Showing atoms in module: ${modules.find(m => m.id === context.moduleId)?.name || context.moduleId}`}
+            {context.mode === 'impact' && `Impact analysis from: ${atoms.find(a => a.id === context.atomId)?.name || context.atomId} (depth: ${context.depth}, ${context.direction})`}
+            {context.mode === 'risk' && `Risk view - ${context.minCriticality ? `min: ${context.minCriticality}` : 'all criticalities'}${context.showControls ? ', controls highlighted' : ''}`}
+          </div>
+          {onContextChange && (
+            <button
+              onClick={() => onContextChange({ mode: 'global' })}
+              style={{
+                marginTop: '8px',
+                padding: '4px 12px',
+                fontSize: '11px',
+                backgroundColor: 'white',
+                border: '1px solid #0ea5e9',
+                borderRadius: '4px',
+                color: '#0369a1',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}
+            >
+              Reset to Global View
+            </button>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
