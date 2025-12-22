@@ -278,6 +278,79 @@ const GraphView: React.FC<GraphViewProps> = ({
         .force('collision', d3.forceCollide().radius(35))
         .force('x', d3.forceX((d: any) => categoryPositions.get(d.category).x).strength(0.5))
         .force('y', d3.forceY((d: any) => categoryPositions.get(d.category).y).strength(0.5));
+    }
+
+    // Draw module boundaries for non-hierarchical layouts when in module/phase context
+    if ((context.mode === 'module' || context.mode === 'phase' || context.showModuleBoundaries) &&
+        layoutMode !== 'hierarchical') {
+      setTimeout(() => {
+        const moduleGroups = new Map<string, any[]>();
+
+        // Group nodes by moduleId
+        nodes.forEach(node => {
+          const moduleId = node.atom.moduleId || 'unassigned';
+          if (!moduleGroups.has(moduleId)) {
+            moduleGroups.set(moduleId, []);
+          }
+          moduleGroups.get(moduleId)!.push(node);
+        });
+
+        const boundaryGroup = g.insert('g', ':first-child').attr('class', 'module-boundaries');
+
+        moduleGroups.forEach((moduleNodes, moduleId) => {
+          if (moduleNodes.length === 0) return;
+
+          const xs = moduleNodes.map((n: any) => n.x);
+          const ys = moduleNodes.map((n: any) => n.y);
+          const minX = Math.min(...xs) - 50;
+          const maxX = Math.max(...xs) + 50;
+          const minY = Math.min(...ys) - 50;
+          const maxY = Math.max(...ys) + 50;
+
+          const module = modules.find(m => m.id === moduleId);
+
+          // Draw boundary rectangle
+          boundaryGroup.append('rect')
+            .attr('class', 'module-boundary')
+            .attr('data-module-id', moduleId)
+            .attr('x', minX)
+            .attr('y', minY)
+            .attr('width', maxX - minX)
+            .attr('height', maxY - minY)
+            .attr('fill', context.moduleId === moduleId ? '#dbeafe' : '#f8fafc')
+            .attr('stroke', context.moduleId === moduleId ? '#3b82f6' : '#cbd5e1')
+            .attr('stroke-width', context.moduleId === moduleId ? 3 : 2)
+            .attr('stroke-dasharray', '5,5')
+            .attr('rx', 12)
+            .attr('opacity', 0.7)
+            .style('pointer-events', 'none');
+
+          // Draw module label
+          const labelGroup = boundaryGroup.append('g')
+            .attr('class', 'module-label')
+            .attr('transform', `translate(${minX + 10}, ${minY + 5})`);
+
+          const labelText = module?.name || moduleId;
+          const labelBg = labelGroup.append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('height', 24)
+            .attr('rx', 4)
+            .attr('fill', context.moduleId === moduleId ? '#3b82f6' : '#64748b')
+            .attr('opacity', 0.9);
+
+          const label = labelGroup.append('text')
+            .attr('x', 8)
+            .attr('y', 16)
+            .attr('font-size', '12px')
+            .attr('font-weight', '600')
+            .attr('fill', '#ffffff')
+            .text(labelText);
+
+          const bbox = (label.node() as any).getBBox();
+          labelBg.attr('width', bbox.width + 16);
+        });
+      }, 1500); // Longer delay for force layouts to settle
     } else {
       // Hierarchical layout - group by module/phase
       const moduleGroups = new Map();
@@ -312,41 +385,71 @@ const GraphView: React.FC<GraphViewProps> = ({
         .force('x', d3.forceX((d: any) => modulePositions.get(d.atom.moduleId || 'unassigned').x).strength(0.8))
         .force('y', d3.forceY((d: any) => modulePositions.get(d.atom.moduleId || 'unassigned').y).strength(0.8));
 
-      // Draw module boundary boxes if hierarchical mode is enabled
-      if (showModuleGroups) {
+      // Draw module boundary boxes (auto-enabled in hierarchical mode or when context requires it)
+      const shouldShowBoundaries = showModuleGroups ||
+                                    context.mode === 'module' ||
+                                    context.mode === 'phase' ||
+                                    context.showModuleBoundaries;
+
+      if (shouldShowBoundaries) {
         setTimeout(() => {
+          // Store boundary group for later updates
+          const boundaryGroup = g.insert('g', ':first-child').attr('class', 'module-boundaries');
+
           moduleIds.forEach(moduleId => {
             const moduleNodes = moduleGroups.get(moduleId);
             if (moduleNodes.length === 0) return;
 
             const xs = moduleNodes.map((n: any) => n.x);
             const ys = moduleNodes.map((n: any) => n.y);
-            const minX = Math.min(...xs) - 40;
-            const maxX = Math.max(...xs) + 40;
-            const minY = Math.min(...ys) - 40;
-            const maxY = Math.max(...ys) + 40;
+            const minX = Math.min(...xs) - 50;
+            const maxX = Math.max(...xs) + 50;
+            const minY = Math.min(...ys) - 50;
+            const maxY = Math.max(...ys) + 50;
 
             const module = modules.find(m => m.id === moduleId);
 
-            g.insert('rect', ':first-child')
+            // Draw boundary rectangle with module-specific styling
+            boundaryGroup.append('rect')
+              .attr('class', 'module-boundary')
+              .attr('data-module-id', moduleId)
               .attr('x', minX)
               .attr('y', minY)
               .attr('width', maxX - minX)
               .attr('height', maxY - minY)
-              .attr('fill', '#f8fafc')
-              .attr('stroke', '#cbd5e1')
-              .attr('stroke-width', 2)
+              .attr('fill', context.moduleId === moduleId ? '#dbeafe' : '#f8fafc')
+              .attr('stroke', context.moduleId === moduleId ? '#3b82f6' : '#cbd5e1')
+              .attr('stroke-width', context.moduleId === moduleId ? 3 : 2)
               .attr('stroke-dasharray', '5,5')
-              .attr('rx', 8)
-              .attr('opacity', 0.6);
+              .attr('rx', 12)
+              .attr('opacity', 0.7)
+              .style('pointer-events', 'none');
 
-            g.append('text')
-              .attr('x', minX + 10)
-              .attr('y', minY + 20)
+            // Draw module label with background
+            const labelGroup = boundaryGroup.append('g')
+              .attr('class', 'module-label')
+              .attr('transform', `translate(${minX + 10}, ${minY + 5})`);
+
+            const labelText = module?.name || moduleId;
+            const labelBg = labelGroup.append('rect')
+              .attr('x', 0)
+              .attr('y', 0)
+              .attr('height', 24)
+              .attr('rx', 4)
+              .attr('fill', context.moduleId === moduleId ? '#3b82f6' : '#64748b')
+              .attr('opacity', 0.9);
+
+            const label = labelGroup.append('text')
+              .attr('x', 8)
+              .attr('y', 16)
               .attr('font-size', '12px')
               .attr('font-weight', '600')
-              .attr('fill', '#475569')
-              .text(module?.name || moduleId);
+              .attr('fill', '#ffffff')
+              .text(labelText);
+
+            // Size background to fit text
+            const bbox = (label.node() as any).getBBox();
+            labelBg.attr('width', bbox.width + 16);
           });
         }, 1000);
       }
@@ -471,6 +574,55 @@ const GraphView: React.FC<GraphViewProps> = ({
       .attr('dy', 15)
       .attr('fill', '#64748b')
       .attr('font-weight', '500');
+
+    // Compliance score indicator (small circle in corner)
+    node.filter((d: any) => d.atom.metrics?.compliance_score !== undefined)
+      .append('circle')
+      .attr('cx', 15)
+      .attr('cy', -15)
+      .attr('r', 6)
+      .attr('fill', (d: any) => {
+        const score = d.atom.metrics?.compliance_score || 0;
+        if (score >= 0.95) return '#10b981'; // Green - excellent
+        if (score >= 0.80) return '#fbbf24'; // Yellow - needs attention
+        return '#ef4444'; // Red - critical
+      })
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 2)
+      .attr('opacity', 0.9);
+
+    // Compliance score percentage text
+    node.filter((d: any) => d.atom.metrics?.compliance_score !== undefined)
+      .append('text')
+      .text((d: any) => Math.round((d.atom.metrics?.compliance_score || 0) * 100))
+      .attr('x', 15)
+      .attr('y', -11)
+      .attr('font-size', '7px')
+      .attr('font-weight', '700')
+      .attr('fill', '#ffffff')
+      .attr('text-anchor', 'middle');
+
+    // Risk badge for critical atoms
+    node.filter((d: any) => d.criticality === 'CRITICAL' || d.criticality === 'HIGH')
+      .append('circle')
+      .attr('cx', -15)
+      .attr('cy', -15)
+      .attr('r', 5)
+      .attr('fill', (d: any) => d.criticality === 'CRITICAL' ? '#ef4444' : '#f97316')
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 1.5)
+      .attr('opacity', 0.95);
+
+    // Risk icon (exclamation mark)
+    node.filter((d: any) => d.criticality === 'CRITICAL' || d.criticality === 'HIGH')
+      .append('text')
+      .text('!')
+      .attr('x', -15)
+      .attr('y', -11)
+      .attr('font-size', '8px')
+      .attr('font-weight', '900')
+      .attr('fill', '#ffffff')
+      .attr('text-anchor', 'middle');
 
     // Update positions on tick
     simulation.on('tick', () => {

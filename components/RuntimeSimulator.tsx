@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Journey, Phase } from '../types';
-import { API_ENDPOINTS } from '../constants';
+import { API_ENDPOINTS, MOCK_JOURNEYS, MOCK_PHASES } from '../constants';
 
 interface RuntimeContext {
   customer_data?: {
@@ -32,7 +32,8 @@ interface JourneyEvaluation {
 }
 
 export default function RuntimeSimulator() {
-  const [selectedJourney, setSelectedJourney] = useState<string>('journey-loan-origination');
+  const [availableJourneys, setAvailableJourneys] = useState<Journey[]>(MOCK_JOURNEYS);
+  const [selectedJourneyId, setSelectedJourneyId] = useState<string>(MOCK_JOURNEYS[0]?.id || 'journey-loan-origination');
   const [context, setContext] = useState<RuntimeContext>({
     customer_data: { credit_score: 750, annual_income: 100000 },
     transaction_data: { amount: 250000, currency: 'USD' },
@@ -45,11 +46,18 @@ export default function RuntimeSimulator() {
   const handleEvaluate = async () => {
     setIsEvaluating(true);
     try {
-      // Mock journey for demonstration
+      // Get selected journey from available journeys
+      const selectedJourney = availableJourneys.find(j => j.id === selectedJourneyId);
+      if (!selectedJourney) {
+        throw new Error('Journey not found');
+      }
+
+      // Build journey object for evaluation
       const baseJourney = {
-        id: selectedJourney,
-        name: 'Loan Origination Journey',
-        phases: ['phase-application', 'phase-assessment', 'phase-approval', 'phase-funding']
+        id: selectedJourney.id,
+        name: selectedJourney.name,
+        description: selectedJourney.description,
+        phases: selectedJourney.phases || []
       };
 
       const response = await fetch(`${API_ENDPOINTS.base}/runtime/evaluate`, {
@@ -133,6 +141,31 @@ export default function RuntimeSimulator() {
           <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: 'var(--spacing-md)', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}>
             Scenario Configuration
           </h3>
+
+          {/* Journey Selection */}
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '8px' }}>
+              Select Journey
+            </label>
+            <select
+              value={selectedJourneyId}
+              onChange={(e) => {
+                setSelectedJourneyId(e.target.value);
+                setEvaluation(null); // Clear previous evaluation
+              }}
+              className="input"
+              style={{ width: '100%' }}
+            >
+              {availableJourneys.map(journey => (
+                <option key={journey.id} value={journey.id}>
+                  {journey.name}
+                </option>
+              ))}
+            </select>
+            <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+              {availableJourneys.find(j => j.id === selectedJourneyId)?.description || 'Select a journey to evaluate'}
+            </p>
+          </div>
 
           {/* Customer Data */}
           <div style={{ marginBottom: 'var(--spacing-lg)' }}>
