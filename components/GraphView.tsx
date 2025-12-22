@@ -41,6 +41,9 @@ const GraphView: React.FC<GraphViewProps> = ({
   const [showModuleGroups, setShowModuleGroups] = useState(false);
   const [highlightedAtoms, setHighlightedAtoms] = useState<Set<string>>(new Set());
   const [contextMenuAtom, setContextMenuAtom] = useState<{ atom: Atom; x: number; y: number } | null>(null);
+  const [atomLimit, setAtomLimit] = useState<number>(50); // Default limit to prevent crowding
+  const [isLimited, setIsLimited] = useState<boolean>(false);
+  const [totalBeforeLimit, setTotalBeforeLimit] = useState<number>(0);
 
   useEffect(() => {
     if (!svgRef.current || atoms.length === 0) return;
@@ -170,6 +173,34 @@ const GraphView: React.FC<GraphViewProps> = ({
     // Apply category filter on top of context filtering
     if (selectedCategory !== 'ALL') {
       filteredAtoms = filteredAtoms.filter(a => a.category === selectedCategory);
+    }
+
+    // Apply intelligent limiting to prevent graph overcrowding
+    setTotalBeforeLimit(filteredAtoms.length);
+    if (filteredAtoms.length > atomLimit && context.mode !== 'impact') {
+      // Prioritize by: 1) Highlighted atoms, 2) CRITICAL atoms, 3) Most connected atoms
+      const prioritized = [...filteredAtoms].sort((a, b) => {
+        // Highlighted first
+        const aHighlighted = highlightedIds.has(a.id) ? 1 : 0;
+        const bHighlighted = highlightedIds.has(b.id) ? 1 : 0;
+        if (aHighlighted !== bHighlighted) return bHighlighted - aHighlighted;
+
+        // Then by criticality
+        const critOrder = { 'CRITICAL': 3, 'HIGH': 2, 'MEDIUM': 1, 'LOW': 0 };
+        const aCrit = critOrder[a.criticality] || 0;
+        const bCrit = critOrder[b.criticality] || 0;
+        if (aCrit !== bCrit) return bCrit - aCrit;
+
+        // Then by connection count
+        const aEdges = (a.edges?.length || 0);
+        const bEdges = (b.edges?.length || 0);
+        return bEdges - aEdges;
+      });
+
+      filteredAtoms = prioritized.slice(0, atomLimit);
+      setIsLimited(true);
+    } else {
+      setIsLimited(false);
     }
 
     setHighlightedAtoms(highlightedIds);
@@ -531,7 +562,42 @@ const GraphView: React.FC<GraphViewProps> = ({
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
+        {/* Limit Warning */}
+        {isLimited && (
+          <div style={{
+            marginBottom: 'var(--spacing-md)',
+            padding: 'var(--spacing-sm)',
+            backgroundColor: '#fef3c7',
+            borderRadius: '6px',
+            border: '1px solid #fbbf24',
+            fontSize: '12px',
+            color: '#92400e',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <strong>Graph Limited:</strong> Showing {atomLimit} of {totalBeforeLimit} atoms (prioritized by criticality & connections)
+            </div>
+            <button
+              onClick={() => setAtomLimit(atomLimit + 50)}
+              style={{
+                padding: '4px 12px',
+                fontSize: '11px',
+                backgroundColor: 'white',
+                border: '1px solid #fbbf24',
+                borderRadius: '4px',
+                color: '#92400e',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}
+            >
+              Show +50 More
+            </button>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center', flexWrap: 'wrap' }}>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -555,6 +621,24 @@ const GraphView: React.FC<GraphViewProps> = ({
             <option value="cluster">Clustered</option>
             <option value="hierarchical">Hierarchical (Modules)</option>
           </select>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+              Atom Limit:
+            </label>
+            <select
+              value={atomLimit}
+              onChange={(e) => setAtomLimit(parseInt(e.target.value))}
+              className="form-input"
+              style={{ width: '100px' }}
+            >
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="999999">All</option>
+            </select>
+          </div>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
             <input
