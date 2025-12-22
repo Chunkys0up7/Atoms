@@ -7,9 +7,17 @@ interface ModuleExplorerProps {
   modules: Module[];
   atoms: Atom[];
   onSelectAtom: (atom: Atom) => void;
+  onNavigateToGraph?: (moduleId: string) => void;
+  selectedModuleId?: string | null;
 }
 
-const ModuleExplorer: React.FC<ModuleExplorerProps> = ({ modules, atoms, onSelectAtom }) => {
+const ModuleExplorer: React.FC<ModuleExplorerProps> = ({
+  modules,
+  atoms,
+  onSelectAtom,
+  onNavigateToGraph,
+  selectedModuleId: initialSelectedModuleId
+}) => {
   const [selectedJourneyId, setSelectedJourneyId] = useState(MOCK_JOURNEYS[0]?.id);
   const [selectedPhaseId, setSelectedPhaseId] = useState(MOCK_PHASES[0]?.id);
   const [selectedModuleId, setSelectedModuleId] = useState(modules[0]?.id);
@@ -134,7 +142,21 @@ const ModuleExplorer: React.FC<ModuleExplorerProps> = ({ modules, atoms, onSelec
         <div style={{ padding: 'var(--spacing-lg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-md)' }}>
             <h3 style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: '600', color: 'var(--color-text-tertiary)', letterSpacing: '0.5px' }}>Module Composition</h3>
-            <span className="badge badge-info">{moduleAtoms.length} Atoms</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span className="badge badge-info">{moduleAtoms.length} Atoms</span>
+              {onNavigateToGraph && selectedModuleId && (
+                <button
+                  onClick={() => onNavigateToGraph(selectedModuleId)}
+                  className="btn btn-sm btn-secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                >
+                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  View Graph
+                </button>
+              )}
+            </div>
           </div>
 
           {moduleAtoms.length > 0 ? (

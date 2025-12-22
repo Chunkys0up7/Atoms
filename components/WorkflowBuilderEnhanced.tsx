@@ -8,12 +8,20 @@ interface WorkflowBuilderProps {
   atoms: Atom[];
   modules: Module[];
   onSelectAtom?: (atom: Atom) => void;
+  onNavigateToGraph?: (journeyId: string) => void;
+  onNavigateToPhase?: (phaseId: string) => void;
 }
 
 type ViewMode = 'journey' | 'phase' | 'module';
 type EditorMode = 'journey' | 'module' | null;
 
-const WorkflowBuilderEnhanced: React.FC<WorkflowBuilderProps> = ({ atoms, modules, onSelectAtom }) => {
+const WorkflowBuilderEnhanced: React.FC<WorkflowBuilderProps> = ({
+  atoms,
+  modules,
+  onSelectAtom,
+  onNavigateToGraph,
+  onNavigateToPhase
+}) => {
   const [viewMode, setViewMode] = useState<ViewMode>('journey');
   const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
@@ -193,6 +201,33 @@ const WorkflowBuilderEnhanced: React.FC<WorkflowBuilderProps> = ({ atoms, module
 
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', gap: '6px' }}>
+                      {onNavigateToGraph && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNavigateToGraph(journey.id);
+                          }}
+                          style={{
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '6px',
+                            padding: '6px 10px',
+                            backgroundColor: '#ffffff',
+                            cursor: 'pointer',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            color: '#10b981',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          title="View in Graph"
+                        >
+                          <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          Graph
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -276,8 +311,38 @@ const WorkflowBuilderEnhanced: React.FC<WorkflowBuilderProps> = ({ atoms, module
                             <div style={{ fontSize: '10px', fontWeight: '600', color: 'var(--color-text-tertiary)', marginBottom: '4px' }}>
                               PHASE {index + 1}
                             </div>
-                            <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onNavigateToPhase) {
+                                  onNavigateToPhase(phase.id);
+                                }
+                              }}
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: 'var(--color-text-primary)',
+                                marginBottom: '4px',
+                                cursor: onNavigateToPhase ? 'pointer' : 'default',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (onNavigateToPhase) {
+                                  e.currentTarget.style.color = 'var(--color-primary)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.color = 'var(--color-text-primary)';
+                              }}
+                            >
                               {phase.name}
+                              {onNavigateToPhase && (
+                                <svg style={{ width: '12px', height: '12px', opacity: 0.5 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              )}
                             </div>
                             <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)', lineHeight: '1.4' }}>
                               {phase.description}

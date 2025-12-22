@@ -9,6 +9,8 @@ interface PhaseExplorerProps {
   atoms: Atom[];
   onPhaseSelect?: (phase: Phase) => void;
   onNavigateToGraph?: (phaseId: string) => void;
+  onNavigateToModule?: (moduleId: string) => void;
+  selectedPhaseId?: string | null;
 }
 
 export default function PhaseExplorer({
@@ -17,7 +19,9 @@ export default function PhaseExplorer({
   modules,
   atoms,
   onPhaseSelect,
-  onNavigateToGraph
+  onNavigateToGraph,
+  onNavigateToModule,
+  selectedPhaseId: initialSelectedPhaseId
 }: PhaseExplorerProps) {
   const [selectedPhase, setSelectedPhase] = useState<Phase | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -328,13 +332,22 @@ export default function PhaseExplorer({
                     {selectedPhaseModules.map(module => {
                       const moduleAtoms = atoms.filter(a => module.atoms.includes(a.id));
                       return (
-                        <div key={module.id} className="p-4 border border-gray-200 rounded-lg hover:border-gray-300">
+                        <div
+                          key={module.id}
+                          className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all"
+                          onClick={() => onNavigateToModule?.(module.id)}
+                        >
                           <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h4 className="font-medium text-gray-900">{module.name}</h4>
-                              <p className="text-sm text-gray-600">{module.description}</p>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-gray-900">{module.name}</h4>
+                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{module.description}</p>
                             </div>
-                            <span className="text-xs text-gray-500">{moduleAtoms.length} atoms</span>
+                            <span className="text-xs text-gray-500 ml-2">{moduleAtoms.length} atoms</span>
                           </div>
                           <p className="text-xs text-gray-500">Owner: {module.owner}</p>
                         </div>

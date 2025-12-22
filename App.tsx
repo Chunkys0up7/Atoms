@@ -13,9 +13,22 @@ import OntologyBrowser from './components/OntologyBrowser';
 import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
+import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
-import { Atom, Module, ViewType, GraphContext } from './types';
+import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
 import './styles.css';
+
+interface NavigationContext {
+  sourceView: ViewType;
+  targetView: ViewType;
+  context?: any;
+}
+
+interface NavigationHistory {
+  view: ViewType;
+  context?: any;
+  timestamp: number;
+}
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>('explorer');
@@ -26,6 +39,10 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [fullAtomData, setFullAtomData] = useState<Atom | null>(null);
   const [graphContext, setGraphContext] = useState<GraphContext>({ mode: 'global' });
+  const [navigationHistory, setNavigationHistory] = useState<NavigationHistory[]>([]);
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
+  const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
 
   // Load data from API on mount
   useEffect(() => {
@@ -118,6 +135,61 @@ const App: React.FC = () => {
     setView('modules');
   };
 
+  // Navigation helper with history tracking
+  const navigateTo = (targetView: ViewType, context?: {
+    atomId?: string;
+    moduleId?: string;
+    phaseId?: string;
+    journeyId?: string;
+    graphContext?: GraphContext;
+  }) => {
+    // Add current view to history
+    setNavigationHistory(prev => [...prev, {
+      view,
+      context: {
+        selectedAtom: selectedAtom?.id,
+        selectedPhaseId,
+        selectedJourneyId,
+        selectedModuleId,
+        graphContext
+      },
+      timestamp: Date.now()
+    }]);
+
+    // Apply new context
+    if (context?.atomId) {
+      const atom = atoms.find(a => a.id === context.atomId);
+      if (atom) handleAtomSelect(atom);
+    }
+    if (context?.moduleId) setSelectedModuleId(context.moduleId);
+    if (context?.phaseId) setSelectedPhaseId(context.phaseId);
+    if (context?.journeyId) setSelectedJourneyId(context.journeyId);
+    if (context?.graphContext) setGraphContext(context.graphContext);
+
+    // Navigate to target view
+    setView(targetView);
+  };
+
+  // Navigate back in history
+  const navigateBack = () => {
+    if (navigationHistory.length === 0) return;
+
+    const previous = navigationHistory[navigationHistory.length - 1];
+    setNavigationHistory(prev => prev.slice(0, -1));
+
+    // Restore previous state
+    if (previous.context?.selectedAtom) {
+      const atom = atoms.find(a => a.id === previous.context.selectedAtom);
+      if (atom) setSelectedAtom(atom);
+    }
+    if (previous.context?.selectedPhaseId) setSelectedPhaseId(previous.context.selectedPhaseId);
+    if (previous.context?.selectedJourneyId) setSelectedJourneyId(previous.context.selectedJourneyId);
+    if (previous.context?.selectedModuleId) setSelectedModuleId(previous.context.selectedModuleId);
+    if (previous.context?.graphContext) setGraphContext(previous.context.graphContext);
+
+    setView(previous.view);
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -144,23 +216,34 @@ const App: React.FC = () => {
       case 'glossary':
         return <Glossary />;
       case 'workflow':
-        return <WorkflowBuilderEnhanced atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+        return <WorkflowBuilderEnhanced
+          atoms={atoms}
+          modules={modules}
+          onSelectAtom={(a) => { handleAtomSelect(a); }}
+          onNavigateToGraph={(journeyId) => navigateTo('graph', { journeyId, graphContext: { mode: 'journey', journeyId } })}
+          onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
+        />;
       case 'phases':
         return <PhaseExplorer
           phases={MOCK_PHASES}
           journeys={MOCK_JOURNEYS}
           modules={modules}
           atoms={atoms}
-          onPhaseSelect={(phase) => console.log('Selected phase:', phase)}
-          onNavigateToGraph={(phaseId) => {
-            setGraphContext({ mode: 'phase', phaseId, showModuleBoundaries: true });
-            setView('graph');
-          }}
+          onPhaseSelect={(phase) => setSelectedPhaseId(phase.id)}
+          onNavigateToGraph={(phaseId) => navigateTo('graph', { phaseId, graphContext: { mode: 'phase', phaseId, showModuleBoundaries: true } })}
+          onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
+          selectedPhaseId={selectedPhaseId}
         />;
       case 'explorer':
         return <AtomExplorer atoms={atoms} modules={modules} onSelect={(a) => { handleAtomSelect(a); }} />;
       case 'modules':
-        return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+        return <ModuleExplorer
+          modules={modules}
+          atoms={atoms}
+          onSelectAtom={(a) => { handleAtomSelect(a); }}
+          onNavigateToGraph={(moduleId) => navigateTo('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
+          selectedModuleId={selectedModuleId}
+        />;
       case 'graph':
         return <GraphView
           atoms={atoms}
@@ -170,6 +253,9 @@ const App: React.FC = () => {
           context={graphContext}
           onSelectAtom={(a) => { handleAtomSelect(a); }}
           onContextChange={(ctx) => setGraphContext(ctx)}
+          onNavigateToJourney={(journeyId) => navigateTo('workflow', { journeyId })}
+          onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
+          onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
         />;
       case 'edges':
         return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
@@ -222,6 +308,24 @@ const App: React.FC = () => {
             </button>
           </div>
         </header>
+
+        <Breadcrumb
+          items={buildBreadcrumbs(
+            view,
+            {
+              selectedAtom,
+              selectedPhaseId,
+              selectedJourneyId,
+              selectedModuleId,
+              phases: MOCK_PHASES,
+              journeys: MOCK_JOURNEYS,
+              modules
+            },
+            navigateTo
+          )}
+          canGoBack={navigationHistory.length > 0}
+          onGoBack={navigateBack}
+        />
 
         <div className="content-area">
           {renderContent()}

@@ -11,6 +11,9 @@ interface GraphViewProps {
   context?: GraphContext;
   onSelectAtom: (atom: Atom) => void;
   onContextChange?: (context: GraphContext) => void;
+  onNavigateToJourney?: (journeyId: string) => void;
+  onNavigateToPhase?: (phaseId: string) => void;
+  onNavigateToModule?: (moduleId: string) => void;
 }
 
 const CATEGORY_COLORS = {
@@ -26,7 +29,10 @@ const GraphView: React.FC<GraphViewProps> = ({
   journeys = [],
   context = { mode: 'global' },
   onSelectAtom,
-  onContextChange
+  onContextChange,
+  onNavigateToJourney,
+  onNavigateToPhase,
+  onNavigateToModule
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -34,6 +40,7 @@ const GraphView: React.FC<GraphViewProps> = ({
   const [layoutMode, setLayoutMode] = useState<'force' | 'radial' | 'cluster' | 'hierarchical'>('force');
   const [showModuleGroups, setShowModuleGroups] = useState(false);
   const [highlightedAtoms, setHighlightedAtoms] = useState<Set<string>>(new Set());
+  const [contextMenuAtom, setContextMenuAtom] = useState<{ atom: Atom; x: number; y: number } | null>(null);
 
   useEffect(() => {
     if (!svgRef.current || atoms.length === 0) return;
@@ -368,7 +375,17 @@ const GraphView: React.FC<GraphViewProps> = ({
         }) as any
       )
       .on('click', (event, d: any) => {
+        event.stopPropagation();
         onSelectAtom(d.atom);
+      })
+      .on('contextmenu', (event, d: any) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setContextMenuAtom({
+          atom: d.atom,
+          x: event.pageX,
+          y: event.pageY
+        });
       });
 
     // Node circles with context-aware styling
@@ -598,6 +615,183 @@ const GraphView: React.FC<GraphViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenuAtom && (
+        <>
+          {/* Backdrop to close context menu */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999
+            }}
+            onClick={() => setContextMenuAtom(null)}
+          />
+
+          {/* Context Menu */}
+          <div
+            style={{
+              position: 'fixed',
+              top: contextMenuAtom.y,
+              left: contextMenuAtom.x,
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '1px solid var(--color-border)',
+              minWidth: '200px',
+              zIndex: 1000,
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Menu Header */}
+            <div style={{
+              padding: '12px',
+              borderBottom: '1px solid var(--color-border)',
+              backgroundColor: '#f8fafc'
+            }}>
+              <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text)' }}>
+                {contextMenuAtom.atom.name}
+              </div>
+              <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                {contextMenuAtom.atom.type}
+              </div>
+            </div>
+
+            {/* Menu Items */}
+            <div style={{ padding: '4px' }}>
+              {/* View Impact */}
+              <button
+                onClick={() => {
+                  if (onContextChange) {
+                    onContextChange({
+                      mode: 'impact',
+                      atomId: contextMenuAtom.atom.id,
+                      depth: 2,
+                      direction: 'both'
+                    });
+                  }
+                  setContextMenuAtom(null);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  textAlign: 'left',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                View Impact Analysis
+              </button>
+
+              {/* Navigate to Module */}
+              {contextMenuAtom.atom.moduleId && onNavigateToModule && (
+                <button
+                  onClick={() => {
+                    onNavigateToModule(contextMenuAtom.atom.moduleId!);
+                    setContextMenuAtom(null);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    fontSize: '13px',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  View Module
+                </button>
+              )}
+
+              {/* Navigate to Phase */}
+              {contextMenuAtom.atom.phaseId && onNavigateToPhase && (
+                <button
+                  onClick={() => {
+                    onNavigateToPhase(contextMenuAtom.atom.phaseId!);
+                    setContextMenuAtom(null);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    fontSize: '13px',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  View Phase
+                </button>
+              )}
+
+              <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '4px 0' }}></div>
+
+              {/* View Details */}
+              <button
+                onClick={() => {
+                  onSelectAtom(contextMenuAtom.atom);
+                  setContextMenuAtom(null);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  textAlign: 'left',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                View Details
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
