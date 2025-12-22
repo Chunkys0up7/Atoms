@@ -14,6 +14,7 @@ import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
 import RuntimeSimulator from './components/RuntimeSimulator';
+import LineageViewer from './components/LineageViewer';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
@@ -44,6 +45,7 @@ const App: React.FC = () => {
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
   const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [showLineageViewer, setShowLineageViewer] = useState<boolean>(false);
 
   // Load data from API on mount
   useEffect(() => {
@@ -609,8 +611,18 @@ const App: React.FC = () => {
 
               <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }}>
                 <button
-                  onClick={() => { setView('impact'); setSelectedAtom(null); setFullAtomData(null); }}
+                  onClick={() => setShowLineageViewer(true)}
                   className="btn btn-primary"
+                  style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
+                >
+                  <svg style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle', marginRight: '6px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  View History
+                </button>
+                <button
+                  onClick={() => { setView('impact'); setSelectedAtom(null); setFullAtomData(null); }}
+                  className="btn"
                   style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
                 >
                   View Impact Analysis
@@ -626,6 +638,14 @@ const App: React.FC = () => {
             </div>
           );
         })()}
+
+        {/* Lineage Viewer Modal */}
+        {showLineageViewer && selectedAtom && (
+          <LineageViewer
+            atomId={selectedAtom.id}
+            onClose={() => setShowLineageViewer(false)}
+          />
+        )}
       </main>
     </div>
   );
