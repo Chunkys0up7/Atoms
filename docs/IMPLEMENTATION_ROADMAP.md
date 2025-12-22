@@ -1,17 +1,18 @@
 # GNDP Implementation Roadmap
 **Living Knowledge Graph: From Foundation to Intelligence**
 
-## ✅ Priorities 1-4, 6-7 Complete! (2025-12-22)
+## ✅ Priorities 1-7 Complete! (2025-12-22)
 
 **What was built:**
 1. ✅ **PhaseExplorer** - Complete CRUD UI for phases (Priority 1)
 2. ✅ **Enhanced GraphView** - 6 context modes with intelligent filtering (Priority 2)
 3. ✅ **Cross-view Navigation** - Full navigation integration with breadcrumbs and context menu (Priority 3)
 4. ✅ **Module Boundaries** - Visual grouping in all graph layouts (Priority 4)
-5. ✅ **Graph Performance** - Intelligent atom limiting to prevent overcrowding
+5. ✅ **Git Lineage & Ownership** - Full change tracking and attribution (Priority 5)
 6. ✅ **Risk/Compliance Overlay** - Visual badges for quality metrics (Priority 6)
-7. ✅ **UX Improvements** - Reorganized sidebar for better information architecture
-8. ✅ **Dynamic Process Rewriting Engine** - Runtime workflow adaptation system (Priority 7)
+7. ✅ **Dynamic Process Rewriting Engine** - Runtime workflow adaptation system (Priority 7)
+8. ✅ **Graph Performance** - Intelligent atom limiting to prevent overcrowding
+9. ✅ **UX Improvements** - Reorganized sidebar for better information architecture
 
 **Key achievements:**
 - Filled the "phase gap" in Atom → Module → Phase → Journey hierarchy
@@ -28,25 +29,28 @@
 - **Risk badges** with exclamation marks for critical atoms
 - **Runtime engine with 4 rule types** for dynamic workflow modification
 - **Interactive simulator** with real journey data integration
+- **Git lineage tracking** showing who created/modified each atom
+- **LineageViewer component** with timeline and diff views
+- **Full commit history** with author attribution and timestamps
 
-**Current State:** From 50% → 85% overall completion
+**Current State:** From 50% → 88% overall completion
 
 ---
 
-## Current State Assessment (85% Complete) - UPDATED 2025-12-22
+## Current State Assessment (88% Complete) - UPDATED 2025-12-22
 
 ### Architectural Objectives Progress
 
 | Objective | Status | Current % | What Works | What's Missing |
 |-----------|--------|-----------|------------|----------------|
 | **Docs are Code** | 🟡 Partial | 70% | ✓ YAML atoms with versioning<br>✓ Git-based change tracking<br>✓ JSON Schema validation | ❌ No automated testing framework<br>❌ No deployment pipeline<br>❌ No validation in CI/CD |
-| **Atoms + Molecules + Workflows** | 🟢 Excellent | 98% | ✓ Well-defined atom model (124 atoms)<br>✓ Module (molecule) builder UI<br>✓ Journey editor with inline phase creation<br>✓ **PhaseExplorer with full CRUD**<br>✓ **Full cross-view navigation**<br>✓ **Breadcrumb trail with history**<br>✓ **Intelligent graph limiting**<br>✓ **Module boundaries in all layouts** (NEW) | ✓ Fully complete |
-| **Ontology Ownership** | 🟡 Partial | 50% | ✓ Owner/steward fields in data model<br>✓ OntologySchemaEditor for domains/constraints<br>✓ Domain definitions | ❌ **No git lineage tracking**<br>❌ No change attribution UI<br>❌ No ownership history |
-| **Dynamic Process Rewriting** | 🟡 Foundation | 45% | ✓ Data structure supports it<br>✓ **Runtime engine with rule evaluation**<br>✓ **4 rule types implemented**<br>✓ **RuntimeSimulator UI with journey selector** (NEW)<br>✓ **REST API endpoints**<br>✓ **Risk scoring system**<br>✓ **Connected to real journey data** (NEW) | ❌ **Limited to 4 example rules**<br>❌ No rule builder UI<br>❌ No rule persistence/management |
-| **Risk-Aware CI/CD** | 🟢 Strong | 85% | ✓ Claude-powered PR analysis (.github/workflows/pr-analysis.yml)<br>✓ impact_analysis.py with risk scoring<br>✓ Automated issue creation<br>✓ **Compliance badges in graph** (NEW)<br>✓ **Risk badges for critical atoms** (NEW)<br>✓ **Visual quality metrics** (NEW) | ❌ No control validation automation |
-| **System Thinking** | 🟢 Excellent | 96% | ✓ Graph data structure with edges<br>✓ D3 visualization (GraphView.tsx)<br>✓ Multiple layout modes<br>✓ **6 context modes**: global/journey/phase/module/impact/risk<br>✓ **Impact propagation visualization**<br>✓ **Risk overlay with criticality coloring**<br>✓ **Right-click context menu for navigation**<br>✓ **Context-aware filtering and highlighting**<br>✓ **Intelligent atom limiting with priority ranking**<br>✓ **Configurable display limits (25/50/100/200/All)**<br>✓ **Module boundaries with auto-highlighting** (NEW)<br>✓ **Compliance score badges** (NEW)<br>✓ **Risk warning badges** (NEW) | ⚠️ No feedback loop visualization |
+| **Atoms + Molecules + Workflows** | 🟢 Excellent | 98% | ✓ Well-defined atom model (124 atoms)<br>✓ Module (molecule) builder UI<br>✓ Journey editor with inline phase creation<br>✓ **PhaseExplorer with full CRUD**<br>✓ **Full cross-view navigation**<br>✓ **Breadcrumb trail with history**<br>✓ **Intelligent graph limiting**<br>✓ **Module boundaries in all layouts** | ✓ Fully complete |
+| **Ontology Ownership** | 🟢 Strong | 85% | ✓ Owner/steward fields in data model<br>✓ OntologySchemaEditor for domains/constraints<br>✓ Domain definitions<br>✓ **Git lineage tracking with full commit history** (NEW)<br>✓ **LineageViewer with timeline and diffs** (NEW)<br>✓ **Author attribution and timestamps** (NEW)<br>✓ **Creator and last modifier tracking** (NEW) | ⚠️ No bulk ownership reporting UI |
+| **Dynamic Process Rewriting** | 🟡 Foundation | 45% | ✓ Data structure supports it<br>✓ **Runtime engine with rule evaluation**<br>✓ **4 rule types implemented**<br>✓ **RuntimeSimulator UI with journey selector**<br>✓ **REST API endpoints**<br>✓ **Risk scoring system**<br>✓ **Connected to real journey data** | ❌ **Limited to 4 example rules**<br>❌ No rule builder UI<br>❌ No rule persistence/management |
+| **Risk-Aware CI/CD** | 🟢 Strong | 85% | ✓ Claude-powered PR analysis (.github/workflows/pr-analysis.yml)<br>✓ impact_analysis.py with risk scoring<br>✓ Automated issue creation<br>✓ **Compliance badges in graph**<br>✓ **Risk badges for critical atoms**<br>✓ **Visual quality metrics** | ❌ No control validation automation |
+| **System Thinking** | 🟢 Excellent | 96% | ✓ Graph data structure with edges<br>✓ D3 visualization (GraphView.tsx)<br>✓ Multiple layout modes<br>✓ **6 context modes**: global/journey/phase/module/impact/risk<br>✓ **Impact propagation visualization**<br>✓ **Risk overlay with criticality coloring**<br>✓ **Right-click context menu for navigation**<br>✓ **Context-aware filtering and highlighting**<br>✓ **Intelligent atom limiting with priority ranking**<br>✓ **Configurable display limits (25/50/100/200/All)**<br>✓ **Module boundaries with auto-highlighting**<br>✓ **Compliance score badges**<br>✓ **Risk warning badges** | ⚠️ No feedback loop visualization |
 
-**Overall Completion: 85%** - Strong foundations + full navigation + contextual intelligence + performance optimization + runtime foundation + visual quality metrics
+**Overall Completion: 88%** - Strong foundations + full navigation + contextual intelligence + performance optimization + runtime foundation + visual quality metrics + ownership tracking
 
 ---
 
