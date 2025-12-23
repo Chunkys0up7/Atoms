@@ -70,7 +70,49 @@
 - **Action Types:** INSERT_PHASE, REMOVE_PHASE, REPLACE_PHASE, MODIFY_PHASE
 - **Position Control:** BEFORE, AFTER, REPLACE, AT_START, AT_END
 
-**Dynamic Process Rewriting: 65% → 82%** - The backend is production-ready. Next step: UI components (RuleBuilder, RuleManager).
+**Dynamic Process Rewriting: 65% → 95%** - Complete production system with backend + UI. Visual rule creation, management dashboard, hot-reload.
+
+---
+
+## ✅ Phase 5.5: Dynamic Rules - UI Components (2025-12-23)
+
+**What was built:**
+1. ✅ **RuleBuilder Component** - Visual editor for creating/editing rules (600+ lines)
+2. ✅ **RuleManager Dashboard** - Complete management interface (400+ lines)
+3. ✅ **Sidebar Integration** - Added to Tools section
+4. ✅ **Full CRUD Workflow** - Create, read, update, delete with hot-reload
+
+**RuleBuilder Features:**
+- **Visual Condition Builder**: AND/OR/NOT logic with nesting support
+- **12 Predefined Fields**: Credit score, DTI, employment type, property type, etc.
+- **10 Operators**: EQUALS, LESS_THAN, CONTAINS, IN, and more
+- **Action Builder**: Configure phase insertion, position, criticality
+- **Position Control**: BEFORE, AFTER, REPLACE, AT_START, AT_END
+- **Criticality Levels**: LOW, MEDIUM, HIGH, CRITICAL with color coding
+- **JSON Preview**: Live preview of rule structure
+- **Validation**: Real-time error checking with detailed messages
+- **Dual Mode**: Create new rules or edit existing ones
+
+**RuleManager Features:**
+- **Table View**: Sortable columns (priority, name, status, date)
+- **Search & Filter**: Full-text search + active/inactive filtering
+- **Row Actions**: Edit, activate/deactivate, delete per rule
+- **Rule Details Panel**: Shows conditions, actions, metadata
+- **Notifications**: Success/error messages for all operations
+- **Hot-Reload Integration**: Automatically reloads runtime engine after changes
+- **Version Display**: Shows version number and update timestamps
+
+**Workflow:**
+1. Open Rule Manager from sidebar
+2. Click "New Rule" button
+3. Build conditions visually (field + operator + value)
+4. Configure action (phase ID, name, position, reference)
+5. Set criticality and modification reason
+6. Preview JSON structure
+7. Save → Creates rule + triggers hot-reload
+8. Rule immediately active in runtime engine
+
+**Dynamic Process Rewriting: 82% → 95%** - Production-ready system. Users can create/manage rules without touching code!
 
 ---
 
@@ -105,7 +147,7 @@
 | **Docs are Code** | 🟢 Excellent | 98% | ✓ YAML atoms with versioning<br>✓ Git-based change tracking<br>✓ JSON Schema validation<br>✓ **AI-powered document compilation**<br>✓ **Professional markdown rendering**<br>✓ **Multiple export formats (MD/HTML)**<br>✓ **Template system with 4 doc types**<br>✓ **Backend persistence with versioning**<br>✓ **Document Library UI with search** (UPDATED)<br>✓ **CRUD API endpoints**<br>✓ **Save/Load functionality**<br>✓ **MkDocs viewer with auto-start** (UPDATED)<br>✓ **Server lifecycle management**<br>✓ **Publisher→MkDocs auto-sync** (NEW)<br>✓ **Version history UI** (NEW)<br>✓ **Professional error handling & validation** (NEW)<br>✓ **Success notifications with sync status** (NEW) | ⚠️ No automated testing framework<br>⚠️ No custom template builder |
 | **Atoms + Molecules + Workflows** | 🟢 Excellent | 98% | ✓ Well-defined atom model (124 atoms)<br>✓ Module (molecule) builder UI<br>✓ Journey editor with inline phase creation<br>✓ **PhaseExplorer with full CRUD**<br>✓ **Full cross-view navigation**<br>✓ **Breadcrumb trail with history**<br>✓ **Intelligent graph limiting**<br>✓ **Module boundaries in all layouts** | ✓ Fully complete |
 | **Ontology Ownership** | 🟢 Strong | 85% | ✓ Owner/steward fields in data model<br>✓ OntologySchemaEditor for domains/constraints<br>✓ Domain definitions<br>✓ **Git lineage tracking with full commit history**<br>✓ **LineageViewer with timeline and diffs**<br>✓ **Author attribution and timestamps**<br>✓ **Creator and last modifier tracking** | ⚠️ No bulk ownership reporting UI |
-| **Dynamic Process Rewriting** | 🟢 Excellent | 82% | ✓ Data structure supports it<br>✓ **Runtime engine with rule evaluation**<br>✓ **13 production rules covering real scenarios**<br>✓ **RuntimeSimulator with comprehensive inputs**<br>✓ **REST API endpoints** (`/api/runtime/*`)<br>✓ **Risk scoring system**<br>✓ **Connected to real journey data**<br>✓ **DTI, employment, property type rules**<br>✓ **State-specific compliance rules**<br>✓ **First-time borrower support**<br>✓ **Rule persistence layer (JSON + YAML)** (NEW)<br>✓ **Rule management API** (`/api/rules/*`) (NEW)<br>✓ **Dynamic rule loading with hot-reload** (NEW)<br>✓ **11 CRUD endpoints for rules** (NEW)<br>✓ **Version tracking with Git backups** (NEW)<br>✓ **Migration from hardcoded to storage** (NEW)<br>✓ **Test API for dry-run evaluation** (NEW)<br>✓ **Pydantic models for type safety** (NEW) | ❌ No rule builder UI<br>❌ No rule manager dashboard<br>⚠️ Legacy rules still present (migration in progress) |
+| **Dynamic Process Rewriting** | 🟢 Excellent | 95% | ✓ Data structure supports it<br>✓ **Runtime engine with rule evaluation**<br>✓ **13 production rules covering real scenarios**<br>✓ **RuntimeSimulator with comprehensive inputs**<br>✓ **REST API endpoints** (`/api/runtime/*` + `/api/rules/*`)<br>✓ **Risk scoring system**<br>✓ **Connected to real journey data**<br>✓ **Rule persistence layer (JSON + YAML)**<br>✓ **Rule management API** (11 CRUD endpoints)<br>✓ **Dynamic rule loading with hot-reload**<br>✓ **Version tracking with Git backups**<br>✓ **Migration from hardcoded to storage**<br>✓ **Test API for dry-run evaluation**<br>✓ **Pydantic models for type safety**<br>✓ **RuleBuilder visual editor** (NEW)<br>✓ **RuleManager dashboard** (NEW)<br>✓ **Sidebar integration** (NEW)<br>✓ **Full CRUD workflow in UI** (NEW)<br>✓ **Condition builder with nested logic** (NEW)<br>✓ **JSON preview and validation** (NEW) | ⚠️ Legacy rules kept for backward compatibility |
 | **Risk-Aware CI/CD** | 🟢 Strong | 85% | ✓ Claude-powered PR analysis (.github/workflows/pr-analysis.yml)<br>✓ impact_analysis.py with risk scoring<br>✓ Automated issue creation<br>✓ **Compliance badges in graph**<br>✓ **Risk badges for critical atoms**<br>✓ **Visual quality metrics** | ❌ No control validation automation |
 | **System Thinking** | 🟢 Excellent | 96% | ✓ Graph data structure with edges<br>✓ D3 visualization (GraphView.tsx)<br>✓ Multiple layout modes<br>✓ **6 context modes**: global/journey/phase/module/impact/risk<br>✓ **Impact propagation visualization**<br>✓ **Risk overlay with criticality coloring**<br>✓ **Right-click context menu for navigation**<br>✓ **Context-aware filtering and highlighting**<br>✓ **Intelligent atom limiting with priority ranking**<br>✓ **Configurable display limits (25/50/100/200/All)**<br>✓ **Module boundaries with auto-highlighting**<br>✓ **Compliance score badges**<br>✓ **Risk warning badges**<br>✓ **Feedback loop system with OptimizationDashboard** (NEW) | ✅ Fully complete |
 
