@@ -17,12 +17,24 @@ interface DocumentLibraryProps {
   moduleId?: string;
 }
 
+interface DocumentVersion {
+  timestamp: string;
+  version: number;
+  updated_at: string;
+  title: string;
+  size: number;
+}
+
 const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, moduleId }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [filterTemplateType, setFilterTemplateType] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [versions, setVersions] = useState<DocumentVersion[]>([]);
+  const [showVersions, setShowVersions] = useState(false);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   useEffect(() => {
     loadDocuments();
@@ -62,12 +74,39 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
 
       const doc = await response.json();
       setSelectedDoc(doc);
+      setShowVersions(false);
+      setVersions([]);
 
       if (onLoadDocument) {
         onLoadDocument(doc);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load document');
+    }
+  };
+
+  const loadVersionHistory = async (docId: string) => {
+    // Toggle off if already showing
+    if (showVersions) {
+      setShowVersions(false);
+      return;
+    }
+
+    setLoadingVersions(true);
+    try {
+      const response = await fetch(`http://localhost:8000/api/documents/${docId}/versions`);
+
+      if (!response.ok) {
+        throw new Error('Failed to load version history');
+      }
+
+      const data = await response.json();
+      setVersions(data.versions || []);
+      setShowVersions(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load version history');
+    } finally {
+      setLoadingVersions(false);
     }
   };
 
@@ -146,6 +185,17 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
     }
   };
 
+  const filteredDocuments = documents.filter(doc => {
+    if (!searchQuery) return true;
+
+    const query = searchQuery.toLowerCase();
+    const titleMatch = doc.title.toLowerCase().includes(query);
+    const contentMatch = doc.content?.toLowerCase().includes(query);
+    const moduleMatch = doc.module_id.toLowerCase().includes(query);
+
+    return titleMatch || contentMatch || moduleMatch;
+  });
+
   if (isLoading) {
     return (
       <div style={{ padding: 'var(--spacing-xl)', textAlign: 'center' }}>
@@ -182,27 +232,97 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
             Document Library
           </h2>
 
+          {/* Search */}
+          <div style={{ position: 'relative', marginBottom: 'var(--spacing-sm)' }}>
+            <svg
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '16px',
+                height: '16px',
+                color: 'var(--color-text-tertiary)',
+                pointerEvents: 'none'
+              }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search documents by title, module, or content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px 8px 36px',
+                fontSize: '13px',
+                border: '1px solid var(--color-border)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--color-bg-secondary)',
+                color: 'var(--color-text-primary)',
+                outline: 'none'
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  padding: '4px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  color: 'var(--color-text-tertiary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Clear search"
+              >
+                <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
           {/* Filter */}
-          <select
-            value={filterTemplateType}
-            onChange={(e) => setFilterTemplateType(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              fontSize: '13px',
-              border: '1px solid var(--color-border)',
-              borderRadius: '6px',
-              backgroundColor: 'var(--color-bg-secondary)',
-              color: 'var(--color-text-primary)',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="">All Templates</option>
-            <option value="SOP">Standard Operating Procedure</option>
-            <option value="TECHNICAL_DESIGN">Technical Design</option>
-            <option value="EXECUTIVE_SUMMARY">Executive Summary</option>
-            <option value="COMPLIANCE_AUDIT">Compliance Audit</option>
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+            <select
+              value={filterTemplateType}
+              onChange={(e) => setFilterTemplateType(e.target.value)}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                fontSize: '13px',
+                border: '1px solid var(--color-border)',
+                borderRadius: '6px',
+                backgroundColor: 'var(--color-bg-secondary)',
+                color: 'var(--color-text-primary)',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="">All Templates</option>
+              <option value="SOP">Standard Operating Procedure</option>
+              <option value="TECHNICAL_DESIGN">Technical Design</option>
+              <option value="EXECUTIVE_SUMMARY">Executive Summary</option>
+              <option value="COMPLIANCE_AUDIT">Compliance Audit</option>
+            </select>
+            <div style={{
+              fontSize: '12px',
+              color: 'var(--color-text-tertiary)',
+              whiteSpace: 'nowrap'
+            }}>
+              {filteredDocuments.length} of {documents.length}
+            </div>
+          </div>
         </div>
 
         {/* Error */}
@@ -227,17 +347,19 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
           flexDirection: 'column',
           gap: 'var(--spacing-sm)'
         }}>
-          {documents.length === 0 ? (
+          {filteredDocuments.length === 0 ? (
             <div style={{
               padding: 'var(--spacing-xl)',
               textAlign: 'center',
               color: 'var(--color-text-secondary)',
               fontSize: '14px'
             }}>
-              No documents found. Create your first document using the Publisher.
+              {documents.length === 0
+                ? 'No documents found. Create your first document using the Publisher.'
+                : `No documents match "${searchQuery}". Try a different search term.`}
             </div>
           ) : (
-            documents.map((doc) => (
+            filteredDocuments.map((doc) => (
               <div
                 key={doc.id}
                 onClick={() => loadDocumentDetails(doc.id)}
@@ -337,6 +459,23 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
             </div>
             <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
               <button
+                onClick={() => loadVersionHistory(selectedDoc.id)}
+                disabled={loadingVersions}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  color: showVersions ? 'white' : 'var(--color-text-primary)',
+                  backgroundColor: showVersions ? 'var(--color-primary)' : 'var(--color-bg-secondary)',
+                  border: `1px solid ${showVersions ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                  borderRadius: '6px',
+                  cursor: loadingVersions ? 'wait' : 'pointer',
+                  opacity: loadingVersions ? 0.6 : 1
+                }}
+              >
+                {loadingVersions ? 'Loading...' : showVersions ? 'Hide History' : 'View History'}
+              </button>
+              <button
                 onClick={() => downloadDocument(selectedDoc.id, 'markdown')}
                 style={{
                   padding: '8px 12px',
@@ -384,7 +523,7 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
             </div>
           </div>
 
-          {/* Content Preview */}
+          {/* Content Preview or Version History */}
           <div style={{
             flex: 1,
             overflow: 'auto',
@@ -393,15 +532,82 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
             borderRadius: '6px',
             border: '1px solid var(--color-border)'
           }}>
-            <pre style={{
-              whiteSpace: 'pre-wrap',
-              fontSize: '13px',
-              lineHeight: '1.6',
-              margin: 0,
-              color: 'var(--color-text-primary)'
-            }}>
-              {selectedDoc.content || 'No content available'}
-            </pre>
+            {showVersions ? (
+              // Version History View
+              <div>
+                <h4 style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  marginBottom: 'var(--spacing-md)',
+                  color: 'var(--color-text-primary)'
+                }}>
+                  Version History ({versions.length} versions)
+                </h4>
+
+                {versions.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: 'var(--spacing-xl)',
+                    color: 'var(--color-text-secondary)',
+                    fontSize: '13px'
+                  }}>
+                    No version history available for this document.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+                    {versions.map((version, index) => (
+                      <div
+                        key={version.timestamp}
+                        style={{
+                          padding: 'var(--spacing-md)',
+                          backgroundColor: 'var(--color-bg-tertiary)',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: '6px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <div>
+                            <div style={{
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              color: 'var(--color-text-primary)',
+                              marginBottom: '4px'
+                            }}>
+                              {index === 0 ? '📌 ' : ''}Version {version.version}
+                              {index === 0 && ' (Latest)'}
+                            </div>
+                            <div style={{
+                              fontSize: '12px',
+                              color: 'var(--color-text-secondary)',
+                              marginBottom: '4px'
+                            }}>
+                              {version.title}
+                            </div>
+                            <div style={{
+                              fontSize: '11px',
+                              color: 'var(--color-text-tertiary)'
+                            }}>
+                              Saved {formatDate(version.updated_at)} • {(version.size / 1024).toFixed(1)} KB
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Document Content Preview
+              <pre style={{
+                whiteSpace: 'pre-wrap',
+                fontSize: '13px',
+                lineHeight: '1.6',
+                margin: 0,
+                color: 'var(--color-text-primary)'
+              }}>
+                {selectedDoc.content || 'No content available'}
+              </pre>
+            )}
           </div>
         </div>
       )}

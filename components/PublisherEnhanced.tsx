@@ -73,6 +73,7 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [savedDocId, setSavedDocId] = useState<string | null>(null);
+  const [mkdocsPath, setMkdocsPath] = useState<string | null>(null);
   const [documentTitle, setDocumentTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [compileError, setCompileError] = useState<string | null>(null);
@@ -283,10 +284,16 @@ ${compiledText.split('\n').map(line => {
       setSaveSuccess(true);
       setSavedDocId(savedDoc.id);
 
+      // Capture MkDocs sync result
+      if (savedDoc.mkdocs_sync?.mkdocs_path) {
+        setMkdocsPath(savedDoc.mkdocs_sync.mkdocs_path);
+      }
+
       // Auto-clear success message after 5 seconds
       setTimeout(() => {
         setSaveSuccess(false);
         setSavedDocId(null);
+        setMkdocsPath(null);
       }, 5000);
     } catch (err) {
       console.error('Save error:', err);
@@ -493,11 +500,16 @@ ${compiledText.split('\n').map(line => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '13px', fontWeight: '600', color: '#0a0', marginBottom: '4px' }}>Document Saved Successfully!</div>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#0a0', marginBottom: '4px' }}>Document Saved & Published!</div>
               <div style={{ fontSize: '13px', color: '#060' }}>
-                Your document has been saved to the library.
+                Your document has been saved to the library{mkdocsPath && ' and synced to MkDocs'}.
                 {savedDocId && (
                   <span> Document ID: <code style={{ fontSize: '12px', backgroundColor: '#dfd', padding: '2px 6px', borderRadius: '3px' }}>{savedDocId}</code></span>
+                )}
+                {mkdocsPath && (
+                  <div style={{ marginTop: '4px', fontSize: '12px' }}>
+                    📚 Published to: <code style={{ fontSize: '11px', backgroundColor: '#dfd', padding: '2px 6px', borderRadius: '3px' }}>{mkdocsPath}</code>
+                  </div>
                 )}
               </div>
             </div>

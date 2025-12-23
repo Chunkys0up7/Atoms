@@ -6,6 +6,8 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
 import hashlib
+import shutil
+import yaml
 
 router = APIRouter()
 
@@ -36,6 +38,72 @@ def get_document_path(doc_id: str) -> Path:
     """Get the file path for a document."""
     docs_dir = get_docs_dir()
     return docs_dir / f"{doc_id}.json"
+
+
+def get_mkdocs_dir() -> Path:
+    """Get the MkDocs docs directory."""
+    base = Path(__file__).parent.parent.parent / "docs"
+    return base
+
+
+def get_mkdocs_generated_docs_dir() -> Path:
+    """Get the MkDocs generated/published directory."""
+    base = get_mkdocs_dir() / "generated" / "published"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def sync_document_to_mkdocs(doc_id: str) -> Dict[str, str]:
+    """Sync a document to MkDocs published folder."""
+    # Load document
+    doc_path = get_document_path(doc_id)
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        with open(doc_path, "r", encoding="utf-8") as f:
+            document = json.load(f)
+
+        # Get target directory
+        published_dir = get_mkdocs_generated_docs_dir()
+
+        # Create filename from title (sanitize for filesystem)
+        title = document.get('title', doc_id)
+        safe_filename = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in title)
+        safe_filename = safe_filename.replace(' ', '_').lower()
+
+        # Add template type prefix
+        template_prefix = document.get('template_type', 'doc').lower()
+        md_filename = f"{template_prefix}_{safe_filename}.md"
+
+        target_path = published_dir / md_filename
+
+        # Add frontmatter to content
+        frontmatter = f"""---
+title: {document.get('title', 'Untitled')}
+template_type: {document.get('template_type', 'unknown')}
+module: {document.get('module_id', 'unknown')}
+created: {document.get('created_at', 'unknown')}
+updated: {document.get('updated_at', 'unknown')}
+version: {document.get('version', 1)}
+atoms: {len(document.get('atom_ids', []))}
+---
+
+"""
+        content_with_frontmatter = frontmatter + document.get('content', '')
+
+        # Write to MkDocs
+        with open(target_path, "w", encoding="utf-8") as f:
+            f.write(content_with_frontmatter)
+
+        return {
+            'status': 'synced',
+            'doc_id': doc_id,
+            'mkdocs_path': str(target_path.relative_to(get_mkdocs_dir()))
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to sync document: {str(e)}")
 
 
 def generate_doc_id(title: str, module_id: str) -> str:
@@ -153,6 +221,15 @@ def create_document(doc: CreateDocumentRequest) -> Dict[str, Any]:
 
         # Save initial version
         save_version(doc_id, document)
+
+        # Auto-sync to MkDocs
+        try:
+            sync_result = sync_document_to_mkdocs(doc_id)
+            document['mkdocs_sync'] = sync_result
+        except Exception as sync_error:
+            # Log but don't fail the document creation
+            print(f"Warning: Failed to sync document to MkDocs: {sync_error}")
+            document['mkdocs_sync'] = {'status': 'failed', 'error': str(sync_error)}
 
         return document
     except Exception as e:
@@ -312,3 +389,33 @@ def export_document_html(doc_id: str) -> str:
 </html>"""
 
     return html
+
+
+@router.post("/api/documents/{doc_id}/sync")
+def sync_document(doc_id: str) -> Dict[str, Any]:
+    """Sync a document to MkDocs published folder."""
+    return sync_document_to_mkdocs(doc_id)
+
+
+@router.post("/api/documents/sync-all")
+def sync_all_documents() -> Dict[str, Any]:
+    """Sync all documents to MkDocs published folder."""
+    docs_dir = get_docs_dir()
+    synced = []
+    failed = []
+
+    for doc_file in docs_dir.glob("*.json"):
+        doc_id = doc_file.stem
+        try:
+            result = sync_document_to_mkdocs(doc_id)
+            synced.append(result)
+        except Exception as e:
+            failed.append({'doc_id': doc_id, 'error': str(e)})
+
+    return {
+        'status': 'completed',
+        'synced': len(synced),
+        'failed': len(failed),
+        'results': synced,
+        'errors': failed
+    }

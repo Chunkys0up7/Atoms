@@ -115,6 +115,9 @@ nav:
       - Knowledge Graph: generated/modules/knowledge_graph/index.md
       - AI Agent: generated/modules/ai_agent/index.md
   - Graph Visualization: graph.md
+  - Published Documents:
+      - Overview: generated/published/index.md
+      - Documents: generated/published/
   - Documentation:
       - Architecture: docs/GNDP-Architecture.md
       - Action Plan: docs/ACTION_PLAN.md

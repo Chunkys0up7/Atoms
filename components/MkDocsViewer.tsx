@@ -14,10 +14,19 @@ const MkDocsViewer: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [hasAttemptedAutoStart, setHasAttemptedAutoStart] = useState(false);
 
   useEffect(() => {
     checkStatus();
   }, []);
+
+  // Auto-start MkDocs server when component mounts and server is not running
+  useEffect(() => {
+    if (!isLoading && status && !status.running && !hasAttemptedAutoStart && !isStarting) {
+      setHasAttemptedAutoStart(true);
+      startMkDocs();
+    }
+  }, [status, isLoading, hasAttemptedAutoStart, isStarting]);
 
   const checkStatus = async () => {
     setIsLoading(true);
@@ -170,7 +179,9 @@ const MkDocsViewer: React.FC = () => {
           maxWidth: '500px',
           lineHeight: '1.6'
         }}>
-          The documentation site is not currently running. Click the button below to start the MkDocs development server.
+          {isStarting
+            ? 'Starting the MkDocs development server...'
+            : 'The documentation site is not currently running. Click the button below to start the MkDocs development server.'}
         </p>
 
         {error && (
