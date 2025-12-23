@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-from routes import graph, atoms, modules, rag, runtime, lineage
+from routes import graph, atoms, modules, rag, runtime, lineage, feedback
 
 
 def get_admin_token():
@@ -35,6 +35,7 @@ app.include_router(modules.router)
 app.include_router(rag.router)
 app.include_router(runtime.router)
 app.include_router(lineage.router)
+app.include_router(feedback.router)
 
 
 @app.get("/health")
