@@ -70,6 +70,9 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
   const [compiledText, setCompiledText] = useState<string | null>(null);
   const [currentStage, setCurrentStage] = useState(0);
   const [showTemplatePreview, setShowTemplatePreview] = useState<DocTemplateType | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [documentTitle, setDocumentTitle] = useState('');
 
   const activeModule = modules.find(m => m.id === selectedModuleId);
   const moduleAtoms = atoms.filter(a => activeModule?.atoms.includes(a.id));
@@ -196,6 +199,47 @@ ${compiledText.split('\n').map(line => {
       a.download = `${activeModule?.id || 'doc'}_${template}.html`;
       a.click();
       URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!compiledText || !activeModule) return;
+
+    const title = documentTitle.trim() || `${activeModule.name} - ${TEMPLATE_INFO[template].title}`;
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/documents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          template_type: template,
+          module_id: activeModule.id,
+          atom_ids: moduleAtoms.map(a => a.id),
+          content: compiledText,
+          metadata: {
+            compiled_at: new Date().toISOString(),
+            atom_count: moduleAtoms.length
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save document');
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error('Save error:', err);
+      alert('Failed to save document. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -395,7 +439,40 @@ ${compiledText.split('\n').map(line => {
                 borderBottom: '1px solid var(--color-border)'
               }}>
                 <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Compiled Output</h3>
-                <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+                <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    placeholder="Document title (optional)"
+                    value={documentTitle}
+                    onChange={(e) => setDocumentTitle(e.target.value)}
+                    style={{
+                      flex: '1 1 200px',
+                      padding: '8px 12px',
+                      fontSize: '13px',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '6px',
+                      backgroundColor: 'var(--color-bg-secondary)',
+                      color: 'var(--color-text-primary)'
+                    }}
+                  />
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="btn btn-sm"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--spacing-xs)',
+                      backgroundColor: saveSuccess ? '#10b981' : 'var(--color-primary)',
+                      color: 'white',
+                      border: 'none'
+                    }}
+                  >
+                    <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={saveSuccess ? "M5 13l4 4L19 7" : "M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"} />
+                    </svg>
+                    {isSaving ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save to Library'}
+                  </button>
                   <button
                     onClick={() => handleDownload('markdown')}
                     className="btn btn-sm"

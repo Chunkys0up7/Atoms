@@ -1,0 +1,314 @@
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from pathlib import Path
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+import json
+import hashlib
+
+router = APIRouter()
+
+
+class CreateDocumentRequest(BaseModel):
+    title: str
+    template_type: str  # SOP, TECHNICAL_DESIGN, EXECUTIVE_SUMMARY, COMPLIANCE_AUDIT
+    module_id: str
+    atom_ids: List[str]
+    content: str  # Compiled markdown content
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class UpdateDocumentRequest(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
+def get_docs_dir() -> Path:
+    """Get the documents storage directory."""
+    base = Path(__file__).parent.parent.parent / "data" / "documents"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def get_document_path(doc_id: str) -> Path:
+    """Get the file path for a document."""
+    docs_dir = get_docs_dir()
+    return docs_dir / f"{doc_id}.json"
+
+
+def generate_doc_id(title: str, module_id: str) -> str:
+    """Generate a unique document ID based on title and module."""
+    content = f"{title}_{module_id}_{datetime.utcnow().isoformat()}"
+    return hashlib.md5(content.encode()).hexdigest()[:12]
+
+
+def save_version(doc_id: str, document: Dict[str, Any]) -> None:
+    """Save a version of the document to the versions directory."""
+    versions_dir = get_docs_dir() / "versions" / doc_id
+    versions_dir.mkdir(parents=True, exist_ok=True)
+
+    # Use timestamp for version filename
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    version_path = versions_dir / f"{timestamp}.json"
+
+    with open(version_path, "w", encoding="utf-8") as f:
+        json.dump(document, f, indent=2, ensure_ascii=False)
+
+
+@router.get("/api/documents")
+def list_documents(
+    limit: int = 100,
+    offset: int = 0,
+    module_id: Optional[str] = None,
+    template_type: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    List all documents with optional filtering.
+
+    Args:
+        limit: Maximum number of documents to return
+        offset: Number of documents to skip
+        module_id: Filter by module ID
+        template_type: Filter by template type
+    """
+    docs_dir = get_docs_dir()
+    documents = []
+
+    # Load all document files
+    for doc_file in docs_dir.glob("*.json"):
+        try:
+            with open(doc_file, "r", encoding="utf-8") as f:
+                doc = json.load(f)
+
+            # Apply filters
+            if module_id and doc.get('module_id') != module_id:
+                continue
+            if template_type and doc.get('template_type') != template_type:
+                continue
+
+            documents.append(doc)
+        except Exception as e:
+            print(f"Warning: Failed to load {doc_file}: {e}")
+            continue
+
+    # Sort by updated_at (most recent first)
+    documents.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
+
+    # Apply pagination
+    total = len(documents)
+    paginated_docs = documents[offset:offset + limit]
+
+    return {
+        'documents': paginated_docs,
+        'total': total,
+        'limit': limit,
+        'offset': offset,
+        'has_more': (offset + limit) < total
+    }
+
+
+@router.get("/api/documents/{doc_id}")
+def get_document(doc_id: str) -> Dict[str, Any]:
+    """Get a specific document by ID."""
+    doc_path = get_document_path(doc_id)
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        with open(doc_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load document: {str(e)}")
+
+
+@router.post("/api/documents")
+def create_document(doc: CreateDocumentRequest) -> Dict[str, Any]:
+    """Create a new document."""
+    # Generate unique ID
+    doc_id = generate_doc_id(doc.title, doc.module_id)
+
+    # Create document structure
+    now = datetime.utcnow().isoformat()
+    document = {
+        'id': doc_id,
+        'title': doc.title,
+        'template_type': doc.template_type,
+        'module_id': doc.module_id,
+        'atom_ids': doc.atom_ids,
+        'content': doc.content,
+        'metadata': doc.metadata or {},
+        'created_at': now,
+        'updated_at': now,
+        'version': 1
+    }
+
+    # Save document
+    doc_path = get_document_path(doc_id)
+    try:
+        with open(doc_path, "w", encoding="utf-8") as f:
+            json.dump(document, f, indent=2, ensure_ascii=False)
+
+        # Save initial version
+        save_version(doc_id, document)
+
+        return document
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create document: {str(e)}")
+
+
+@router.put("/api/documents/{doc_id}")
+def update_document(doc_id: str, update: UpdateDocumentRequest) -> Dict[str, Any]:
+    """Update an existing document."""
+    doc_path = get_document_path(doc_id)
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        # Load existing document
+        with open(doc_path, "r", encoding="utf-8") as f:
+            document = json.load(f)
+
+        # Save current version before updating
+        save_version(doc_id, document)
+
+        # Update fields
+        if update.title is not None:
+            document['title'] = update.title
+        if update.content is not None:
+            document['content'] = update.content
+        if update.metadata is not None:
+            document['metadata'].update(update.metadata)
+
+        # Increment version and update timestamp
+        document['version'] = document.get('version', 1) + 1
+        document['updated_at'] = datetime.utcnow().isoformat()
+
+        # Save updated document
+        with open(doc_path, "w", encoding="utf-8") as f:
+            json.dump(document, f, indent=2, ensure_ascii=False)
+
+        return document
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update document: {str(e)}")
+
+
+@router.delete("/api/documents/{doc_id}")
+def delete_document(doc_id: str) -> Dict[str, str]:
+    """Delete a document."""
+    doc_path = get_document_path(doc_id)
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        # Load document for final version save
+        with open(doc_path, "r", encoding="utf-8") as f:
+            document = json.load(f)
+
+        # Save final version with deleted flag
+        document['deleted_at'] = datetime.utcnow().isoformat()
+        save_version(doc_id, document)
+
+        # Delete the main file
+        doc_path.unlink()
+
+        return {'status': 'deleted', 'id': doc_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete document: {str(e)}")
+
+
+@router.get("/api/documents/{doc_id}/versions")
+def get_document_versions(doc_id: str) -> Dict[str, Any]:
+    """Get all versions of a document."""
+    versions_dir = get_docs_dir() / "versions" / doc_id
+
+    if not versions_dir.exists():
+        return {'versions': [], 'total': 0}
+
+    versions = []
+    for version_file in sorted(versions_dir.glob("*.json"), reverse=True):
+        try:
+            with open(version_file, "r", encoding="utf-8") as f:
+                version_data = json.load(f)
+
+            # Extract timestamp from filename
+            timestamp = version_file.stem
+
+            versions.append({
+                'timestamp': timestamp,
+                'version': version_data.get('version', 1),
+                'updated_at': version_data.get('updated_at'),
+                'title': version_data.get('title'),
+                'size': len(version_data.get('content', ''))
+            })
+        except Exception as e:
+            print(f"Warning: Failed to load version {version_file}: {e}")
+            continue
+
+    return {
+        'versions': versions,
+        'total': len(versions)
+    }
+
+
+@router.get("/api/documents/{doc_id}/versions/{timestamp}")
+def get_document_version(doc_id: str, timestamp: str) -> Dict[str, Any]:
+    """Get a specific version of a document."""
+    version_path = get_docs_dir() / "versions" / doc_id / f"{timestamp}.json"
+
+    if not version_path.exists():
+        raise HTTPException(status_code=404, detail=f"Version '{timestamp}' not found")
+
+    try:
+        with open(version_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load version: {str(e)}")
+
+
+@router.get("/api/documents/export/{doc_id}/markdown")
+def export_document_markdown(doc_id: str) -> str:
+    """Export document as markdown."""
+    document = get_document(doc_id)
+    return document.get('content', '')
+
+
+@router.get("/api/documents/export/{doc_id}/html")
+def export_document_html(doc_id: str) -> str:
+    """Export document as HTML."""
+    document = get_document(doc_id)
+    content = document.get('content', '')
+    title = document.get('title', 'Document')
+
+    # Simple HTML wrapper (client will use react-markdown for full rendering)
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{title}</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            color: #333;
+        }}
+        h1 {{ border-bottom: 2px solid #eee; padding-bottom: 10px; }}
+        h2 {{ margin-top: 24px; }}
+        code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }}
+        pre {{ background: #f4f4f4; padding: 12px; border-radius: 4px; overflow-x: auto; }}
+        blockquote {{ border-left: 4px solid #ddd; padding-left: 16px; color: #666; }}
+    </style>
+</head>
+<body>
+    <pre>{content}</pre>
+</body>
+</html>"""
+
+    return html

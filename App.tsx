@@ -10,6 +10,7 @@ import ValidationCenter from './components/ValidationCenter';
 import Publisher from './components/PublisherEnhanced';
 import IngestionEngine from './components/IngestionEngine';
 import OntologyBrowser from './components/OntologyBrowser';
+import DocumentLibrary from './components/DocumentLibrary';
 import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
@@ -269,6 +270,8 @@ const App: React.FC = () => {
         return <ImpactAnalysisUI atoms={atoms} />;
       case 'publisher':
         return <Publisher atoms={atoms} modules={modules} />;
+      case 'library':
+        return <DocumentLibrary />;
       case 'assistant':
         return <AIAssistant atoms={atoms} />;
       case 'ingestion':
