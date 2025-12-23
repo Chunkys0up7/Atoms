@@ -42,7 +42,7 @@ export default function LineageViewer({ atomId, onClose }: LineageViewerProps) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.base}/lineage/atom/${atomId}`);
+      const response = await fetch(`http://localhost:8000/api/lineage/atom/${atomId}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -66,7 +66,7 @@ export default function LineageViewer({ atomId, onClose }: LineageViewerProps) {
 
     try {
       const response = await fetch(
-        `${API_ENDPOINTS.base}/lineage/diff/${atomId}/${commit.commit_hash}`
+        `http://localhost:8000/api/lineage/diff/${atomId}/${commit.commit_hash}`
       );
 
       if (!response.ok) {
