@@ -1,0 +1,31 @@
+action:
+  modification:
+    criticality: HIGH
+    reason: DTI ratio exceeds 43% threshold
+  phase:
+    description: High DTI ratio requires review
+    id: phase-dti-review
+    modules:
+    - module-debt-analysis
+    - module-underwriting-exception
+    name: DTI Review & Counseling
+    position: AFTER
+    reference_phase: phase-assessment
+    target_duration_days: 2
+  type: INSERT_PHASE
+active: true
+condition:
+  groups: null
+  rules:
+  - field: customer_data.debt_to_income_ratio
+    operator: GREATER_THAN
+    value: 0.43
+  type: AND
+created_at: '2025-12-23T21:16:32.664286'
+created_by: system-migration
+description: Requires debt counseling review for DTI > 43%
+name: High DTI Ratio Review
+priority: 8
+rule_id: rule-high-dti
+updated_at: '2025-12-23T21:16:32.664286'
+version: 1

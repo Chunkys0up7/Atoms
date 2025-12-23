@@ -1,0 +1,37 @@
+action:
+  modification:
+    criticality: CRITICAL
+    reason: Risk flags detected requiring fraud investigation
+  phase:
+    description: Triggered by risk flags
+    id: phase-fraud-investigation
+    modules:
+    - module-fraud-screening
+    - module-identity-verification
+    name: Fraud Investigation
+    position: AT_START
+    reference_phase: null
+    target_duration_days: 2
+  type: INSERT_PHASE
+active: true
+condition:
+  groups: null
+  rules:
+  - field: risk_flags
+    operator: CONTAINS
+    value: suspicious_activity
+  - field: risk_flags
+    operator: CONTAINS
+    value: identity_mismatch
+  - field: risk_flags
+    operator: CONTAINS
+    value: velocity_check_failed
+  type: OR
+created_at: '2025-12-23T21:16:32.664286'
+created_by: system-migration
+description: Adds fraud screening when risk flags are present
+name: Fraud Detection Enhancement
+priority: 9
+rule_id: rule-fraud
+updated_at: '2025-12-23T21:16:32.664286'
+version: 1

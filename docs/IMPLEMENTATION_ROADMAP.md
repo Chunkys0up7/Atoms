@@ -33,7 +33,44 @@
 - **LineageViewer component** with timeline and diff views
 - **Full commit history** with author attribution and timestamps
 
-**Current State:** From 50% → 98% overall completion
+**Current State:** From 50% → 88% overall completion
+
+---
+
+## ✅ Phase 5: Dynamic Rules - Backend Foundation (2025-12-23)
+
+**What was built:**
+1. ✅ **Rule Persistence Layer** - JSON + YAML dual storage for rules
+2. ✅ **Rule Management API** - 11 CRUD endpoints (`/api/rules/*`)
+3. ✅ **Dynamic Rule Loading** - ProcessRewriteEngine loads from storage
+4. ✅ **Hot-Reload System** - Update rules without server restart
+5. ✅ **Migration Script** - Converted 13 hardcoded rules to storage
+6. ✅ **Version Tracking** - YAML backups for Git tracking
+7. ✅ **Test API** - Dry-run rule evaluation endpoint
+8. ✅ **Type Safety** - Pydantic models for all rule structures
+
+**Key features:**
+- **Persistence:** Rules survive server restarts (data/rules/rules.json)
+- **Git Tracking:** Each rule version saved as YAML file
+- **API Endpoints:**
+  - `GET /api/rules` - List all rules
+  - `GET /api/rules/{id}` - Get specific rule
+  - `POST /api/rules` - Create new rule
+  - `PUT /api/rules/{id}` - Update rule (creates new version)
+  - `DELETE /api/rules/{id}` - Soft delete (sets active=false)
+  - `POST /api/rules/{id}/activate` - Activate rule
+  - `POST /api/rules/{id}/deactivate` - Deactivate rule
+  - `GET /api/rules/{id}/versions` - Get version history
+  - `POST /api/rules/{id}/test` - Test rule against context
+  - `POST /api/runtime/rules/reload` - Hot-reload rules from storage
+  - `GET /api/runtime/rules` - List active runtime rules
+- **Data Models:** ConditionRule, ConditionGroup, PhaseAction, RuleAction, RuleDefinition
+- **Condition Operators:** EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, CONTAINS, IN, etc.
+- **Logical Operators:** AND, OR, NOT with nesting support
+- **Action Types:** INSERT_PHASE, REMOVE_PHASE, REPLACE_PHASE, MODIFY_PHASE
+- **Position Control:** BEFORE, AFTER, REPLACE, AT_START, AT_END
+
+**Dynamic Process Rewriting: 65% → 82%** - The backend is production-ready. Next step: UI components (RuleBuilder, RuleManager).
 
 ---
 
@@ -68,7 +105,7 @@
 | **Docs are Code** | 🟢 Excellent | 98% | ✓ YAML atoms with versioning<br>✓ Git-based change tracking<br>✓ JSON Schema validation<br>✓ **AI-powered document compilation**<br>✓ **Professional markdown rendering**<br>✓ **Multiple export formats (MD/HTML)**<br>✓ **Template system with 4 doc types**<br>✓ **Backend persistence with versioning**<br>✓ **Document Library UI with search** (UPDATED)<br>✓ **CRUD API endpoints**<br>✓ **Save/Load functionality**<br>✓ **MkDocs viewer with auto-start** (UPDATED)<br>✓ **Server lifecycle management**<br>✓ **Publisher→MkDocs auto-sync** (NEW)<br>✓ **Version history UI** (NEW)<br>✓ **Professional error handling & validation** (NEW)<br>✓ **Success notifications with sync status** (NEW) | ⚠️ No automated testing framework<br>⚠️ No custom template builder |
 | **Atoms + Molecules + Workflows** | 🟢 Excellent | 98% | ✓ Well-defined atom model (124 atoms)<br>✓ Module (molecule) builder UI<br>✓ Journey editor with inline phase creation<br>✓ **PhaseExplorer with full CRUD**<br>✓ **Full cross-view navigation**<br>✓ **Breadcrumb trail with history**<br>✓ **Intelligent graph limiting**<br>✓ **Module boundaries in all layouts** | ✓ Fully complete |
 | **Ontology Ownership** | 🟢 Strong | 85% | ✓ Owner/steward fields in data model<br>✓ OntologySchemaEditor for domains/constraints<br>✓ Domain definitions<br>✓ **Git lineage tracking with full commit history**<br>✓ **LineageViewer with timeline and diffs**<br>✓ **Author attribution and timestamps**<br>✓ **Creator and last modifier tracking** | ⚠️ No bulk ownership reporting UI |
-| **Dynamic Process Rewriting** | 🟢 Strong | 65% | ✓ Data structure supports it<br>✓ **Runtime engine with rule evaluation**<br>✓ **14 rule types covering real scenarios** (NEW)<br>✓ **RuntimeSimulator with comprehensive inputs** (NEW)<br>✓ **REST API endpoints**<br>✓ **Risk scoring system**<br>✓ **Connected to real journey data**<br>✓ **DTI, employment, property type rules** (NEW)<br>✓ **State-specific compliance rules** (NEW)<br>✓ **First-time borrower support** (NEW) | ❌ No rule builder UI<br>❌ No rule persistence/management<br>⚠️ Rules hardcoded (not configurable) |
+| **Dynamic Process Rewriting** | 🟢 Excellent | 82% | ✓ Data structure supports it<br>✓ **Runtime engine with rule evaluation**<br>✓ **13 production rules covering real scenarios**<br>✓ **RuntimeSimulator with comprehensive inputs**<br>✓ **REST API endpoints** (`/api/runtime/*`)<br>✓ **Risk scoring system**<br>✓ **Connected to real journey data**<br>✓ **DTI, employment, property type rules**<br>✓ **State-specific compliance rules**<br>✓ **First-time borrower support**<br>✓ **Rule persistence layer (JSON + YAML)** (NEW)<br>✓ **Rule management API** (`/api/rules/*`) (NEW)<br>✓ **Dynamic rule loading with hot-reload** (NEW)<br>✓ **11 CRUD endpoints for rules** (NEW)<br>✓ **Version tracking with Git backups** (NEW)<br>✓ **Migration from hardcoded to storage** (NEW)<br>✓ **Test API for dry-run evaluation** (NEW)<br>✓ **Pydantic models for type safety** (NEW) | ❌ No rule builder UI<br>❌ No rule manager dashboard<br>⚠️ Legacy rules still present (migration in progress) |
 | **Risk-Aware CI/CD** | 🟢 Strong | 85% | ✓ Claude-powered PR analysis (.github/workflows/pr-analysis.yml)<br>✓ impact_analysis.py with risk scoring<br>✓ Automated issue creation<br>✓ **Compliance badges in graph**<br>✓ **Risk badges for critical atoms**<br>✓ **Visual quality metrics** | ❌ No control validation automation |
 | **System Thinking** | 🟢 Excellent | 96% | ✓ Graph data structure with edges<br>✓ D3 visualization (GraphView.tsx)<br>✓ Multiple layout modes<br>✓ **6 context modes**: global/journey/phase/module/impact/risk<br>✓ **Impact propagation visualization**<br>✓ **Risk overlay with criticality coloring**<br>✓ **Right-click context menu for navigation**<br>✓ **Context-aware filtering and highlighting**<br>✓ **Intelligent atom limiting with priority ranking**<br>✓ **Configurable display limits (25/50/100/200/All)**<br>✓ **Module boundaries with auto-highlighting**<br>✓ **Compliance score badges**<br>✓ **Risk warning badges**<br>✓ **Feedback loop system with OptimizationDashboard** (NEW) | ✅ Fully complete |
 

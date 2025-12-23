@@ -594,19 +594,41 @@ class NonResidentRule(ProcessRewriteRule):
         return modified, modification
 
 
+# Dynamic Rule Loading
+def load_rules_from_storage():
+    """Load rules from JSON storage"""
+    from pathlib import Path
+    import json
+
+    rules_path = Path(__file__).parent.parent.parent / "data" / "rules" / "rules.json"
+
+    if not rules_path.exists():
+        return []
+
+    try:
+        with open(rules_path, "r", encoding="utf-8") as f:
+            storage = json.load(f)
+            return storage.get("rules", [])
+    except Exception as e:
+        print(f"Warning: Failed to load rules from storage: {e}")
+        return []
+
+
 # Process Rewrite Engine
 class ProcessRewriteEngine:
     """Engine for evaluating and modifying journeys at runtime"""
 
     def __init__(self):
-        # Register all rules
-        self.rules: List[ProcessRewriteRule] = [
-            # Original 4 rules
+        # Load rules dynamically from storage
+        self.rule_definitions = self._load_rules()
+
+        # Legacy hardcoded rules (kept for backward compatibility)
+        # TODO: Remove once migration is confirmed working
+        self._legacy_rules: List[ProcessRewriteRule] = [
             LowCreditScoreRule(),
             HighValueTransactionRule(),
             ComplianceCheckRule(),
             FraudRiskRule(),
-            # New 10 rules
             FirstTimeBorrowerRule(),
             HighDebtToIncomeRule(),
             SelfEmployedIncomeRule(),
@@ -617,8 +639,123 @@ class ProcessRewriteEngine:
             StateSpecificRequirementsRule(),
             NonResidentRule(),
         ]
+
+    def _load_rules(self):
+        """Load and parse rules from storage"""
+        rules_data = load_rules_from_storage()
+
+        # Filter to active rules only
+        active_rules = [r for r in rules_data if r.get("active", False)]
+
         # Sort by priority (highest first)
-        self.rules.sort(key=lambda r: r.priority, reverse=True)
+        active_rules.sort(key=lambda r: r.get("priority", 0), reverse=True)
+
+        return active_rules
+
+    def reload_rules(self):
+        """Hot-reload rules from storage without restarting server"""
+        self.rule_definitions = self._load_rules()
+
+    @property
+    def rules(self):
+        """Get current active rules (for backward compatibility with legacy API)"""
+        return self._legacy_rules
+
+    def _evaluate_condition(self, condition: Dict[str, Any], context: RuntimeContext) -> bool:
+        """Evaluate a condition group against runtime context"""
+        from routes.rules import evaluate_condition, ConditionGroup
+
+        try:
+            # Convert context to dict for evaluation
+            context_dict = {
+                "customer_data": context.customer_data or {},
+                "transaction_data": context.transaction_data or {},
+                "risk_flags": context.risk_flags,
+                "compliance_requirements": context.compliance_requirements
+            }
+
+            # Parse condition group
+            condition_group = ConditionGroup(**condition)
+
+            # Evaluate
+            return evaluate_condition(condition_group, context_dict)
+        except Exception as e:
+            print(f"Warning: Condition evaluation failed: {e}")
+            return False
+
+    def _apply_rule_action(self, journey: Dict[str, Any], rule: Dict[str, Any], context: RuntimeContext) -> tuple[Dict[str, Any], PhaseModification]:
+        """Apply a rule action to a journey"""
+        action = rule.get("action", {})
+        action_type = action.get("type")
+        phase = action.get("phase", {})
+        modification_meta = action.get("modification", {})
+
+        modified = copy.deepcopy(journey)
+        phase_id = phase.get("id")
+        position = phase.get("position", "AT_END")
+        reference_phase = phase.get("reference_phase")
+
+        # Build phase object
+        phase_obj = {
+            "id": phase_id,
+            "name": phase.get("name"),
+            "description": phase.get("description"),
+            "modules": phase.get("modules", []),
+            "targetDurationDays": phase.get("target_duration_days", 1),
+            "criticality": modification_meta.get("criticality", "MEDIUM")
+        }
+
+        # Apply based on action type
+        if action_type == "INSERT_PHASE":
+            phases = modified.get("phases", [])
+
+            # Don't insert if phase already exists
+            if phase_id in phases:
+                return modified, PhaseModification(
+                    action="noop",
+                    phase_id=phase_id,
+                    reason="Phase already exists in journey",
+                    criticality="LOW"
+                )
+
+            if position == "AT_START":
+                phases.insert(0, phase_id)
+            elif position == "AT_END":
+                phases.append(phase_id)
+            elif position == "BEFORE" and reference_phase:
+                try:
+                    idx = phases.index(reference_phase)
+                    phases.insert(idx, phase_id)
+                except ValueError:
+                    phases.append(phase_id)
+            elif position == "AFTER" and reference_phase:
+                try:
+                    idx = phases.index(reference_phase)
+                    phases.insert(idx + 1, phase_id)
+                except ValueError:
+                    phases.append(phase_id)
+            else:
+                phases.append(phase_id)
+
+            modified["phases"] = phases
+
+        elif action_type == "REMOVE_PHASE":
+            phases = modified.get("phases", [])
+            modified["phases"] = [p for p in phases if p != phase_id]
+
+        elif action_type == "REPLACE_PHASE" and reference_phase:
+            phases = modified.get("phases", [])
+            modified["phases"] = [phase_id if p == reference_phase else p for p in phases]
+
+        # Create modification record
+        modification = PhaseModification(
+            action=action_type.lower().replace("_", ""),
+            phase_id=phase_id,
+            reason=modification_meta.get("reason", f"Rule {rule.get('rule_id')} triggered"),
+            criticality=modification_meta.get("criticality", "MEDIUM")
+        )
+
+        return modified, modification
 
     def evaluate_journey(self, journey: Dict[str, Any], context: RuntimeContext) -> JourneyEvaluation:
         """
@@ -634,11 +771,30 @@ class ProcessRewriteEngine:
         modified_journey = copy.deepcopy(journey)
         modifications = []
 
-        # Apply each applicable rule
-        for rule in self.rules:
-            if rule.evaluate(modified_journey, context):
-                modified_journey, modification = rule.apply(modified_journey, context)
-                modifications.append(modification)
+        # Apply dynamic rules from storage (NEW)
+        for rule_def in self.rule_definitions:
+            try:
+                # Evaluate condition
+                if self._evaluate_condition(rule_def.get("condition", {}), context):
+                    # Apply action
+                    modified_journey, modification = self._apply_rule_action(modified_journey, rule_def, context)
+                    # Only add if not a noop
+                    if modification.action != "noop":
+                        modifications.append(modification)
+            except Exception as e:
+                print(f"Warning: Failed to apply rule {rule_def.get('rule_id')}: {e}")
+
+        # Apply legacy hardcoded rules (for backward compatibility)
+        # TODO: Remove once all rules are migrated and tested
+        # Skip if we have dynamic rules loaded (migration complete)
+        if not self.rule_definitions:
+            for rule in self._legacy_rules:
+                try:
+                    if rule.evaluate(modified_journey, context):
+                        modified_journey, modification = rule.apply(modified_journey, context)
+                        modifications.append(modification)
+                except Exception as e:
+                    print(f"Warning: Failed to apply legacy rule {rule.rule_id}: {e}")
 
         # Calculate risk score based on modifications
         risk_score = self._calculate_risk_score(modifications)
@@ -704,19 +860,52 @@ async def evaluate_journey(
 
 @router.get("/rules")
 async def list_rules():
-    """List all available runtime rules"""
+    """List all available runtime rules (dynamic + legacy)"""
+    dynamic_rules = [
+        {
+            "rule_id": rule.get("rule_id"),
+            "name": rule.get("name"),
+            "description": rule.get("description"),
+            "priority": rule.get("priority"),
+            "source": "storage",
+            "active": rule.get("active", True)
+        }
+        for rule in engine.rule_definitions
+    ]
+
+    legacy_rules = [
+        {
+            "rule_id": rule.rule_id,
+            "name": rule.name,
+            "description": rule.description,
+            "priority": rule.priority,
+            "source": "hardcoded",
+            "active": True
+        }
+        for rule in engine._legacy_rules
+    ]
+
     return {
-        "rules": [
-            {
-                "rule_id": rule.rule_id,
-                "name": rule.name,
-                "description": rule.description,
-                "priority": rule.priority
-            }
-            for rule in engine.rules
-        ],
-        "total_count": len(engine.rules)
+        "dynamic_rules": dynamic_rules,
+        "legacy_rules": legacy_rules,
+        "total_dynamic": len(dynamic_rules),
+        "total_legacy": len(legacy_rules),
+        "total_count": len(dynamic_rules) + len(legacy_rules)
     }
+
+
+@router.post("/rules/reload")
+async def reload_rules():
+    """Hot-reload rules from storage without restarting server"""
+    try:
+        engine.reload_rules()
+        return {
+            "status": "success",
+            "message": f"Reloaded {len(engine.rule_definitions)} rules from storage",
+            "rules_count": len(engine.rule_definitions)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to reload rules: {str(e)}")
 
 
 @router.post("/simulate")

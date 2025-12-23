@@ -1,0 +1,31 @@
+action:
+  modification:
+    criticality: MEDIUM
+    reason: Non-resident status requires enhanced verification
+  phase:
+    description: Additional documentation for non-resident borrowers
+    id: phase-non-resident-verification
+    modules:
+    - module-visa-verification
+    - module-international-credit
+    name: Non-Resident Verification
+    position: AFTER
+    reference_phase: phase-application
+    target_duration_days: 3
+  type: INSERT_PHASE
+active: true
+condition:
+  groups: null
+  rules:
+  - field: customer_data.residency_status
+    operator: EQUALS
+    value: NON_RESIDENT
+  type: AND
+created_at: '2025-12-23T21:16:32.664286'
+created_by: system-migration
+description: Enhanced verification for non-resident borrowers
+name: Non-Resident Verification
+priority: 7
+rule_id: rule-non-resident
+updated_at: '2025-12-23T21:16:32.664286'
+version: 1

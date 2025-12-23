@@ -1,0 +1,569 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-12-23T21:16:32.669319",
+  "rules": [
+    {
+      "rule_id": "rule-low-credit",
+      "name": "Low Credit Score Manual Review",
+      "description": "Requires manual review for credit scores below 620",
+      "priority": 9,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.663319",
+      "updated_at": "2025-12-23T21:16:32.663319",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "customer_data.credit_score",
+            "operator": "LESS_THAN",
+            "value": 620
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-manual-credit-review",
+          "name": "Manual Credit Review",
+          "description": "Enhanced review required due to credit risk",
+          "position": "AFTER",
+          "reference_phase": "phase-assessment",
+          "modules": [
+            "module-credit-analysis",
+            "module-risk-assessment"
+          ],
+          "target_duration_days": 2
+        },
+        "modification": {
+          "reason": "Credit score below threshold (620)",
+          "criticality": "HIGH"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-high-value",
+      "name": "Senior Approval for High Value",
+      "description": "Requires senior management approval for transactions over $1M",
+      "priority": 10,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "transaction_data.amount",
+            "operator": "GREATER_THAN",
+            "value": 1000000
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-senior-approval",
+          "name": "Senior Management Approval",
+          "description": "Required for transactions exceeding $1M",
+          "position": "BEFORE",
+          "reference_phase": "phase-final-approval",
+          "modules": [
+            "module-exec-review",
+            "module-risk-committee"
+          ],
+          "target_duration_days": 3
+        },
+        "modification": {
+          "reason": "Transaction amount exceeds $1M threshold",
+          "criticality": "CRITICAL"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-compliance",
+      "name": "Regulatory Compliance Checks",
+      "description": "Adds compliance verification for regulated transactions",
+      "priority": 8,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "OR",
+        "rules": [
+          {
+            "field": "compliance_requirements",
+            "operator": "CONTAINS",
+            "value": "AML"
+          },
+          {
+            "field": "compliance_requirements",
+            "operator": "CONTAINS",
+            "value": "KYC"
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-compliance-verification",
+          "name": "Compliance Verification",
+          "description": "Required AML/KYC checks",
+          "position": "AT_START",
+          "reference_phase": null,
+          "modules": [
+            "module-aml-check",
+            "module-kyc-verification"
+          ],
+          "target_duration_days": 1
+        },
+        "modification": {
+          "reason": "Compliance requirements detected (AML/KYC)",
+          "criticality": "HIGH"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-fraud",
+      "name": "Fraud Detection Enhancement",
+      "description": "Adds fraud screening when risk flags are present",
+      "priority": 9,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "OR",
+        "rules": [
+          {
+            "field": "risk_flags",
+            "operator": "CONTAINS",
+            "value": "suspicious_activity"
+          },
+          {
+            "field": "risk_flags",
+            "operator": "CONTAINS",
+            "value": "identity_mismatch"
+          },
+          {
+            "field": "risk_flags",
+            "operator": "CONTAINS",
+            "value": "velocity_check_failed"
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-fraud-investigation",
+          "name": "Fraud Investigation",
+          "description": "Triggered by risk flags",
+          "position": "AT_START",
+          "reference_phase": null,
+          "modules": [
+            "module-fraud-screening",
+            "module-identity-verification"
+          ],
+          "target_duration_days": 2
+        },
+        "modification": {
+          "reason": "Risk flags detected requiring fraud investigation",
+          "criticality": "CRITICAL"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-first-time",
+      "name": "First-Time Borrower Support",
+      "description": "Adds education and documentation support for first-time borrowers",
+      "priority": 6,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "customer_data.first_time_borrower",
+            "operator": "EQUALS",
+            "value": true
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-borrower-education",
+          "name": "Borrower Education & Documentation",
+          "description": "Additional support for first-time borrowers",
+          "position": "AFTER",
+          "reference_phase": "phase-application",
+          "modules": [
+            "module-education",
+            "module-doc-assistance"
+          ],
+          "target_duration_days": 1
+        },
+        "modification": {
+          "reason": "First-time borrower requires additional education and support",
+          "criticality": "MEDIUM"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-high-dti",
+      "name": "High DTI Ratio Review",
+      "description": "Requires debt counseling review for DTI > 43%",
+      "priority": 8,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "customer_data.debt_to_income_ratio",
+            "operator": "GREATER_THAN",
+            "value": 0.43
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-dti-review",
+          "name": "DTI Review & Counseling",
+          "description": "High DTI ratio requires review",
+          "position": "AFTER",
+          "reference_phase": "phase-assessment",
+          "modules": [
+            "module-debt-analysis",
+            "module-underwriting-exception"
+          ],
+          "target_duration_days": 2
+        },
+        "modification": {
+          "reason": "DTI ratio exceeds 43% threshold",
+          "criticality": "HIGH"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-self-employed",
+      "name": "Self-Employed Income Verification",
+      "description": "Enhanced verification for self-employed income",
+      "priority": 7,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "customer_data.employment_type",
+            "operator": "EQUALS",
+            "value": "SELF_EMPLOYED"
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-self-employed-verification",
+          "name": "Self-Employed Income Verification",
+          "description": "Additional documentation and verification for self-employed income",
+          "position": "AFTER",
+          "reference_phase": "phase-income-verification",
+          "modules": [
+            "module-tax-return-analysis",
+            "module-business-verification"
+          ],
+          "target_duration_days": 3
+        },
+        "modification": {
+          "reason": "Self-employed income requires enhanced verification",
+          "criticality": "MEDIUM"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-property-risk",
+      "name": "Non-Standard Property Review",
+      "description": "Enhanced appraisal for condos, multi-family, or rural properties",
+      "priority": 7,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "transaction_data.property_type",
+            "operator": "IN",
+            "value": [
+              "CONDO",
+              "MULTI_FAMILY",
+              "RURAL",
+              "MANUFACTURED"
+            ]
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-enhanced-appraisal",
+          "name": "Enhanced Property Appraisal",
+          "description": "Additional review for non-standard property types",
+          "position": "BEFORE",
+          "reference_phase": "phase-final-approval",
+          "modules": [
+            "module-appraisal-review",
+            "module-comparable-analysis"
+          ],
+          "target_duration_days": 2
+        },
+        "modification": {
+          "reason": "Non-standard property type requires enhanced appraisal",
+          "criticality": "MEDIUM"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-cash-out",
+      "name": "Cash-Out Refinance Review",
+      "description": "Additional review for cash-out refinance transactions",
+      "priority": 7,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "transaction_data.loan_purpose",
+            "operator": "EQUALS",
+            "value": "REFINANCE"
+          },
+          {
+            "field": "transaction_data.cash_out_amount",
+            "operator": "GREATER_THAN",
+            "value": 0
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-equity-review",
+          "name": "Equity & Cash-Out Review",
+          "description": "Review cash-out amount and equity position",
+          "position": "AFTER",
+          "reference_phase": "phase-assessment",
+          "modules": [
+            "module-equity-analysis",
+            "module-ltv-verification"
+          ],
+          "target_duration_days": 1
+        },
+        "modification": {
+          "reason": "Cash-out refinance requires equity review",
+          "criticality": "MEDIUM"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-doc-expiration",
+      "name": "Document Expiration Check",
+      "description": "Re-verification when documents are close to expiration",
+      "priority": 8,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "risk_flags",
+            "operator": "CONTAINS",
+            "value": "documents_expiring"
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-document-reverification",
+          "name": "Document Re-Verification",
+          "description": "Update expiring documents before closing",
+          "position": "BEFORE",
+          "reference_phase": "phase-final-approval",
+          "modules": [
+            "module-doc-update",
+            "module-reverification"
+          ],
+          "target_duration_days": 1
+        },
+        "modification": {
+          "reason": "Documents nearing expiration require re-verification",
+          "criticality": "HIGH"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-low-appraisal",
+      "name": "Low Appraisal Handling",
+      "description": "Add renegotiation when appraisal < purchase price",
+      "priority": 9,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "risk_flags",
+            "operator": "CONTAINS",
+            "value": "appraisal_below_value"
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-value-renegotiation",
+          "name": "Price Renegotiation",
+          "description": "Appraisal below purchase price requires renegotiation",
+          "position": "BEFORE",
+          "reference_phase": "phase-approval",
+          "modules": [
+            "module-price-negotiation",
+            "module-contract-amendment"
+          ],
+          "target_duration_days": 3
+        },
+        "modification": {
+          "reason": "Appraisal value below purchase price requires renegotiation",
+          "criticality": "HIGH"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-state-compliance",
+      "name": "State-Specific Requirements",
+      "description": "Add compliance phases for states with special requirements",
+      "priority": 8,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "transaction_data.property_state",
+            "operator": "IN",
+            "value": [
+              "NY",
+              "TX",
+              "CA",
+              "NV"
+            ]
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-state-compliance",
+          "name": "State-Specific Compliance",
+          "description": "State-specific requirements",
+          "position": "AFTER",
+          "reference_phase": "phase-application",
+          "modules": [
+            "module-state-disclosure",
+            "module-state-regulations"
+          ],
+          "target_duration_days": 1
+        },
+        "modification": {
+          "reason": "Property in state with special compliance requirements",
+          "criticality": "HIGH"
+        }
+      }
+    },
+    {
+      "rule_id": "rule-non-resident",
+      "name": "Non-Resident Verification",
+      "description": "Enhanced verification for non-resident borrowers",
+      "priority": 7,
+      "active": true,
+      "created_at": "2025-12-23T21:16:32.664286",
+      "updated_at": "2025-12-23T21:16:32.664286",
+      "created_by": "system-migration",
+      "version": 1,
+      "condition": {
+        "type": "AND",
+        "rules": [
+          {
+            "field": "customer_data.residency_status",
+            "operator": "EQUALS",
+            "value": "NON_RESIDENT"
+          }
+        ],
+        "groups": null
+      },
+      "action": {
+        "type": "INSERT_PHASE",
+        "phase": {
+          "id": "phase-non-resident-verification",
+          "name": "Non-Resident Verification",
+          "description": "Additional documentation for non-resident borrowers",
+          "position": "AFTER",
+          "reference_phase": "phase-application",
+          "modules": [
+            "module-visa-verification",
+            "module-international-credit"
+          ],
+          "target_duration_days": 3
+        },
+        "modification": {
+          "reason": "Non-resident status requires enhanced verification",
+          "criticality": "MEDIUM"
+        }
+      }
+    }
+  ]
+}

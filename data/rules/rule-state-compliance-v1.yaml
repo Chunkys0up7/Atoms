@@ -1,0 +1,35 @@
+action:
+  modification:
+    criticality: HIGH
+    reason: Property in state with special compliance requirements
+  phase:
+    description: State-specific requirements
+    id: phase-state-compliance
+    modules:
+    - module-state-disclosure
+    - module-state-regulations
+    name: State-Specific Compliance
+    position: AFTER
+    reference_phase: phase-application
+    target_duration_days: 1
+  type: INSERT_PHASE
+active: true
+condition:
+  groups: null
+  rules:
+  - field: transaction_data.property_state
+    operator: IN
+    value:
+    - NY
+    - TX
+    - CA
+    - NV
+  type: AND
+created_at: '2025-12-23T21:16:32.664286'
+created_by: system-migration
+description: Add compliance phases for states with special requirements
+name: State-Specific Requirements
+priority: 8
+rule_id: rule-state-compliance
+updated_at: '2025-12-23T21:16:32.664286'
+version: 1

@@ -1,0 +1,31 @@
+action:
+  modification:
+    criticality: MEDIUM
+    reason: Self-employed income requires enhanced verification
+  phase:
+    description: Additional documentation and verification for self-employed income
+    id: phase-self-employed-verification
+    modules:
+    - module-tax-return-analysis
+    - module-business-verification
+    name: Self-Employed Income Verification
+    position: AFTER
+    reference_phase: phase-income-verification
+    target_duration_days: 3
+  type: INSERT_PHASE
+active: true
+condition:
+  groups: null
+  rules:
+  - field: customer_data.employment_type
+    operator: EQUALS
+    value: SELF_EMPLOYED
+  type: AND
+created_at: '2025-12-23T21:16:32.664286'
+created_by: system-migration
+description: Enhanced verification for self-employed income
+name: Self-Employed Income Verification
+priority: 7
+rule_id: rule-self-employed
+updated_at: '2025-12-23T21:16:32.664286'
+version: 1
