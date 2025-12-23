@@ -16,6 +16,7 @@ import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
 import RuntimeSimulator from './components/RuntimeSimulator';
+import RuleManager from './components/RuleManager';
 import LineageViewer from './components/LineageViewer';
 import OptimizationDashboard from './components/OptimizationDashboard';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
@@ -281,6 +282,8 @@ const App: React.FC = () => {
         return <IngestionEngine atoms={atoms} onIngest={handleIngest} />;
       case 'runtime':
         return <RuntimeSimulator />;
+      case 'rules':
+        return <RuleManager />;
       case 'feedback':
         return <OptimizationDashboard />;
       default:
