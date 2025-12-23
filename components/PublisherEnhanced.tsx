@@ -72,26 +72,42 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
   const [showTemplatePreview, setShowTemplatePreview] = useState<DocTemplateType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [savedDocId, setSavedDocId] = useState<string | null>(null);
   const [documentTitle, setDocumentTitle] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [compileError, setCompileError] = useState<string | null>(null);
 
   const activeModule = modules.find(m => m.id === selectedModuleId);
   const moduleAtoms = atoms.filter(a => activeModule?.atoms.includes(a.id));
 
   const handleCompile = async () => {
-    if (!activeModule) return;
+    if (!activeModule) {
+      setCompileError('Please select a module to compile.');
+      return;
+    }
+
+    if (moduleAtoms.length === 0) {
+      setCompileError('The selected module has no atoms. Please select a different module.');
+      return;
+    }
+
     setIsCompiling(true);
     setCompiledText(null);
     setCurrentStage(0);
+    setCompileError(null);
+    setError(null);
+
+    let stageInterval: NodeJS.Timeout | null = null;
 
     try {
       // Simulate stages for better UX
-      const stageInterval = setInterval(() => {
+      stageInterval = setInterval(() => {
         setCurrentStage(prev => Math.min(prev + 1, COMPILATION_STAGES.length - 1));
       }, 1500);
 
       const result = await compileDocument(moduleAtoms, activeModule, template);
 
-      clearInterval(stageInterval);
+      if (stageInterval) clearInterval(stageInterval);
       setCurrentStage(COMPILATION_STAGES.length - 1);
 
       setTimeout(() => {
@@ -99,7 +115,13 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
         setIsCompiling(false);
       }, 500);
     } catch (err) {
+      if (stageInterval) clearInterval(stageInterval);
       console.error('Compilation error:', err);
+      setCompileError(
+        err instanceof Error
+          ? `Compilation failed: ${err.message}`
+          : 'An unexpected error occurred during compilation. Please try again.'
+      );
       setIsCompiling(false);
     }
   };
@@ -203,12 +225,33 @@ ${compiledText.split('\n').map(line => {
   };
 
   const handleSave = async () => {
-    if (!compiledText || !activeModule) return;
+    // Validation
+    if (!compiledText) {
+      setError('No content to save. Please compile a document first.');
+      return;
+    }
+
+    if (!activeModule) {
+      setError('No module selected. Please select a module.');
+      return;
+    }
 
     const title = documentTitle.trim() || `${activeModule.name} - ${TEMPLATE_INFO[template].title}`;
 
+    if (title.length < 3) {
+      setError('Document title must be at least 3 characters.');
+      return;
+    }
+
+    if (compiledText.length < 50) {
+      setError('Document content is too short. Please compile a proper document.');
+      return;
+    }
+
     setIsSaving(true);
     setSaveSuccess(false);
+    setSavedDocId(null);
+    setError(null);
 
     try {
       const response = await fetch('http://localhost:8000/api/documents', {
@@ -224,20 +267,34 @@ ${compiledText.split('\n').map(line => {
           content: compiledText,
           metadata: {
             compiled_at: new Date().toISOString(),
-            atom_count: moduleAtoms.length
+            atom_count: moduleAtoms.length,
+            template: template
           }
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save document');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Server error: ${response.status}`);
       }
 
+      const savedDoc = await response.json();
+
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      setSavedDocId(savedDoc.id);
+
+      // Auto-clear success message after 5 seconds
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setSavedDocId(null);
+      }, 5000);
     } catch (err) {
       console.error('Save error:', err);
-      alert('Failed to save document. Please try again.');
+      setError(
+        err instanceof Error
+          ? `Failed to save: ${err.message}`
+          : 'An unexpected error occurred while saving. Please try again.'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -379,6 +436,70 @@ ${compiledText.split('\n').map(line => {
                 width: `${((currentStage + 1) / COMPILATION_STAGES.length) * 100}%`,
                 transition: 'width 0.5s ease-out'
               }} />
+            </div>
+          </div>
+        )}
+
+        {/* Error Notifications */}
+        {(error || compileError) && (
+          <div style={{
+            marginTop: 'var(--spacing-md)',
+            padding: 'var(--spacing-md)',
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'start',
+            gap: 'var(--spacing-sm)'
+          }}>
+            <svg style={{ width: '20px', height: '20px', flexShrink: 0, color: '#c00' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#c00', marginBottom: '4px' }}>Error</div>
+              <div style={{ fontSize: '13px', color: '#c00' }}>{error || compileError}</div>
+            </div>
+            <button
+              onClick={() => { setError(null); setCompileError(null); }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                color: '#c00',
+                opacity: 0.7
+              }}
+            >
+              <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Success Notification */}
+        {saveSuccess && (
+          <div style={{
+            marginTop: 'var(--spacing-md)',
+            padding: 'var(--spacing-md)',
+            backgroundColor: '#efe',
+            border: '1px solid #cfc',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'start',
+            gap: 'var(--spacing-sm)'
+          }}>
+            <svg style={{ width: '20px', height: '20px', flexShrink: 0, color: '#0a0' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#0a0', marginBottom: '4px' }}>Document Saved Successfully!</div>
+              <div style={{ fontSize: '13px', color: '#060' }}>
+                Your document has been saved to the library.
+                {savedDocId && (
+                  <span> Document ID: <code style={{ fontSize: '12px', backgroundColor: '#dfd', padding: '2px 6px', borderRadius: '3px' }}>{savedDocId}</code></span>
+                )}
+              </div>
             </div>
           </div>
         )}
