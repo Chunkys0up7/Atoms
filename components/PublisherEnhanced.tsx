@@ -1,0 +1,514 @@
+import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
+import { Atom, Module, DocTemplateType } from '../types';
+import { compileDocument } from '../geminiService';
+
+interface PublisherProps {
+  atoms: Atom[];
+  modules: Module[];
+}
+
+interface TemplateInfo {
+  title: string;
+  description: string;
+  icon: string;
+  sections: string[];
+  example: string;
+}
+
+const TEMPLATE_INFO: Record<DocTemplateType, TemplateInfo> = {
+  SOP: {
+    title: 'Standard Operating Procedure',
+    description: 'Step-by-step process documentation with compliance controls and regulatory context',
+    icon: '📋',
+    sections: ['Purpose', 'Scope', 'Responsibilities', 'Procedure', 'Controls', 'Exceptions', 'References'],
+    example: 'Detailed walkthrough of operational processes with risk mitigation steps'
+  },
+  TECHNICAL_DESIGN: {
+    title: 'Technical Design Document',
+    description: 'System architecture, data models, APIs, and implementation specifications',
+    icon: '🏗️',
+    sections: ['Overview', 'Architecture', 'Data Models', 'APIs', 'Security', 'Deployment', 'Dependencies'],
+    example: 'Complete technical blueprint for system implementation and integration'
+  },
+  EXECUTIVE_SUMMARY: {
+    title: 'Executive Summary',
+    description: 'High-level business overview with key metrics, risks, and strategic insights',
+    icon: '📊',
+    sections: ['Overview', 'Key Metrics', 'Business Value', 'Risks', 'Recommendations', 'Next Steps'],
+    example: 'C-suite focused document highlighting business impact and strategic alignment'
+  },
+  COMPLIANCE_AUDIT: {
+    title: 'Compliance Audit Report',
+    description: 'Regulatory requirements, controls assessment, and compliance verification',
+    icon: '✅',
+    sections: ['Scope', 'Regulations', 'Controls', 'Findings', 'Gaps', 'Remediation', 'Sign-off'],
+    example: 'Comprehensive audit trail for regulatory review and certification'
+  }
+};
+
+interface CompilationStage {
+  name: string;
+  description: string;
+  icon: string;
+}
+
+const COMPILATION_STAGES: CompilationStage[] = [
+  { name: 'Analyzing', description: 'Reading atom metadata and relationships', icon: '🔍' },
+  { name: 'Structuring', description: 'Building document outline and flow', icon: '🏗️' },
+  { name: 'Generating', description: 'Synthesizing content with AI', icon: '✨' },
+  { name: 'Formatting', description: 'Applying template and styling', icon: '📝' }
+];
+
+const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
+  const [selectedModuleId, setSelectedModuleId] = useState(modules[0]?.id || '');
+  const [template, setTemplate] = useState<DocTemplateType>('SOP');
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [compiledText, setCompiledText] = useState<string | null>(null);
+  const [currentStage, setCurrentStage] = useState(0);
+  const [showTemplatePreview, setShowTemplatePreview] = useState<DocTemplateType | null>(null);
+
+  const activeModule = modules.find(m => m.id === selectedModuleId);
+  const moduleAtoms = atoms.filter(a => activeModule?.atoms.includes(a.id));
+
+  const handleCompile = async () => {
+    if (!activeModule) return;
+    setIsCompiling(true);
+    setCompiledText(null);
+    setCurrentStage(0);
+
+    try {
+      // Simulate stages for better UX
+      const stageInterval = setInterval(() => {
+        setCurrentStage(prev => Math.min(prev + 1, COMPILATION_STAGES.length - 1));
+      }, 1500);
+
+      const result = await compileDocument(moduleAtoms, activeModule, template);
+
+      clearInterval(stageInterval);
+      setCurrentStage(COMPILATION_STAGES.length - 1);
+
+      setTimeout(() => {
+        setCompiledText(result);
+        setIsCompiling(false);
+      }, 500);
+    } catch (err) {
+      console.error('Compilation error:', err);
+      setIsCompiling(false);
+    }
+  };
+
+  const handleDownload = (format: 'markdown' | 'html') => {
+    if (!compiledText) return;
+
+    if (format === 'markdown') {
+      const blob = new Blob([compiledText], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${activeModule?.id || 'doc'}_${template}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (format === 'html') {
+      // Convert markdown to HTML
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${activeModule?.name || 'Document'} - ${TEMPLATE_INFO[template].title}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+    h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+    code {
+      background-color: #f6f8fa;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 85%;
+    }
+    pre {
+      background-color: #f6f8fa;
+      padding: 16px;
+      border-radius: 6px;
+      overflow: auto;
+    }
+    pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 16px 0;
+    }
+    th, td {
+      border: 1px solid #dfe2e5;
+      padding: 6px 13px;
+    }
+    th {
+      background-color: #f6f8fa;
+      font-weight: 600;
+    }
+    blockquote {
+      padding: 0 1em;
+      color: #6a737d;
+      border-left: 0.25em solid #dfe2e5;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+${compiledText.split('\n').map(line => {
+  // Basic markdown to HTML conversion
+  line = line.replace(/^# (.+)$/, '<h1>$1</h1>');
+  line = line.replace(/^## (.+)$/, '<h2>$1</h2>');
+  line = line.replace(/^### (.+)$/, '<h3>$1</h3>');
+  line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  line = line.replace(/`(.+?)`/g, '<code>$1</code>');
+  return line;
+}).join('\n')}
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${activeModule?.id || 'doc'}_${template}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--color-bg-primary)', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{
+        padding: 'var(--spacing-xl)',
+        borderBottom: '1px solid var(--color-border)',
+        backgroundColor: 'var(--color-bg-secondary)',
+        flexShrink: 0
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>
+              AI Document Compiler
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+              Synthesize atomic units into cohesive professional artifacts
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
+            {/* Template Selector */}
+            <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-tertiary)', padding: '4px', borderRadius: '8px' }}>
+              {(['SOP', 'TECHNICAL_DESIGN', 'EXECUTIVE_SUMMARY', 'COMPLIANCE_AUDIT'] as DocTemplateType[]).map(t => (
+                <div key={t} style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setTemplate(t)}
+                    onMouseEnter={() => setShowTemplatePreview(t)}
+                    onMouseLeave={() => setShowTemplatePreview(null)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      cursor: 'pointer',
+                      backgroundColor: template === t ? 'var(--color-primary)' : 'transparent',
+                      color: template === t ? 'white' : 'var(--color-text-secondary)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {TEMPLATE_INFO[t].icon} {t.replace(/_/g, ' ')}
+                  </button>
+
+                  {/* Template Preview Tooltip */}
+                  {showTemplatePreview === t && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      marginTop: '8px',
+                      width: '280px',
+                      backgroundColor: 'white',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '8px',
+                      padding: 'var(--spacing-md)',
+                      boxShadow: 'var(--shadow-lg)',
+                      zIndex: 1000
+                    }}>
+                      <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '4px' }}>
+                        {TEMPLATE_INFO[t].title}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)' }}>
+                        {TEMPLATE_INFO[t].description}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginBottom: '4px', fontWeight: '600' }}>
+                        Includes:
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                        {TEMPLATE_INFO[t].sections.join(' • ')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Compile Button */}
+            <button
+              onClick={handleCompile}
+              disabled={isCompiling || !selectedModuleId}
+              className="btn btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)',
+                padding: '10px 20px'
+              }}
+            >
+              {isCompiling ? (
+                <>
+                  <div className="loading-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></div>
+                  Compiling...
+                </>
+              ) : (
+                <>
+                  <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Compile {TEMPLATE_INFO[template].icon}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Compilation Progress */}
+        {isCompiling && (
+          <div style={{ marginTop: 'var(--spacing-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              {COMPILATION_STAGES.map((stage, idx) => (
+                <div key={idx} style={{
+                  flex: 1,
+                  textAlign: 'center',
+                  opacity: idx <= currentStage ? 1 : 0.3,
+                  transition: 'opacity 0.3s'
+                }}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>{stage.icon}</div>
+                  <div style={{ fontSize: '11px', fontWeight: '600', color: idx === currentStage ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
+                    {stage.name}
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)' }}>
+                    {stage.description}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ height: '4px', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                backgroundColor: 'var(--color-primary)',
+                width: `${((currentStage + 1) / COMPILATION_STAGES.length) * 100}%`,
+                transition: 'width 0.5s ease-out'
+              }} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Module Picker */}
+        <div style={{
+          width: '320px',
+          borderRight: '1px solid var(--color-border)',
+          backgroundColor: 'var(--color-bg-secondary)',
+          padding: 'var(--spacing-lg)',
+          overflowY: 'auto'
+        }}>
+          <h3 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', marginBottom: 'var(--spacing-md)' }}>
+            Select Scope
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+            {modules.map(mod => (
+              <button
+                key={mod.id}
+                onClick={() => setSelectedModuleId(mod.id)}
+                style={{
+                  textAlign: 'left',
+                  padding: 'var(--spacing-md)',
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: selectedModuleId === mod.id ? 'var(--color-primary)' : 'var(--color-border)',
+                  backgroundColor: selectedModuleId === mod.id ? 'var(--color-primary-light)' : 'var(--color-bg-tertiary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginBottom: '4px' }}>
+                  {mod.id}
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: selectedModuleId === mod.id ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>
+                  {mod.name}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                  {mod.atoms.length} atoms in scope
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Preview */}
+        <div style={{ flex: 1, backgroundColor: 'var(--color-bg-primary)', padding: 'var(--spacing-xl)', overflowY: 'auto' }}>
+          {compiledText ? (
+            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 'var(--spacing-lg)',
+                paddingBottom: 'var(--spacing-md)',
+                borderBottom: '1px solid var(--color-border)'
+              }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Compiled Output</h3>
+                <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+                  <button
+                    onClick={() => handleDownload('markdown')}
+                    className="btn btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
+                  >
+                    <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download MD
+                  </button>
+                  <button
+                    onClick={() => handleDownload('html')}
+                    className="btn btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
+                  >
+                    <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download HTML
+                  </button>
+                </div>
+              </div>
+
+              {/* Properly Rendered Markdown */}
+              <div style={{
+                backgroundColor: 'white',
+                padding: 'var(--spacing-xl)',
+                borderRadius: '8px',
+                border: '1px solid var(--color-border)'
+              }}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    code(props: any) {
+                      const {node, inline, className, children, ...rest} = props;
+                      const match = /language-(\w+)/.exec(className || '');
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={oneDark as any}
+                          language={match[1]}
+                          PreTag="div"
+                          {...rest}
+                        >
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...rest}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    h1: ({node, ...props}) => <h1 style={{ fontSize: '28px', fontWeight: '700', marginTop: 'var(--spacing-xl)', marginBottom: 'var(--spacing-md)', borderBottom: '2px solid var(--color-border)', paddingBottom: 'var(--spacing-sm)' }} {...props} />,
+                    h2: ({node, ...props}) => <h2 style={{ fontSize: '22px', fontWeight: '600', marginTop: 'var(--spacing-lg)', marginBottom: 'var(--spacing-md)' }} {...props} />,
+                    h3: ({node, ...props}) => <h3 style={{ fontSize: '18px', fontWeight: '600', marginTop: 'var(--spacing-md)', marginBottom: 'var(--spacing-sm)' }} {...props} />,
+                    p: ({node, ...props}) => <p style={{ lineHeight: '1.6', marginBottom: 'var(--spacing-md)', color: 'var(--color-text-primary)' }} {...props} />,
+                    ul: ({node, ...props}) => <ul style={{ marginLeft: 'var(--spacing-lg)', marginBottom: 'var(--spacing-md)' }} {...props} />,
+                    ol: ({node, ...props}) => <ol style={{ marginLeft: 'var(--spacing-lg)', marginBottom: 'var(--spacing-md)' }} {...props} />,
+                    li: ({node, ...props}) => <li style={{ marginBottom: 'var(--spacing-xs)', lineHeight: '1.6' }} {...props} />,
+                    blockquote: ({node, ...props}) => <blockquote style={{ borderLeft: '4px solid var(--color-primary)', paddingLeft: 'var(--spacing-md)', marginLeft: 0, color: 'var(--color-text-secondary)', fontStyle: 'italic' }} {...props} />,
+                    table: ({node, ...props}) => <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 'var(--spacing-md)' }} {...props} />,
+                    th: ({node, ...props}) => <th style={{ border: '1px solid var(--color-border)', padding: 'var(--spacing-sm)', backgroundColor: 'var(--color-bg-tertiary)', textAlign: 'left', fontWeight: '600' }} {...props} />,
+                    td: ({node, ...props}) => <td style={{ border: '1px solid var(--color-border)', padding: 'var(--spacing-sm)' }} {...props} />,
+                  }}
+                >
+                  {compiledText}
+                </ReactMarkdown>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              color: 'var(--color-text-tertiary)'
+            }}>
+              <div style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                border: '2px solid var(--color-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 'var(--spacing-lg)'
+              }}>
+                <svg style={{ width: '40px', height: '40px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-sm)' }}>
+                Compiler Ready
+              </h3>
+              <p style={{ fontSize: '14px', maxWidth: '400px', marginBottom: 'var(--spacing-md)' }}>
+                Select a module and template type, then click Compile to generate a professional document.
+              </p>
+              <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                {selectedModuleId ? (
+                  <>
+                    <strong>{moduleAtoms.length} atoms</strong> ready to compile from <strong>{activeModule?.name}</strong>
+                  </>
+                ) : (
+                  'Select a module to get started'
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PublisherEnhanced;

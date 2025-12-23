@@ -7,7 +7,7 @@ import EdgeExplorer from './components/EdgeExplorer';
 import ImpactAnalysisUI from './components/ImpactAnalysisUI';
 import AIAssistant from './components/AIAssistant';
 import ValidationCenter from './components/ValidationCenter';
-import Publisher from './components/Publisher';
+import Publisher from './components/PublisherEnhanced';
 import IngestionEngine from './components/IngestionEngine';
 import OntologyBrowser from './components/OntologyBrowser';
 import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
