@@ -220,6 +220,380 @@ class FraudRiskRule(ProcessRewriteRule):
         return modified, modification
 
 
+class FirstTimeBorrowerRule(ProcessRewriteRule):
+    """Add enhanced documentation and education for first-time borrowers"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-first-time",
+            name="First-Time Borrower Support",
+            description="Adds education and documentation support for first-time borrowers",
+            priority=6
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.customer_data:
+            return False
+        return context.customer_data.get('first_time_borrower', False)
+
+    def apply(self, journey, context):
+        education_phase = {
+            "id": "phase-borrower-education",
+            "name": "Borrower Education & Documentation",
+            "description": "Additional support for first-time borrowers",
+            "modules": ["module-education", "module-doc-assistance"],
+            "targetDurationDays": 1,
+            "criticality": "MEDIUM"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert early, after application
+        if len(modified.get('phases', [])) > 0:
+            modified['phases'].insert(1, education_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=education_phase['id'],
+            reason="First-time borrower requires additional education and support",
+            criticality="MEDIUM"
+        )
+
+        return modified, modification
+
+
+class HighDebtToIncomeRule(ProcessRewriteRule):
+    """Add debt counseling for high DTI ratios"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-high-dti",
+            name="High DTI Ratio Review",
+            description="Requires debt counseling review for DTI > 43%",
+            priority=8
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.customer_data:
+            return False
+        dti = context.customer_data.get('debt_to_income_ratio', 0)
+        return dti > 0.43
+
+    def apply(self, journey, context):
+        dti_phase = {
+            "id": "phase-dti-review",
+            "name": "DTI Review & Counseling",
+            "description": f"High DTI ratio ({context.customer_data.get('debt_to_income_ratio', 0):.1%}) requires review",
+            "modules": ["module-debt-analysis", "module-underwriting-exception"],
+            "targetDurationDays": 2,
+            "criticality": "HIGH"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert after assessment
+        if len(modified.get('phases', [])) > 2:
+            modified['phases'].insert(2, dti_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=dti_phase['id'],
+            reason=f"DTI ratio {context.customer_data.get('debt_to_income_ratio', 0):.1%} exceeds 43% threshold",
+            criticality="HIGH"
+        )
+
+        return modified, modification
+
+
+class SelfEmployedIncomeRule(ProcessRewriteRule):
+    """Add additional verification for self-employed borrowers"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-self-employed",
+            name="Self-Employed Income Verification",
+            description="Enhanced verification for self-employed income",
+            priority=7
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.customer_data:
+            return False
+        return context.customer_data.get('employment_type') == 'SELF_EMPLOYED'
+
+    def apply(self, journey, context):
+        verification_phase = {
+            "id": "phase-self-employed-verification",
+            "name": "Self-Employed Income Verification",
+            "description": "Additional documentation and verification for self-employed income",
+            "modules": ["module-tax-return-analysis", "module-business-verification"],
+            "targetDurationDays": 3,
+            "criticality": "MEDIUM"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert after initial income verification
+        if len(modified.get('phases', [])) > 1:
+            modified['phases'].insert(2, verification_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=verification_phase['id'],
+            reason="Self-employed income requires enhanced verification",
+            criticality="MEDIUM"
+        )
+
+        return modified, modification
+
+
+class PropertyTypeRiskRule(ProcessRewriteRule):
+    """Add appraisal review for non-standard properties"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-property-risk",
+            name="Non-Standard Property Review",
+            description="Enhanced appraisal for condos, multi-family, or rural properties",
+            priority=7
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.transaction_data:
+            return False
+        property_type = context.transaction_data.get('property_type', 'SINGLE_FAMILY')
+        risky_types = ['CONDO', 'MULTI_FAMILY', 'RURAL', 'MANUFACTURED']
+        return property_type in risky_types
+
+    def apply(self, journey, context):
+        appraisal_phase = {
+            "id": "phase-enhanced-appraisal",
+            "name": "Enhanced Property Appraisal",
+            "description": f"Additional review for {context.transaction_data.get('property_type')} property",
+            "modules": ["module-appraisal-review", "module-comparable-analysis"],
+            "targetDurationDays": 2,
+            "criticality": "MEDIUM"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert before final approval
+        if len(modified.get('phases', [])) > 2:
+            modified['phases'].insert(-1, appraisal_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=appraisal_phase['id'],
+            reason=f"Property type {context.transaction_data.get('property_type')} requires enhanced appraisal",
+            criticality="MEDIUM"
+        )
+
+        return modified, modification
+
+
+class CashOutRefinanceRule(ProcessRewriteRule):
+    """Add equity review for cash-out refinances"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-cash-out",
+            name="Cash-Out Refinance Review",
+            description="Additional review for cash-out refinance transactions",
+            priority=7
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.transaction_data:
+            return False
+        loan_purpose = context.transaction_data.get('loan_purpose', 'PURCHASE')
+        cash_out = context.transaction_data.get('cash_out_amount', 0)
+        return loan_purpose == 'REFINANCE' and cash_out > 0
+
+    def apply(self, journey, context):
+        equity_phase = {
+            "id": "phase-equity-review",
+            "name": "Equity & Cash-Out Review",
+            "description": f"Review cash-out amount ${context.transaction_data.get('cash_out_amount', 0):,.0f}",
+            "modules": ["module-equity-analysis", "module-ltv-verification"],
+            "targetDurationDays": 1,
+            "criticality": "MEDIUM"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert after assessment
+        if len(modified.get('phases', [])) > 1:
+            modified['phases'].insert(2, equity_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=equity_phase['id'],
+            reason=f"Cash-out refinance with ${context.transaction_data.get('cash_out_amount', 0):,.0f} requires equity review",
+            criticality="MEDIUM"
+        )
+
+        return modified, modification
+
+
+class ExpiredDocumentsRule(ProcessRewriteRule):
+    """Add re-verification if documents are expiring soon"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-doc-expiration",
+            name="Document Expiration Check",
+            description="Re-verification when documents are close to expiration",
+            priority=8
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        return 'documents_expiring' in context.risk_flags
+
+    def apply(self, journey, context):
+        reverify_phase = {
+            "id": "phase-document-reverification",
+            "name": "Document Re-Verification",
+            "description": "Update expiring documents before closing",
+            "modules": ["module-doc-update", "module-reverification"],
+            "targetDurationDays": 1,
+            "criticality": "HIGH"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert before final approval
+        if len(modified.get('phases', [])) > 2:
+            modified['phases'].insert(-1, reverify_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=reverify_phase['id'],
+            reason="Documents nearing expiration require re-verification",
+            criticality="HIGH"
+        )
+
+        return modified, modification
+
+
+class LowAppraisalRule(ProcessRewriteRule):
+    """Add renegotiation phase if appraisal comes in low"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-low-appraisal",
+            name="Low Appraisal Handling",
+            description="Add renegotiation when appraisal < purchase price",
+            priority=9
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        return 'appraisal_below_value' in context.risk_flags
+
+    def apply(self, journey, context):
+        renegotiation_phase = {
+            "id": "phase-value-renegotiation",
+            "name": "Price Renegotiation",
+            "description": "Appraisal below purchase price requires renegotiation",
+            "modules": ["module-price-negotiation", "module-contract-amendment"],
+            "targetDurationDays": 3,
+            "criticality": "HIGH"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert before approval
+        if len(modified.get('phases', [])) > 2:
+            modified['phases'].insert(-2, renegotiation_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=renegotiation_phase['id'],
+            reason="Appraisal value below purchase price requires renegotiation",
+            criticality="HIGH"
+        )
+
+        return modified, modification
+
+
+class StateSpecificRequirementsRule(ProcessRewriteRule):
+    """Add state-specific compliance phases"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-state-compliance",
+            name="State-Specific Requirements",
+            description="Add compliance phases for states with special requirements",
+            priority=8
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.transaction_data:
+            return False
+        # States with special requirements
+        special_states = ['NY', 'TX', 'CA', 'NV']
+        state = context.transaction_data.get('property_state', '')
+        return state in special_states
+
+    def apply(self, journey, context):
+        state = context.transaction_data.get('property_state', '')
+        compliance_phase = {
+            "id": f"phase-{state.lower()}-compliance",
+            "name": f"{state} State Compliance",
+            "description": f"State-specific requirements for {state}",
+            "modules": [f"module-{state.lower()}-disclosure", "module-state-regulations"],
+            "targetDurationDays": 1,
+            "criticality": "HIGH"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert early in process
+        if len(modified.get('phases', [])) > 0:
+            modified['phases'].insert(1, compliance_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=compliance_phase['id'],
+            reason=f"Property in {state} requires state-specific compliance",
+            criticality="HIGH"
+        )
+
+        return modified, modification
+
+
+class NonResidentRule(ProcessRewriteRule):
+    """Add verification for non-resident borrowers"""
+
+    def __init__(self):
+        super().__init__(
+            rule_id="rule-non-resident",
+            name="Non-Resident Verification",
+            description="Enhanced verification for non-resident borrowers",
+            priority=7
+        )
+
+    def evaluate(self, journey, context) -> bool:
+        if not context.customer_data:
+            return False
+        return context.customer_data.get('residency_status') == 'NON_RESIDENT'
+
+    def apply(self, journey, context):
+        verification_phase = {
+            "id": "phase-non-resident-verification",
+            "name": "Non-Resident Verification",
+            "description": "Additional documentation for non-resident borrowers",
+            "modules": ["module-visa-verification", "module-international-credit"],
+            "targetDurationDays": 3,
+            "criticality": "MEDIUM"
+        }
+
+        modified = copy.deepcopy(journey)
+        # Insert early
+        if len(modified.get('phases', [])) > 0:
+            modified['phases'].insert(1, verification_phase['id'])
+
+        modification = PhaseModification(
+            action="insert",
+            phase_id=verification_phase['id'],
+            reason="Non-resident status requires enhanced verification",
+            criticality="MEDIUM"
+        )
+
+        return modified, modification
+
+
 # Process Rewrite Engine
 class ProcessRewriteEngine:
     """Engine for evaluating and modifying journeys at runtime"""
@@ -227,10 +601,21 @@ class ProcessRewriteEngine:
     def __init__(self):
         # Register all rules
         self.rules: List[ProcessRewriteRule] = [
+            # Original 4 rules
             LowCreditScoreRule(),
             HighValueTransactionRule(),
             ComplianceCheckRule(),
             FraudRiskRule(),
+            # New 10 rules
+            FirstTimeBorrowerRule(),
+            HighDebtToIncomeRule(),
+            SelfEmployedIncomeRule(),
+            PropertyTypeRiskRule(),
+            CashOutRefinanceRule(),
+            ExpiredDocumentsRule(),
+            LowAppraisalRule(),
+            StateSpecificRequirementsRule(),
+            NonResidentRule(),
         ]
         # Sort by priority (highest first)
         self.rules.sort(key=lambda r: r.priority, reverse=True)
