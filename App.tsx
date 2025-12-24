@@ -5,7 +5,7 @@ import AtomExplorer from './components/AtomExplorer';
 import ModuleExplorer from './components/ModuleExplorer';
 import EdgeExplorer from './components/EdgeExplorer';
 import ImpactAnalysisUI from './components/ImpactAnalysisUI';
-import AIAssistant from './components/AIAssistant';
+import AIAssistant from './components/AIAssistantEnhanced';
 import ValidationCenter from './components/ValidationCenter';
 import Publisher from './components/PublisherEnhanced';
 import IngestionEngine from './components/IngestionEngine';
