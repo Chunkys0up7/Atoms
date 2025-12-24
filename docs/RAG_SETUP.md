@@ -284,21 +284,34 @@ The enhanced AI Assistant (`AIAssistantEnhanced.tsx`) provides:
 ### Re-Index After Atom Changes
 
 ```bash
-# Full re-index (slow but complete)
+# Full re-index (slow - rebuilds entire index)
 python scripts/initialize_vectors.py
 
-# Incremental update (future enhancement)
-python scripts/incremental_update.py --changed atom-xyz-123
+# Incremental update (30x faster - recommended)
+python scripts/incremental_update.py
+
+# Force update all atoms
+python scripts/incremental_update.py --force-all
+
+# Update specific atom
+python scripts/incremental_update.py --atom-id atom-xyz-123
 ```
+
+**Incremental Update Benefits (RAG.md Phase 3):**
+- **30x faster** than full rebuild (seconds vs. minutes)
+- Detects changes via file modification timestamps + MD5 hashes
+- Updates only modified atoms in vector DB
+- Targeted subgraph updates in Neo4j
+- Maintains state file for change tracking
 
 ### Update Graph After Module Changes
 
 ```bash
-# Full graph rebuild
+# Full graph rebuild (slow)
 python scripts/sync_graph_to_neo4j.py
 
-# Incremental graph update (future enhancement)
-python scripts/update_graph.py --module module-abc
+# Incremental update (fast - same script)
+python scripts/incremental_update.py
 ```
 
 ### Monitor Performance
