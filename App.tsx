@@ -19,6 +19,7 @@ import RuntimeSimulator from './components/RuntimeSimulator';
 import RuleManager from './components/RuleManager';
 import LineageViewer from './components/LineageViewer';
 import OptimizationDashboard from './components/OptimizationDashboard';
+import OwnershipDashboard from './components/OwnershipDashboard';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
@@ -286,6 +287,8 @@ const App: React.FC = () => {
         return <RuleManager />;
       case 'feedback':
         return <OptimizationDashboard />;
+      case 'ownership':
+        return <OwnershipDashboard />;
       default:
         return <div className="content-area">Select a view from the sidebar</div>;
     }
