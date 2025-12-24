@@ -74,6 +74,7 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [savedDocId, setSavedDocId] = useState<string | null>(null);
   const [mkdocsPath, setMkdocsPath] = useState<string | null>(null);
+  const [ragIndexResult, setRagIndexResult] = useState<any>(null);
   const [documentTitle, setDocumentTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [compileError, setCompileError] = useState<string | null>(null);
@@ -289,11 +290,17 @@ ${compiledText.split('\n').map(line => {
         setMkdocsPath(savedDoc.mkdocs_sync.mkdocs_path);
       }
 
+      // Capture RAG indexing result
+      if (savedDoc.rag_index) {
+        setRagIndexResult(savedDoc.rag_index);
+      }
+
       // Auto-clear success message after 5 seconds
       setTimeout(() => {
         setSaveSuccess(false);
         setSavedDocId(null);
         setMkdocsPath(null);
+        setRagIndexResult(null);
       }, 5000);
     } catch (err) {
       console.error('Save error:', err);
@@ -509,6 +516,24 @@ ${compiledText.split('\n').map(line => {
                 {mkdocsPath && (
                   <div style={{ marginTop: '4px', fontSize: '12px' }}>
                     📚 Published to: <code style={{ fontSize: '11px', backgroundColor: '#dfd', padding: '2px 6px', borderRadius: '3px' }}>{mkdocsPath}</code>
+                  </div>
+                )}
+                {ragIndexResult && ragIndexResult.status === 'indexed' && (
+                  <div style={{ marginTop: '4px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>🤖</span>
+                    <span>
+                      Indexed in RAG system
+                      {ragIndexResult.strategy === 'chunked' ? (
+                        <span> ({ragIndexResult.chunks_indexed} semantic chunks)</span>
+                      ) : (
+                        <span> (full document)</span>
+                      )}
+                    </span>
+                  </div>
+                )}
+                {ragIndexResult && ragIndexResult.status === 'failed' && (
+                  <div style={{ marginTop: '4px', fontSize: '12px', color: '#c60' }}>
+                    ⚠️ RAG indexing failed - document not searchable in AI Assistant
                   </div>
                 )}
               </div>

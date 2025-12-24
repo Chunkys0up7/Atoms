@@ -25,7 +25,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'ai',
-      text: 'Hello! I am the GNDP RAG Assistant with **dual-index architecture** (vector + graph). I can help you explore the knowledge base using three modes:\n\n• **Entity Search**: Semantic similarity search\n• **Path Search**: Graph relationship traversal\n• **Impact Analysis**: Downstream dependency analysis\n\nHow can I help you today?'
+      text: 'Hello! I am the GNDP RAG Assistant with **dual-index architecture** (vector + graph). I can help you explore the knowledge base using three modes:\n\n• **Entity Search**: Semantic similarity search\n• **Path Search**: Graph relationship traversal\n• **Impact Analysis**: Downstream dependency analysis\n\n**📚 New:** I can now search published documents! When you publish a document, it\'s automatically indexed for semantic search.\n\nHow can I help you today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -106,17 +106,17 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
     entity: [
       "Find loan application processes",
       "What controls govern credit scoring?",
-      "Show risk assessment procedures"
+      "Summarize published SOP documents"
     ],
     path: [
       "What systems connect to payment processing?",
       "Show dependencies of compliance controls",
-      "How are KYC procedures related?"
+      "How are published documents related to atoms?"
     ],
     impact: [
       "What would break if we change credit verification?",
       "Show downstream impacts of risk scoring",
-      "Which processes depend on document validation?"
+      "Which documents reference this compliance control?"
     ]
   };
 
@@ -196,13 +196,21 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
         {/* System Status */}
         {ragHealth && (
           <div className="mt-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
-            <div className="grid grid-cols-4 gap-3 text-[10px]">
+            <div className="grid grid-cols-2 gap-3 text-[10px] mb-3">
               <div>
-                <div className="text-slate-500 mb-1">Vector DB</div>
+                <div className="text-slate-500 mb-1">Atoms Indexed</div>
                 <div className={`font-bold ${ragHealth.vector_db_exists ? 'text-green-400' : 'text-red-400'}`}>
                   {ragHealth.vector_db_exists ? `${ragHealth.collection_count} atoms` : 'Not initialized'}
                 </div>
               </div>
+              <div>
+                <div className="text-slate-500 mb-1">Documents Indexed</div>
+                <div className={`font-bold ${ragHealth.document_collection_count > 0 ? 'text-green-400' : 'text-slate-500'}`}>
+                  {ragHealth.document_collection_count || 0} docs
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-[10px]">
               <div>
                 <div className="text-slate-500 mb-1">Graph DB</div>
                 <div className={`font-bold ${ragHealth.neo4j_connected ? 'text-green-400' : 'text-red-400'}`}>
@@ -212,11 +220,11 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
               <div>
                 <div className="text-slate-500 mb-1">LLM</div>
                 <div className={`font-bold ${ragHealth.claude_api_available ? 'text-green-400' : 'text-red-400'}`}>
-                  {ragHealth.claude_api_available ? 'Claude API' : 'Unavailable'}
+                  {ragHealth.claude_api_available ? 'Claude' : 'Unavailable'}
                 </div>
               </div>
               <div>
-                <div className="text-slate-500 mb-1">Dual-Index</div>
+                <div className="text-slate-500 mb-1">Status</div>
                 <div className={`font-bold ${ragHealth.dual_index_ready ? 'text-green-400' : 'text-red-400'}`}>
                   {ragHealth.dual_index_ready ? 'Ready' : 'Partial'}
                 </div>

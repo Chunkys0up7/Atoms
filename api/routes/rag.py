@@ -342,6 +342,13 @@ def rag_health():
             collection = client.get_collection(name="gndp_atoms")
             status['vector_db_exists'] = True
             status['collection_count'] = collection.count()
+
+            # Check documents collection
+            try:
+                doc_collection = client.get_collection(name="gndp_documents")
+                status['document_collection_count'] = doc_collection.count()
+            except:
+                status['document_collection_count'] = 0
         except Exception as e:
             status['chroma_error'] = str(e)
 
@@ -375,3 +382,162 @@ def rag_health():
     )
 
     return status
+
+
+# Document Indexing
+class IndexDocumentRequest(BaseModel):
+    """Request to index a document in RAG system."""
+    doc_id: str
+    title: str
+    content: str
+    template_type: str
+    module_id: str
+    atom_ids: List[str]
+    metadata: Optional[Dict[str, Any]] = None
+
+
+@router.post("/api/rag/index-document")
+def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
+    """
+    Index a published document in the RAG system.
+
+    This allows the AI assistant to answer questions about published documents
+    using semantic search + graph traversal.
+    """
+    if not HAS_CHROMA:
+        raise HTTPException(status_code=503, detail="Chroma not installed")
+
+    try:
+        # Initialize vector DB
+        rag_index_dir = Path(__file__).parent.parent.parent / "rag-index"
+        if not rag_index_dir.exists():
+            raise HTTPException(
+                status_code=503,
+                detail="RAG system not initialized. Run scripts/initialize_vectors.py first"
+            )
+
+        client = chromadb.PersistentClient(path=str(rag_index_dir))
+
+        # Get or create documents collection
+        try:
+            collection = client.get_collection(name="gndp_documents")
+        except:
+            # Create collection if it doesn't exist
+            openai_api_key = os.environ.get("OPENAI_API_KEY")
+            if not openai_api_key:
+                raise HTTPException(
+                    status_code=503,
+                    detail="OPENAI_API_KEY not set. Required for document embeddings."
+                )
+
+            embedding_fn = embedding_functions.OpenAIEmbeddingFunction(
+                api_key=openai_api_key,
+                model_name="text-embedding-3-small"
+            )
+            collection = client.create_collection(
+                name="gndp_documents",
+                embedding_function=embedding_fn,
+                metadata={"description": "Published GNDP documents"}
+            )
+
+        # Prepare document for indexing
+        # Use semantic chunking if document is long (>2000 chars)
+        if len(request.content) > 2000:
+            # Call chunking API to split document
+            import httpx
+            try:
+                chunk_response = httpx.post(
+                    "http://localhost:8001/api/chunking/chunk",
+                    json={
+                        "document_text": request.content,
+                        "parent_atom_id": request.doc_id,
+                        "chunk_strategy": "semantic",
+                        "similarity_threshold": 0.8,
+                        "preserve_structure": True
+                    },
+                    timeout=30.0
+                )
+
+                if chunk_response.status_code == 200:
+                    chunk_data = chunk_response.json()
+                    chunks = chunk_data.get("chunks", [])
+
+                    # Index each chunk separately
+                    for chunk in chunks:
+                        chunk_id = chunk["chunk_id"]
+                        chunk_text = chunk["text"]
+
+                        # Prepare metadata
+                        chunk_metadata = {
+                            "doc_id": request.doc_id,
+                            "title": request.title,
+                            "template_type": request.template_type,
+                            "module_id": request.module_id,
+                            "chunk_index": chunk["chunk_index"],
+                            "section_header": chunk.get("section_header", ""),
+                            "type": "document_chunk"
+                        }
+
+                        # Upsert chunk
+                        collection.upsert(
+                            ids=[chunk_id],
+                            documents=[chunk_text],
+                            metadatas=[chunk_metadata]
+                        )
+
+                    return {
+                        "status": "indexed",
+                        "doc_id": request.doc_id,
+                        "strategy": "chunked",
+                        "chunks_indexed": len(chunks),
+                        "message": f"Document chunked into {len(chunks)} semantic segments and indexed"
+                    }
+            except Exception as e:
+                # Fallback to full document indexing if chunking fails
+                print(f"Chunking failed, indexing full document: {e}")
+
+        # Index full document (not chunked or chunking failed)
+        # Build searchable document text
+        doc_parts = [
+            f"Document ID: {request.doc_id}",
+            f"Title: {request.title}",
+            f"Type: {request.template_type}",
+            f"Module: {request.module_id}",
+            f"\nContent:\n{request.content}"
+        ]
+
+        document_text = "\n".join(doc_parts)
+
+        # Prepare metadata
+        metadata = {
+            "doc_id": request.doc_id,
+            "title": request.title,
+            "template_type": request.template_type,
+            "module_id": request.module_id,
+            "atom_count": len(request.atom_ids),
+            "type": "document"
+        }
+
+        if request.metadata:
+            metadata.update(request.metadata)
+
+        # Upsert to vector DB (creates or updates)
+        collection.upsert(
+            ids=[request.doc_id],
+            documents=[document_text],
+            metadatas=[metadata]
+        )
+
+        return {
+            "status": "indexed",
+            "doc_id": request.doc_id,
+            "strategy": "full_document",
+            "chunks_indexed": 1,
+            "message": "Document indexed successfully in RAG system"
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to index document: {str(e)}"
+        )

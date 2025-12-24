@@ -231,6 +231,35 @@ def create_document(doc: CreateDocumentRequest) -> Dict[str, Any]:
             print(f"Warning: Failed to sync document to MkDocs: {sync_error}")
             document['mkdocs_sync'] = {'status': 'failed', 'error': str(sync_error)}
 
+        # Auto-index in RAG system
+        try:
+            import httpx
+            rag_response = httpx.post(
+                "http://localhost:8001/api/rag/index-document",
+                json={
+                    "doc_id": doc_id,
+                    "title": doc.title,
+                    "content": doc.content,
+                    "template_type": doc.template_type,
+                    "module_id": doc.module_id,
+                    "atom_ids": doc.atom_ids,
+                    "metadata": doc.metadata
+                },
+                timeout=30.0
+            )
+
+            if rag_response.status_code == 200:
+                document['rag_index'] = rag_response.json()
+            else:
+                document['rag_index'] = {
+                    'status': 'failed',
+                    'error': f"HTTP {rag_response.status_code}"
+                }
+        except Exception as rag_error:
+            # Log but don't fail the document creation
+            print(f"Warning: Failed to index document in RAG: {rag_error}")
+            document['rag_index'] = {'status': 'failed', 'error': str(rag_error)}
+
         return document
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create document: {str(e)}")
