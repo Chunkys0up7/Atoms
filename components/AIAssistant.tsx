@@ -46,18 +46,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ atoms }) => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-slate-900">
-      <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/40">
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gray-50">
         <div>
-          <h2 className="text-xl font-bold flex items-center gap-2">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900">
             <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center text-[10px] text-white">AI</div>
             RAG Assistant
           </h2>
-          <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-black">Graph-Augmented Intelligence</p>
+          <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-widest font-black">Graph-Augmented Intelligence</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500"></div>
-          <span className="text-[9px] font-black uppercase text-slate-500">Retrieval Active</span>
+          <span className="text-[9px] font-black uppercase text-gray-600">Retrieval Active</span>
         </div>
       </div>
 
@@ -65,9 +65,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ atoms }) => {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-[2rem] p-5 text-sm leading-relaxed ${
-              msg.role === 'user' 
-                ? 'bg-blue-600 text-white rounded-tr-none shadow-lg' 
-                : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700 prose prose-invert prose-sm max-w-none'
+              msg.role === 'user'
+                ? 'bg-blue-600 text-white rounded-tr-none shadow-lg'
+                : 'bg-gray-100 text-gray-900 rounded-tl-none border border-gray-300 prose prose-blue prose-sm max-w-none'
             }`}>
               {msg.role === 'ai' ? (
                 <div dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br/>') }} />
@@ -79,7 +79,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ atoms }) => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 text-slate-400 p-5 rounded-[2rem] rounded-tl-none border border-slate-700 flex gap-2">
+            <div className="bg-gray-100 text-gray-600 p-5 rounded-[2rem] rounded-tl-none border border-gray-300 flex gap-2">
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></span>
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></span>
@@ -91,10 +91,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ atoms }) => {
       {messages.length < 3 && (
         <div className="p-6 pt-0 flex flex-wrap gap-2">
           {suggestedQuestions.map(q => (
-            <button 
-              key={q} 
+            <button
+              key={q}
               onClick={() => handleSend(q)}
-              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-full text-[10px] font-bold text-slate-400 hover:text-white hover:border-blue-500 transition-all"
+              className="px-4 py-2 bg-white border border-gray-300 rounded-full text-[10px] font-bold text-gray-700 hover:text-blue-600 hover:border-blue-500 transition-all"
             >
               {q}
             </button>
@@ -102,20 +102,20 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ atoms }) => {
         </div>
       )}
 
-      <div className="p-6 bg-slate-900 border-t border-slate-800">
+      <div className="p-6 bg-white border-t border-gray-200">
         <div className="relative">
-          <input 
-            type="text" 
-            placeholder="Search knowledge base or ask a methodology question..." 
-            className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-4 pl-6 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xl text-white placeholder:text-slate-700"
+          <input
+            type="text"
+            placeholder="Search knowledge base or ask a methodology question..."
+            className="w-full bg-white border border-gray-300 rounded-2xl py-4 pl-6 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md text-gray-900 placeholder:text-gray-400"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
           />
-          <button 
+          <button
             onClick={() => handleSend()}
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-2 bottom-2 px-5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 rounded-xl text-white transition-all font-black text-[10px] uppercase tracking-widest"
+            className="absolute right-2 top-2 bottom-2 px-5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-200 disabled:text-gray-400 rounded-xl text-white transition-all font-black text-[10px] uppercase tracking-widest"
           >
             Ask
           </button>
