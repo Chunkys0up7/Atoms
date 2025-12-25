@@ -1,0 +1,40 @@
+test_suite: verify-address
+
+setup:
+  fixtures_file: test_data/fixtures/address-fixtures.yml
+
+tests:
+  - name: US Address Validation
+    input:
+      country: US
+      street: "4326 Cedar Lane"
+      city: "Rivertown"
+      state: "CA"
+      postal_code: "90210"
+    expected_output:
+      is_deliverable: true
+    assertion: "response.is_deliverable == true"
+
+  - name: Missing Fields Rejection
+    input:
+      country: US
+      street: ""
+      city: ""
+      postal_code: ""
+    expected_output:
+      is_deliverable: false
+      failure_reason: "missing_fields"
+    assertion: "response.is_deliverable == false"
+
+  - name: International Format - UK
+    input:
+      country: UK
+      street: "Flat 3, 12 High Street"
+      city: "London"
+      postal_code: "SW1A 1AA"
+    expected_output:
+      is_deliverable: true
+    assertion: "response.is_deliverable == true"
+
+notes: |
+  - Tests should validate normalization, postal code format checks, and optional geocode lookup.

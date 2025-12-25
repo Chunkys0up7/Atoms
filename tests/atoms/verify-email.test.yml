@@ -1,0 +1,73 @@
+test_suite: verify-email-validation
+
+setup:
+  fixtures_file: test_data/fixtures/verify-email-fixtures.yml
+  fixtures:
+    valid_emails:
+      - alice@bank.com
+      - bob.jones@enterprise.org
+      - oliver+sales@company.co.uk
+    invalid_emails:
+      - missing-at-sign.example.com
+      - @no-local-part.com
+    dns_failures:
+      - nonexistent-domain-xyz12345.test
+
+tests:
+  - name: Valid Email Format
+    input:
+      email_address: "alice@bank.com"
+      verification_method: "smtp"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Valid Email With Plus-Addressing
+    input:
+      email_address: "oliver+sales@company.co.uk"
+      verification_method: "smtp"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: International / Unicode Local Part
+    input:
+      email_address: "maria.garcía@empresa.es"
+      verification_method: "smtp"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Invalid Format Detection - missing @
+    input:
+      email_address: "missing-at-sign.example.com"
+    expected_output:
+      is_valid: false
+    assertion: "response.is_valid == false"
+
+  - name: DNS Lookup Failure Handling
+    input:
+      email_address: "user@nonexistent-domain-xyz12345.test"
+    expected_output:
+      is_valid: false
+      failure_reason: "dns_lookup_failed"
+    assertion: "response.is_valid == false AND response.reason == 'dns_lookup_failed'"
+
+  - name: Role Account Rejection
+    input:
+      email_address: "admin@company.com"
+    policy:
+      reject_role_accounts: true
+    expected_output:
+      is_valid: false
+      failure_reason: "role_address"
+    assertion: "response.is_valid == false AND response.reason == 'role_address'"
+
+performance_tests:
+  - name: Batch Verification Throughput (sample)
+    input: "10 random valid emails"
+    expected: "complete in < 5 seconds"
+
+notes: |
+  - This YAML is a template for unit testing the `atom:verify-email` logic.
+  - Tests should map to fixture entries in `test_data/fixtures/verify-email-fixtures.yml`.

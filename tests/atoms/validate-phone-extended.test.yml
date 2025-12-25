@@ -1,0 +1,41 @@
+test_suite: validate-phone-extended
+
+setup:
+  fixtures_file: test_data/fixtures/phone-large-fixtures.yml
+
+tests:
+  - name: Normalize E.164
+    input:
+      phone_number: "+1 (415) 555-2671"
+    expected_output:
+      normalized: "+14155552671"
+      is_valid: true
+    assertion: "response.is_valid == true AND response.normalized == '+14155552671'"
+
+  - name: UK Mobile
+    input:
+      phone_number: "+447911123456"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Extension Extraction
+    input:
+      phone_number: "+44 7911 123456 ext 123"
+    expected_output:
+      is_valid: true
+      extension: "123"
+    assertion: "response.extension == '123'"
+
+  - name: Invalid Contains Letters
+    input:
+      phone_number: "+99abc12345"
+    expected_output:
+      is_valid: false
+      failure_reason: "invalid_characters"
+    assertion: "response.is_valid == false"
+
+performance_tests:
+  - name: Bulk Phone Normalize Sample
+    input: "100 mixed phone numbers"
+    expected: "complete in < 5 seconds"
