@@ -78,9 +78,47 @@ export default function OptimizationDashboard() {
   };
 
   const handleApply = async (suggestion: Suggestion) => {
-    // TODO: Implement suggestion application logic
-    console.log('Apply suggestion:', suggestion);
-    alert(`Applying suggestion: ${suggestion.recommendation}\n\nThis would trigger the suggested actions in a production system.`);
+    try {
+      // Apply suggestion via backend API
+      const response = await fetch('http://localhost:8000/api/feedback/apply-suggestion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          suggestion_id: suggestion.id,
+          target_type: suggestion.target_type,
+          target_id: suggestion.target_id,
+          actions: suggestion.suggested_actions
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to apply suggestion');
+      }
+
+      const result = await response.json();
+
+      // Show success message with details
+      alert(
+        `✅ Suggestion Applied Successfully!\n\n` +
+        `Target: ${suggestion.target_name}\n` +
+        `Actions Performed:\n${result.actions_applied.map((a: string) => `  • ${a}`).join('\n')}\n\n` +
+        `${result.message || 'Changes have been applied to the system.'}`
+      );
+
+      // Dismiss the suggestion
+      handleDismiss(suggestion.id);
+
+      // Reload the report to see updated suggestions
+      await loadOptimizationReport();
+    } catch (err) {
+      console.error('Apply suggestion error:', err);
+      alert(
+        `❌ Failed to Apply Suggestion\n\n` +
+        `${err instanceof Error ? err.message : 'An unexpected error occurred'}\n\n` +
+        `The suggestion could not be applied automatically. Please apply changes manually.`
+      );
+    }
   };
 
   const getSeverityColor = (severity: string) => {

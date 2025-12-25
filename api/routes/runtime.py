@@ -622,23 +622,8 @@ class ProcessRewriteEngine:
         # Load rules dynamically from storage
         self.rule_definitions = self._load_rules()
 
-        # Legacy hardcoded rules (kept for backward compatibility)
-        # TODO: Remove once migration is confirmed working
-        self._legacy_rules: List[ProcessRewriteRule] = [
-            LowCreditScoreRule(),
-            HighValueTransactionRule(),
-            ComplianceCheckRule(),
-            FraudRiskRule(),
-            FirstTimeBorrowerRule(),
-            HighDebtToIncomeRule(),
-            SelfEmployedIncomeRule(),
-            PropertyTypeRiskRule(),
-            CashOutRefinanceRule(),
-            ExpiredDocumentsRule(),
-            LowAppraisalRule(),
-            StateSpecificRequirementsRule(),
-            NonResidentRule(),
-        ]
+        # All rules now loaded from storage (data/rules/rules.json)
+        # Legacy hardcoded rules have been successfully migrated
 
     def _load_rules(self):
         """Load and parse rules from storage"""
@@ -784,17 +769,7 @@ class ProcessRewriteEngine:
             except Exception as e:
                 print(f"Warning: Failed to apply rule {rule_def.get('rule_id')}: {e}")
 
-        # Apply legacy hardcoded rules (for backward compatibility)
-        # TODO: Remove once all rules are migrated and tested
-        # Skip if we have dynamic rules loaded (migration complete)
-        if not self.rule_definitions:
-            for rule in self._legacy_rules:
-                try:
-                    if rule.evaluate(modified_journey, context):
-                        modified_journey, modification = rule.apply(modified_journey, context)
-                        modifications.append(modification)
-                except Exception as e:
-                    print(f"Warning: Failed to apply legacy rule {rule.rule_id}: {e}")
+        # All rules now loaded from storage - no legacy fallback needed
 
         # Calculate risk score based on modifications
         risk_score = self._calculate_risk_score(modifications)

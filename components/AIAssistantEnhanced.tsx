@@ -32,6 +32,8 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [ragMode, setRagMode] = useState<RAGMode>('entity');
   const [ragHealth, setRagHealth] = useState<any>(null);
+  const [ragMetrics, setRagMetrics] = useState<any>(null);
+  const [showMetrics, setShowMetrics] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,6 +43,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
   useEffect(() => {
     // Check RAG system health on mount
     checkRagHealth();
+    fetchRagMetrics();
   }, []);
 
   const checkRagHealth = async () => {
@@ -52,6 +55,18 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
       }
     } catch (error) {
       console.error('Failed to check RAG health:', error);
+    }
+  };
+
+  const fetchRagMetrics = async () => {
+    try {
+      const response = await fetch('http://localhost:8001/api/rag/metrics');
+      if (response.ok) {
+        const metrics = await response.json();
+        setRagMetrics(metrics);
+      }
+    } catch (error) {
+      console.error('Failed to fetch RAG metrics:', error);
     }
   };
 
@@ -230,6 +245,137 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* RAG Metrics Dashboard */}
+        {ragMetrics && (
+          <div className="mt-3">
+            <button
+              onClick={() => setShowMetrics(!showMetrics)}
+              className="w-full p-2 bg-slate-800 border border-slate-700 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white hover:border-blue-500 transition-all flex items-center justify-between"
+            >
+              <span>📊 RAG Performance Metrics</span>
+              <span>{showMetrics ? '▼' : '▶'}</span>
+            </button>
+
+            {showMetrics && (
+              <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-700 space-y-3">
+                {/* Index Health */}
+                <div>
+                  <div className="text-[9px] font-bold text-slate-500 uppercase mb-2">Index Health</div>
+                  <div className="grid grid-cols-2 gap-3 text-[10px]">
+                    <div>
+                      <div className="text-slate-500 mb-1">Atoms Indexed</div>
+                      <div className="font-bold text-green-400">
+                        {ragMetrics.index_health.atoms_indexed || 0}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 mb-1">Documents Indexed</div>
+                      <div className="font-bold text-green-400">
+                        {ragMetrics.index_health.documents_indexed || 0}
+                      </div>
+                    </div>
+                    {ragMetrics.index_health.staleness_hours !== undefined && (
+                      <>
+                        <div>
+                          <div className="text-slate-500 mb-1">Index Staleness</div>
+                          <div className={`font-bold ${ragMetrics.index_health.is_stale ? 'text-yellow-400' : 'text-green-400'}`}>
+                            {ragMetrics.index_health.staleness_hours.toFixed(1)}h
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-slate-500 mb-1">Index Status</div>
+                          <div className={`font-bold ${ragMetrics.index_health.is_stale ? 'text-yellow-400' : 'text-green-400'}`}>
+                            {ragMetrics.index_health.is_stale ? 'Stale' : 'Fresh'}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Performance Metrics */}
+                <div>
+                  <div className="text-[9px] font-bold text-slate-500 uppercase mb-2">Query Performance</div>
+                  <div className="grid grid-cols-3 gap-3 text-[10px]">
+                    <div>
+                      <div className="text-slate-500 mb-1">P50 Latency</div>
+                      <div className="font-bold text-blue-400">
+                        {ragMetrics.performance.avg_query_latency_ms}ms
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 mb-1">P95 Latency</div>
+                      <div className={`font-bold ${ragMetrics.performance.meets_target ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {ragMetrics.performance.p95_latency_ms}ms
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 mb-1">P99 Latency</div>
+                      <div className="font-bold text-blue-400">
+                        {ragMetrics.performance.p99_latency_ms}ms
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-[9px] text-slate-500">
+                    Target P95: {ragMetrics.performance.target_p95_ms}ms
+                    {ragMetrics.performance.meets_target && ' ✓'}
+                  </div>
+                </div>
+
+                {/* Retrieval Quality */}
+                <div>
+                  <div className="text-[9px] font-bold text-slate-500 uppercase mb-2">Retrieval Quality</div>
+                  <div className="grid grid-cols-3 gap-3 text-[10px]">
+                    <div>
+                      <div className="text-slate-500 mb-1">MRR Score</div>
+                      <div className={`font-bold ${ragMetrics.retrieval_quality.estimated_mrr >= ragMetrics.retrieval_quality.target_mrr ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {ragMetrics.retrieval_quality.estimated_mrr.toFixed(2)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 mb-1">Accuracy</div>
+                      <div className="font-bold text-green-400">
+                        {(ragMetrics.retrieval_quality.estimated_accuracy * 100).toFixed(0)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 mb-1">Duplicate Rate</div>
+                      <div className={`font-bold ${ragMetrics.retrieval_quality.duplicate_rate < 0.02 ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {(ragMetrics.retrieval_quality.duplicate_rate * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-[9px] text-slate-500">
+                    Target MRR: {ragMetrics.retrieval_quality.target_mrr.toFixed(2)}
+                    {ragMetrics.retrieval_quality.meets_quality_targets && ' ✓'}
+                  </div>
+                </div>
+
+                {/* Overall Score */}
+                <div className="pt-2 border-t border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[9px] font-bold text-slate-500 uppercase">Overall System Score</div>
+                    <div className="text-lg font-bold text-green-400">
+                      {(ragMetrics.overall_score.total_score * 100).toFixed(0)}%
+                    </div>
+                  </div>
+                  <div className="mt-2 grid grid-cols-3 gap-2 text-[9px]">
+                    <div className="text-slate-500">
+                      Index: {(ragMetrics.overall_score.index_health_score * 100).toFixed(0)}%
+                    </div>
+                    <div className="text-slate-500">
+                      Performance: {(ragMetrics.overall_score.performance_score * 100).toFixed(0)}%
+                    </div>
+                    <div className="text-slate-500">
+                      Quality: {(ragMetrics.overall_score.quality_score * 100).toFixed(0)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
