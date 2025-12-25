@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Atom } from '../types';
-import { Database, GitBranch, TrendingUp, Zap } from 'lucide-react';
+import { Database, GitBranch, TrendingUp, Zap, BarChart3, CheckCircle } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'ai';
@@ -255,7 +255,10 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
               onClick={() => setShowMetrics(!showMetrics)}
               className="w-full p-2 bg-slate-800 border border-slate-700 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white hover:border-blue-500 transition-all flex items-center justify-between"
             >
-              <span>📊 RAG Performance Metrics</span>
+              <span className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                RAG Performance Metrics
+              </span>
               <span>{showMetrics ? '▼' : '▶'}</span>
             </button>
 
@@ -319,9 +322,9 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-2 text-[9px] text-slate-500">
+                  <div className="mt-2 text-[9px] text-slate-500 flex items-center gap-1">
                     Target P95: {ragMetrics.performance.target_p95_ms}ms
-                    {ragMetrics.performance.meets_target && ' ✓'}
+                    {ragMetrics.performance.meets_target && <CheckCircle className="w-3 h-3 text-green-400" />}
                   </div>
                 </div>
 
@@ -348,9 +351,9 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-2 text-[9px] text-slate-500">
+                  <div className="mt-2 text-[9px] text-slate-500 flex items-center gap-1">
                     Target MRR: {ragMetrics.retrieval_quality.target_mrr.toFixed(2)}
-                    {ragMetrics.retrieval_quality.meets_quality_targets && ' ✓'}
+                    {ragMetrics.retrieval_quality.meets_quality_targets && <CheckCircle className="w-3 h-3 text-green-400" />}
                   </div>
                 </div>
 

@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
+import { FileText, Building2, BarChart3, CheckCircle2, Search, Layers, Sparkles, FileOutput } from 'lucide-react';
 import { Atom, Module, DocTemplateType } from '../types';
 import { compileDocument } from '../geminiService';
 
@@ -14,7 +15,7 @@ interface PublisherProps {
 interface TemplateInfo {
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
   sections: string[];
   example: string;
 }
@@ -23,28 +24,28 @@ const TEMPLATE_INFO: Record<DocTemplateType, TemplateInfo> = {
   SOP: {
     title: 'Standard Operating Procedure',
     description: 'Step-by-step process documentation with compliance controls and regulatory context',
-    icon: '📋',
+    icon: <FileText className="w-5 h-5" />,
     sections: ['Purpose', 'Scope', 'Responsibilities', 'Procedure', 'Controls', 'Exceptions', 'References'],
     example: 'Detailed walkthrough of operational processes with risk mitigation steps'
   },
   TECHNICAL_DESIGN: {
     title: 'Technical Design Document',
     description: 'System architecture, data models, APIs, and implementation specifications',
-    icon: '🏗️',
+    icon: <Building2 className="w-5 h-5" />,
     sections: ['Overview', 'Architecture', 'Data Models', 'APIs', 'Security', 'Deployment', 'Dependencies'],
     example: 'Complete technical blueprint for system implementation and integration'
   },
   EXECUTIVE_SUMMARY: {
     title: 'Executive Summary',
     description: 'High-level business overview with key metrics, risks, and strategic insights',
-    icon: '📊',
+    icon: <BarChart3 className="w-5 h-5" />,
     sections: ['Overview', 'Key Metrics', 'Business Value', 'Risks', 'Recommendations', 'Next Steps'],
     example: 'C-suite focused document highlighting business impact and strategic alignment'
   },
   COMPLIANCE_AUDIT: {
     title: 'Compliance Audit Report',
     description: 'Regulatory requirements, controls assessment, and compliance verification',
-    icon: '✅',
+    icon: <CheckCircle2 className="w-5 h-5" />,
     sections: ['Scope', 'Regulations', 'Controls', 'Findings', 'Gaps', 'Remediation', 'Sign-off'],
     example: 'Comprehensive audit trail for regulatory review and certification'
   }
@@ -53,14 +54,14 @@ const TEMPLATE_INFO: Record<DocTemplateType, TemplateInfo> = {
 interface CompilationStage {
   name: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const COMPILATION_STAGES: CompilationStage[] = [
-  { name: 'Analyzing', description: 'Reading atom metadata and relationships', icon: '🔍' },
-  { name: 'Structuring', description: 'Building document outline and flow', icon: '🏗️' },
-  { name: 'Generating', description: 'Synthesizing content with AI', icon: '✨' },
-  { name: 'Formatting', description: 'Applying template and styling', icon: '📝' }
+  { name: 'Analyzing', description: 'Reading atom metadata and relationships', icon: <Search className="w-4 h-4" /> },
+  { name: 'Structuring', description: 'Building document outline and flow', icon: <Layers className="w-4 h-4" /> },
+  { name: 'Generating', description: 'Synthesizing content with AI', icon: <Sparkles className="w-4 h-4" /> },
+  { name: 'Formatting', description: 'Applying template and styling', icon: <FileOutput className="w-4 h-4" /> }
 ];
 
 const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {

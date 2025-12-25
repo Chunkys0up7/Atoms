@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FileText, Building2, BarChart3, CheckCircle2, File } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -166,12 +167,13 @@ const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onLoadDocument, modul
   };
 
   const getTemplateIcon = (templateType: string) => {
+    const iconClass = "w-4 h-4 inline-block";
     switch (templateType) {
-      case 'SOP': return '📋';
-      case 'TECHNICAL_DESIGN': return '🏗️';
-      case 'EXECUTIVE_SUMMARY': return '📊';
-      case 'COMPLIANCE_AUDIT': return '✅';
-      default: return '📄';
+      case 'SOP': return <FileText className={iconClass} />;
+      case 'TECHNICAL_DESIGN': return <Building2 className={iconClass} />;
+      case 'EXECUTIVE_SUMMARY': return <BarChart3 className={iconClass} />;
+      case 'COMPLIANCE_AUDIT': return <CheckCircle2 className={iconClass} />;
+      default: return <File className={iconClass} />;
     }
   };
 

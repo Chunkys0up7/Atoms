@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Target, Zap, BarChart3, CheckCircle, AlertCircle } from 'lucide-react';
 import { API_ENDPOINTS } from '../constants';
 
 interface Suggestion {
@@ -100,7 +101,7 @@ export default function OptimizationDashboard() {
 
       // Show success message with details
       alert(
-        `✅ Suggestion Applied Successfully!\n\n` +
+        `Suggestion Applied Successfully\n\n` +
         `Target: ${suggestion.target_name}\n` +
         `Actions Performed:\n${result.actions_applied.map((a: string) => `  • ${a}`).join('\n')}\n\n` +
         `${result.message || 'Changes have been applied to the system.'}`
@@ -114,7 +115,7 @@ export default function OptimizationDashboard() {
     } catch (err) {
       console.error('Apply suggestion error:', err);
       alert(
-        `❌ Failed to Apply Suggestion\n\n` +
+        `Failed to Apply Suggestion\n\n` +
         `${err instanceof Error ? err.message : 'An unexpected error occurred'}\n\n` +
         `The suggestion could not be applied automatically. Please apply changes manually.`
       );
@@ -132,12 +133,13 @@ export default function OptimizationDashboard() {
   };
 
   const getTypeIcon = (type: string) => {
+    const iconClass = "w-4 h-4 inline-block";
     switch (type) {
-      case 'quality': return '🎯';
-      case 'performance': return '⚡';
-      case 'efficiency': return '📊';
-      case 'compliance': return '✅';
-      default: return '💡';
+      case 'quality': return <Target className={iconClass} />;
+      case 'performance': return <Zap className={iconClass} />;
+      case 'efficiency': return <BarChart3 className={iconClass} />;
+      case 'compliance': return <CheckCircle className={iconClass} />;
+      default: return <AlertCircle className={iconClass} />;
     }
   };
 
@@ -261,10 +263,10 @@ export default function OptimizationDashboard() {
               style={{ width: '100%' }}
             >
               <option value="all">All Types</option>
-              <option value="quality">🎯 Quality</option>
-              <option value="performance">⚡ Performance</option>
-              <option value="efficiency">📊 Efficiency</option>
-              <option value="compliance">✅ Compliance</option>
+              <option value="quality">Quality</option>
+              <option value="performance">Performance</option>
+              <option value="efficiency">Efficiency</option>
+              <option value="compliance">Compliance</option>
             </select>
           </div>
 
@@ -279,10 +281,10 @@ export default function OptimizationDashboard() {
               style={{ width: '100%' }}
             >
               <option value="all">All Severities</option>
-              <option value="critical">🔴 Critical</option>
-              <option value="high">🟠 High</option>
-              <option value="medium">🟡 Medium</option>
-              <option value="low">🟢 Low</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
             </select>
           </div>
         </div>
