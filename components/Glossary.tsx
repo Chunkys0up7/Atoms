@@ -33,19 +33,19 @@ const Glossary: React.FC = () => {
   const categories = Array.from(new Set(GLOSSARY_DATA.map(i => i.category)));
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 overflow-hidden">
-      <div className="p-10 border-b border-slate-800 bg-slate-900/40 shrink-0">
-        <h2 className="text-4xl font-black text-white tracking-tight mb-2 uppercase">Platform Glossary</h2>
-        <p className="text-slate-500 text-sm font-medium">Standardized terminology for Docs-as-Code and NASA-Inspired Atomic Documentation.</p>
-        
+    <div className="flex flex-col h-full bg-white overflow-hidden">
+      <div className="p-10 border-b border-gray-200 bg-gray-50 shrink-0">
+        <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-2 uppercase">Platform Glossary</h2>
+        <p className="text-gray-600 text-sm font-medium">Standardized terminology for Docs-as-Code and NASA-Inspired Atomic Documentation.</p>
+
         <div className="mt-8 relative max-w-2xl">
-          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input 
-            type="text" 
-            placeholder="Search terminology..." 
-            className="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3.5 pl-12 pr-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/50 text-white placeholder:text-slate-600 shadow-inner"
+          <input
+            type="text"
+            placeholder="Search terminology..."
+            className="w-full bg-white border border-gray-300 rounded-2xl py-3.5 pl-12 pr-6 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder:text-gray-400 shadow-md"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -58,12 +58,12 @@ const Glossary: React.FC = () => {
           if (catItems.length === 0) return null;
           return (
             <div key={cat} className="mb-12">
-              <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-6 border-b border-slate-800 pb-2">{cat}</h3>
+              <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] mb-6 border-b border-gray-200 pb-2">{cat}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {catItems.map(item => (
-                  <div key={item.term} className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2rem] hover:border-slate-700 transition-all">
-                    <h4 className="text-lg font-bold text-white mb-2 tracking-tight">{item.term}</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed font-medium">{item.definition}</p>
+                  <div key={item.term} className="bg-white border border-gray-300 p-6 rounded-[2rem] hover:border-gray-400 transition-all shadow-sm">
+                    <h4 className="text-lg font-bold text-gray-900 mb-2 tracking-tight">{item.term}</h4>
+                    <p className="text-xs text-gray-600 leading-relaxed font-medium">{item.definition}</p>
                   </div>
                 ))}
               </div>

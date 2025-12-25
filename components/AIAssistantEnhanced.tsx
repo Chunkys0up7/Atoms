@@ -168,9 +168,9 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
   const healthStatus = getRagHealthStatus();
 
   return (
-    <div className="flex flex-col h-full bg-slate-900">
+    <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="p-6 border-b border-slate-800 bg-slate-900/40">
+      <div className="p-6 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
@@ -196,7 +196,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
               className={`p-3 rounded-lg border transition-all ${
                 ragMode === mode
                   ? 'bg-blue-600 border-blue-500 text-white'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-blue-500 hover:text-white'
+                  : 'bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600'
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
@@ -210,7 +210,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
 
         {/* System Status */}
         {ragHealth && (
-          <div className="mt-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
+          <div className="mt-3 p-3 bg-white rounded-lg border border-gray-300">
             <div className="grid grid-cols-2 gap-3 text-[10px] mb-3">
               <div>
                 <div className="text-slate-500 mb-1">Atoms Indexed</div>
@@ -253,7 +253,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
           <div className="mt-3">
             <button
               onClick={() => setShowMetrics(!showMetrics)}
-              className="w-full p-2 bg-slate-800 border border-slate-700 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white hover:border-blue-500 transition-all flex items-center justify-between"
+              className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-[10px] font-bold text-gray-700 hover:text-blue-600 hover:border-blue-500 transition-all flex items-center justify-between"
             >
               <span className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
@@ -263,7 +263,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
             </button>
 
             {showMetrics && (
-              <div className="mt-2 p-3 bg-slate-800 rounded-lg border border-slate-700 space-y-3">
+              <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-300 space-y-3">
                 {/* Index Health */}
                 <div>
                   <div className="text-[9px] font-bold text-slate-500 uppercase mb-2">Index Health</div>
@@ -390,7 +390,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
             <div className={`max-w-[85%] rounded-[2rem] p-5 ${
               msg.role === 'user'
                 ? 'bg-blue-600 text-white rounded-tr-none shadow-lg'
-                : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
+                : 'bg-gray-100 text-gray-900 rounded-tl-none border border-gray-300'
             }`}>
               {/* Message Text */}
               <div className="text-sm leading-relaxed prose prose-invert prose-sm max-w-none">
@@ -424,7 +424,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 text-slate-400 p-5 rounded-[2rem] rounded-tl-none border border-slate-700 flex gap-2">
+            <div className="bg-gray-100 text-gray-600 p-5 rounded-[2rem] rounded-tl-none border border-gray-300 flex gap-2">
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></span>
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></span>
@@ -442,7 +442,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
               <button
                 key={q}
                 onClick={() => handleSend(q)}
-                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-full text-[10px] font-bold text-slate-400 hover:text-white hover:border-blue-500 transition-all"
+                className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-full text-[10px] font-bold text-gray-700 hover:text-blue-600 hover:border-blue-500 transition-all"
               >
                 {q}
               </button>
@@ -452,12 +452,12 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
       )}
 
       {/* Input */}
-      <div className="p-6 bg-slate-900 border-t border-slate-800">
+      <div className="p-6 bg-white border-t border-gray-200">
         <div className="relative">
           <input
             type="text"
             placeholder={`Ask a question (${ragMode} mode)...`}
-            className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-4 pl-6 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xl text-white placeholder:text-slate-700"
+            className="w-full bg-white border border-gray-300 rounded-2xl py-4 pl-6 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md text-gray-900 placeholder:text-gray-400"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
@@ -466,7 +466,7 @@ const AIAssistantEnhanced: React.FC<AIAssistantProps> = ({ atoms }) => {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || isLoading || !healthStatus.ready}
-            className="absolute right-2 top-2 bottom-2 px-5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 rounded-xl text-white transition-all font-black text-[10px] uppercase tracking-widest"
+            className="absolute right-2 top-2 bottom-2 px-5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-200 disabled:text-gray-400 rounded-xl text-white transition-all font-black text-[10px] uppercase tracking-widest"
           >
             Ask
           </button>
