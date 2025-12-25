@@ -64,6 +64,8 @@ export interface Atom {
   category: AtomCategory;
   type: AtomType;
   name: string;
+  title?: string; // Alternative display name (fallback to name if not provided)
+  summary?: string; // Short description (fallback to content.summary if not provided)
   version: string;
   status: 'ACTIVE' | 'DRAFT' | 'DEPRECATED';
   owner: string;
