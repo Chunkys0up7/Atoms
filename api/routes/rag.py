@@ -10,8 +10,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from neo4j_client import get_neo4j_client
 from claude_client import get_claude_client
+from logging_config import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 try:
     import chromadb
@@ -86,8 +88,12 @@ def entity_rag(query: str, top_k: int = 5, atom_type: Optional[str] = None) -> L
 
         return atoms
     except Exception as e:
-        print(f"Entity RAG error: {e}")
-        return []
+        # SECURITY: Log exception without exposing sensitive details
+        logger.exception("Entity RAG query failed")
+        raise HTTPException(
+            status_code=503,
+            detail="Search service temporarily unavailable"
+        )
 
 
 def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -130,7 +136,7 @@ def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
                             'relationship': 'connected'
                         })
             except Exception as e:
-                print(f"Neo4j traversal error for {atom_id}: {e}")
+                logger.exception(f"Neo4j traversal failed for atom {atom_id}")
                 continue
 
         return expanded_atoms
@@ -209,7 +215,7 @@ def impact_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
                     })
 
             except Exception as e:
-                print(f"Neo4j impact analysis error for {atom_id}: {e}")
+                logger.exception(f"Neo4j impact analysis failed for atom {atom_id}")
                 # Fallback: return target with no impact data
                 impact_chain.append({
                     **target_atom,
@@ -291,7 +297,7 @@ async def query_rag(request: RAGQuery):
                 context_atoms=context_ids
             )
         except Exception as e:
-            print(f"Claude API error: {e}")
+            logger.exception("Claude API request failed")
             # Fall through to fallback answer
 
     # Fallback: Simple answer without Claude

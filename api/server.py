@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import secrets
 
 from routes import graph, atoms, modules, rag, runtime, lineage, feedback, documentation, mkdocs_service, rules, ownership, chunking
 
@@ -26,7 +27,8 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
+    # SECURITY: Explicit headers instead of wildcard to prevent CSRF
+    allow_headers=["Content-Type", "Authorization", "X-Request-ID", "Accept"],
 )
 
 app.include_router(graph.router)
@@ -49,9 +51,26 @@ def health():
 
 
 @app.post("/api/trigger/sync")
-def trigger_sync(admin_token: str | None = None):
+def trigger_sync(authorization: str = Header(...)):
+    """
+    Trigger system sync operation (admin only).
+
+    Requires Bearer token in Authorization header.
+    Uses timing-safe comparison to prevent timing attacks.
+    """
     expected = os.environ.get("API_ADMIN_TOKEN")
-    if not expected or admin_token != expected:
-        raise HTTPException(status_code=403, detail="forbidden")
+    if not expected:
+        raise HTTPException(status_code=503, detail="Service unavailable")
+
+    # Extract Bearer token
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization format")
+
+    token = authorization[7:]  # Remove "Bearer " prefix
+
+    # SECURITY: Use timing-safe comparison to prevent timing attacks
+    if not secrets.compare_digest(token, expected):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
     # In production, you may dispatch a background job; here we return accepted
     return {"status": "sync scheduled"}

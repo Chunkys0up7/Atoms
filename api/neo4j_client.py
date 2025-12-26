@@ -113,6 +113,10 @@ class Neo4jClient:
         if not self.driver:
             raise ConnectionError("Not connected to Neo4j")
 
+        # SECURITY: Validate max_depth to prevent DoS via unbounded traversal
+        if not isinstance(max_depth, int) or not (1 <= max_depth <= 5):
+            raise ValueError("max_depth must be an integer between 1 and 5")
+
         query = f"""
         MATCH (a:Atom {{id: $atom_id}})
         -[r:requires|depends_on*1..{max_depth}]->(upstream)
@@ -151,6 +155,10 @@ class Neo4jClient:
         """
         if not self.driver:
             raise ConnectionError("Not connected to Neo4j")
+
+        # SECURITY: Validate max_depth to prevent DoS via unbounded traversal
+        if not isinstance(max_depth, int) or not (1 <= max_depth <= 5):
+            raise ValueError("max_depth must be an integer between 1 and 5")
 
         query = f"""
         MATCH (a:Atom {{id: $atom_id}})
@@ -192,6 +200,10 @@ class Neo4jClient:
         """
         if not self.driver:
             raise ConnectionError("Not connected to Neo4j")
+
+        # SECURITY: Validate max_depth to prevent DoS via unbounded traversal
+        if not isinstance(max_depth, int) or not (1 <= max_depth <= 5):
+            raise ValueError("max_depth must be an integer between 1 and 5")
 
         query = f"""
         MATCH (a:Atom {{id: $atom_id}})
