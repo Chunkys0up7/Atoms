@@ -57,8 +57,14 @@ def list_modules() -> List[Dict[str, Any]]:
                     '_raw': serialize_dates(data)  # Serialize dates in raw data
                 }
                 modules.append(normalized)
-        except Exception as e:
-            print(f"Warning: Failed to load {yaml_file}: {e}")
+        except (OSError, IOError) as e:
+            print(f"Warning: Could not read {yaml_file}: {e}")
+            continue
+        except yaml.YAMLError as e:
+            print(f"Warning: Invalid YAML in {yaml_file}: {e}")
+            continue
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"Warning: Invalid module data in {yaml_file}: {e}")
             continue
 
     return modules
@@ -96,7 +102,11 @@ def get_module(module_id: str) -> Dict[str, Any]:
                     '_raw': serialize_dates(data)  # Serialize dates in raw data
                 }
                 return normalized
-        except Exception:
+        except (OSError, IOError):
+            continue
+        except yaml.YAMLError:
+            continue
+        except (KeyError, ValueError, TypeError):
             continue
 
     raise HTTPException(status_code=404, detail=f"Module '{module_id}' not found")
@@ -141,8 +151,10 @@ def create_module(module: CreateModuleRequest) -> Dict[str, Any]:
     try:
         with open(file_path, "w", encoding="utf-8") as fh:
             yaml.dump(module_data, fh, default_flow_style=False, sort_keys=False, allow_unicode=True)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create module: {str(e)}")
+    except (OSError, IOError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to write module file: {str(e)}")
+    except yaml.YAMLError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serialize module data: {str(e)}")
 
     # Return normalized format
     normalized = {

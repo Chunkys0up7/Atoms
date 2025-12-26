@@ -108,9 +108,17 @@ def list_atoms(limit: int = 100, offset: int = 0, summary_only: bool = False, ty
                     # Add file path for reference
                     data['_file_path'] = str(yaml_file)
                     atoms.append(data)
-        except Exception as e:
-            # Skip files that fail to parse
-            print(f"Warning: Failed to load {yaml_file}: {e}")
+        except (OSError, IOError) as e:
+            # Skip files that can't be read
+            print(f"Warning: Could not read {yaml_file}: {e}")
+            continue
+        except yaml.YAMLError as e:
+            # Skip files with invalid YAML
+            print(f"Warning: Invalid YAML in {yaml_file}: {e}")
+            continue
+        except (KeyError, ValueError, TypeError) as e:
+            # Skip files with missing or invalid required fields
+            print(f"Warning: Invalid atom data in {yaml_file}: {e}")
             continue
     
     # Apply pagination after filtering
@@ -174,8 +182,14 @@ def get_atom(atom_id: str) -> Dict[str, Any]:
                 
                 data['_file_path'] = str(yaml_file)
                 return data
-        except Exception as e:
-            print(f"Warning: Failed to load {yaml_file}: {e}")
+        except (OSError, IOError) as e:
+            print(f"Warning: Could not read {yaml_file}: {e}")
+            continue
+        except yaml.YAMLError as e:
+            print(f"Warning: Invalid YAML in {yaml_file}: {e}")
+            continue
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"Warning: Invalid atom data in {yaml_file}: {e}")
             continue
 
     raise HTTPException(status_code=404, detail=f"Atom '{atom_id}' not found")
@@ -235,8 +249,10 @@ def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
     try:
         with open(file_path, "w", encoding="utf-8") as fh:
             yaml.dump(atom_data, fh, default_flow_style=False, sort_keys=False, allow_unicode=True)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create atom: {str(e)}")
+    except (OSError, IOError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to write atom file: {str(e)}")
+    except yaml.YAMLError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serialize atom data: {str(e)}")
 
     atom_data['_file_path'] = str(file_path)
     return atom_data
