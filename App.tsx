@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
 import AtomExplorer from './components/AtomExplorer';
@@ -251,42 +252,72 @@ const App: React.FC = () => {
           onSelectAtom={(a) => { handleAtomSelect(a); }}
           onNavigateToGraph={(moduleId) => navigateTo('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
           selectedModuleId={selectedModuleId}
+          selectedPhaseId={selectedPhaseId}
+          selectedJourneyId={selectedJourneyId}
         />;
       case 'graph':
-        return <GraphView
-          atoms={atoms}
-          modules={modules}
-          phases={MOCK_PHASES}
-          journeys={MOCK_JOURNEYS}
-          context={graphContext}
-          onSelectAtom={(a) => { handleAtomSelect(a); }}
-          onContextChange={(ctx) => setGraphContext(ctx)}
-          onNavigateToJourney={(journeyId) => navigateTo('workflow', { journeyId })}
-          onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
-          onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
-        />;
+        return (
+          <ErrorBoundary>
+            <GraphView
+              atoms={atoms}
+              modules={modules}
+              phases={MOCK_PHASES}
+              journeys={MOCK_JOURNEYS}
+              context={graphContext}
+              onSelectAtom={(a) => { handleAtomSelect(a); }}
+              onContextChange={(ctx) => setGraphContext(ctx)}
+              onNavigateToJourney={(journeyId) => navigateTo('workflow', { journeyId })}
+              onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
+              onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
+            />
+          </ErrorBoundary>
+        );
       case 'edges':
         return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'health':
-        return <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); setView('explorer'); }} />;
+        return (
+          <ErrorBoundary>
+            <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); setView('explorer'); }} />
+          </ErrorBoundary>
+        );
       case 'impact':
-        return <ImpactAnalysisUI atoms={atoms} />;
+        return (
+          <ErrorBoundary>
+            <ImpactAnalysisUI atoms={atoms} />
+          </ErrorBoundary>
+        );
       case 'publisher':
-        return <Publisher atoms={atoms} modules={modules} />;
+        return (
+          <ErrorBoundary>
+            <Publisher atoms={atoms} modules={modules} />
+          </ErrorBoundary>
+        );
       case 'library':
         return <DocumentLibrary />;
       case 'docssite':
         return <MkDocsViewer />;
       case 'assistant':
-        return <AIAssistant atoms={atoms} />;
+        return (
+          <ErrorBoundary>
+            <AIAssistant atoms={atoms} />
+          </ErrorBoundary>
+        );
       case 'ingestion':
-        return <IngestionEngine atoms={atoms} onIngest={handleIngest} />;
+        return (
+          <ErrorBoundary>
+            <IngestionEngine atoms={atoms} onIngest={handleIngest} />
+          </ErrorBoundary>
+        );
       case 'runtime':
         return <RuntimeSimulator />;
       case 'rules':
         return <RuleManager />;
       case 'feedback':
-        return <OptimizationDashboard />;
+        return (
+          <ErrorBoundary>
+            <OptimizationDashboard />
+          </ErrorBoundary>
+        );
       case 'ownership':
         return <OwnershipDashboard />;
       default:
