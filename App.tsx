@@ -337,8 +337,8 @@ const App: React.FC = () => {
         <Sidebar currentView={view} onViewChange={setView} />
       </aside>
 
-      <main className="main-content">
-        <header className="app-header">
+      <main className="main-content" role="main">
+        <header className="app-header" role="banner">
           <div className="header-title">
             <span className="header-breadcrumb">System Registry</span>
             <span style={{ color: 'var(--color-border-dark)', margin: '0 8px' }}>/</span>
@@ -348,12 +348,23 @@ const App: React.FC = () => {
           </div>
 
           <div className="header-actions">
-            <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', textAlign: 'right' }}>
+            <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', textAlign: 'right' }} aria-live="polite">
               <div style={{ fontWeight: '600', marginBottom: '2px' }}>Total Atoms: {atoms.length}</div>
               <div>Modules: {modules.length}</div>
             </div>
-            <button onClick={loadData} className="btn" title="Refresh data">
-              <svg style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button
+              onClick={loadData}
+              className="btn"
+              title="Refresh data"
+              aria-label="Refresh atom and module data"
+            >
+              <svg
+                style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>

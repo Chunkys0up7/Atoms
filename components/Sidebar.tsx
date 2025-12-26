@@ -50,28 +50,40 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
   ];
 
   return (
-    <nav className="sidebar-nav">
+    <nav className="sidebar-nav" aria-label="Main navigation">
       {sections.map((section) => (
         <div key={section.title} style={{ marginBottom: 'var(--spacing-lg)' }}>
-          <div style={{
-            fontSize: '10px',
-            fontWeight: '600',
-            color: 'rgba(255,255,255,0.4)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            marginBottom: 'var(--spacing-sm)',
-            paddingLeft: '12px'
-          }}>
+          <div
+            role="heading"
+            aria-level={2}
+            style={{
+              fontSize: '10px',
+              fontWeight: '600',
+              color: 'rgba(255,255,255,0.4)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              marginBottom: 'var(--spacing-sm)',
+              paddingLeft: '12px'
+            }}
+          >
             {section.title}
           </div>
-          <div>
+          <div role="group" aria-labelledby={`section-${section.title.replace(/\s+/g, '-').toLowerCase()}`}>
             {section.items.map((item) => (
               <button
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
                 className={`nav-item ${currentView === item.id ? 'active' : ''}`}
+                aria-label={`Navigate to ${item.label}`}
+                aria-current={currentView === item.id ? 'page' : undefined}
               >
-                <svg style={{ width: '14px', height: '14px', marginRight: '8px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  style={{ width: '14px', height: '14px', marginRight: '8px', flexShrink: 0 }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                 </svg>
                 <span>{item.label}</span>

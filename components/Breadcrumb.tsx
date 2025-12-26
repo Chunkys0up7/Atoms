@@ -29,6 +29,7 @@ export default function Breadcrumb({ items, canGoBack, onGoBack }: BreadcrumbPro
           onClick={onGoBack}
           className="btn btn-sm"
           title="Go back"
+          aria-label="Go back to previous view"
           style={{
             padding: '4px 8px',
             fontSize: '12px',
@@ -37,7 +38,13 @@ export default function Breadcrumb({ items, canGoBack, onGoBack }: BreadcrumbPro
             gap: '4px'
           }}
         >
-          <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            style={{ width: '12px', height: '12px' }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back
@@ -45,15 +52,20 @@ export default function Breadcrumb({ items, canGoBack, onGoBack }: BreadcrumbPro
       )}
 
       {/* Breadcrumb trail */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+      <nav
+        aria-label="Breadcrumb navigation"
+        style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}
+      >
         {items.map((item, index) => (
           <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             {index > 0 && (
-              <span style={{ color: 'var(--color-text-tertiary)' }}>/</span>
+              <span style={{ color: 'var(--color-text-tertiary)' }} aria-hidden="true">/</span>
             )}
             {item.onClick ? (
               <button
                 onClick={item.onClick}
+                aria-label={`Navigate to ${item.label}`}
+                aria-current={index === items.length - 1 ? 'page' : undefined}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -75,11 +87,14 @@ export default function Breadcrumb({ items, canGoBack, onGoBack }: BreadcrumbPro
                 {item.label}
               </button>
             ) : (
-              <span style={{
-                padding: '2px 6px',
-                color: index === items.length - 1 ? 'var(--color-text)' : 'var(--color-text-secondary)',
-                fontWeight: index === items.length - 1 ? '600' : '400'
-              }}>
+              <span
+                aria-current={index === items.length - 1 ? 'page' : undefined}
+                style={{
+                  padding: '2px 6px',
+                  color: index === items.length - 1 ? 'var(--color-text)' : 'var(--color-text-secondary)',
+                  fontWeight: index === items.length - 1 ? '600' : '400'
+                }}
+              >
                 {item.label}
               </span>
             )}
