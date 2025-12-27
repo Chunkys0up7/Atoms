@@ -21,6 +21,8 @@ import RuleManager from './components/RuleManager';
 import LineageViewer from './components/LineageViewer';
 import OptimizationDashboard from './components/OptimizationDashboard';
 import OwnershipDashboard from './components/OwnershipDashboard';
+import GraphAnalyticsDashboard from './components/GraphAnalyticsDashboard';
+import AnomalyDetectionDashboard from './components/AnomalyDetectionDashboard';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
@@ -170,10 +172,16 @@ const App: React.FC = () => {
       const atom = atoms.find(a => a.id === context.atomId);
       if (atom) handleAtomSelect(atom);
     }
-    if (context?.moduleId) setSelectedModuleId(context.moduleId);
-    if (context?.phaseId) setSelectedPhaseId(context.phaseId);
-    if (context?.journeyId) setSelectedJourneyId(context.journeyId);
+    if (context?.moduleId !== undefined) setSelectedModuleId(context.moduleId);
+    if (context?.phaseId !== undefined) setSelectedPhaseId(context.phaseId);
+    if (context?.journeyId !== undefined) setSelectedJourneyId(context.journeyId);
     if (context?.graphContext) setGraphContext(context.graphContext);
+
+    // Clear phase/journey filters when navigating to modules without context
+    if (targetView === 'modules' && !context) {
+      setSelectedPhaseId(null);
+      setSelectedJourneyId(null);
+    }
 
     // Navigate to target view
     setView(targetView);
@@ -251,6 +259,10 @@ const App: React.FC = () => {
           atoms={atoms}
           onSelectAtom={(a) => { handleAtomSelect(a); }}
           onNavigateToGraph={(moduleId) => navigateTo('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
+          onClearFilter={() => {
+            setSelectedPhaseId(null);
+            setSelectedJourneyId(null);
+          }}
           selectedModuleId={selectedModuleId}
           selectedPhaseId={selectedPhaseId}
           selectedJourneyId={selectedJourneyId}
@@ -320,6 +332,18 @@ const App: React.FC = () => {
         );
       case 'ownership':
         return <OwnershipDashboard />;
+      case 'analytics':
+        return (
+          <ErrorBoundary>
+            <GraphAnalyticsDashboard />
+          </ErrorBoundary>
+        );
+      case 'anomalies':
+        return (
+          <ErrorBoundary>
+            <AnomalyDetectionDashboard />
+          </ErrorBoundary>
+        );
       default:
         return <div className="content-area">Select a view from the sidebar</div>;
     }

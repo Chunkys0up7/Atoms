@@ -68,8 +68,11 @@ export interface Atom {
   summary?: string; // Short description (fallback to content.summary if not provided)
   version: string;
   status: 'ACTIVE' | 'DRAFT' | 'DEPRECATED';
-  owner: string;
-  team: string;
+  owning_team: string; // Team responsible for this atom (was 'owner')
+  author?: string; // Person who created/authored this atom
+  team: string; // Legacy field - will be migrated to owning_team
+  owner?: string; // Legacy field - will be migrated to author
+  steward?: string; // Data steward for governance
   ontologyDomain: string;
   criticality: Criticality;
   phaseId?: string;
@@ -117,7 +120,7 @@ export interface Journey {
 
 export type NodeLevel = 'ATOM' | 'MODULE' | 'PHASE' | 'JOURNEY';
 
-export type ViewType = 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite';
+export type ViewType = 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite' | 'analytics' | 'anomalies';
 
 export interface ValidationIssue {
   type: string;

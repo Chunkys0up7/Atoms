@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import secrets
 
-from routes import graph, atoms, modules, rag, runtime, lineage, feedback, documentation, mkdocs_service, rules, ownership, chunking
+from .routes import graph, atoms, modules, rag, runtime, lineage, feedback, documentation, mkdocs_service, rules, ownership, chunking, git_status, schema, phases, glossary, graph_analytics, relationship_inference, graph_constraints, anomaly_detection
 
 
 def get_admin_token():
@@ -43,6 +43,14 @@ app.include_router(mkdocs_service.router)
 app.include_router(rules.router)
 app.include_router(ownership.router)
 app.include_router(chunking.router)
+app.include_router(git_status.router)
+app.include_router(schema.router)
+app.include_router(phases.router)
+app.include_router(glossary.router)
+app.include_router(graph_analytics.router)
+app.include_router(relationship_inference.router)
+app.include_router(graph_constraints.router)
+app.include_router(anomaly_detection.router)
 
 
 @app.get("/health")
