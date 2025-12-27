@@ -23,6 +23,7 @@ import OptimizationDashboard from './components/OptimizationDashboard';
 import OwnershipDashboard from './components/OwnershipDashboard';
 import GraphAnalyticsDashboard from './components/GraphAnalyticsDashboard';
 import AnomalyDetectionDashboard from './components/AnomalyDetectionDashboard';
+import CollaborativeAtomEditor from './components/CollaborativeAtomEditor';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
@@ -343,6 +344,41 @@ const App: React.FC = () => {
           <ErrorBoundary>
             <AnomalyDetectionDashboard />
           </ErrorBoundary>
+        );
+      case 'collaborate':
+        return selectedAtom ? (
+          <ErrorBoundary>
+            <CollaborativeAtomEditor
+              atom_id={selectedAtom.id}
+              user_id="user-demo"
+              user_name="Demo User"
+              onSave={async (atom) => {
+                // Update atom via API
+                const response = await fetch(`${API_ENDPOINTS.atoms}/${atom.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(atom)
+                });
+                if (!response.ok) {
+                  throw new Error('Failed to save atom');
+                }
+                // Reload data
+                await loadData();
+              }}
+              onConflict={(conflicts) => {
+                console.warn('Conflicts detected:', conflicts);
+              }}
+            />
+          </ErrorBoundary>
+        ) : (
+          <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ fontSize: '16px', color: 'var(--color-text-secondary)' }}>
+              Select an atom to collaborate on
+            </div>
+            <button onClick={() => setView('explorer')} className="btn btn-primary">
+              Go to Atom Explorer
+            </button>
+          </div>
         );
       default:
         return <div className="content-area">Select a view from the sidebar</div>;
