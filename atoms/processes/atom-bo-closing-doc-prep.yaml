@@ -4,7 +4,7 @@ type: PROCESS
 name: Closing Coordinator Prepares Documents
 version: 1.0.0
 status: DRAFT
-owner: Sarah Chen
+owner: Robert Kim
 team: Technology
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -47,3 +47,5 @@ metrics:
   avg_cycle_time_mins: 359
   error_rate: 0.061
   compliance_score: 0.96
+steward: David Thompson
+owning_team: Technology

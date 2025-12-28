@@ -4,7 +4,7 @@ type: PROCESS
 name: Customer Uploads Initial Documents
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
+owner: Robert Kim
 team: Risk Management
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -42,3 +42,5 @@ metrics:
   avg_cycle_time_mins: 849
   error_rate: 0.009
   compliance_score: 0.93
+steward: Sarah Chen
+owning_team: Risk Management

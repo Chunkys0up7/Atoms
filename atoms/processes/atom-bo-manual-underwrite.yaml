@@ -54,3 +54,4 @@ metrics:
   avg_cycle_time_mins: 312
   error_rate: 0.06
   compliance_score: 0.99
+owning_team: Customer Experience

@@ -4,7 +4,7 @@ type: PROCESS
 name: Underwriter Clears Conditions
 version: 1.0.0
 status: DRAFT
-owner: Robert Kim
+owner: Jennifer Park
 team: Technology
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -45,3 +45,5 @@ metrics:
   avg_cycle_time_mins: 197
   error_rate: 0.096
   compliance_score: 0.86
+steward: Lisa Anderson
+owning_team: Technology

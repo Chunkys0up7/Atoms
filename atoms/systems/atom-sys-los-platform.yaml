@@ -4,7 +4,7 @@ type: SYSTEM
 name: Loan Origination System (LOS)
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
+owner: David Thompson
 team: Technology
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -30,3 +30,5 @@ metrics:
   avg_cycle_time_mins: 15
   error_rate: 0.019
   compliance_score: 0.91
+steward: Michael Rodriguez
+owning_team: Technology

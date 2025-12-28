@@ -36,3 +36,4 @@ metrics:
   avg_cycle_time_mins: 962
   error_rate: 0.008
   compliance_score: 0.86
+owning_team: Loan Origination

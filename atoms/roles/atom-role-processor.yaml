@@ -4,7 +4,7 @@ type: ROLE
 name: Loan Processor
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
+owner: Sarah Chen
 team: Compliance
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -29,3 +29,5 @@ metrics:
   avg_cycle_time_mins: 112
   error_rate: 0.048
   compliance_score: 0.87
+steward: James Martinez
+owning_team: Compliance

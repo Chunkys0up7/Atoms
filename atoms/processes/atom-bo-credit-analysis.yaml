@@ -4,7 +4,7 @@ type: PROCESS
 name: Processor Analyzes Credit Report
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
+owner: Michael Rodriguez
 team: Loan Origination
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -57,3 +57,5 @@ metrics:
   avg_cycle_time_mins: 369
   error_rate: 0.051
   compliance_score: 0.94
+steward: Jennifer Park
+owning_team: Loan Origination

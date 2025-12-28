@@ -4,7 +4,7 @@ type: PROCESS
 name: Processor Tracks Condition Fulfillment
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
+owner: Lisa Anderson
 team: Technology
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -41,3 +41,5 @@ metrics:
   avg_cycle_time_mins: 37
   error_rate: 0.027
   compliance_score: 0.88
+steward: Jennifer Park
+owning_team: Technology

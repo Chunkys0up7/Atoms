@@ -34,3 +34,4 @@ metrics:
   avg_cycle_time_mins: 6
   error_rate: 0.09
   compliance_score: 0.94
+owning_team: Risk Management
