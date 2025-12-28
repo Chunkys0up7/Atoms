@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { parseDocumentToGraph, verifyAtomDeduplication } from '../geminiService';
+import { parseDocumentToGraph, verifyAtomDeduplication } from '../aiService';
 import { Atom, Module, AtomType, Criticality } from '../types';
 import { ATOM_COLORS } from '../constants';
 

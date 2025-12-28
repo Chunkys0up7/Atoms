@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Atom } from '../types';
-import { chatWithKnowledgeBase } from '../geminiService';
+import { chatWithKnowledgeBase } from '../aiService';
 import { GLOSSARY_DATA } from './Glossary';
 
 interface Message {

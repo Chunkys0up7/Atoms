@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Atom, Module, DocTemplateType } from '../types';
-import { compileDocument } from '../geminiService';
+import { compileDocument } from '../aiService';
 
 interface PublisherProps {
   atoms: Atom[];

@@ -5,7 +5,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { FileText, Building2, BarChart3, CheckCircle2, Search, Layers, Sparkles, FileOutput, Plus } from 'lucide-react';
 import { Atom, Module, DocTemplateType } from '../types';
-import { compileDocument } from '../geminiService';
+import { compileDocument } from '../aiService';
 
 interface PublisherProps {
   atoms: Atom[];
