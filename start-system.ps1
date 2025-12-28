@@ -61,7 +61,31 @@ if (-not (Test-Path "venv")) {
     }
     Write-Host "  ✓ Python environment created" -ForegroundColor Green
 } else {
-    Write-Host "  ✓ Python venv OK" -ForegroundColor Green
+    # Verify critical dependencies are installed
+    Write-Host "  Checking Python dependencies..." -ForegroundColor Gray
+    $missingDeps = @()
+
+    $criticalPackages = @("fastapi", "uvicorn", "neo4j", "chromadb", "anthropic")
+    foreach ($package in $criticalPackages) {
+        $installed = .\venv\Scripts\pip show $package 2>$null
+        if (-not $installed) {
+            $missingDeps += $package
+        }
+    }
+
+    if ($missingDeps.Count -gt 0) {
+        Write-Host "  ⚠ Missing dependencies detected: $($missingDeps -join ', ')" -ForegroundColor Yellow
+        Write-Host "  Installing missing packages..." -ForegroundColor Gray
+        .\venv\Scripts\pip install -r requirements.txt -q
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  ✗ ERROR: Failed to install dependencies" -ForegroundColor Red
+            Write-Host "  Run manually: .\venv\Scripts\pip install -r requirements.txt" -ForegroundColor Yellow
+            exit 1
+        }
+        Write-Host "  ✓ Dependencies installed" -ForegroundColor Green
+    } else {
+        Write-Host "  ✓ Python dependencies OK" -ForegroundColor Green
+    }
 }
 Write-Host ""
 
