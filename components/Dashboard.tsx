@@ -423,7 +423,7 @@ const Dashboard: React.FC<DashboardProps> = ({ atoms, modules, onNavigate }) => 
               Key Features
             </h3>
             <ul style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.8', paddingLeft: '20px' }}>
-              <li><strong>AI-Powered Deduplication:</strong> Automatically reuses existing atoms (>70% reuse rate)</li>
+              <li><strong>AI-Powered Deduplication:</strong> Automatically reuses existing atoms ({'>'}70% reuse rate)</li>
               <li><strong>Semantic Similarity Check:</strong> Catches potential duplicates before commit</li>
               <li><strong>Dynamic Templates:</strong> Create unlimited custom document templates</li>
               <li><strong>Full Traceability:</strong> Every document maintains links to source atoms</li>

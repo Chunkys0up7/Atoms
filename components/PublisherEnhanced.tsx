@@ -562,7 +562,6 @@ ${compiledText.split('\n').map(line => {
             </div>
           </div>
         )}
-      </div>
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Module Picker */}
