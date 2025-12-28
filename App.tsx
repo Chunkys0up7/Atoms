@@ -25,6 +25,7 @@ import GraphAnalyticsDashboard from './components/GraphAnalyticsDashboard';
 import AnomalyDetectionDashboard from './components/AnomalyDetectionDashboard';
 import CollaborativeAtomEditor from './components/CollaborativeAtomEditor';
 import ProcessMonitoringDashboard from './components/ProcessMonitoringDashboard';
+import Dashboard from './components/Dashboard';
 import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
 import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
 import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
@@ -43,7 +44,7 @@ interface NavigationHistory {
 }
 
 const App: React.FC = () => {
-  const [view, setView] = useState<ViewType>('explorer');
+  const [view, setView] = useState<ViewType>('dashboard');
   const [selectedAtom, setSelectedAtom] = useState<Atom | null>(null);
   const [atoms, setAtoms] = useState<Atom[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -230,6 +231,8 @@ const App: React.FC = () => {
     }
 
     switch (view) {
+      case 'dashboard':
+        return <Dashboard atoms={atoms} modules={modules} onNavigate={(targetView) => navigateTo(targetView as ViewType, {})} />;
       case 'ontology':
         return <OntologyBrowser atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'glossary':

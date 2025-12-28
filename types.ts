@@ -120,7 +120,7 @@ export interface Journey {
 
 export type NodeLevel = 'ATOM' | 'MODULE' | 'PHASE' | 'JOURNEY';
 
-export type ViewType = 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite' | 'analytics' | 'anomalies' | 'collaborate' | 'processes';
+export type ViewType = 'dashboard' | 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite' | 'analytics' | 'anomalies' | 'collaborate' | 'processes';
 
 export interface ValidationIssue {
   type: string;
