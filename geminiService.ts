@@ -1,8 +1,11 @@
 
-import { GoogleGenAI } from "@google/genai";
+import Anthropic from "@anthropic-ai/sdk";
 import { Atom, Module, Phase, Journey, DocTemplateType, GlossaryItem } from "./types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const anthropic = new Anthropic({
+  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY || '',
+  dangerouslyAllowBrowser: true // Only for development - in production, use backend proxy
+});
 
 // RAG-Enhanced Knowledge Assistant
 export const chatWithKnowledgeBase = async (query: string, atoms: Atom[], glossary: GlossaryItem[]) => {
@@ -50,14 +53,17 @@ export const chatWithKnowledgeBase = async (query: string, atoms: Atom[], glossa
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: {
-        systemInstruction: "You are a professional technical support agent for the Graph-Native Documentation Platform (GNDP). You specialize in RAG-based retrieval and atomic documentation methodologies."
-      }
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      system: "You are a professional technical support agent for the Graph-Native Documentation Platform (GNDP). You specialize in RAG-based retrieval and atomic documentation methodologies.",
+      messages: [{
+        role: 'user',
+        content: prompt
+      }]
     });
-    return response.text;
+
+    return response.content[0].type === 'text' ? response.content[0].text : '';
   } catch (error) {
     console.error("AI Assistant Error:", error);
     return "I encountered an error accessing the knowledge base. Please try a more specific query.";
@@ -131,15 +137,18 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        systemInstruction: "You are a lead graph-native systems architect specializing in ATOM REUSABILITY and deduplication. Your primary goal is to map new concepts to existing atoms whenever possible. Creating duplicate atoms is considered a critical failure. Prioritize reuse over creation at all times."
-      }
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: "You are a lead graph-native systems architect specializing in ATOM REUSABILITY and deduplication. Your primary goal is to map new concepts to existing atoms whenever possible. Creating duplicate atoms is considered a critical failure. Prioritize reuse over creation at all times. Always respond with valid JSON only.",
+      messages: [{
+        role: 'user',
+        content: prompt
+      }]
     });
-    return JSON.parse(response.text);
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : '{}';
+    return JSON.parse(text);
   } catch (error) {
     console.error("Ingestion Error:", error);
     throw new Error("AI parser failed to resolve atomic structure.");
@@ -300,17 +309,20 @@ export const compileDocument = async (atoms: Atom[], module: Module, templateTyp
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: prompt,
-      config: {
-        systemInstruction: "You are an expert technical writer specializing in semantic documentation networks. You produce audit-ready, compliance-grade documents that maintain full traceability to source atoms. Every statement should be grounded in the provided atomic units."
-      }
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8192,
+      system: "You are an expert technical writer specializing in semantic documentation networks. You produce audit-ready, compliance-grade documents that maintain full traceability to source atoms. Every statement should be grounded in the provided atomic units.",
+      messages: [{
+        role: 'user',
+        content: prompt
+      }]
     });
-    return response.text;
+
+    return response.content[0].type === 'text' ? response.content[0].text : 'Failed to compile document.';
   } catch (error) {
     console.error("Compilation Error:", error);
-    return "Failed to compile document.";
+    throw new Error(`Failed to compile document: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -329,14 +341,17 @@ export const generateImpactAnalysis = async (targetId: string, context: { target
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: prompt,
-      config: {
-        systemInstruction: "You are a graph reasoning engine performing deep impact analysis."
-      }
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: "You are a graph reasoning engine performing deep impact analysis.",
+      messages: [{
+        role: 'user',
+        content: prompt
+      }]
     });
-    return response.text;
+
+    return response.content[0].type === 'text' ? response.content[0].text : 'Simulation analysis failed.';
   } catch (error) {
     return "Simulation analysis failed.";
   }
