@@ -1,6 +1,6 @@
 id: atom-sys-application-validation
 category: SYSTEM
-type: VALIDATION
+type: PROCESS
 name: System Validates Application Completeness
 version: 1.0.0
 status: ACTIVE

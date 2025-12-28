@@ -136,9 +136,9 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["target", "type"],
+        "required": ["targetId", "type"],
         "properties": {
-          "target": {
+          "targetId": {
             "type": "string",
             "pattern": "^atom-[a-z]+-[a-z0-9-]+$",
             "description": "Target atom ID"
@@ -153,7 +153,12 @@
               "VALIDATES",
               "IMPLEMENTS",
               "DEPENDS_ON",
-              "TRIGGERS"
+              "TRIGGERS",
+              "DATA_FLOWS_TO",
+              "GOVERNED_BY",
+              "PERFORMED_BY",
+              "RELATED_TO",
+              "USES_COMPONENT"
             ],
             "description": "Type of relationship"
           },
