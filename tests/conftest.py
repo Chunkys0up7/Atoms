@@ -576,4 +576,4 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
 
         if "async" in item.name.lower():
-            item.add_marker(pytest.mark.async)
+            item.add_marker(pytest.mark.asyncio)

@@ -24,8 +24,6 @@ def get_mkdocs_dir() -> Path:
 
 def is_mkdocs_running() -> bool:
     """Check if MkDocs server is running on the configured port."""
-    global _mkdocs_process
-
     # Check if we have a process reference and it's still running
     if _mkdocs_process and _mkdocs_process.poll() is None:
         return True
@@ -40,8 +38,6 @@ def is_mkdocs_running() -> bool:
 
 def get_mkdocs_pid() -> Optional[int]:
     """Get the PID of the running MkDocs process."""
-    global _mkdocs_process
-
     if _mkdocs_process and _mkdocs_process.poll() is None:
         return _mkdocs_process.pid
 
