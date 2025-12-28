@@ -311,7 +311,7 @@ def check_module_approval_readiness(module_id: str) -> Dict[str, Any]:
     module_file = modules_dir / f"{module_id}.yaml"
 
     if not module_file.exists():
-        raise HTTPException(status_code=404, detail=f"Module '{request.module_id}' not found")
+        raise HTTPException(status_code=404, detail=f"Module '{module_id}' not found")
 
     with open(module_file, 'r') as f:
         module_data = yaml.safe_load(f)

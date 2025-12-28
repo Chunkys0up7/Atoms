@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Atom, AtomType } from '../types';
-import { generateImpactAnalysis } from '../geminiService';
+import { generateImpactAnalysis } from '../aiService';
 import { ATOM_COLORS } from '../constants';
 
 interface ImpactAnalysisUIProps {
