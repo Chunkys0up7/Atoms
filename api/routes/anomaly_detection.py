@@ -113,9 +113,10 @@ def detect_structural_anomalies(neo4j_client) -> List[Anomaly]:
             WITH a, collect(DISTINCT connected.id) as cluster
             WHERE size(cluster) <= 3 AND size(cluster) > 0
             WITH a, cluster, size(cluster) as cluster_size
-            MATCH (a)
-            WHERE NOT (a)-[*3..]-(outside:Atom)
-            OR outside.id IN cluster
+            OPTIONAL MATCH (a)-[*3..]-(outside:Atom)
+            WHERE NOT outside.id IN cluster
+            WITH a, cluster_size, count(outside) as external_connections
+            WHERE external_connections = 0
             RETURN a.id as atom_id, a.name as atom_name, cluster_size
             LIMIT 10
         """)
