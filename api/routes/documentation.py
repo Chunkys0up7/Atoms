@@ -210,7 +210,8 @@ def create_document(doc: CreateDocumentRequest) -> Dict[str, Any]:
         'metadata': doc.metadata or {},
         'created_at': now,
         'updated_at': now,
-        'version': 1
+        'version': 1,
+        'approval_status': 'draft'  # New documents start as draft
     }
 
     # Save document
@@ -398,7 +399,7 @@ def export_document_html(doc_id: str) -> str:
     <title>{title}</title>
     <style>
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Helvetica Neue', Arial, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica', sans-serif;
             line-height: 1.6;
             max-width: 900px;
             margin: 40px auto;
@@ -448,3 +449,157 @@ def sync_all_documents() -> Dict[str, Any]:
         'results': synced,
         'errors': failed
     }
+
+
+# Approval Workflow Routes
+
+class SubmitForReviewRequest(BaseModel):
+    reviewer: str  # Username or email of the reviewer
+    notes: Optional[str] = None
+
+
+class ApprovalDecisionRequest(BaseModel):
+    decision: str  # 'approve' or 'reject'
+    notes: Optional[str] = None
+    reviewer: str
+
+
+@router.post("/api/documents/{doc_id}/submit-for-review")
+def submit_for_review(doc_id: str, request: SubmitForReviewRequest) -> Dict[str, Any]:
+    """Submit a document for review."""
+    doc_path = get_document_path(doc_id)
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        # Load existing document
+        with open(doc_path, "r", encoding="utf-8") as f:
+            document = json.load(f)
+
+        # Check if already submitted or approved
+        current_status = document.get('approval_status', 'draft')
+        if current_status == 'pending_review':
+            raise HTTPException(status_code=400, detail="Document is already pending review")
+        if current_status == 'approved':
+            raise HTTPException(status_code=400, detail="Document is already approved")
+
+        # Save current version before updating
+        save_version(doc_id, document)
+
+        # Update approval fields
+        now = datetime.utcnow().isoformat()
+        document['approval_status'] = 'pending_review'
+        document['submitted_for_review_at'] = now
+        document['reviewer'] = request.reviewer
+        document['review_notes'] = request.notes
+        document['updated_at'] = now
+
+        # Save updated document
+        with open(doc_path, "w", encoding="utf-8") as f:
+            json.dump(document, f, indent=2, ensure_ascii=False)
+
+        return document
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to submit document for review: {str(e)}")
+
+
+@router.post("/api/documents/{doc_id}/approve-reject")
+def approve_or_reject_document(doc_id: str, request: ApprovalDecisionRequest) -> Dict[str, Any]:
+    """Approve or reject a document."""
+    doc_path = get_document_path(doc_id)
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        # Load existing document
+        with open(doc_path, "r", encoding="utf-8") as f:
+            document = json.load(f)
+
+        # Check if document is pending review
+        current_status = document.get('approval_status', 'draft')
+        if current_status != 'pending_review':
+            raise HTTPException(
+                status_code=400,
+                detail=f"Document must be pending review to approve/reject (current status: {current_status})"
+            )
+
+        # Validate decision
+        if request.decision not in ['approve', 'reject']:
+            raise HTTPException(status_code=400, detail="Decision must be 'approve' or 'reject'")
+
+        # Save current version before updating
+        save_version(doc_id, document)
+
+        # Update approval fields
+        now = datetime.utcnow().isoformat()
+        document['approval_status'] = 'approved' if request.decision == 'approve' else 'rejected'
+        document['reviewed_at'] = now
+        document['reviewed_by'] = request.reviewer
+        document['review_decision_notes'] = request.notes
+        document['updated_at'] = now
+
+        # If approved, sync to MkDocs
+        if request.decision == 'approve':
+            try:
+                sync_result = sync_document_to_mkdocs(doc_id)
+                document['mkdocs_sync'] = sync_result
+                document['published_at'] = now
+            except Exception as sync_error:
+                print(f"Warning: Failed to sync approved document to MkDocs: {sync_error}")
+                document['mkdocs_sync'] = {'status': 'failed', 'error': str(sync_error)}
+
+        # Save updated document
+        with open(doc_path, "w", encoding="utf-8") as f:
+            json.dump(document, f, indent=2, ensure_ascii=False)
+
+        return document
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to {request.decision} document: {str(e)}"
+        )
+
+
+@router.post("/api/documents/{doc_id}/revert-to-draft")
+def revert_to_draft(doc_id: str) -> Dict[str, Any]:
+    """Revert a document back to draft status."""
+    doc_path = get_document_path(doc_id)
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found")
+
+    try:
+        # Load existing document
+        with open(doc_path, "r", encoding="utf-8") as f:
+            document = json.load(f)
+
+        # Save current version before updating
+        save_version(doc_id, document)
+
+        # Update status
+        now = datetime.utcnow().isoformat()
+        document['approval_status'] = 'draft'
+        document['reverted_to_draft_at'] = now
+        document['updated_at'] = now
+
+        # Clear review fields
+        document.pop('submitted_for_review_at', None)
+        document.pop('reviewer', None)
+        document.pop('review_notes', None)
+        document.pop('reviewed_at', None)
+        document.pop('reviewed_by', None)
+        document.pop('review_decision_notes', None)
+
+        # Save updated document
+        with open(doc_path, "w", encoding="utf-8") as f:
+            json.dump(document, f, indent=2, ensure_ascii=False)
+
+        return document
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to revert document to draft: {str(e)}")
