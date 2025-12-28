@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { parseDocumentToGraph } from '../geminiService';
+import { parseDocumentToGraph, verifyAtomDeduplication } from '../geminiService';
 import { Atom, Module, AtomType, Criticality } from '../types';
 import { ATOM_COLORS } from '../constants';
 
@@ -13,14 +13,24 @@ const IngestionEngine: React.FC<IngestionEngineProps> = ({ atoms: existingAtoms,
   const [text, setText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [stagingData, setStagingData] = useState<{ proposedAtoms: any[], proposedModule: any } | null>(null);
+  const [stagingData, setStagingData] = useState<{ proposedAtoms: any[], proposedModule: any, reuseStats?: any } | null>(null);
+  const [deduplicationWarnings, setDeduplicationWarnings] = useState<string[]>([]);
 
   const handleStartAnalysis = async () => {
     if (!text.trim()) return;
     setIsProcessing(true);
     setError(null);
+    setDeduplicationWarnings([]);
+
     try {
       const result = await parseDocumentToGraph(text, existingAtoms);
+
+      // Verify AI's deduplication decisions with semantic similarity check
+      const verification = await verifyAtomDeduplication(result.proposedAtoms, existingAtoms);
+      if (!verification.verified) {
+        setDeduplicationWarnings(verification.warnings);
+      }
+
       setStagingData(result);
     } catch (err) {
       setError("Deduplication analysis failed. Please check content for complex formatting.");
@@ -58,13 +68,21 @@ const IngestionEngine: React.FC<IngestionEngineProps> = ({ atoms: existingAtoms,
   if (stagingData) {
     const newCount = stagingData.proposedAtoms.filter(a => a.isNew).length;
     const reusedCount = stagingData.proposedAtoms.filter(a => !a.isNew).length;
+    const reusePercentage = stagingData.reuseStats?.reusePercentage || 0;
 
     return (
       <div className="p-12 flex flex-col h-full bg-white overflow-hidden">
         <div className="mb-10 flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">Verify System Changes</h2>
-            <p className="text-gray-600 mt-2">AI resolved concepts. Please verify new vs reused nodes before syncing to Graph DB.</p>
+            <p className="text-gray-600 mt-2">
+              AI resolved concepts. Please verify new vs reused nodes before syncing to Graph DB.
+              {stagingData.reuseStats && (
+                <span className="ml-2 text-sm font-bold" style={{ color: reusePercentage >= 70 ? '#10b981' : reusePercentage >= 50 ? '#f59e0b' : '#ef4444' }}>
+                  Reuse Rate: {reusePercentage.toFixed(0)}%
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex gap-4">
             <button
@@ -81,6 +99,30 @@ const IngestionEngine: React.FC<IngestionEngineProps> = ({ atoms: existingAtoms,
             </button>
           </div>
         </div>
+
+        {/* Deduplication Warnings */}
+        {deduplicationWarnings.length > 0 && (
+          <div className="mb-6 p-6 bg-yellow-50 border-2 border-yellow-400 rounded-2xl">
+            <div className="flex items-start gap-3 mb-3">
+              <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="flex-1">
+                <h3 className="text-sm font-black text-yellow-900 uppercase mb-2">Potential Duplicate Atoms Detected</h3>
+                <p className="text-xs text-yellow-800 mb-3">
+                  Our semantic similarity check found {deduplicationWarnings.length} atom{deduplicationWarnings.length > 1 ? 's' : ''} that may be duplicates of existing atoms. Consider reviewing these before committing.
+                </p>
+                <div className="space-y-2">
+                  {deduplicationWarnings.map((warning, idx) => (
+                    <div key={idx} className="text-xs text-yellow-900 bg-yellow-100 p-3 rounded-lg">
+                      {warning}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex-1 grid grid-cols-3 gap-8 overflow-hidden">
           <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-2">
@@ -121,7 +163,9 @@ const IngestionEngine: React.FC<IngestionEngineProps> = ({ atoms: existingAtoms,
                     </div>
                   </div>
                   <h4 className="font-bold text-gray-700 mb-1">{displayTitle}</h4>
-                  <p className="text-[10px] text-gray-600 italic">Atom already exists in Global Registry. Relationships will be updated.</p>
+                  <p className="text-[10px] text-gray-600 italic">
+                    {atom.reuseReason || 'Atom already exists in Global Registry. Relationships will be updated.'}
+                  </p>
                 </div>
               );
             })}

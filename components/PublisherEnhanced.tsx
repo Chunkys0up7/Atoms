@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
-import { FileText, Building2, BarChart3, CheckCircle2, Search, Layers, Sparkles, FileOutput } from 'lucide-react';
+import { FileText, Building2, BarChart3, CheckCircle2, Search, Layers, Sparkles, FileOutput, Plus } from 'lucide-react';
 import { Atom, Module, DocTemplateType } from '../types';
 import { compileDocument } from '../geminiService';
 
@@ -13,42 +13,24 @@ interface PublisherProps {
 }
 
 interface TemplateInfo {
-  title: string;
+  template_id: string;
+  template_name: string;
+  title?: string;
   description: string;
-  icon: React.ReactNode;
-  sections: string[];
-  example: string;
+  icon?: React.ReactNode;
+  sections: Array<{ name: string; description?: string; required?: boolean; order?: number }>;
+  example?: string;
+  category: string;
+  builtin?: boolean;
 }
 
-const TEMPLATE_INFO: Record<DocTemplateType, TemplateInfo> = {
-  SOP: {
-    title: 'Standard Operating Procedure',
-    description: 'Step-by-step process documentation with compliance controls and regulatory context',
-    icon: <FileText className="w-5 h-5" />,
-    sections: ['Purpose', 'Scope', 'Responsibilities', 'Procedure', 'Controls', 'Exceptions', 'References'],
-    example: 'Detailed walkthrough of operational processes with risk mitigation steps'
-  },
-  TECHNICAL_DESIGN: {
-    title: 'Technical Design Document',
-    description: 'System architecture, data models, APIs, and implementation specifications',
-    icon: <Building2 className="w-5 h-5" />,
-    sections: ['Overview', 'Architecture', 'Data Models', 'APIs', 'Security', 'Deployment', 'Dependencies'],
-    example: 'Complete technical blueprint for system implementation and integration'
-  },
-  EXECUTIVE_SUMMARY: {
-    title: 'Executive Summary',
-    description: 'High-level business overview with key metrics, risks, and strategic insights',
-    icon: <BarChart3 className="w-5 h-5" />,
-    sections: ['Overview', 'Key Metrics', 'Business Value', 'Risks', 'Recommendations', 'Next Steps'],
-    example: 'C-suite focused document highlighting business impact and strategic alignment'
-  },
-  COMPLIANCE_AUDIT: {
-    title: 'Compliance Audit Report',
-    description: 'Regulatory requirements, controls assessment, and compliance verification',
-    icon: <CheckCircle2 className="w-5 h-5" />,
-    sections: ['Scope', 'Regulations', 'Controls', 'Findings', 'Gaps', 'Remediation', 'Sign-off'],
-    example: 'Comprehensive audit trail for regulatory review and certification'
-  }
+// Icon mapping for template categories
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  SOP: <FileText className="w-5 h-5" />,
+  TECHNICAL: <Building2 className="w-5 h-5" />,
+  BUSINESS: <BarChart3 className="w-5 h-5" />,
+  COMPLIANCE: <CheckCircle2 className="w-5 h-5" />,
+  CUSTOM: <FileText className="w-5 h-5" />
 };
 
 interface CompilationStage {
@@ -66,11 +48,11 @@ const COMPILATION_STAGES: CompilationStage[] = [
 
 const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
   const [selectedModuleId, setSelectedModuleId] = useState(modules[0]?.id || '');
-  const [template, setTemplate] = useState<DocTemplateType>('SOP');
+  const [template, setTemplate] = useState<string>('SOP');
   const [isCompiling, setIsCompiling] = useState(false);
   const [compiledText, setCompiledText] = useState<string | null>(null);
   const [currentStage, setCurrentStage] = useState(0);
-  const [showTemplatePreview, setShowTemplatePreview] = useState<DocTemplateType | null>(null);
+  const [showTemplatePreview, setShowTemplatePreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [savedDocId, setSavedDocId] = useState<string | null>(null);
@@ -79,9 +61,38 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
   const [documentTitle, setDocumentTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [compileError, setCompileError] = useState<string | null>(null);
+  const [templates, setTemplates] = useState<TemplateInfo[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
 
   const activeModule = modules.find(m => m.id === selectedModuleId);
   const moduleAtoms = atoms.filter(a => activeModule?.atoms.includes(a.id));
+  const activeTemplate = templates.find(t => t.template_id === template);
+
+  // Load templates from API on mount
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/templates');
+        if (response.ok) {
+          const data = await response.json();
+          const loadedTemplates = data.templates.map((t: any) => ({
+            ...t,
+            icon: CATEGORY_ICONS[t.category] || CATEGORY_ICONS.CUSTOM,
+            title: t.template_name
+          }));
+          setTemplates(loadedTemplates);
+        } else {
+          console.error('Failed to load templates:', response.statusText);
+        }
+      } catch (err) {
+        console.error('Error loading templates:', err);
+      } finally {
+        setTemplatesLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, []);
 
   const handleCompile = async () => {
     if (!activeModule) {
@@ -147,16 +158,16 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${activeModule?.name || 'Document'} - ${TEMPLATE_INFO[template].title}</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
-      color: #333;
-    }
+  <title>${activeModule?.name || 'Document'} - ${activeTemplate?.template_name || 'Document'}</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica', sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+        color: #333;
+      }
     h1, h2, h3, h4, h5, h6 {
       margin-top: 24px;
       margin-bottom: 16px;
@@ -169,7 +180,7 @@ const PublisherEnhanced: React.FC<PublisherProps> = ({ atoms, modules }) => {
       background-color: #f6f8fa;
       padding: 0.2em 0.4em;
       border-radius: 3px;
-      font-family: monospace;
+      font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
       font-size: 85%;
     }
     pre {
@@ -239,7 +250,7 @@ ${compiledText.split('\n').map(line => {
       return;
     }
 
-    const title = documentTitle.trim() || `${activeModule.name} - ${TEMPLATE_INFO[template].title}`;
+    const title = documentTitle.trim() || `${activeModule.name} - ${activeTemplate?.template_name || template}`;
 
     if (title.length < 3) {
       setError('Document title must be at least 3 characters.');
@@ -334,64 +345,74 @@ ${compiledText.split('\n').map(line => {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Template Selector */}
-            <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-tertiary)', padding: '4px', borderRadius: '8px' }}>
-              {(['SOP', 'TECHNICAL_DESIGN', 'EXECUTIVE_SUMMARY', 'COMPLIANCE_AUDIT'] as DocTemplateType[]).map(t => (
-                <div key={t} style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => setTemplate(t)}
-                    onMouseEnter={() => setShowTemplatePreview(t)}
-                    onMouseLeave={() => setShowTemplatePreview(null)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      cursor: 'pointer',
-                      backgroundColor: template === t ? 'var(--color-primary)' : 'transparent',
-                      color: template === t ? 'white' : 'var(--color-text-secondary)',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {TEMPLATE_INFO[t].icon} {t.replace(/_/g, ' ')}
-                  </button>
+            {templatesLoading ? (
+              <div style={{ padding: '8px 16px', color: 'var(--color-text-secondary)' }}>Loading templates...</div>
+            ) : (
+              <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-tertiary)', padding: '4px', borderRadius: '8px', flexWrap: 'wrap' }}>
+                {templates.map(t => (
+                  <div key={t.template_id} style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => setTemplate(t.template_id)}
+                      onMouseEnter={() => setShowTemplatePreview(t.template_id)}
+                      onMouseLeave={() => setShowTemplatePreview(null)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        cursor: 'pointer',
+                        backgroundColor: template === t.template_id ? 'var(--color-primary)' : 'transparent',
+                        color: template === t.template_id ? 'white' : 'var(--color-text-secondary)',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      {t.icon} {t.template_id.replace(/_/g, ' ')}
+                      {!t.builtin && <Plus className="w-3 h-3" />}
+                    </button>
 
-                  {/* Template Preview Tooltip */}
-                  {showTemplatePreview === t && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      marginTop: '8px',
-                      width: '280px',
-                      backgroundColor: 'white',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '8px',
-                      padding: 'var(--spacing-md)',
-                      boxShadow: 'var(--shadow-lg)',
-                      zIndex: 1000
-                    }}>
-                      <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '4px' }}>
-                        {TEMPLATE_INFO[t].title}
+                    {/* Template Preview Tooltip */}
+                    {showTemplatePreview === t.template_id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        marginTop: '8px',
+                        width: '280px',
+                        backgroundColor: 'white',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '8px',
+                        padding: 'var(--spacing-md)',
+                        boxShadow: 'var(--shadow-lg)',
+                        zIndex: 1000
+                      }}>
+                        <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '4px' }}>
+                          {t.template_name}
+                          {!t.builtin && <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--color-primary)', backgroundColor: 'var(--color-bg-primary)', padding: '2px 6px', borderRadius: '4px' }}>CUSTOM</span>}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)' }}>
+                          {t.description}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginBottom: '4px', fontWeight: '600' }}>
+                          Includes:
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                          {t.sections.map(s => typeof s === 'string' ? s : s.name).join(' • ')}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)' }}>
-                        {TEMPLATE_INFO[t].description}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginBottom: '4px', fontWeight: '600' }}>
-                        Includes:
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
-                        {TEMPLATE_INFO[t].sections.join(' • ')}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
             </div>
 
             {/* Compile Button */}
@@ -416,7 +437,7 @@ ${compiledText.split('\n').map(line => {
                   <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Compile {TEMPLATE_INFO[template].icon}
+                  Compile {activeTemplate?.icon}
                 </>
               )}
             </button>

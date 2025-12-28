@@ -69,34 +69,64 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
   const prompt = `
     TASK: ATOMIC RECONSTRUCTION & ENTITY RESOLUTION
     METHODOLOGY: NASA-Inspired Atomic Design & Semantic Documentation Networks
-    
-    NEW DOCUMENT CONTENT: """${documentText}"""
-    EXISTING CANONICAL ATOMS: ${JSON.stringify(existingContext)}
-    
-    ID PREFIXING RULES:
-    - Customer actions: atom-cust-[name]
-    - Back-office tasks: atom-bo-[name]
-    - Automated system actions: atom-sys-[name]
-    
-    ONTOLOGY & RELATIONSHIP RULES:
-    1. ENTITY CLASSIFICATION: Categorize atoms strictly as PROCESS, DECISION, GATEWAY, ROLE, SYSTEM, DOCUMENT, REGULATION, POLICY, or CONTROL.
-    2. SEMANTIC EDGES: Use rich edge types (IMPLEMENTS, ENABLES, DEPENDS_ON, SUPERSEDES, DATA_FLOWS_TO, REQUIRES_KNOWLEDGE_OF).
-    3. VOCABULARY CONSISTENCY: Map new concepts to the 'ontologyDomain' of existing atoms if they overlap.
+    CRITICAL PRIORITY: MAXIMIZE ATOM REUSABILITY - DO NOT CREATE NEW ATOMS IF EXISTING ATOMS CAN BE REUSED
 
-    OUTPUT FORMAT: JSON ONLY
+    NEW DOCUMENT CONTENT: """${documentText}"""
+    EXISTING CANONICAL ATOMS (${existingContext.length} atoms): ${JSON.stringify(existingContext)}
+
+    ENTITY RESOLUTION RULES (STRICT - FOLLOW IN ORDER):
+    1. REUSE FIRST: For EVERY concept in the new document, FIRST search the EXISTING CANONICAL ATOMS list
+    2. SEMANTIC MATCHING: If a concept is semantically similar (>70% overlap) to an existing atom, REUSE that atom ID
+    3. VOCABULARY ALIGNMENT: Map new terminology to existing atom's ontologyDomain vocabulary
+    4. PREFER BROADER REUSE: If uncertain, reuse a slightly broader existing atom rather than creating a narrow new one
+    5. CREATE ONLY IF TRULY NEW: Only create a new atom if NO existing atom covers >50% of the concept
+    6. WHEN IN DOUBT, REUSE: Default to reusing an existing atom over creating a new one
+
+    ID PREFIXING RULES (for NEW atoms only):
+    - Customer actions: atom-cust-[kebab-case-name]
+    - Back-office tasks: atom-bo-[kebab-case-name]
+    - Automated system actions: atom-sys-[kebab-case-name]
+
+    ONTOLOGY & RELATIONSHIP RULES:
+    1. ENTITY CLASSIFICATION: Categorize atoms strictly as PROCESS, DECISION, GATEWAY, ROLE, SYSTEM, DOCUMENT, REGULATION, POLICY, or CONTROL
+    2. SEMANTIC EDGES: Use rich edge types (IMPLEMENTS, ENABLES, DEPENDS_ON, SUPERSEDES, DATA_FLOWS_TO, REQUIRES_KNOWLEDGE_OF)
+    3. VOCABULARY CONSISTENCY: Use EXACT terminology from existing atoms' ontologyDomain when reusing
+
+    EDGE UPDATES FOR REUSED ATOMS:
+    - If reusing an existing atom, propose NEW edges connecting it to other atoms in this context
+    - Format: { "sourceId": "existing-atom-id", "type": "DEPENDS_ON", "targetId": "other-atom-id" }
+    - This enriches the graph without creating duplicate atoms
+
+    OUTPUT FORMAT: JSON ONLY (strict schema compliance required)
     {
-      "proposedAtoms": [{ 
-        "id": "atom-...", 
-        "name": "...", 
-        "category": "CUSTOMER_FACING | BACK_OFFICE | SYSTEM", 
-        "type": "PROCESS | SYSTEM | etc.",
+      "proposedAtoms": [{
+        "id": "atom-...",  // Existing ID if reused, new ID if created
+        "name": "...",
+        "category": "CUSTOMER_FACING | BACK_OFFICE | SYSTEM",
+        "type": "PROCESS | DECISION | GATEWAY | ROLE | SYSTEM | DOCUMENT | REGULATION | POLICY | CONTROL",
         "ontologyDomain": "...",
-        "content": { "summary": "..." }, 
-        "isNew": true,
-        "edges": [{"type": "...", "targetId": "..."}]
+        "content": { "summary": "..." },
+        "isNew": false,  // false = reused from existing, true = newly created
+        "reuseReason": "...",  // If isNew=false, explain WHY this atom was reused (which existing atom matched and why)
+        "edges": [{"type": "IMPLEMENTS|ENABLES|DEPENDS_ON|SUPERSEDES|DATA_FLOWS_TO|REQUIRES_KNOWLEDGE_OF", "targetId": "atom-..."}]
       }],
-      "proposedModule": { "id": "module-...", "name": "...", "atoms": ["atom-id-1"], "phases": ["phase-name"] },
-      "proposedPhase": { "id": "phase-...", "name": "...", "modules": ["module-id-1"] }
+      "reuseStats": {
+        "totalConcepts": 0,  // Total concepts identified in document
+        "atomsReused": 0,    // Number of existing atoms reused
+        "atomsCreated": 0,   // Number of new atoms created
+        "reusePercentage": 0  // (atomsReused / totalConcepts) * 100
+      },
+      "proposedModule": {
+        "id": "module-...",
+        "name": "...",
+        "atoms": ["atom-id-1", "atom-id-2"],
+        "phases": ["phase-name-1", "phase-name-2"]
+      },
+      "proposedPhase": {
+        "id": "phase-...",
+        "name": "...",
+        "modules": ["module-id-1"]
+      }
     }
   `;
 
@@ -106,7 +136,7 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        systemInstruction: "You are a lead graph-native systems architect. You transform monolithic documentation into a semantic network of interconnected atoms."
+        systemInstruction: "You are a lead graph-native systems architect specializing in ATOM REUSABILITY and deduplication. Your primary goal is to map new concepts to existing atoms whenever possible. Creating duplicate atoms is considered a critical failure. Prioritize reuse over creation at all times."
       }
     });
     return JSON.parse(response.text);
@@ -116,18 +146,157 @@ export const parseDocumentToGraph = async (documentText: string, existingAtoms: 
   }
 };
 
+/**
+ * Verify AI's atom reusability decisions using semantic similarity check
+ * Returns warnings for atoms that should potentially be flagged for review
+ */
+export const verifyAtomDeduplication = async (
+  proposedAtoms: any[],
+  existingAtoms: Atom[]
+): Promise<{ verified: boolean, warnings: string[] }> => {
+  const warnings: string[] = [];
+
+  // Only check atoms marked as "new" by the AI
+  const newAtoms = proposedAtoms.filter(a => a.isNew === true);
+
+  for (const proposed of newAtoms) {
+    const proposedText = `${proposed.name} ${proposed.content?.summary || ''}`;
+
+    try {
+      // Call RAG entity search for semantic similarity
+      const response = await fetch('http://localhost:8001/api/rag/entity-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: proposedText,
+          top_k: 3,
+          similarity_threshold: 0.70  // 70% similarity threshold
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.results && data.results.length > 0) {
+          const topMatch = data.results[0];
+
+          // If similarity is high, warn about potential duplicate
+          if (topMatch.similarity_score > 0.70) {
+            const matchedAtom = existingAtoms.find(a => a.id === topMatch.atom_id);
+            warnings.push(
+              `⚠️ Proposed NEW atom "${proposed.name}" (${proposed.id}) is ${Math.round(topMatch.similarity_score * 100)}% similar to existing atom "${matchedAtom?.name || topMatch.atom_id}" (${topMatch.atom_id}). Consider reusing existing atom instead.`
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`Similarity check failed for atom ${proposed.id}:`, error);
+      // Don't block the workflow if similarity check fails
+    }
+  }
+
+  return {
+    verified: warnings.length === 0,
+    warnings
+  };
+};
+
+// Template structure definitions for consistent document compilation
+const TEMPLATE_STRUCTURES: Record<DocTemplateType, { sections: string[], instructions: string }> = {
+  SOP: {
+    sections: [
+      "Purpose",
+      "Scope",
+      "Responsibilities",
+      "Procedure",
+      "Controls and Compliance",
+      "Exceptions",
+      "References"
+    ],
+    instructions: "Follow a formal, procedural tone. Use numbered steps for procedures. Include clear role assignments. Cite specific policies and regulations."
+  },
+  TECHNICAL_DESIGN: {
+    sections: [
+      "Overview",
+      "Architecture",
+      "Data Models",
+      "APIs and Integrations",
+      "Security Considerations",
+      "Deployment Strategy",
+      "Dependencies"
+    ],
+    instructions: "Use technical language appropriate for engineering teams. Include diagrams using mermaid syntax where applicable. Be specific about technologies and versions."
+  },
+  EXECUTIVE_SUMMARY: {
+    sections: [
+      "Executive Overview",
+      "Key Metrics and KPIs",
+      "Business Value and ROI",
+      "Risks and Mitigation",
+      "Recommendations",
+      "Next Steps and Timeline"
+    ],
+    instructions: "Use business-friendly language avoiding technical jargon. Focus on outcomes, ROI, and strategic value. Keep it concise - executives have limited time."
+  },
+  COMPLIANCE_AUDIT: {
+    sections: [
+      "Audit Scope",
+      "Applicable Regulations",
+      "Control Framework",
+      "Findings and Observations",
+      "Compliance Gaps",
+      "Remediation Plan",
+      "Sign-off and Approval"
+    ],
+    instructions: "Use formal, audit-ready language. Cite specific regulation sections (e.g., 'TRID §1026.19'). Include evidence trails. Be objective and factual."
+  }
+};
+
 export const compileDocument = async (atoms: Atom[], module: Module, templateType: DocTemplateType) => {
+  const template = TEMPLATE_STRUCTURES[templateType];
+
   const prompt = `
     TASK: COMPILE SEMANTIC DOCUMENT FROM ATOMIC UNITS
     TEMPLATE: ${templateType}
-    HIERARCHY: Module '${module.name}' (Module ID: ${module.id})
-    ATOMS: ${JSON.stringify(atoms)}
-    
-    INSTRUCTIONS:
-    1. POINTER REFERENCE: Treat every node as a single source of truth. Reference by ID.
-    2. GRAPH-BASED REASONING: Construct the narrative by traversing the semantic edges.
-    3. Mention explicitly how a procedure 'IMPLEMENTS' a policy or 'DEPENDS_ON' a system check.
-    4. Maintain vocabulary consistency as defined in the ontology domains.
+
+    REQUIRED SECTIONS (must be present in this order):
+    ${template.sections.map((s, i) => `${i + 1}. ${s}`).join('\n    ')}
+
+    STYLE GUIDE:
+    ${template.instructions}
+
+    MODULE CONTEXT:
+    - Name: ${module.name}
+    - ID: ${module.id}
+    - Type: ${module.type || 'BPM_WORKFLOW'}
+    - Description: ${module.description || 'No description provided'}
+
+    ATOMS TO INTEGRATE (${atoms.length} atoms):
+    ${JSON.stringify(atoms.map(a => ({
+      id: a.id,
+      name: a.name,
+      type: a.type,
+      category: a.category,
+      domain: a.ontologyDomain,
+      summary: a.content?.summary
+    })))}
+
+    COMPILATION INSTRUCTIONS:
+    1. POINTER REFERENCE: Treat every atom as a single source of truth. Always reference atoms by their ID in brackets (e.g., [atom-bo-w2-review]).
+    2. GRAPH-BASED REASONING: Construct the narrative by traversing semantic edges between atoms.
+       - When atom A IMPLEMENTS policy B, write: "The [atom-A] procedure implements the [atom-B] policy."
+       - When atom A DEPENDS_ON system B, write: "This step depends on [atom-B] system integration."
+       - When atom A ENABLES outcome B, write: "The [atom-A] process enables [atom-B]."
+    3. SECTION COMPLETENESS: Ensure EVERY required section listed above is present in the output, even if brief.
+    4. VOCABULARY CONSISTENCY: Use terminology from atom ontologyDomain values. Maintain consistent vocabulary throughout.
+    5. FORMATTING: Use Markdown with proper hierarchy:
+       - ## for main sections (e.g., ## Purpose)
+       - ### for subsections (e.g., ### Loan Officer Responsibilities)
+       - Numbered lists for sequential procedures
+       - Bullet points for non-sequential items
+    6. ATOM TRACEABILITY: For audit purposes, mention which atoms contribute to each section.
+
+    OUTPUT: Generate a complete, well-structured document in Markdown format with all required sections.
   `;
 
   try {
@@ -135,7 +304,7 @@ export const compileDocument = async (atoms: Atom[], module: Module, templateTyp
       model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
-        systemInstruction: "You are an expert technical writer specializing in semantic documentation networks."
+        systemInstruction: "You are an expert technical writer specializing in semantic documentation networks. You produce audit-ready, compliance-grade documents that maintain full traceability to source atoms. Every statement should be grounded in the provided atomic units."
       }
     });
     return response.text;
