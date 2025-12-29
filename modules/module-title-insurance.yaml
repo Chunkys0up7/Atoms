@@ -1,5 +1,6 @@
 id: module-title-insurance
 version: 1.0.0
+workflow_type: BPM
 name: Title & Insurance
 description: Title search, title insurance, hazard insurance verification, and flood
   determination

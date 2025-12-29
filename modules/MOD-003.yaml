@@ -1,5 +1,6 @@
 id: MOD-003
 version: 1.0.0
+workflow_type: BPM
 type: Module
 name: Module 3
 description: Demo module 3

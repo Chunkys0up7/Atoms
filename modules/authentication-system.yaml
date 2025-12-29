@@ -1,5 +1,6 @@
 id: authentication-system
 version: 1.0.0
+workflow_type: CUSTOM
 module_id: auth-system
 name: Authentication System
 description: Complete user authentication and authorization system with OAuth 2.0,

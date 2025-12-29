@@ -1,5 +1,6 @@
 id: MOD-004
 version: 1.0.0
+workflow_type: BPM
 type: Module
 name: Module 4
 description: Demo module 4

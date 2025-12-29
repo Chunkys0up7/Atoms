@@ -1,5 +1,6 @@
 id: data-layer
 version: 1.0.0
+workflow_type: CUSTOM
 module_id: data-layer
 name: Data Persistence Layer
 description: Database and caching infrastructure including PostgreSQL, Redis, and

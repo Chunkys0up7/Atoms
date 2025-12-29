@@ -1,5 +1,6 @@
 id: module-closing-preparation
 version: 1.0.0
+workflow_type: BPM
 name: Closing Preparation
 description: Closing disclosure generation, document preparation, and closing scheduling
 owner: Closing

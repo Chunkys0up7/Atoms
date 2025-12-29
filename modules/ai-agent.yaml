@@ -1,5 +1,6 @@
 id: ai-agent
 version: 1.0.0
+workflow_type: CUSTOM
 module_id: ai-agent
 name: AI-Powered Agent
 description: Claude AI integration for automated impact analysis, PR summarization,

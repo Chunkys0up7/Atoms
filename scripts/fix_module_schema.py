@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 
 def fix_module_schemas():
-    """Add missing version and id fields to modules."""
+    """Add missing version, id, and workflow_type fields to modules."""
     modules_dir = Path("modules")
     updated_count = 0
     skipped_count = 0
@@ -36,13 +36,32 @@ def fix_module_schemas():
                 needs_update = True
                 print(f"  Adding id={module_id} to {module_file.name}")
 
+            # Add workflow_type if missing
+            if 'workflow_type' not in module_data:
+                # Determine workflow_type based on module name/description
+                module_name = module_data.get('name', '').lower()
+                module_desc = module_data.get('description', '').lower()
+
+                # Default to BPM for mortgage process modules
+                workflow_type = 'BPM'
+
+                # Check if it's a system/technical module (not business process)
+                if any(term in module_name or term in module_desc for term in ['system', 'gateway', 'authentication', 'data layer', 'graph', 'agent', 'api']):
+                    workflow_type = 'CUSTOM'
+
+                module_data['workflow_type'] = workflow_type
+                needs_update = True
+                print(f"  Adding workflow_type={workflow_type} to {module_file.name}")
+
             if needs_update:
-                # Write back with version and id at the top
+                # Write back with version, id, and workflow_type at the top
                 ordered_data = {}
                 if 'id' in module_data:
                     ordered_data['id'] = module_data.pop('id')
                 if 'version' in module_data:
                     ordered_data['version'] = module_data.pop('version')
+                if 'workflow_type' in module_data:
+                    ordered_data['workflow_type'] = module_data.pop('workflow_type')
                 ordered_data.update(module_data)
 
                 with open(module_file, 'w', encoding='utf-8') as f:

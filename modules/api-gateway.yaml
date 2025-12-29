@@ -1,5 +1,6 @@
 id: api-gateway
 version: 1.0.0
+workflow_type: CUSTOM
 module_id: api-gateway
 name: API Gateway
 description: Unified API layer supporting REST and GraphQL protocols with authentication
