@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Atom, AtomType } from '../types';
 import { generateImpactAnalysis } from '../aiService';
 import { ATOM_COLORS } from '../constants';
@@ -188,8 +189,17 @@ const ImpactAnalysisUI: React.FC<ImpactAnalysisUIProps> = ({ atoms }) => {
 
               {/* Detailed Markdown Report */}
               <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-xl)' }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto', color: 'var(--color-text-primary)', lineHeight: '1.6' }}>
-                  <div dangerouslySetInnerHTML={{ __html: report.replace(/\n/g, '<br/>') }} />
+                <div
+                  className="markdown-content"
+                  style={{
+                    maxWidth: '900px',
+                    margin: '0 auto',
+                    color: 'var(--color-text-primary)',
+                    lineHeight: '1.7',
+                    fontSize: '14px'
+                  }}
+                >
+                  <ReactMarkdown>{report}</ReactMarkdown>
                 </div>
               </div>
             </div>
