@@ -1,5 +1,10 @@
 id: MOD-004
+version: 1.0.0
 type: Module
 name: Module 4
 description: Demo module 4
 owner: platform
+atoms:
+- atom-sys-appraisal-received
+- atom-bo-appraisal-review
+- atom-bo-property-condition-review

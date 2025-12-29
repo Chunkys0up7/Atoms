@@ -1,4 +1,5 @@
 id: module-underwriting-decision
+version: 1.0.0
 name: Underwriting Decision
 description: Automated underwriting system (AUS) submission, manual underwrite, and
   loan decision

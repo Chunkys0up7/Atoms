@@ -1,5 +1,10 @@
 id: MOD-009
+version: 1.0.0
 type: Module
 name: Module 9
 description: Demo module 9
 owner: team-b
+atoms:
+- atom-ctrl-credit-policy
+- atom-pol-trid-compliance
+- atom-pol-fair-lending

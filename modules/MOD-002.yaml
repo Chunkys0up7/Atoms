@@ -1,5 +1,10 @@
 id: MOD-002
+version: 1.0.0
 type: Module
 name: Module 2
 description: Demo module 2
 owner: team-a
+atoms:
+- atom-cust-pre-qual-request
+- atom-ctrl-credit-policy
+- atom-pol-fair-lending

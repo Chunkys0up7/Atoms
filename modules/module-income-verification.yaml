@@ -1,4 +1,5 @@
 id: module-income-verification
+version: 1.0.0
 name: Income Verification
 description: W-2 review, pay stub analysis, tax return validation, and income calculation
 owner: Processing

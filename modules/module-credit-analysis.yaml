@@ -1,4 +1,5 @@
 id: module-credit-analysis
+version: 1.0.0
 name: Credit Analysis
 description: Credit report review, credit score analysis, trade line evaluation, and
   credit risk assessment

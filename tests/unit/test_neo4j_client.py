@@ -13,7 +13,7 @@ Tests the Neo4jClient class with comprehensive coverage of:
 
 import pytest
 from unittest.mock import Mock, MagicMock, patch, call
-from neo4j.exceptions import ConnectionError, DatabaseError
+from neo4j.exceptions import ServiceUnavailable, DatabaseError
 
 from api.neo4j_client import Neo4jClient, get_neo4j_client, close_neo4j_client
 
@@ -75,14 +75,14 @@ class TestNeo4jClientInitialization:
 
     def test_connection_error_on_failed_connect(self):
         """
-        Test that ConnectionError is raised when connection fails.
+        Test that ServiceUnavailable is raised when connection fails.
 
         Verifies proper error handling during the initial connection attempt.
         """
         with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
             mock_driver.side_effect = Exception("Connection refused")
 
-            with pytest.raises(ConnectionError, match="Failed to connect to Neo4j"):
+            with pytest.raises(ServiceUnavailable, match="Failed to connect to Neo4j"):
                 Neo4jClient(
                     uri="neo4j://unreachable:7687",
                     user="neo4j",
@@ -219,7 +219,7 @@ class TestUpstreamDependencies:
         client = Neo4jClient.__new__(Neo4jClient)
         client.driver = None
 
-        with pytest.raises(ConnectionError, match="Not connected to Neo4j"):
+        with pytest.raises(ServiceUnavailable, match="Not connected to Neo4j"):
             client.find_upstream_dependencies("REQ-001")
 
     def test_find_upstream_dependencies_database_error_handling(self, mock_neo4j_client):
@@ -291,7 +291,7 @@ class TestDownstreamImpacts:
         client = Neo4jClient.__new__(Neo4jClient)
         client.driver = None
 
-        with pytest.raises(ConnectionError, match="Not connected to Neo4j"):
+        with pytest.raises(ServiceUnavailable, match="Not connected to Neo4j"):
             client.find_downstream_impacts("REQ-001")
 
     def test_find_downstream_impacts_database_error_handling(self, mock_neo4j_client):

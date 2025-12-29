@@ -1,5 +1,10 @@
 id: MOD-001
+version: 1.0.0
 type: Module
 name: Module 1
 description: Demo module 1
 owner: team-b
+atoms:
+- atom-sys-los-platform
+- atom-sys-doc-management
+- atom-role-loan-officer

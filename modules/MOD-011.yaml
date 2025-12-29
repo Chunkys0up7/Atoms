@@ -1,5 +1,10 @@
 id: MOD-011
+version: 1.0.0
 type: Module
 name: Module 11
 description: Demo module 11
 owner: platform
+atoms:
+- atom-sys-document-imaging
+- atom-bo-post-closing-audit
+- atom-bo-loan-sale-prep

@@ -1,4 +1,5 @@
 id: module-asset-verification
+version: 1.0.0
 name: Asset Verification
 description: Bank statement review, asset source documentation, and reserve calculation
 owner: Processing

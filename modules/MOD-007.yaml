@@ -1,5 +1,10 @@
 id: MOD-007
+version: 1.0.0
 type: Module
 name: Module 7
 description: Demo module 7
 owner: platform
+atoms:
+- atom-sys-funding-wire
+- atom-sys-deed-recording
+- atom-bo-funding-verification

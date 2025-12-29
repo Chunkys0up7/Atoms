@@ -1,5 +1,10 @@
 id: MOD-005
+version: 1.0.0
 type: Module
 name: Module 5
 description: Demo module 5
 owner: team-a
+atoms:
+- atom-sys-condition-generation
+- atom-bo-condition-tracking
+- atom-bo-condition-clearance

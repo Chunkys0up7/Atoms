@@ -1,4 +1,5 @@
 id: module-application-intake
+version: 1.0.0
 name: Application Intake
 description: 1003 form completion, initial document upload, and application completeness
   validation

@@ -1,5 +1,10 @@
 id: MOD-010
+version: 1.0.0
 type: Module
 name: Module 10
 description: Demo module 10
 owner: team-b
+atoms:
+- atom-sys-identity-verification
+- atom-bo-fraud-detection
+- atom-bo-fraud-review

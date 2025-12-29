@@ -1,5 +1,10 @@
 id: MOD-012
+version: 1.0.0
 type: Module
 name: Module 12
 description: Demo module 12
 owner: platform
+atoms:
+- atom-sys-los-platform
+- atom-sys-reserve-calculation
+- atom-bo-asset-source-review

@@ -1,11 +1,13 @@
+id: api-gateway
+version: 1.0.0
 module_id: api-gateway
 name: API Gateway
-description: Unified API layer supporting REST and GraphQL protocols with authentication and rate limiting
+description: Unified API layer supporting REST and GraphQL protocols with authentication
+  and rate limiting
 atom_ids:
-  - REQ-003
-  - DES-003
-  - PROC-003
-  - VAL-003
+- atom-sys-doc-management
+- atom-sys-document-imaging
+- atom-sys-credit-report-pull
 metadata:
   owner: backend-team
   criticality: high
@@ -14,10 +16,10 @@ metadata:
   updated: 2025-12-18
   estimated_effort: 4 weeks
   dependencies:
-    - auth-system
-    - data-layer
+  - auth-system
+  - data-layer
 tags:
-  - api
-  - rest
-  - graphql
-  - gateway
+- api
+- rest
+- graphql
+- gateway
