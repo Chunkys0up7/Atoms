@@ -4,6 +4,14 @@ description: Wire transfer, loan funding, deed recording, and post-closing docum
   collection
 owner: Closing
 atoms:
+  - atom-cust-closing-signing
+  - atom-sys-funding-wire
+  - atom-sys-deed-recording
+  - atom-bo-funding-verification
+  - atom-sys-wire-verification
+  - atom-bo-funding-reconciliation
+  - atom-bo-funding-package-review
+  - atom-bo-funding-hold-review
 - atom-cust-closing-signing
 - atom-sys-funding-wire
 - atom-sys-deed-recording

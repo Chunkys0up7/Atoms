@@ -1,0 +1,8 @@
+id: phase-underwriting-refinance-rate-term
+name: Underwriting - Refi Rate & Term
+description: Underwriter review of credit, collateral and refinance-specific eligibility rules.
+modules:
+  - module-underwriting-decision
+  - module-conditions-management
+journeyId: journey-refinance-rate-term
+targetDurationDays: 4

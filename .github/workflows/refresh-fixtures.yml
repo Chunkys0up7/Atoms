@@ -1,0 +1,27 @@
+name: Refresh fixtures and run atom tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'  # daily at 02:00 UTC
+
+jobs:
+  refresh-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+      - name: Run fixture generator
+        run: |
+          python tools/generate_fixtures.py --count 500
+      - name: Run tests (placeholder)
+        run: |
+          echo "Run your test harness here, e.g. pytest or custom runner"
+          exit 0

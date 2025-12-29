@@ -1,0 +1,7 @@
+id: phase-application-intake-refinance-rate-term
+name: Application Intake - Refi Rate & Term
+description: Formal refinance application, upload of current loan documents and verification of title.
+modules:
+  - module-application-intake
+journeyId: journey-refinance-rate-term
+targetDurationDays: 3

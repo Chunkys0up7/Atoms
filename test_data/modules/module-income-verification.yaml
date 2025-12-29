@@ -3,10 +3,19 @@ name: Income Verification
 description: W-2 review, pay stub analysis, tax return validation, and income calculation
 owner: Processing
 atoms:
-- atom-cust-w2-upload
-- atom-bo-w2-review
-- atom-cust-tax-return-upload
-- atom-bo-tax-return-analysis
-- atom-sys-income-calculation
-- atom-bo-voi-verification
+	- atom-cust-w2-upload
+	- atom-bo-w2-review
+	- atom-cust-tax-return-upload
+	- atom-bo-tax-return-analysis
+	- atom-sys-income-calculation
+	- atom-bo-voi-verification
+	- atom-cust-pay-stub-upload
+	- atom-bo-pay-stub-review
+	- atom-bo-income-stability-check
+	- atom-bo-bonus-overtime-calculation
+	- atom-bo-employment-verification
+	- atom-bo-alimony-child-support-verification
+	- atom-bo-retirement-income-verification
+	- atom-bo-self-employment-verification
+	- atom-bo-rental-income-verification
 phaseId: phase-processing

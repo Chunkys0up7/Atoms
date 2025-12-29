@@ -1,0 +1,9 @@
+id: phase-processing-purchase-fha
+name: Processing - FHA Purchase
+description: Processing for FHA products with MI and appraisal follow-ups.
+modules:
+  - module-income-verification
+  - module-credit-analysis
+  - module-property-appraisal
+journeyId: journey-purchase-fha
+targetDurationDays: 7

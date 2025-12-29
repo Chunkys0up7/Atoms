@@ -4,8 +4,13 @@ description: 1003 form completion, initial document upload, and application comp
   validation
 owner: Loan Origination
 atoms:
-- atom-cust-application-submit
-- atom-sys-application-validation
-- atom-cust-initial-doc-upload
-- atom-bo-completeness-review
+atoms:
+  - atom-cust-application-submit
+  - atom-sys-application-validation
+  - atom-cust-initial-doc-upload
+  - atom-bo-completeness-review
+  - atom-sys-loan-estimate-generation
+  - atom-sys-identity-verification
+  - atom-bo-fraud-detection
+  - atom-bo-fraud-review
 phaseId: phase-application-intake

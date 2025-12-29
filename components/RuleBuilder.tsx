@@ -130,7 +130,7 @@ export default function RuleBuilder({ ruleId, onClose, onSave }: RuleBuilderProp
   const loadRule = async (id: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8001/api/rules/${id}`);
+      const response = await fetch(`http://localhost:8000/api/rules/${id}`);
       if (response.ok) {
         const data = await response.json();
         setRule(data);

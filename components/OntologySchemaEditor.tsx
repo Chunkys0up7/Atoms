@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AtomType, EdgeType, AtomCategory } from '../types';
 
 interface DomainDefinition {
@@ -26,6 +26,7 @@ interface OntologySchemaEditorProps {
 
 const OntologySchemaEditor: React.FC<OntologySchemaEditorProps> = ({ onSave, onCancel }) => {
   const [activeTab, setActiveTab] = useState<'domains' | 'constraints' | 'validation'>('domains');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Domain Management State
   const [domains, setDomains] = useState<DomainDefinition[]>([
@@ -88,6 +89,57 @@ const OntologySchemaEditor: React.FC<OntologySchemaEditorProps> = ({ onSave, onC
 
   const [selectedConstraint, setSelectedConstraint] = useState<EdgeConstraint | null>(null);
   const [showConstraintEditor, setShowConstraintEditor] = useState(false);
+
+  // Load schema data from backend on mount
+  useEffect(() => {
+    const loadSchemaData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Load domains
+        const domainsResponse = await fetch('http://localhost:8000/api/schema/domains');
+        if (domainsResponse.ok) {
+          const backendDomains = await domainsResponse.json();
+          // Map backend format to frontend format
+          const mappedDomains = backendDomains.map((d: any) => ({
+            id: d.id,
+            name: d.name,
+            description: d.description,
+            owner: d.owner || 'Not Assigned',
+            allowedTypes: d.allowed_types || [],
+            requiredAttributes: d.required_attributes || [],
+            validationRules: d.validation_rules || []
+          }));
+          setDomains(mappedDomains);
+          console.log('[OntologySchemaEditor] Loaded domains from backend:', mappedDomains.length);
+        }
+
+        // Load constraints
+        const constraintsResponse = await fetch('http://localhost:8000/api/schema/constraints');
+        if (constraintsResponse.ok) {
+          const backendConstraints = await constraintsResponse.json();
+          // Map backend format to frontend format
+          const mappedConstraints = backendConstraints.map((c: any) => ({
+            edgeType: c.edge_type,
+            sourceTypes: [c.source_type],
+            targetTypes: [c.target_type],
+            description: c.description,
+            required: c.is_required || false
+          }));
+          setConstraints(mappedConstraints);
+          console.log('[OntologySchemaEditor] Loaded constraints from backend:', mappedConstraints.length);
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('[OntologySchemaEditor] Failed to load schema data:', error);
+        setIsLoading(false);
+        // Keep using default hardcoded data on error
+      }
+    };
+
+    loadSchemaData();
+  }, []);
 
   // Domain Editor
   const renderDomainManagement = () => {

@@ -1,0 +1,8 @@
+id: phase-underwriting-refinance-cash-out
+name: Underwriting - Refi Cash-Out
+description: Underwriting review for cash-out transactions with LTV and seasoning checks.
+modules:
+  - module-underwriting-decision
+  - module-conditions-management
+journeyId: journey-refinance-cash-out
+targetDurationDays: 6

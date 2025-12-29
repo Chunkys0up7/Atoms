@@ -1,0 +1,9 @@
+id: phase-processing-refinance-cash-out
+name: Processing - Refi Cash-Out
+description: Processing including appraisal, payoff demand validation, and investor eligibility.
+modules:
+  - module-property-appraisal
+  - module-credit-analysis
+  - module-conditions-management
+journeyId: journey-refinance-cash-out
+targetDurationDays: 8

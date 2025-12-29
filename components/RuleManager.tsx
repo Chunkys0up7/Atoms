@@ -38,7 +38,7 @@ export default function RuleManager() {
   const loadRules = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8001/api/rules');
+      const response = await fetch('http://localhost:8000/api/rules');
       if (response.ok) {
         const data = await response.json();
         setRules(data);
@@ -98,8 +98,8 @@ export default function RuleManager() {
   const handleSaveRule = async (rule: any) => {
     try {
       const url = editingRuleId
-        ? `http://localhost:8001/api/rules/${editingRuleId}`
-        : 'http://localhost:8001/api/rules';
+        ? `http://localhost:8000/api/rules/${editingRuleId}`
+        : 'http://localhost:8000/api/rules';
 
       const method = editingRuleId ? 'PUT' : 'POST';
 
@@ -128,7 +128,7 @@ export default function RuleManager() {
   const handleToggleActive = async (ruleId: string, currentlyActive: boolean) => {
     try {
       const endpoint = currentlyActive ? 'deactivate' : 'activate';
-      const response = await fetch(`http://localhost:8001/api/rules/${ruleId}/${endpoint}`, {
+      const response = await fetch(`http://localhost:8000/api/rules/${ruleId}/${endpoint}`, {
         method: 'POST',
       });
 
@@ -136,7 +136,7 @@ export default function RuleManager() {
         showNotification('success', `Rule ${currentlyActive ? 'deactivated' : 'activated'}`);
         loadRules();
         // Hot-reload rules in runtime engine
-        await fetch('http://localhost:8001/api/runtime/rules/reload', { method: 'POST' });
+        await fetch('http://localhost:8000/api/runtime/rules/reload', { method: 'POST' });
       }
     } catch (error) {
       console.error('Failed to toggle rule:', error);
@@ -150,7 +150,7 @@ export default function RuleManager() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8001/api/rules/${ruleId}`, {
+      const response = await fetch(`http://localhost:8000/api/rules/${ruleId}`, {
         method: 'DELETE',
       });
 
@@ -158,7 +158,7 @@ export default function RuleManager() {
         showNotification('success', 'Rule deleted successfully');
         loadRules();
         // Hot-reload rules in runtime engine
-        await fetch('http://localhost:8001/api/runtime/rules/reload', { method: 'POST' });
+        await fetch('http://localhost:8000/api/runtime/rules/reload', { method: 'POST' });
       }
     } catch (error) {
       console.error('Failed to delete rule:', error);

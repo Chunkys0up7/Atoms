@@ -6,6 +6,7 @@ version: 1.0.0
 status: ACTIVE
 owner: Sarah Chen
 team: Technology
+steward: Amanda White
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-pre-application

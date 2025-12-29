@@ -543,10 +543,36 @@ const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSel
       {/* Schema Editor Modal */}
       {showSchemaEditor && (
         <OntologySchemaEditor
-          onSave={(domains, constraints) => {
-            console.log('Schema saved:', { domains, constraints });
-            // In production, this would sync with backend
-            setShowSchemaEditor(false);
+          onSave={async (domains, constraints) => {
+            try {
+              // Save domains
+              const domainResponse = await fetch('http://localhost:8000/api/schema/domains', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(domains)
+              });
+
+              if (!domainResponse.ok) {
+                throw new Error('Failed to save domains');
+              }
+
+              // Save constraints
+              const constraintResponse = await fetch('http://localhost:8000/api/schema/constraints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(constraints)
+              });
+
+              if (!constraintResponse.ok) {
+                throw new Error('Failed to save constraints');
+              }
+
+              console.log('✅ Schema saved successfully to backend');
+              setShowSchemaEditor(false);
+            } catch (error) {
+              console.error('Failed to save schema:', error);
+              alert('Failed to save schema. See console for details.');
+            }
           }}
           onCancel={() => setShowSchemaEditor(false)}
         />

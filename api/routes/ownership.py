@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import json
 from collections import Counter, defaultdict
+from .atoms import _load_all_atoms
 
 router = APIRouter()
 
@@ -64,22 +65,43 @@ class OwnershipReport(BaseModel):
 
 # Helper Functions
 def load_atoms() -> List[Dict[str, Any]]:
-    """Load all atoms from storage."""
-    atoms_dir = Path(__file__).parent.parent.parent / "data" / "atoms"
-    atoms = []
+    """
+    Load all atoms from storage using the cached loader.
 
-    if not atoms_dir.exists():
-        return atoms
-
-    for file_path in atoms_dir.glob("atom-*.json"):
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                atom = json.load(f)
-                atoms.append(atom)
-        except Exception as e:
-            print(f"Error loading atom {file_path}: {e}")
-
-    return atoms
+    This ensures consistency with the main atoms API and benefits from caching.
+    """
+    # Use the direct import instead of HTTP call to avoid circular dependency
+    result = _load_all_atoms()
+    
+    # If cache returns empty, reload without cache
+    if not result:
+        print("DEBUG: Cache returned empty, reloading atoms directly from disk")
+        atoms = []
+        base = Path(__file__).parent.parent.parent / "atoms"
+        
+        if not base.exists():
+            print(f"ERROR: atoms directory not found at {base}")
+            return atoms
+        
+        yaml_files = list(base.rglob("*.yaml"))
+        print(f"DEBUG: Found {len(yaml_files)} YAML files")
+        
+        import yaml
+        for yaml_file in yaml_files:
+            try:
+                with open(yaml_file, "r", encoding="utf-8") as fh:
+                    data = yaml.safe_load(fh)
+                if data:
+                    if 'id' not in data and 'atom_id' in data:
+                        data['id'] = data['atom_id']
+                    atoms.append(data)
+            except Exception as e:
+                print(f"Warning: Could not read {yaml_file}: {e}")
+                continue
+        
+        result = atoms
+        print(f"DEBUG: Direct load returned {len(result)} atoms")
+    return result
 
 
 def calculate_coverage(atoms: List[Dict[str, Any]]) -> OwnershipCoverage:
@@ -223,6 +245,7 @@ def get_ownership_report() -> OwnershipReport:
     try:
         # Load all atoms
         atoms = load_atoms()
+        print(f"DEBUG: Loaded {len(atoms)} atoms")  # Debug logging
 
         if not atoms:
             raise HTTPException(status_code=404, detail="No atoms found")

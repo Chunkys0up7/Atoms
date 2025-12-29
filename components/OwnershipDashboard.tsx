@@ -58,7 +58,7 @@ export default function OwnershipDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:8001/api/ownership/report');
+      const response = await fetch('http://localhost:8000/api/ownership/report');
       if (response.ok) {
         const data = await response.json();
         setReport(data);

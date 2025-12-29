@@ -548,7 +548,7 @@ class WorkflowEngine:
             )
 
             # Check if we should advance the process
-            await self._check_process_progress(task['process_instance_id'])
+            self._check_process_progress(task['process_instance_id'])
 
             logger.info(f"Task {task_id} completed by {user_id}")
             return task
@@ -698,7 +698,7 @@ class WorkflowEngine:
             logger.error(f"Failed to log event: {e}")
             # Don't raise - event logging shouldn't break main flow
 
-    async def _check_process_progress(self, process_id: UUID):
+    def _check_process_progress(self, process_id: UUID):
         """Check if process should advance based on task completion"""
         try:
             # Get task stats

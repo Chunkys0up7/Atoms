@@ -281,7 +281,7 @@ class GNDPGraph {
         </span>
       </div>
       <div style="font-weight: 600; margin-bottom: 4px;">${d.label}</div>
-      <div style="font-family: monospace; font-size: 11px; color: #94A3B8; margin-bottom: 8px;">${d.id}</div>
+      <div style="font-family: Consolas, 'Courier New', monospace; font-size: 11px; color: #94A3B8; margin-bottom: 8px;">${d.id}</div>
       ${d.description ? `<div style="font-size: 12px; color: #CBD5E1;">${d.description}</div>` : ''}
       ${d.owner ? `<div style="font-size: 11px; color: #64748B; margin-top: 8px;">Owner: ${d.owner}</div>` : ''}
     `;

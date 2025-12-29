@@ -51,8 +51,11 @@ export default function OptimizationDashboard() {
         throw new Error('Failed to load system data');
       }
 
-      const atoms = await atomsRes.json();
+      const atomsData = await atomsRes.json();
       const modules = await modulesRes.json();
+
+      // Extract atoms array from response (API returns { atoms: [...], total: ... })
+      const atoms = atomsData.atoms || atomsData;
 
       // Analyze system
       const analysisRes = await fetch('http://localhost:8000/api/feedback/analyze', {

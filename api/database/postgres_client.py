@@ -54,6 +54,39 @@ class PostgreSQLClient:
 
         except Exception as e:
             logger.error(f"Failed to create PostgreSQL connection pool: {e}")
+            # If the error is because the database does not exist, try to create it
+            try:
+                if isinstance(e, psycopg2.OperationalError) and 'does not exist' in str(e):
+                    admin_db = os.getenv('POSTGRES_ADMIN_DB', 'postgres')
+                    logger.info(f"Attempting to create missing database '{db_config['database']}' using admin DB '{admin_db}'")
+
+                    # Connect to the admin DB and create the target database
+                    admin_conn = psycopg2.connect(
+                        host=db_config['host'],
+                        port=db_config['port'],
+                        user=db_config['user'],
+                        password=db_config['password'],
+                        dbname=admin_db
+                    )
+                    admin_conn.autocommit = True
+                    with admin_conn.cursor() as cur:
+                        cur.execute(f"CREATE DATABASE \"{db_config['database']}\"")
+                    admin_conn.close()
+
+                    # Retry creating the pool
+                    self._pool = pool.ThreadedConnectionPool(
+                        minconn=2,
+                        maxconn=20,
+                        **db_config
+                    )
+
+                    logger.info(f"PostgreSQL database '{db_config['database']}' created and connection pool established")
+                    return
+            except Exception as e2:
+                logger.error(f"Failed to create database '{db_config.get('database')}' automatically: {e2}")
+                # fall through to raise the original error below
+
+            # If we couldn't create the DB or it's a different error, set pool None and raise
             self._pool = None
             raise
 

@@ -190,8 +190,10 @@ def get_atom(atom_id: str) -> Dict[str, Any]:
 
 
 @router.post("/api/atoms")
-def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
-    """Create a new atom."""
+async def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
+    """Create a new atom with schema validation."""
+    import httpx
+
     base = Path(__file__).parent.parent.parent / "atoms"
 
     if not base.exists():
@@ -230,6 +232,38 @@ def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
             'compliance_score': 0
         }
     }
+
+    # Validate atom against schema
+    try:
+        async with httpx.AsyncClient() as client:
+            validation_response = await client.post(
+                'http://localhost:8000/api/schema/validate-atom',
+                json=atom_data,
+                timeout=5.0
+            )
+            if validation_response.status_code == 200:
+                validation_result = validation_response.json()
+
+                # Log validation results
+                if not validation_result.get('is_valid'):
+                    errors = validation_result.get('errors', [])
+                    warnings = validation_result.get('warnings', [])
+                    error_msg = f"Schema validation failed for atom '{atom.id}':\n"
+                    error_msg += "\n".join([f"  - {err}" for err in errors])
+                    if warnings:
+                        error_msg += "\nWarnings:\n" + "\n".join([f"  - {warn}" for warn in warnings])
+
+                    raise HTTPException(status_code=400, detail=error_msg)
+
+                # Log warnings even if valid
+                warnings = validation_result.get('warnings', [])
+                if warnings:
+                    print(f"[Atom Creation] Warnings for atom '{atom.id}':", file=sys.stderr)
+                    for warn in warnings:
+                        print(f"  - {warn}", file=sys.stderr)
+    except httpx.RequestError as e:
+        print(f"[Atom Creation] Schema validation skipped due to connection error: {e}", file=sys.stderr)
+        # Continue without validation if schema service is unavailable
 
     # Determine file path (use category if available, otherwise root)
     if atom.category:

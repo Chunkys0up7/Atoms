@@ -4,8 +4,14 @@ description: Title search, title insurance, hazard insurance verification, and f
   determination
 owner: Processing
 atoms:
-- atom-sys-title-order
-- atom-bo-title-review
-- atom-sys-flood-determination
-- atom-cust-insurance-verification
+  - atom-sys-title-order
+  - atom-bo-title-review
+  - atom-sys-flood-determination
+  - atom-cust-insurance-verification
+  - atom-bo-title-issue-resolution
+  - atom-bo-flood-insurance-verification
+  - atom-bo-homeowners-insurance-review
+  - atom-bo-hazard-insurance-binder
+  - atom-bo-title-commitment-review
+  - atom-bo-survey-review
 phaseId: phase-processing

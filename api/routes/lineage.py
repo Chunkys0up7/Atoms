@@ -64,31 +64,29 @@ def get_git_root() -> str:
 def get_atom_file_path(atom_id: str) -> Optional[str]:
     """
     Find the YAML file path for an atom ID
-    Assumes atoms are in data/atoms/ directory
+    Searches in atoms/ and test_data/ directories
     """
     git_root = get_git_root()
-    atoms_dir = os.path.join(git_root, 'data', 'atoms')
 
-    if not os.path.exists(atoms_dir):
-        return None
-
-    # Try to find matching file
-    # Format: atom-id.yaml or subdirectories
-    potential_paths = [
-        os.path.join(atoms_dir, f"{atom_id}.yaml"),
-        os.path.join(atoms_dir, f"{atom_id}.yml"),
+    # Search in multiple locations
+    search_dirs = [
+        os.path.join(git_root, 'atoms'),
+        os.path.join(git_root, 'test_data', 'atoms'),
+        os.path.join(git_root, 'test_data'),
     ]
 
-    # Also search subdirectories
-    for root, dirs, files in os.walk(atoms_dir):
-        for file in files:
-            if file.startswith(atom_id) and (file.endswith('.yaml') or file.endswith('.yml')):
-                potential_paths.append(os.path.join(root, file))
+    for base_dir in search_dirs:
+        if not os.path.exists(base_dir):
+            continue
 
-    for path in potential_paths:
-        if os.path.exists(path):
-            # Return relative path from git root
-            return os.path.relpath(path, git_root)
+        # Walk through all subdirectories
+        for root, dirs, files in os.walk(base_dir):
+            for file in files:
+                # Match exact atom ID with .yaml or .yml extension
+                if file == f"{atom_id}.yaml" or file == f"{atom_id}.yml":
+                    full_path = os.path.join(root, file)
+                    # Return relative path from git root
+                    return os.path.relpath(full_path, git_root).replace('\\', '/')
 
     return None
 
@@ -191,7 +189,7 @@ async def get_atom_lineage(atom_id: str):
     if not file_path:
         raise HTTPException(
             status_code=404,
-            detail=f"Atom file not found for {atom_id}. Make sure the atom exists in data/atoms/"
+            detail=f"Atom file not found for {atom_id}. Make sure the atom exists in atoms/ or test_data/ directories."
         )
 
     # Get all commits
@@ -228,52 +226,59 @@ async def get_ownership_summary():
     Shows which authors have created/modified the most atoms
     """
     git_root = get_git_root()
-    atoms_dir = os.path.join(git_root, 'data', 'atoms')
 
-    if not os.path.exists(atoms_dir):
-        raise HTTPException(status_code=404, detail="Atoms directory not found")
+    # Search in multiple locations
+    search_dirs = [
+        os.path.join(git_root, 'atoms'),
+        os.path.join(git_root, 'test_data', 'atoms'),
+        os.path.join(git_root, 'test_data'),
+    ]
 
     # Track author statistics
     author_stats = {}
 
-    # Walk through all atom files
-    for root, dirs, files in os.walk(atoms_dir):
-        for file in files:
-            if not (file.endswith('.yaml') or file.endswith('.yml')):
-                continue
+    # Walk through all atom files in all search directories
+    for atoms_dir in search_dirs:
+        if not os.path.exists(atoms_dir):
+            continue
 
-            file_path = os.path.relpath(os.path.join(root, file), git_root)
-            commits = get_file_commits(file_path)
+        for root, dirs, files in os.walk(atoms_dir):
+            for file in files:
+                if not (file.endswith('.yaml') or file.endswith('.yml')):
+                    continue
 
-            if not commits:
-                continue
+                file_path = os.path.relpath(os.path.join(root, file), git_root).replace('\\', '/')
+                commits = get_file_commits(file_path)
 
-            # Track creator
-            creator = commits[-1]  # First commit
-            creator_key = (creator.author_name, creator.author_email)
+                if not commits:
+                    continue
 
-            if creator_key not in author_stats:
-                author_stats[creator_key] = {
-                    'atoms_created': 0,
-                    'atoms_modified': 0,
-                    'total_commits': 0
-                }
+                # Track creator
+                creator = commits[-1]  # First commit
+                creator_key = (creator.author_name, creator.author_email)
 
-            author_stats[creator_key]['atoms_created'] += 1
-
-            # Track all contributors
-            for commit in commits:
-                author_key = (commit.author_name, commit.author_email)
-
-                if author_key not in author_stats:
-                    author_stats[author_key] = {
+                if creator_key not in author_stats:
+                    author_stats[creator_key] = {
                         'atoms_created': 0,
                         'atoms_modified': 0,
                         'total_commits': 0
                     }
 
-                author_stats[author_key]['atoms_modified'] += 1
-                author_stats[author_key]['total_commits'] += 1
+                author_stats[creator_key]['atoms_created'] += 1
+
+                # Track all contributors
+                for commit in commits:
+                    author_key = (commit.author_name, commit.author_email)
+
+                    if author_key not in author_stats:
+                        author_stats[author_key] = {
+                            'atoms_created': 0,
+                            'atoms_modified': 0,
+                            'total_commits': 0
+                        }
+
+                    author_stats[author_key]['atoms_modified'] += 1
+                    author_stats[author_key]['total_commits'] += 1
 
     # Convert to response format
     summaries = [

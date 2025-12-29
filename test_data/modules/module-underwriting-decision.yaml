@@ -1,10 +1,149 @@
 id: module-underwriting-decision
+module_id: module-underwriting-decision
 name: Underwriting Decision
-description: Automated underwriting system (AUS) submission, manual underwrite, and
-  loan decision
+description: Automated underwriting system (AUS) submission, manual underwrite, and loan decision including risk assessment, eligibility verification, and exception handling
+version: 1.2.0
+status: ACTIVE
+workflow_type: BPM
+criticality: CRITICAL
+
 owner: Underwriting
-atoms:
-- atom-sys-aus-submission
-- atom-bo-manual-underwrite
-- atom-dec-loan-decision
+steward: Sarah Chen
+type: business
 phaseId: phase-underwriting
+
+# Atoms that compose this module
+atoms:
+  - atom-sys-aus-submission
+  - atom-bo-manual-underwrite
+  - atom-dec-loan-decision
+  - atom-bo-risk-assessment
+  - atom-bo-program-eligibility-check
+  - atom-bo-compensating-factors-analysis
+  - atom-sys-rate-lock-processing
+  - atom-bo-underwriting-exception-request
+  - atom-bo-exception-approval
+  - atom-bo-loan-modification-review
+  - atom-sys-aus-findings-review
+  - atom-bo-manual-review-trigger
+  - atom-bo-loan-denial-documentation
+  - atom-bo-adverse-action-letter
+  - atom-bo-appeal-review
+
+atom_ids:
+  - atom-sys-aus-submission
+  - atom-bo-manual-underwrite
+  - atom-dec-loan-decision
+  - atom-bo-risk-assessment
+  - atom-bo-program-eligibility-check
+  - atom-bo-compensating-factors-analysis
+  - atom-sys-rate-lock-processing
+  - atom-bo-underwriting-exception-request
+  - atom-bo-exception-approval
+  - atom-bo-loan-modification-review
+  - atom-sys-aus-findings-review
+  - atom-bo-manual-review-trigger
+  - atom-bo-loan-denial-documentation
+  - atom-bo-adverse-action-letter
+  - atom-bo-appeal-review
+
+# Workflow entry and exit points
+entry_points:
+  - atom-sys-aus-submission
+  - atom-bo-manual-review-trigger
+
+exit_points:
+  - atom: atom-dec-loan-decision
+    condition: approved
+  - atom: atom-bo-loan-denial-documentation
+    condition: denied
+  - atom: atom-bo-appeal-review
+    condition: appealed
+
+# External dependencies
+external_dependencies:
+  systems:
+    - SYS-LOS-PLATFORM
+    - atom-sys-aus-submission
+    - atom-sys-rate-lock-processing
+  modules:
+    - module-credit-analysis
+    - module-income-verification
+    - module-property-appraisal
+  roles:
+    - atom-role-underwriter
+    - atom-role-processor
+  documents:
+    - atom-doc-aus-findings
+    - atom-doc-underwriting-decision-letter
+    - atom-doc-adverse-action-letter
+
+# Approval workflow configuration
+approval:
+  required: true
+  threshold_risk_score: 80
+  stages:
+    - name: draft
+      label: Draft
+      assigned_to: Module Author
+      description: Module is being created and edited
+    - name: technical_review
+      label: Technical Review
+      assigned_to: Engineering Team
+      description: Technical validation of module composition
+      max_response_hours: 48
+      escalation_to: VP Engineering
+    - name: compliance_review
+      label: Compliance Review
+      assigned_to: Compliance Team
+      description: Regulatory and compliance verification
+      max_response_hours: 24
+      escalation_to: Chief Compliance Officer
+      required_if: criticality >= HIGH
+    - name: security_review
+      label: Security Review
+      assigned_to: Security Team
+      description: Security and data protection review
+      max_response_hours: 24
+      escalation_to: CISO
+      required_if: criticality == CRITICAL
+    - name: approved
+      label: Approved
+      assigned_to: VP Engineering
+      description: Module approved for production use
+  approvers:
+    - role: technical-lead
+      max_response_hours: 48
+    - role: compliance-officer
+      max_response_hours: 24
+      required_if: criticality >= HIGH
+    - role: security-analyst
+      max_response_hours: 24
+      required_if: criticality == CRITICAL
+
+# Service Level Agreement
+sla:
+  target_completion_minutes: 4320  # 3 days
+  warning_threshold_percent: 80
+  escalation_minutes: 5760  # 4 days
+
+# Tags for searchability
+tags:
+  - underwriting
+  - decision
+  - AUS
+  - risk-assessment
+  - critical-process
+  - regulatory
+
+# Metadata
+metadata:
+  created_at: 2025-01-10T09:00:00Z
+  updated_at: 2025-12-26T10:30:00Z
+  created_by: system
+  created_via: migration
+  estimated_effort_hours: 480
+  last_review_date: 2025-12-15
+  next_review_date: 2026-03-15
+  status: approved
+  version: 1.2.0

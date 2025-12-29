@@ -4,6 +4,9 @@ description: Post-closing audit, document imaging, compliance review, and loan s
   preparation
 owner: Post-Closing
 atoms:
+  - atom-bo-post-closing-audit
+  - atom-bo-loan-sale-prep
+  - atom-ctrl-credit-policy
 - atom-bo-post-closing-audit
 - atom-sys-document-imaging
 - atom-bo-loan-sale-prep

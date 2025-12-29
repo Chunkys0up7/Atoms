@@ -1,0 +1,7 @@
+id: phase-pre-application-refinance-rate-term
+name: Pre-Application - Refi Rate & Term
+description: Early engagement for refinance leads, collect basic eligibility information and product suitability.
+modules:
+  - module-pre-qualification
+journeyId: journey-refinance-rate-term
+targetDurationDays: 2

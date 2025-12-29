@@ -3,7 +3,13 @@ name: Asset Verification
 description: Bank statement review, asset source documentation, and reserve calculation
 owner: Processing
 atoms:
-- atom-cust-bank-statement-upload
-- atom-bo-asset-source-review
-- atom-sys-reserve-calculation
+	- atom-cust-bank-statement-upload
+	- atom-bo-asset-source-review
+	- atom-sys-reserve-calculation
+	- atom-cust-asset-statement-upload
+	- atom-bo-gift-letter-review
+	- atom-bo-large-deposit-review
+	- atom-bo-asset-verification-letter
+	- atom-bo-down-payment-verification
+	- atom-bo-reserves-verification
 phaseId: phase-processing

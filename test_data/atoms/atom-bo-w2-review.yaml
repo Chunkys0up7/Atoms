@@ -6,6 +6,7 @@ version: 1.0.0
 status: DRAFT
 owner: James Martinez
 team: Underwriting
+steward: Sarah Chen
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing

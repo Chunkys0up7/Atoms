@@ -1,0 +1,19 @@
+owners:
+  - name: Sarah Chen
+    role: Head of Borrower Experience
+    team: Borrower Experience
+  - name: James Martinez
+    role: Head of Processing
+    team: Loan Operations
+  - name: Jennifer Park
+    role: Head of Underwriting
+    team: Underwriting
+  - name: David Thompson
+    role: Head of Title & Closing
+    team: Closing
+  - name: Lisa Anderson
+    role: Head of Post-Closing
+    team: Post-Closing
+  - name: Robert Kim
+    role: Chief Risk Officer
+    team: Risk Management

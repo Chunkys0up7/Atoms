@@ -1,0 +1,8 @@
+id: phase-application-intake-purchase-fha
+name: Application Intake - FHA Purchase
+description: FHA-specific application intake including appraisal and mortgage insurance checks.
+modules:
+  - module-application-intake
+  - module-property-appraisal
+journeyId: journey-purchase-fha
+targetDurationDays: 4

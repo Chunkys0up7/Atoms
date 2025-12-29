@@ -32,8 +32,8 @@
   --color-info: #0369a1;
 
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-  --font-mono: 'Courier New', Courier, monospace;
+  --font-sans: 'Helvetica Neue', Arial, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -56,6 +56,11 @@ body {
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure root elements inherit the professional font stack */
+html, #root {
+  font-family: var(--font-sans);
 }
 
 /* Professional Layout */
@@ -435,6 +440,9 @@ body {
 .bg-tertiary { background-color: var(--color-bg-tertiary); }
 
 .font-mono { font-family: var(--font-mono); }
+/* Legacy class compatibility */
+.mono { font-family: var(--font-mono); }
+.sans { font-family: var(--font-sans); }
 .font-bold { font-weight: 600; }
 .font-semibold { font-weight: 500; }
 

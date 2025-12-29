@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import re
 from pathlib import Path
+import numpy as np
 
 router = APIRouter()
 
