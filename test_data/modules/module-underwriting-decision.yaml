@@ -143,7 +143,7 @@ metadata:
   created_by: system
   created_via: migration
   estimated_effort_hours: 480
-  last_review_date: 2025-12-15
-  next_review_date: 2026-03-15
+  last_review_date: "2025-12-15"
+  next_review_date: "2026-03-15"
   status: approved
   version: 1.2.0
