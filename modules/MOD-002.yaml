@@ -1,7 +1,7 @@
 id: MOD-002
 version: 1.0.0
 workflow_type: BPM
-type: Module
+type: business
 name: Module 2
 description: Demo module 2
 owner: team-a

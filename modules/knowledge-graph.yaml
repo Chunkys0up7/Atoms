@@ -22,3 +22,5 @@ tags:
 - neo4j
 - graph-database
 - knowledge-management
+atoms:
+- atom-knowledge-graph

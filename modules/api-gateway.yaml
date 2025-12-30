@@ -24,3 +24,5 @@ tags:
 - rest
 - graphql
 - gateway
+atoms:
+- atom-api-gateway

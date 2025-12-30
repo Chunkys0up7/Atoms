@@ -1,4 +1,4 @@
-id: authentication-system
+id: module-authentication-system
 version: 1.0.0
 workflow_type: CUSTOM
 module_id: auth-system

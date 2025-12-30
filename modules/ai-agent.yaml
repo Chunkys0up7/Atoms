@@ -24,3 +24,5 @@ tags:
 - claude
 - automation
 - impact-analysis
+atoms:
+- atom-ai-agent

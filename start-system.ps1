@@ -1,16 +1,107 @@
-# GNDP System Startup Script with Health Checks
+# GNDP System Startup Script - Consolidated Edition
+# Orchestrates the complete GNDP system startup with health checks and validation
+
+param(
+    [switch]$SkipNeo4j,      # Skip Neo4j startup (for development without graph features)
+    [switch]$Quick,          # Skip optional health checks for faster startup
+    [switch]$Verbose,        # Enable detailed logging
+    [int]$Timeout = 60       # Health check timeout in seconds
+)
+
+# Configure logging
+$LogDir = ".\logs"
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+}
+$LogFile = Join-Path $LogDir "startup-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    Add-Content -Path $LogFile -Value $logEntry
+    if ($Verbose) {
+        Write-Host $logEntry -ForegroundColor Gray
+    }
+}
+
+function Write-Step {
+    param([string]$Message, [string]$Color = "Yellow")
+    Write-Host $Message -ForegroundColor $Color
+    Write-Log $Message "STEP"
+}
+
+function Write-Success {
+    param([string]$Message)
+    Write-Host "  ✓ $Message" -ForegroundColor Green
+    Write-Log $Message "SUCCESS"
+}
+
+function Write-Warning {
+    param([string]$Message)
+    Write-Host "  ⚠ $Message" -ForegroundColor Yellow
+    Write-Log $Message "WARNING"
+}
+
+function Write-Error-Custom {
+    param([string]$Message)
+    Write-Host "  ✗ ERROR: $Message" -ForegroundColor Red
+    Write-Log $Message "ERROR"
+}
+
+# Header
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "GNDP System Startup Script" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
+Write-Log "Starting GNDP system startup sequence"
 
-# Step 1: Kill existing processes
-Write-Host "[1/7] Cleaning up existing processes..." -ForegroundColor Yellow
+# ============================================================
+# STEP 1: PREREQUISITES CHECK
+# ============================================================
+Write-Step "[1/6] Checking prerequisites..."
+
+# Check Node.js
+$nodeVersion = node --version 2>$null
+if (-not $nodeVersion) {
+    Write-Error-Custom "Node.js not found. Please install from https://nodejs.org"
+    exit 1
+} else {
+    Write-Success "Node.js $nodeVersion"
+}
+
+# Check Python
+$pythonVersion = python --version 2>$null
+if (-not $pythonVersion) {
+    Write-Error-Custom "Python not found. Please install Python 3.11+"
+    exit 1
+} else {
+    Write-Success "Python $pythonVersion"
+}
+
+# Check Docker (optional for Neo4j)
+if (-not $SkipNeo4j) {
+    try {
+        docker --version | Out-Null
+        Write-Success "Docker is available"
+    } catch {
+        Write-Warning "Docker not found. Use -SkipNeo4j to start without graph features"
+    }
+}
+
+Write-Host ""
+
+# ============================================================
+# STEP 2: CLEANUP EXISTING PROCESSES
+# ============================================================
+Write-Step "[2/6] Cleaning up existing processes..."
+
 $nodeProcesses = Get-Process -Name "node" -ErrorAction SilentlyContinue
 if ($nodeProcesses) {
     Write-Host "  Stopping existing Node.js processes..." -ForegroundColor Gray
     $nodeProcesses | Stop-Process -Force
     Start-Sleep -Seconds 2
+    Write-Success "Node.js processes stopped"
 }
 
 $pythonProcesses = Get-Process -Name "python" -ErrorAction SilentlyContinue
@@ -18,54 +109,47 @@ if ($pythonProcesses) {
     Write-Host "  Stopping existing Python processes..." -ForegroundColor Gray
     $pythonProcesses | Stop-Process -Force
     Start-Sleep -Seconds 2
+    Write-Success "Python processes stopped"
 }
-Write-Host "  ✓ Cleanup complete" -ForegroundColor Green
-Write-Host ""
 
-# Step 2: Clean build artifacts
-Write-Host "[2/7] Cleaning build artifacts..." -ForegroundColor Yellow
+# Clean build artifacts
 if (Test-Path "dist") {
-    Remove-Item -Recurse -Force "dist"
-    Write-Host "  Removed dist/" -ForegroundColor Gray
+    Remove-Item -Recurse -Force "dist" -ErrorAction SilentlyContinue
+    Write-Success "Removed dist/"
 }
 if (Test-Path "node_modules/.vite") {
-    Remove-Item -Recurse -Force "node_modules/.vite"
-    Write-Host "  Removed Vite cache" -ForegroundColor Gray
+    Remove-Item -Recurse -Force "node_modules/.vite" -ErrorAction SilentlyContinue
+    Write-Success "Removed Vite cache"
 }
-Write-Host "  ✓ Build artifacts cleaned" -ForegroundColor Green
+
 Write-Host ""
 
-# Step 3: Verify environment
-Write-Host "[3/7] Verifying environment..." -ForegroundColor Yellow
-$nodeVersion = node --version 2>$null
-if (-not $nodeVersion) {
-    Write-Host "  ✗ ERROR: Node.js not found" -ForegroundColor Red
-    Write-Host "  Please install Node.js from https://nodejs.org" -ForegroundColor Yellow
-    exit 1
-} else {
-    Write-Host "  ✓ Node.js dependencies OK" -ForegroundColor Green
-}
+# ============================================================
+# STEP 3: ENVIRONMENT SETUP
+# ============================================================
+Write-Step "[3/6] Setting up environment..."
 
+# Python virtual environment
 if (-not (Test-Path "venv")) {
     Write-Host "  Creating Python virtual environment..." -ForegroundColor Gray
     python -m venv venv
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "  ✗ ERROR: Failed to create virtual environment" -ForegroundColor Red
+        Write-Error-Custom "Failed to create virtual environment"
         exit 1
     }
     Write-Host "  Installing Python dependencies..." -ForegroundColor Gray
-    .\venv\Scripts\pip install -r requirements.txt
+    .\venv\Scripts\pip install -r requirements.txt -q
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "  ✗ ERROR: pip install failed" -ForegroundColor Red
+        Write-Error-Custom "Failed to install Python dependencies"
         exit 1
     }
-    Write-Host "  ✓ Python environment created" -ForegroundColor Green
+    Write-Success "Python environment created"
 } else {
-    # Verify critical dependencies are installed
+    # Verify critical dependencies
     Write-Host "  Checking Python dependencies..." -ForegroundColor Gray
     $missingDeps = @()
-
     $criticalPackages = @("fastapi", "uvicorn", "neo4j", "chromadb", "anthropic")
+
     foreach ($package in $criticalPackages) {
         $installed = .\venv\Scripts\pip show $package 2>$null
         if (-not $installed) {
@@ -74,51 +158,47 @@ if (-not (Test-Path "venv")) {
     }
 
     if ($missingDeps.Count -gt 0) {
-        Write-Host "  ⚠ Missing dependencies detected: $($missingDeps -join ', ')" -ForegroundColor Yellow
+        Write-Warning "Missing dependencies: $($missingDeps -join ', ')"
         Write-Host "  Installing missing packages..." -ForegroundColor Gray
         .\venv\Scripts\pip install -r requirements.txt -q
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "  ✗ ERROR: Failed to install dependencies" -ForegroundColor Red
-            Write-Host "  Run manually: .\venv\Scripts\pip install -r requirements.txt" -ForegroundColor Yellow
+            Write-Error-Custom "Failed to install dependencies"
             exit 1
         }
-        Write-Host "  ✓ Dependencies installed" -ForegroundColor Green
+        Write-Success "Dependencies installed"
     } else {
-        Write-Host "  ✓ Python dependencies OK" -ForegroundColor Green
+        Write-Success "Python dependencies OK"
     }
 }
-Write-Host ""
 
-# Step 4: Check and start Neo4j Docker container
-Write-Host "[4/7] Checking Neo4j database..." -ForegroundColor Yellow
-
-# Check if Docker is available
-$dockerAvailable = $false
-try {
-    docker --version | Out-Null
-    $dockerAvailable = $true
-} catch {
-    Write-Host "  ✗ WARNING: Docker not found or not running" -ForegroundColor Yellow
-    Write-Host "  Please start Docker Desktop to enable Graph Analytics features" -ForegroundColor Yellow
+# Ensure scripts directory exists
+if (-not (Test-Path ".\scripts")) {
+    New-Item -ItemType Directory -Path ".\scripts" -Force | Out-Null
 }
 
-if ($dockerAvailable) {
-    # Check if gndp-neo4j container exists and start it
+Write-Host ""
+
+# ============================================================
+# STEP 4: NEO4J DATABASE
+# ============================================================
+if (-not $SkipNeo4j) {
+    Write-Step "[4/6] Starting Neo4j database..."
+
     $neo4jContainer = docker ps -a --filter "name=gndp-neo4j" --format "{{.Names}}" 2>$null
 
     if ($neo4jContainer -eq "gndp-neo4j") {
         $neo4jStatus = docker ps --filter "name=gndp-neo4j" --format "{{.Status}}" 2>$null
 
         if ($neo4jStatus) {
-            Write-Host "  ✓ Neo4j container already running" -ForegroundColor Green
+            Write-Success "Neo4j container already running"
         } else {
             Write-Host "  Starting Neo4j container..." -ForegroundColor Gray
             docker start gndp-neo4j | Out-Null
             Write-Host "  Waiting for Neo4j to initialize..." -ForegroundColor Gray
 
-            # Wait for Neo4j health check
+            # Health check with configurable timeout
             $neo4jReady = $false
-            $maxAttempts = 30
+            $maxAttempts = [math]::Ceiling($Timeout / 2)
             $attempt = 0
 
             while (-not $neo4jReady -and $attempt -lt $maxAttempts) {
@@ -128,34 +208,34 @@ if ($dockerAvailable) {
                     $response = Invoke-WebRequest -Uri "http://localhost:7474" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
                     if ($response.StatusCode -eq 200) {
                         $neo4jReady = $true
-                        Write-Host "  ✓ Neo4j is healthy (http://localhost:7474)" -ForegroundColor Green
+                        Write-Success "Neo4j is healthy (http://localhost:7474)"
                     }
                 } catch {
-                    if ($attempt % 5 -eq 0) {
-                        Write-Host "    Attempt $attempt/$maxAttempts..." -ForegroundColor Gray
+                    if ($Verbose -and $attempt % 5 -eq 0) {
+                        Write-Host "    Health check attempt $attempt/$maxAttempts..." -ForegroundColor Gray
                     }
                 }
             }
 
             if (-not $neo4jReady) {
-                Write-Host "  ⚠ WARNING: Neo4j health check timed out" -ForegroundColor Yellow
-                Write-Host "  Graph Analytics may not work. Check Docker Desktop." -ForegroundColor Yellow
+                Write-Warning "Neo4j health check timed out after $Timeout seconds"
+                Write-Warning "Graph Analytics may not work. Check Docker Desktop."
             }
         }
     } else {
-        Write-Host "  ⚠ WARNING: gndp-neo4j container not found" -ForegroundColor Yellow
+        Write-Warning "gndp-neo4j container not found"
         Write-Host "  Run 'docker-compose up neo4j -d' to create it" -ForegroundColor Yellow
     }
+} else {
+    Write-Step "[4/6] Skipping Neo4j database (--SkipNeo4j flag)"
 }
+
 Write-Host ""
 
-# Step 5: Ensure scripts directory exists
-if (-not (Test-Path ".\scripts")) {
-    New-Item -ItemType Directory -Path ".\scripts" -Force | Out-Null
-}
-
-# Step 5: Start Backend
-Write-Host "[5/8] Starting backend service..." -ForegroundColor Yellow
+# ============================================================
+# STEP 5: BACKEND SERVICE
+# ============================================================
+Write-Step "[5/6] Starting backend service..."
 
 # Create backend startup script
 @'
@@ -168,7 +248,7 @@ Write-Host "API Server: http://127.0.0.1:8000" -ForegroundColor Green
 Write-Host "API Docs:   http://127.0.0.1:8000/docs" -ForegroundColor Green
 Write-Host "Health:     http://127.0.0.1:8000/health" -ForegroundColor Green
 Write-Host ""
-Write-Host "Starting FastAPI server using venv Python..." -ForegroundColor Yellow
+Write-Host "Starting FastAPI server..." -ForegroundColor Yellow
 Write-Host ""
 
 Set-Location $PSScriptRoot\..
@@ -179,39 +259,44 @@ $python = Join-Path $PSScriptRoot "..\venv\Scripts\python.exe"
 # Start backend in new window
 Start-Process powershell -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\start-backend.ps1"
 Write-Host "  Backend process started" -ForegroundColor Gray
-Write-Host "  Waiting for backend to initialize..." -ForegroundColor Gray
 
-# Wait for backend health check
-$backendReady = $false
-$maxAttempts = 30
-$attempt = 0
+if (-not $Quick) {
+    Write-Host "  Waiting for backend to initialize..." -ForegroundColor Gray
 
-while (-not $backendReady -and $attempt -lt $maxAttempts) {
-    Start-Sleep -Seconds 1
-    $attempt++
-    try {
-        # Try loopback IPv4 first (avoids IPv6 resolution issues)
-        $response = Invoke-WebRequest -Uri "http://127.0.0.1:8000/health" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
-        if ($response -and $response.StatusCode -eq 200) {
-            $backendReady = $true
-            Write-Host "  ✓ Backend is healthy (http://localhost:8000)" -ForegroundColor Green
-        }
-    } catch {
-        # Still waiting
-        if ($attempt % 5 -eq 0) {
-            Write-Host "    Attempt $attempt/$maxAttempts..." -ForegroundColor Gray
+    $backendReady = $false
+    $maxAttempts = [math]::Ceiling($Timeout / 1)
+    $attempt = 0
+
+    while (-not $backendReady -and $attempt -lt $maxAttempts) {
+        Start-Sleep -Seconds 1
+        $attempt++
+        try {
+            $response = Invoke-WebRequest -Uri "http://127.0.0.1:8000/health" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
+            if ($response -and $response.StatusCode -eq 200) {
+                $backendReady = $true
+                Write-Success "Backend is healthy (http://localhost:8000)"
+            }
+        } catch {
+            if ($Verbose -and $attempt % 5 -eq 0) {
+                Write-Host "    Health check attempt $attempt/$maxAttempts..." -ForegroundColor Gray
+            }
         }
     }
+
+    if (-not $backendReady) {
+        Write-Warning "Backend health check timed out after $Timeout seconds"
+        Write-Warning "Backend may still be starting. Check the backend window."
+    }
+} else {
+    Write-Success "Backend started (quick mode - no health check)"
 }
 
-if (-not $backendReady) {
-    Write-Host "  ✗ WARNING: Backend health check timed out" -ForegroundColor Yellow
-    Write-Host "  Backend may still be starting. Check the backend window." -ForegroundColor Yellow
-}
 Write-Host ""
 
-# Step 6: Start Frontend
-Write-Host "[6/8] Starting frontend service..." -ForegroundColor Yellow
+# ============================================================
+# STEP 6: FRONTEND SERVICE
+# ============================================================
+Write-Step "[6/6] Starting frontend service..."
 
 # Create frontend startup script
 @'
@@ -233,69 +318,77 @@ npm run dev
 # Start frontend in new window
 Start-Process powershell -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\start-frontend.ps1"
 Write-Host "  Frontend process started" -ForegroundColor Gray
-Write-Host "  Waiting for frontend to initialize..." -ForegroundColor Gray
 
-# Wait for frontend to be ready (Vite typically uses port 5173)
-$frontendReady = $false
-$maxAttempts = 30
-$attempt = 0
+if (-not $Quick) {
+    Write-Host "  Waiting for frontend to initialize..." -ForegroundColor Gray
 
-while (-not $frontendReady -and $attempt -lt $maxAttempts) {
-    Start-Sleep -Seconds 1
-    $attempt++
-    try {
-        # Try both common Vite ports
-        $response = Invoke-WebRequest -Uri "http://localhost:5173" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
-        if ($response.StatusCode -eq 200) {
-            $frontendReady = $true
-            $frontendUrl = "http://localhost:5173"
-            Write-Host "  ✓ Frontend is ready ($frontendUrl)" -ForegroundColor Green
-        }
-    } catch {
+    $frontendReady = $false
+    $frontendUrl = "http://localhost:5173"
+    $maxAttempts = [math]::Ceiling($Timeout / 1)
+    $attempt = 0
+
+    while (-not $frontendReady -and $attempt -lt $maxAttempts) {
+        Start-Sleep -Seconds 1
+        $attempt++
         try {
-            $response = Invoke-WebRequest -Uri "http://localhost:3000" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
+            $response = Invoke-WebRequest -Uri "http://localhost:5173" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
             if ($response.StatusCode -eq 200) {
                 $frontendReady = $true
-                $frontendUrl = "http://localhost:3000"
-                Write-Host "  ✓ Frontend is ready ($frontendUrl)" -ForegroundColor Green
+                $frontendUrl = "http://localhost:5173"
+                Write-Success "Frontend is ready ($frontendUrl)"
             }
         } catch {
-            # Still waiting
-            if ($attempt % 5 -eq 0) {
-                Write-Host "    Attempt $attempt/$maxAttempts..." -ForegroundColor Gray
+            try {
+                $response = Invoke-WebRequest -Uri "http://localhost:3000" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
+                if ($response.StatusCode -eq 200) {
+                    $frontendReady = $true
+                    $frontendUrl = "http://localhost:3000"
+                    Write-Success "Frontend is ready ($frontendUrl)"
+                }
+            } catch {
+                if ($Verbose -and $attempt % 5 -eq 0) {
+                    Write-Host "    Health check attempt $attempt/$maxAttempts..." -ForegroundColor Gray
+                }
             }
         }
     }
-}
 
-if (-not $frontendReady) {
-    Write-Host "  ✗ WARNING: Frontend health check timed out" -ForegroundColor Yellow
-    Write-Host "  Frontend may still be starting. Check the frontend window." -ForegroundColor Yellow
-    $frontendUrl = "http://localhost:5173"
-}
-Write-Host ""
-
-# Step 7: Neo4j Health Check
-Write-Host "[7/8] Neo4j Health Check" -ForegroundColor Yellow
-try {
-    $neo4jResponse = Invoke-WebRequest -Uri "http://localhost:7474" -Method GET -TimeoutSec 3 -ErrorAction SilentlyContinue
-    if ($neo4jResponse.StatusCode -eq 200) {
-        Write-Host "  Neo4j:    ✓ Healthy (http://localhost:7474)" -ForegroundColor Green
+    if (-not $frontendReady) {
+        Write-Warning "Frontend health check timed out after $Timeout seconds"
+        Write-Warning "Frontend may still be starting. Check the frontend window."
     }
-} catch {
-    Write-Host "  Neo4j:    ✗ Not responding (Graph Analytics will not work)" -ForegroundColor Red
+} else {
+    $frontendUrl = "http://localhost:5173"
+    Write-Success "Frontend started (quick mode - no health check)"
 }
+
 Write-Host ""
 
-# Step 8: System Health Summary
-Write-Host "[8/8] System Health Summary" -ForegroundColor Yellow
+# ============================================================
+# SYSTEM HEALTH SUMMARY
+# ============================================================
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "System Health Summary" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Backend health check
+# Neo4j check
+if (-not $SkipNeo4j) {
+    try {
+        $neo4jResponse = Invoke-WebRequest -Uri "http://localhost:7474" -Method GET -TimeoutSec 3 -ErrorAction SilentlyContinue
+        if ($neo4jResponse.StatusCode -eq 200) {
+            Write-Host "  Neo4j:    ✓ Healthy (http://localhost:7474)" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "  Neo4j:    ✗ Not responding" -ForegroundColor Red
+    }
+}
+
+# Backend check
 try {
     $backendHealth = Invoke-RestMethod -Uri "http://localhost:8000/health" -Method GET -TimeoutSec 3
     if ($backendHealth.status -eq "ok") {
-        Write-Host "  Backend:  ✓ Healthy" -ForegroundColor Green
+        Write-Host "  Backend:  ✓ Healthy (http://localhost:8000)" -ForegroundColor Green
     } else {
         Write-Host "  Backend:  ? Unknown status" -ForegroundColor Yellow
     }
@@ -303,7 +396,7 @@ try {
     Write-Host "  Backend:  ✗ Not responding" -ForegroundColor Red
 }
 
-# RAG system health check
+# RAG system check
 try {
     $ragHealth = Invoke-RestMethod -Uri "http://localhost:8000/api/rag/health" -Method GET -TimeoutSec 3
     Write-Host "  RAG:      ✓ Healthy" -ForegroundColor Green
@@ -311,11 +404,11 @@ try {
     Write-Host "  RAG:      ⚠ Check backend window for details" -ForegroundColor Yellow
 }
 
-# Frontend health check
+# Frontend check
 try {
     $frontendResponse = Invoke-WebRequest -Uri $frontendUrl -Method GET -TimeoutSec 3 -ErrorAction SilentlyContinue
     if ($frontendResponse.StatusCode -eq 200) {
-        Write-Host "  Frontend: ✓ Healthy" -ForegroundColor Green
+        Write-Host "  Frontend: ✓ Healthy ($frontendUrl)" -ForegroundColor Green
     }
 } catch {
     Write-Host "  Frontend: ✗ Not responding" -ForegroundColor Red
@@ -323,7 +416,9 @@ try {
 
 Write-Host ""
 
-# Final summary
+# ============================================================
+# FINAL SUMMARY
+# ============================================================
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "GNDP System Ready!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
@@ -333,10 +428,14 @@ Write-Host "  • Frontend:  $frontendUrl" -ForegroundColor Cyan
 Write-Host "  • Backend:   http://localhost:8000" -ForegroundColor Cyan
 Write-Host "  • API Docs:  http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host "  • Health:    http://localhost:8000/health" -ForegroundColor Cyan
-Write-Host "  • Neo4j:     http://localhost:7474 (user: neo4j, pass: password)" -ForegroundColor Cyan
+if (-not $SkipNeo4j) {
+    Write-Host "  • Neo4j:     http://localhost:7474 (user: neo4j, pass: password)" -ForegroundColor Cyan
+}
 Write-Host ""
 Write-Host "Services are running in separate windows." -ForegroundColor Gray
 Write-Host "To stop all services, run: .\stop-system.ps1" -ForegroundColor Gray
+Write-Host ""
+Write-Host "Log file: $LogFile" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Press Enter to close this window..." -ForegroundColor Yellow
 Read-Host

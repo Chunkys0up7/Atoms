@@ -1,7 +1,7 @@
 id: MOD-012
 version: 1.0.0
 workflow_type: BPM
-type: Module
+type: business
 name: Module 12
 description: Demo module 12
 owner: platform

@@ -1,7 +1,7 @@
 id: MOD-008
 version: 1.0.0
 workflow_type: BPM
-type: Module
+type: business
 name: Module 8
 description: Demo module 8
 owner: platform
