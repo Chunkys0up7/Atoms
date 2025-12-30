@@ -85,6 +85,7 @@ class ClaudeClient:
                         "relevance_score": atom.get("distance", 0.0)
                     }
                     for atom in context_atoms[:10]  # Top 10 sources
+                    if atom and isinstance(atom, dict)
                 ]
             }
         except Exception as e:
@@ -100,8 +101,12 @@ class ClaudeClient:
             return "No relevant information found."
         
         context_parts = []
-        
+
         for i, atom in enumerate(atoms[:10], 1):  # Limit to top 10
+            # Skip None or invalid atoms
+            if not atom or not isinstance(atom, dict):
+                continue
+
             atom_id = atom.get("id", "unknown")
             atom_type = atom.get("type", "unknown")
             title = atom.get("title", "")

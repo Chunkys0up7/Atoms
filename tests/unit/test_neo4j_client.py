@@ -149,9 +149,12 @@ class TestConnectionManagement:
 
         Verifies that the driver is closed and set to None.
         """
+        # Save reference to driver before closing
+        driver = mock_neo4j_client.driver
+
         mock_neo4j_client.close()
 
-        mock_neo4j_client.driver.close.assert_called_once()
+        driver.close.assert_called_once()
         assert mock_neo4j_client.driver is None
 
     def test_close_is_idempotent(self, mock_neo4j_client):
@@ -174,13 +177,14 @@ class TestConnectionManagement:
         with patch('api.neo4j_client.GraphDatabase.driver'):
             with patch.object(Neo4jClient, '_connect'):
                 client = Neo4jClient.__new__(Neo4jClient)
-                client.driver = MagicMock()
+                driver_mock = MagicMock()
+                client.driver = driver_mock
 
                 with client as ctx:
                     assert ctx is client
 
                 # Driver should be closed on exit
-                client.driver.close.assert_called_once()
+                driver_mock.close.assert_called_once()
 
 
 class TestUpstreamDependencies:
@@ -232,7 +236,7 @@ class TestUpstreamDependencies:
         session_mock.run.side_effect = DatabaseError("Query execution failed")
         mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
 
-        with pytest.raises(DatabaseError, match="Error finding upstream dependencies"):
+        with pytest.raises(Neo4jError, match="Error finding upstream dependencies"):
             mock_neo4j_client.find_upstream_dependencies("REQ-001")
 
     def test_find_upstream_dependencies_returns_serialized_records(self, mock_neo4j_client):
@@ -304,7 +308,7 @@ class TestDownstreamImpacts:
         session_mock.run.side_effect = DatabaseError("Query execution failed")
         mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
 
-        with pytest.raises(DatabaseError, match="Error finding downstream impacts"):
+        with pytest.raises(Neo4jError, match="Error finding downstream impacts"):
             mock_neo4j_client.find_downstream_impacts("REQ-001")
 
 
@@ -712,27 +716,16 @@ class TestEdgeCases:
         """
         Test handling of very large depth values.
 
-        Verifies that extreme depth values are handled safely.
+        Verifies that excessively large depth values raise ValueError.
         """
-        session_mock = MagicMock()
-        session_mock.run.return_value = []
-        mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
-
-        result = mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=100)
-
-        assert isinstance(result, list)
+        with pytest.raises(ValueError, match="max_depth must be an integer between 1 and 5"):
+            mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=100)
 
     def test_negative_depth_value(self, mock_neo4j_client):
         """
         Test handling of negative depth values.
 
-        Verifies that invalid depth values are handled.
+        Verifies that negative depth values raise ValueError.
         """
-        session_mock = MagicMock()
-        session_mock.run.return_value = []
-        mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
-
-        # Should handle gracefully or raise appropriate error
-        result = mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=-1)
-
-        assert isinstance(result, list)
+        with pytest.raises(ValueError, match="max_depth must be an integer between 1 and 5"):
+            mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=-1)

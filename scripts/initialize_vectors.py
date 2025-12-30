@@ -35,6 +35,19 @@ except ImportError:
     HAS_OPENAI = False
 
 
+def init_chroma_client(persist_dir: str = "rag-index"):
+    """
+    Initialize and return Chroma client.
+
+    Args:
+        persist_dir: Directory path for persistent storage
+
+    Returns:
+        chromadb.Client: Initialized Chroma client
+    """
+    return chromadb.PersistentClient(path=persist_dir)
+
+
 def load_atoms_from_disk() -> List[Dict[str, Any]]:
     """Load all atom JSON files from data/atoms/ directory."""
     atoms_dir = Path(__file__).parent.parent / "data" / "atoms"

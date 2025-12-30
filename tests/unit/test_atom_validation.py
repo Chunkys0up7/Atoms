@@ -209,8 +209,11 @@ class TestAtomValidation:
             assert all(p.isdigit() for p in parts)
 
         for version in invalid_versions:
+            # Invalid if it has a 'v' prefix or doesn't have exactly 3 numeric parts
+            has_v_prefix = version.startswith("v")
             parts = version.replace("v", "").split(".")
-            assert len(parts) != 3 or not all(p.isdigit() for p in parts if p)
+            is_valid_format = len(parts) == 3 and all(p.isdigit() for p in parts if p)
+            assert has_v_prefix or not is_valid_format
 
 
 @pytest.mark.unit
