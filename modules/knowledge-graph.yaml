@@ -1,7 +1,7 @@
 id: knowledge-graph
 version: 1.0.0
 workflow_type: CUSTOM
-module_id: knowledge-graph
+module_id: module-knowledge-graph
 name: Knowledge Graph System
 description: Neo4j-based graph database for storing and querying atom relationships
   with automated synchronization

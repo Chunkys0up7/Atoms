@@ -1,7 +1,7 @@
 id: module-authentication-system
 version: 1.0.0
 workflow_type: CUSTOM
-module_id: auth-system
+module_id: module-auth-system
 name: Authentication System
 description: Complete user authentication and authorization system with OAuth 2.0,
   JWT tokens, and MFA support
