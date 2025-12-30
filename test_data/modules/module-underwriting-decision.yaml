@@ -63,7 +63,7 @@ exit_points:
 # External dependencies
 external_dependencies:
   systems:
-    - SYS-LOS-PLATFORM
+    - atom-sys-los-platform
     - atom-sys-aus-submission
     - atom-sys-rate-lock-processing
   modules:
