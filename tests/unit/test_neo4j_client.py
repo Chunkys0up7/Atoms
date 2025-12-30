@@ -672,13 +672,14 @@ class TestSingleton:
         with patch('api.neo4j_client.GraphDatabase.driver'):
             with patch.object(Neo4jClient, '_connect'):
                 with patch.object(Neo4jClient, '__init__', return_value=None):
-                    import api.neo4j_client
-                    api.neo4j_client._neo4j_client = None
+                    with patch.object(Neo4jClient, 'close'):
+                        import api.neo4j_client
+                        api.neo4j_client._neo4j_client = None
 
-                    client = get_neo4j_client()
-                    close_neo4j_client()
+                        client = get_neo4j_client()
+                        close_neo4j_client()
 
-                    assert api.neo4j_client._neo4j_client is None
+                        assert api.neo4j_client._neo4j_client is None
 
 
 class TestEdgeCases:
