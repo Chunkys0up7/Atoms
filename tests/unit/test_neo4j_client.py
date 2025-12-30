@@ -13,7 +13,7 @@ Tests the Neo4jClient class with comprehensive coverage of:
 
 import pytest
 from unittest.mock import Mock, MagicMock, patch, call
-from neo4j.exceptions import ServiceUnavailable, DatabaseError
+from neo4j.exceptions import ServiceUnavailable, DatabaseError, Neo4jError
 
 from api.neo4j_client import Neo4jClient, get_neo4j_client, close_neo4j_client
 
@@ -653,14 +653,15 @@ class TestSingleton:
         """
         with patch('api.neo4j_client.GraphDatabase.driver'):
             with patch.object(Neo4jClient, '_connect'):
-                # Clear global state
-                import api.neo4j_client
-                api.neo4j_client._neo4j_client = None
+                with patch.object(Neo4jClient, '__init__', return_value=None):
+                    # Clear global state
+                    import api.neo4j_client
+                    api.neo4j_client._neo4j_client = None
 
-                client1 = get_neo4j_client()
-                client2 = get_neo4j_client()
+                    client1 = get_neo4j_client()
+                    client2 = get_neo4j_client()
 
-                assert client1 is client2
+                    assert client1 is client2
 
     def test_close_neo4j_client_clears_singleton(self):
         """
@@ -670,13 +671,14 @@ class TestSingleton:
         """
         with patch('api.neo4j_client.GraphDatabase.driver'):
             with patch.object(Neo4jClient, '_connect'):
-                import api.neo4j_client
-                api.neo4j_client._neo4j_client = None
+                with patch.object(Neo4jClient, '__init__', return_value=None):
+                    import api.neo4j_client
+                    api.neo4j_client._neo4j_client = None
 
-                client = get_neo4j_client()
-                close_neo4j_client()
+                    client = get_neo4j_client()
+                    close_neo4j_client()
 
-                assert api.neo4j_client._neo4j_client is None
+                    assert api.neo4j_client._neo4j_client is None
 
 
 class TestEdgeCases:
