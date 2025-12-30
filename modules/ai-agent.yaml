@@ -1,4 +1,4 @@
-id: ai-agent
+id: module-ai-agent
 version: 1.0.0
 workflow_type: CUSTOM
 module_id: module-ai-agent

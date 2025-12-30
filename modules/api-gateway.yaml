@@ -1,4 +1,4 @@
-id: api-gateway
+id: module-api-gateway
 version: 1.0.0
 workflow_type: CUSTOM
 module_id: module-api-gateway
