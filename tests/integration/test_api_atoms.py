@@ -13,9 +13,9 @@ import yaml
 import sys
 
 # Add API to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "api"))
-from server import app
-from cache import get_atom_cache
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from api.server import app
+from api.cache import get_atom_cache
 
 
 @pytest.fixture
