@@ -12,7 +12,7 @@ import Publisher from './components/PublisherEnhanced';
 import IngestionEngine from './components/IngestionEngine';
 import OntologyBrowser from './components/OntologyBrowser';
 import DocumentLibrary from './components/DocumentLibrary';
-import MkDocsViewer from './components/MkDocsViewer';
+import MkDocsViewer from './components/MkDocsViewerEnhanced';
 import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
 import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
