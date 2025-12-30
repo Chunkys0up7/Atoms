@@ -1208,3 +1208,707 @@ async def get_document_health_metrics():
             status_code=500,
             detail=f"Failed to calculate document health: {str(e)}"
         )
+
+
+# ============================================================================
+# ENHANCED FEATURES: VERSIONING & COMPARISON
+# ============================================================================
+
+# Document version history store (in production, use a database)
+version_store = defaultdict(list)
+
+@router.post("/api/mkdocs/documents/{filename}/save-version")
+async def save_document_version(filename: str, request: dict):
+    """Save a version snapshot of a document."""
+    try:
+        published_dir = get_published_docs_dir()
+        doc_path = published_dir / filename
+
+        if not doc_path.exists():
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        # Read current content
+        with open(doc_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        frontmatter = parse_frontmatter(content)
+
+        # Create version entry
+        version = {
+            'version_id': len(version_store[filename]) + 1,
+            'filename': filename,
+            'content': content,
+            'frontmatter': frontmatter,
+            'timestamp': datetime.now().isoformat(),
+            'author': request.get('author', 'anonymous'),
+            'comment': request.get('comment', ''),
+            'word_count': len(content.split()),
+            'hash': hash(content)
+        }
+
+        version_store[filename].append(version)
+
+        # Keep only last 50 versions per document
+        if len(version_store[filename]) > 50:
+            version_store[filename] = version_store[filename][-50:]
+
+        return {
+            'status': 'success',
+            'version_id': version['version_id'],
+            'timestamp': version['timestamp']
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to save version: {str(e)}"
+        )
+
+
+@router.get("/api/mkdocs/documents/{filename}/versions")
+async def get_document_versions(filename: str, limit: int = 10):
+    """Get version history for a document."""
+    try:
+        versions = version_store.get(filename, [])
+
+        # Return metadata only (not full content)
+        version_list = []
+        for v in reversed(versions[-limit:]):
+            version_list.append({
+                'version_id': v['version_id'],
+                'timestamp': v['timestamp'],
+                'author': v['author'],
+                'comment': v['comment'],
+                'word_count': v['word_count']
+            })
+
+        return {
+            'filename': filename,
+            'total_versions': len(versions),
+            'versions': version_list
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get versions: {str(e)}"
+        )
+
+
+@router.get("/api/mkdocs/documents/{filename}/compare")
+async def compare_document_versions(filename: str, version1: int = None, version2: int = None):
+    """Compare two versions of a document or current version with a previous one."""
+    try:
+        published_dir = get_published_docs_dir()
+        doc_path = published_dir / filename
+
+        if not doc_path.exists():
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        versions = version_store.get(filename, [])
+
+        # Get current content
+        with open(doc_path, 'r', encoding='utf-8') as f:
+            current_content = f.read()
+
+        # Determine what to compare
+        if version2 is None:
+            # Compare current with a version
+            content1 = current_content
+            content2 = versions[version1 - 1]['content'] if version1 and version1 <= len(versions) else ""
+            label1 = "Current"
+            label2 = f"Version {version1}"
+        else:
+            # Compare two versions
+            content1 = versions[version1 - 1]['content'] if version1 and version1 <= len(versions) else ""
+            content2 = versions[version2 - 1]['content'] if version2 and version2 <= len(versions) else ""
+            label1 = f"Version {version1}"
+            label2 = f"Version {version2}"
+
+        # Simple diff calculation
+        import difflib
+        diff = difflib.unified_diff(
+            content2.splitlines(keepends=True),
+            content1.splitlines(keepends=True),
+            fromfile=label2,
+            tofile=label1,
+            lineterm=''
+        )
+
+        diff_text = ''.join(diff)
+
+        # Calculate statistics
+        lines1 = content1.count('\n')
+        lines2 = content2.count('\n')
+        words1 = len(content1.split())
+        words2 = len(content2.split())
+
+        return {
+            'filename': filename,
+            'comparison': {
+                'label1': label1,
+                'label2': label2,
+                'diff': diff_text,
+                'stats': {
+                    'lines_added': max(0, lines1 - lines2),
+                    'lines_removed': max(0, lines2 - lines1),
+                    'words_added': max(0, words1 - words2),
+                    'words_removed': max(0, words2 - words1)
+                }
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to compare versions: {str(e)}"
+        )
+
+
+# ============================================================================
+# ENHANCED FEATURES: DOCUMENT TEMPLATES
+# ============================================================================
+
+@router.get("/api/mkdocs/templates")
+async def get_document_templates():
+    """Get available document templates."""
+    templates = [
+        {
+            'id': 'sop',
+            'name': 'Standard Operating Procedure',
+            'description': 'Template for creating SOPs with steps and compliance notes',
+            'template_type': 'sop',
+            'sections': ['Purpose', 'Scope', 'Procedure', 'References', 'Approval']
+        },
+        {
+            'id': 'technical_design',
+            'name': 'Technical Design Document',
+            'description': 'Template for technical specifications and architecture',
+            'template_type': 'technical_design',
+            'sections': ['Overview', 'Architecture', 'Components', 'Data Flow', 'Security', 'Testing']
+        },
+        {
+            'id': 'process_map',
+            'name': 'Process Map',
+            'description': 'Template for documenting business processes',
+            'template_type': 'process_map',
+            'sections': ['Process Overview', 'Inputs', 'Steps', 'Outputs', 'Metrics']
+        },
+        {
+            'id': 'document_inventory',
+            'name': 'Document Inventory',
+            'description': 'Template for cataloging document collections',
+            'template_type': 'document_inventory',
+            'sections': ['Overview', 'Document List', 'Ownership', 'Review Schedule']
+        },
+        {
+            'id': 'api_documentation',
+            'name': 'API Documentation',
+            'description': 'Template for API endpoint documentation',
+            'template_type': 'api_documentation',
+            'sections': ['Endpoint', 'Authentication', 'Request', 'Response', 'Examples', 'Error Codes']
+        }
+    ]
+
+    return {'templates': templates, 'total': len(templates)}
+
+
+@router.post("/api/mkdocs/documents/create-from-template")
+async def create_document_from_template(request: dict):
+    """Create a new document from a template."""
+    try:
+        template_id = request.get('template_id')
+        title = request.get('title')
+        module = request.get('module', 'general')
+        owner = request.get('owner', 'unassigned')
+
+        if not template_id or not title:
+            raise HTTPException(status_code=400, detail="template_id and title are required")
+
+        # Get template
+        templates_response = await get_document_templates()
+        templates = {t['id']: t for t in templates_response['templates']}
+
+        if template_id not in templates:
+            raise HTTPException(status_code=404, detail="Template not found")
+
+        template = templates[template_id]
+
+        # Generate document content
+        frontmatter = {
+            'title': title,
+            'template_type': template['template_type'],
+            'module': module,
+            'owner': owner,
+            'steward': owner,
+            'created': datetime.now().isoformat(),
+            'updated': datetime.now().isoformat(),
+            'version': '1.0.0',
+            'status': 'draft'
+        }
+
+        # Build markdown content
+        import yaml
+        content = "---\n"
+        content += yaml.dump(frontmatter, default_flow_style=False)
+        content += "---\n\n"
+        content += f"# {title}\n\n"
+
+        # Add template sections
+        for section in template['sections']:
+            content += f"## {section}\n\n"
+            content += f"*TODO: Complete the {section} section*\n\n"
+
+        # Save to published directory
+        published_dir = get_published_docs_dir()
+        published_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename
+        safe_title = title.lower().replace(' ', '_').replace('/', '_')
+        filename = f"{template['template_type']}_{safe_title}.md"
+        filepath = published_dir / filename
+
+        # Check if file exists
+        if filepath.exists():
+            raise HTTPException(status_code=409, detail="Document already exists")
+
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        return {
+            'status': 'success',
+            'filename': filename,
+            'url': f"/generated/published/{filename}",
+            'message': f"Document created from {template['name']} template"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create document: {str(e)}"
+        )
+
+
+# ============================================================================
+# ENHANCED FEATURES: DEPENDENCY GRAPH
+# ============================================================================
+
+@router.get("/api/mkdocs/documents/{filename}/dependencies")
+async def get_document_dependencies(filename: str):
+    """Get dependency graph for a document based on atom relationships."""
+    try:
+        published_dir = get_published_docs_dir()
+        doc_path = published_dir / filename
+
+        if not doc_path.exists():
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        # Read document and extract atoms
+        with open(doc_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        frontmatter = parse_frontmatter(content)
+
+        # Extract atom IDs
+        atom_pattern = r'atom-[\w-]+'
+        doc_atoms = set(re.findall(atom_pattern, content))
+
+        # Find all documents and their atoms
+        doc_atoms_map = {}
+        for md_file in published_dir.glob("*.md"):
+            try:
+                with open(md_file, 'r', encoding='utf-8') as f:
+                    file_content = f.read()
+                file_atoms = set(re.findall(atom_pattern, file_content))
+                if file_atoms:
+                    doc_atoms_map[md_file.name] = file_atoms
+            except Exception:
+                continue
+
+        # Build dependency graph
+        nodes = [{'id': filename, 'label': frontmatter.get('title', filename), 'type': 'source'}]
+        edges = []
+
+        for other_doc, other_atoms in doc_atoms_map.items():
+            if other_doc == filename:
+                continue
+
+            # Find shared atoms
+            shared = doc_atoms.intersection(other_atoms)
+            if shared:
+                # Determine direction
+                if len(shared) >= 3:  # Strong dependency
+                    edge_type = 'strong'
+                else:
+                    edge_type = 'weak'
+
+                edges.append({
+                    'source': filename,
+                    'target': other_doc,
+                    'type': edge_type,
+                    'shared_atoms': len(shared),
+                    'atoms': list(shared)[:5]
+                })
+
+                # Add node if not already present
+                if not any(n['id'] == other_doc for n in nodes):
+                    try:
+                        with open(published_dir / other_doc, 'r', encoding='utf-8') as f:
+                            other_content = f.read()
+                        other_frontmatter = parse_frontmatter(other_content)
+                        nodes.append({
+                            'id': other_doc,
+                            'label': other_frontmatter.get('title', other_doc),
+                            'type': 'dependency'
+                        })
+                    except Exception:
+                        nodes.append({
+                            'id': other_doc,
+                            'label': other_doc,
+                            'type': 'dependency'
+                        })
+
+        return {
+            'source_document': filename,
+            'atoms_count': len(doc_atoms),
+            'dependencies_count': len(edges),
+            'graph': {
+                'nodes': nodes,
+                'edges': edges
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get dependencies: {str(e)}"
+        )
+
+
+# ============================================================================
+# ENHANCED FEATURES: ADVANCED SEARCH WITH HIGHLIGHTING
+# ============================================================================
+
+@router.get("/api/mkdocs/documents/advanced-search")
+async def advanced_search(
+    query: str,
+    template_type: str = None,
+    module: str = None,
+    owner: str = None,
+    min_score: float = 0.0,
+    limit: int = 20
+):
+    """Advanced search with content highlighting and relevance scoring."""
+    try:
+        published_dir = get_published_docs_dir()
+        if not published_dir.exists():
+            return []
+
+        results = []
+        query_terms = query.lower().split()
+
+        for md_file in published_dir.glob("*.md"):
+            try:
+                with open(md_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                frontmatter = parse_frontmatter(content)
+
+                # Apply filters
+                if template_type and frontmatter.get('template_type') != template_type:
+                    continue
+                if module and frontmatter.get('module') != module:
+                    continue
+                if owner and frontmatter.get('owner') != owner:
+                    continue
+
+                # Calculate relevance score
+                title = frontmatter.get('title', md_file.stem)
+                content_lower = content.lower()
+                title_lower = title.lower()
+
+                score = 0.0
+
+                # Title matches (highest weight: 10 points per term)
+                for term in query_terms:
+                    if term in title_lower:
+                        score += 10.0
+
+                # Content matches (1 point per occurrence, max 20)
+                for term in query_terms:
+                    occurrences = content_lower.count(term)
+                    score += min(occurrences, 20)
+
+                # Exact phrase bonus (5 points)
+                if query.lower() in content_lower:
+                    score += 5.0
+
+                if score < min_score:
+                    continue
+
+                # Extract highlighted snippets
+                snippets = []
+                lines = content.split('\n')
+                for i, line in enumerate(lines):
+                    line_lower = line.lower()
+                    if any(term in line_lower for term in query_terms):
+                        # Add context (1 line before and after)
+                        context_start = max(0, i - 1)
+                        context_end = min(len(lines), i + 2)
+                        context_lines = lines[context_start:context_end]
+
+                        # Highlight matches
+                        highlighted = []
+                        for ctx_line in context_lines:
+                            for term in query_terms:
+                                # Case-insensitive replace with highlighting
+                                pattern = re.compile(re.escape(term), re.IGNORECASE)
+                                ctx_line = pattern.sub(f'<mark>{term}</mark>', ctx_line)
+                            highlighted.append(ctx_line)
+
+                        snippet = '\n'.join(highlighted)
+                        if snippet not in [s['text'] for s in snippets]:
+                            snippets.append({
+                                'text': snippet,
+                                'line_number': i + 1
+                            })
+
+                        if len(snippets) >= 3:  # Limit snippets
+                            break
+
+                results.append({
+                    'filename': md_file.name,
+                    'title': title,
+                    'template_type': frontmatter.get('template_type', 'unknown'),
+                    'module': frontmatter.get('module', 'unknown'),
+                    'owner': frontmatter.get('owner', 'unknown'),
+                    'url': f"/generated/published/{md_file.name}",
+                    'relevance_score': round(score, 2),
+                    'snippets': snippets,
+                    'total_matches': sum(content_lower.count(term) for term in query_terms)
+                })
+
+            except Exception as e:
+                print(f"Error searching {md_file}: {e}")
+                continue
+
+        # Sort by relevance score
+        results.sort(key=lambda x: x['relevance_score'], reverse=True)
+
+        return results[:limit]
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Advanced search failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# ENHANCED FEATURES: BULK OPERATIONS
+# ============================================================================
+
+@router.post("/api/mkdocs/documents/bulk-update")
+async def bulk_update_documents(request: dict):
+    """Bulk update multiple documents."""
+    try:
+        filenames = request.get('filenames', [])
+        updates = request.get('updates', {})
+
+        if not filenames:
+            raise HTTPException(status_code=400, detail="No filenames provided")
+
+        published_dir = get_published_docs_dir()
+        results = {'success': [], 'failed': []}
+
+        for filename in filenames:
+            try:
+                doc_path = published_dir / filename
+                if not doc_path.exists():
+                    results['failed'].append({
+                        'filename': filename,
+                        'reason': 'File not found'
+                    })
+                    continue
+
+                # Read document
+                with open(doc_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                # Parse and update frontmatter
+                if content.startswith('---'):
+                    parts = content.split('---', 2)
+                    if len(parts) >= 3:
+                        import yaml
+                        frontmatter = yaml.safe_load(parts[1]) or {}
+
+                        # Apply updates
+                        for key, value in updates.items():
+                            frontmatter[key] = value
+
+                        # Rebuild content
+                        new_content = "---\n"
+                        new_content += yaml.dump(frontmatter, default_flow_style=False)
+                        new_content += "---"
+                        new_content += parts[2]
+
+                        # Save
+                        with open(doc_path, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+
+                        results['success'].append(filename)
+
+            except Exception as e:
+                results['failed'].append({
+                    'filename': filename,
+                    'reason': str(e)
+                })
+
+        return {
+            'status': 'completed',
+            'total': len(filenames),
+            'success_count': len(results['success']),
+            'failed_count': len(results['failed']),
+            'results': results
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Bulk update failed: {str(e)}"
+        )
+
+
+@router.post("/api/mkdocs/documents/bulk-delete")
+async def bulk_delete_documents(request: dict):
+    """Bulk delete multiple documents."""
+    try:
+        filenames = request.get('filenames', [])
+        confirm = request.get('confirm', False)
+
+        if not confirm:
+            raise HTTPException(
+                status_code=400,
+                detail="Deletion not confirmed. Set 'confirm': true"
+            )
+
+        if not filenames:
+            raise HTTPException(status_code=400, detail="No filenames provided")
+
+        published_dir = get_published_docs_dir()
+        results = {'deleted': [], 'failed': []}
+
+        for filename in filenames:
+            try:
+                doc_path = published_dir / filename
+                if doc_path.exists():
+                    doc_path.unlink()
+                    results['deleted'].append(filename)
+                else:
+                    results['failed'].append({
+                        'filename': filename,
+                        'reason': 'File not found'
+                    })
+
+            except Exception as e:
+                results['failed'].append({
+                    'filename': filename,
+                    'reason': str(e)
+                })
+
+        return {
+            'status': 'completed',
+            'total': len(filenames),
+            'deleted_count': len(results['deleted']),
+            'failed_count': len(results['failed']),
+            'results': results
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Bulk delete failed: {str(e)}"
+        )
+
+
+@router.get("/api/mkdocs/stats/overview")
+async def get_documentation_overview():
+    """Get comprehensive documentation statistics overview."""
+    try:
+        published_dir = get_published_docs_dir()
+        if not published_dir.exists():
+            return {}
+
+        stats = {
+            'total_documents': 0,
+            'by_type': defaultdict(int),
+            'by_module': defaultdict(int),
+            'by_owner': defaultdict(int),
+            'by_status': defaultdict(int),
+            'total_words': 0,
+            'avg_words_per_doc': 0,
+            'oldest_update': None,
+            'newest_update': None,
+            'total_atoms': set()
+        }
+
+        atom_pattern = r'atom-[\w-]+'
+
+        for md_file in published_dir.glob("*.md"):
+            try:
+                with open(md_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                frontmatter = parse_frontmatter(content)
+                word_count = len(content.split())
+
+                stats['total_documents'] += 1
+                stats['total_words'] += word_count
+
+                # Categorize by attributes
+                stats['by_type'][frontmatter.get('template_type', 'unknown')] += 1
+                stats['by_module'][frontmatter.get('module', 'unknown')] += 1
+                stats['by_owner'][frontmatter.get('owner', 'unknown')] += 1
+                stats['by_status'][frontmatter.get('status', 'unknown')] += 1
+
+                # Track atoms
+                atoms = set(re.findall(atom_pattern, content))
+                stats['total_atoms'].update(atoms)
+
+                # Track dates
+                mod_time = datetime.fromtimestamp(md_file.stat().st_mtime)
+                if stats['oldest_update'] is None or mod_time < stats['oldest_update']:
+                    stats['oldest_update'] = mod_time
+                if stats['newest_update'] is None or mod_time > stats['newest_update']:
+                    stats['newest_update'] = mod_time
+
+            except Exception as e:
+                print(f"Error processing {md_file}: {e}")
+                continue
+
+        # Calculate averages
+        if stats['total_documents'] > 0:
+            stats['avg_words_per_doc'] = round(stats['total_words'] / stats['total_documents'], 1)
+
+        # Convert sets and defaultdicts to regular dicts
+        stats['total_atoms'] = len(stats['total_atoms'])
+        stats['by_type'] = dict(stats['by_type'])
+        stats['by_module'] = dict(stats['by_module'])
+        stats['by_owner'] = dict(stats['by_owner'])
+        stats['by_status'] = dict(stats['by_status'])
+
+        # Format dates
+        if stats['oldest_update']:
+            stats['oldest_update'] = stats['oldest_update'].isoformat()
+        if stats['newest_update']:
+            stats['newest_update'] = stats['newest_update'].isoformat()
+
+        return stats
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get overview: {str(e)}"
+        )
