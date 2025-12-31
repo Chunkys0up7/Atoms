@@ -10,9 +10,10 @@ Tests cover:
 - Request body validation
 """
 
-import pytest
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
 
 
 class TestAtomsEndpoint:
@@ -27,7 +28,7 @@ class TestAtomsEndpoint:
                     "id": "atom-cust-kyc",
                     "type": "process",
                     "title": "Customer KYC",
-                    "summary": "Know Your Customer process"
+                    "summary": "Know Your Customer process",
                 }
             ]
         }
@@ -56,7 +57,7 @@ class TestAtomsEndpoint:
             "summary": "Know Your Customer process",
             "content": {},
             "metadata": {},
-            "relationships": {"upstream": [], "downstream": []}
+            "relationships": {"upstream": [], "downstream": []},
         }
 
         assert response["id"] == atom_id
@@ -81,7 +82,7 @@ class TestAtomsEndpoint:
             "summary": "A new process atom",
             "content": {"steps": []},
             "metadata": {"owner": "test-team", "status": "draft"},
-            "relationships": {"upstream": [], "downstream": []}
+            "relationships": {"upstream": [], "downstream": []},
         }
 
         # Validate required fields
@@ -97,7 +98,7 @@ class TestAtomsEndpoint:
         """POST /api/atoms with missing field should return 400"""
         invalid_atom = {
             "type": "process",
-            "title": "New Process"
+            "title": "New Process",
             # Missing 'id' and 'summary'
         }
 
@@ -113,10 +114,7 @@ class TestAtomsEndpoint:
     def test_update_atom(self):
         """PUT /api/atoms/:id should update existing atom"""
         atom_id = "atom-cust-kyc"
-        updates = {
-            "title": "Updated Customer KYC",
-            "summary": "Updated summary"
-        }
+        updates = {"title": "Updated Customer KYC", "summary": "Updated summary"}
 
         # Validate update payload
         assert isinstance(updates, dict)
@@ -143,7 +141,7 @@ class TestModulesEndpoint:
                     "id": "mod-customer-onboarding",
                     "name": "Customer Onboarding",
                     "domain": "Customer Management",
-                    "atom_count": 15
+                    "atom_count": 15,
                 }
             ]
         }
@@ -159,7 +157,7 @@ class TestModulesEndpoint:
             "id": module_id,
             "name": "Customer Onboarding",
             "domain": "Customer Management",
-            "atoms": ["atom-cust-kyc", "atom-cust-verify"]
+            "atoms": ["atom-cust-kyc", "atom-cust-verify"],
         }
 
         assert response["id"] == module_id
@@ -174,8 +172,8 @@ class TestModulesEndpoint:
             "module_id": module_id,
             "atoms": [
                 {"id": "atom-cust-kyc", "title": "Customer KYC"},
-                {"id": "atom-cust-verify", "title": "Verification"}
-            ]
+                {"id": "atom-cust-verify", "title": "Verification"},
+            ],
         }
 
         assert len(response["atoms"]) > 0
@@ -193,7 +191,7 @@ class TestRulesEndpoint:
                     "id": "rule-001",
                     "category": "structure",
                     "severity": "error",
-                    "message": "Atom must have valid ID format"
+                    "message": "Atom must have valid ID format",
                 }
             ]
         }
@@ -207,7 +205,7 @@ class TestRulesEndpoint:
             "category": "structure",
             "severity": "warning",
             "message": "Atom should have detailed summary",
-            "condition": {"field": "summary", "operator": "length_gt", "value": 50}
+            "condition": {"field": "summary", "operator": "length_gt", "value": 50},
         }
 
         required_fields = ["category", "severity", "message", "condition"]
@@ -220,10 +218,7 @@ class TestRulesEndpoint:
     def test_update_rule(self):
         """PUT /api/rules/:id should update rule"""
         rule_id = "rule-001"
-        updates = {
-            "severity": "error",
-            "message": "Updated message"
-        }
+        updates = {"severity": "error", "message": "Updated message"}
 
         assert isinstance(updates, dict)
 
@@ -240,37 +235,24 @@ class TestRuntimeEndpoint:
 
     def test_validate_atom(self):
         """POST /api/runtime/validate should validate atom"""
-        atom_to_validate = {
-            "id": "atom-test",
-            "type": "process",
-            "title": "Test Atom",
-            "summary": "Test summary"
-        }
+        atom_to_validate = {"id": "atom-test", "type": "process", "title": "Test Atom", "summary": "Test summary"}
 
-        expected_response = {
-            "valid": True,
-            "errors": [],
-            "warnings": []
-        }
+        expected_response = {"valid": True, "errors": [], "warnings": []}
 
         assert "valid" in expected_response
         assert isinstance(expected_response["errors"], list)
 
     def test_validate_invalid_atom(self):
         """POST /api/runtime/validate with invalid atom should return errors"""
-        invalid_atom = {
-            "id": "INVALID-ID",  # Uppercase not allowed
-            "type": "invalid_type",
-            "title": ""  # Empty title
-        }
+        invalid_atom = {"id": "INVALID-ID", "type": "invalid_type", "title": ""}  # Uppercase not allowed  # Empty title
 
         expected_response = {
             "valid": False,
             "errors": [
                 {"field": "id", "message": "ID must be lowercase"},
                 {"field": "type", "message": "Invalid atom type"},
-                {"field": "title", "message": "Title cannot be empty"}
-            ]
+                {"field": "title", "message": "Title cannot be empty"},
+            ],
         }
 
         assert expected_response["valid"] is False
@@ -282,9 +264,7 @@ class TestRuntimeEndpoint:
             "total": 150,
             "valid": 145,
             "invalid": 5,
-            "errors": [
-                {"atom_id": "atom-xyz", "error": "Invalid ID format"}
-            ]
+            "errors": [{"atom_id": "atom-xyz", "error": "Invalid ID format"}],
         }
 
         assert expected_response["total"] > 0
@@ -296,10 +276,7 @@ class TestRAGEndpoint:
 
     def test_query_rag(self):
         """POST /api/rag/query should return relevant results"""
-        query = {
-            "query": "What is customer KYC process?",
-            "limit": 5
-        }
+        query = {"query": "What is customer KYC process?", "limit": 5}
 
         expected_response = {
             "query": query["query"],
@@ -308,10 +285,10 @@ class TestRAGEndpoint:
                     "atom_id": "atom-cust-kyc",
                     "title": "Customer KYC",
                     "relevance_score": 0.95,
-                    "snippet": "Know Your Customer (KYC) process..."
+                    "snippet": "Know Your Customer (KYC) process...",
                 }
             ],
-            "total_results": 3
+            "total_results": 3,
         }
 
         assert "results" in expected_response
@@ -323,14 +300,10 @@ class TestRAGEndpoint:
         document = {
             "doc_id": "doc-001",
             "content": "This is document content to be indexed",
-            "metadata": {"type": "policy", "version": "1.0.0"}
+            "metadata": {"type": "policy", "version": "1.0.0"},
         }
 
-        expected_response = {
-            "status": "indexed",
-            "doc_id": document["doc_id"],
-            "chunks_created": 3
-        }
+        expected_response = {"status": "indexed", "doc_id": document["doc_id"], "chunks_created": 3}
 
         assert expected_response["status"] == "indexed"
         assert expected_response["chunks_created"] > 0
@@ -338,20 +311,9 @@ class TestRAGEndpoint:
     def test_rag_metrics(self):
         """GET /api/rag/metrics should return system metrics"""
         expected_response = {
-            "index_health": {
-                "atom_count": 150,
-                "document_count": 450,
-                "last_updated": "2025-01-15T10:00:00Z"
-            },
-            "performance": {
-                "avg_query_latency_ms": 45,
-                "p95_latency_ms": 120,
-                "p99_latency_ms": 250
-            },
-            "quality": {
-                "mrr": 0.82,
-                "accuracy": 0.87
-            }
+            "index_health": {"atom_count": 150, "document_count": 450, "last_updated": "2025-01-15T10:00:00Z"},
+            "performance": {"avg_query_latency_ms": 45, "p95_latency_ms": 120, "p99_latency_ms": 250},
+            "quality": {"mrr": 0.82, "accuracy": 0.87},
         }
 
         assert "index_health" in expected_response
@@ -366,20 +328,16 @@ class TestOptimizationEndpoint:
         """GET /api/optimization/report should return suggestions"""
         expected_response = {
             "total_suggestions": 12,
-            "by_category": {
-                "structure": 5,
-                "content": 4,
-                "relationships": 3
-            },
+            "by_category": {"structure": 5, "content": 4, "relationships": 3},
             "suggestions": [
                 {
                     "id": "opt-001",
                     "category": "structure",
                     "severity": "warning",
                     "atom_id": "atom-xyz",
-                    "message": "Atom summary is too brief"
+                    "message": "Atom summary is too brief",
                 }
-            ]
+            ],
         }
 
         assert "total_suggestions" in expected_response
@@ -387,16 +345,9 @@ class TestOptimizationEndpoint:
 
     def test_apply_suggestion(self):
         """POST /api/optimization/apply should apply suggestion"""
-        request = {
-            "suggestion_id": "opt-001",
-            "auto_fix": True
-        }
+        request = {"suggestion_id": "opt-001", "auto_fix": True}
 
-        expected_response = {
-            "status": "applied",
-            "suggestion_id": "opt-001",
-            "changes_made": ["Updated summary field"]
-        }
+        expected_response = {"status": "applied", "suggestion_id": "opt-001", "changes_made": ["Updated summary field"]}
 
         assert expected_response["status"] == "applied"
 
@@ -411,14 +362,8 @@ class TestLineageEndpoint:
         expected_response = {
             "atom_id": atom_id,
             "upstream": [],
-            "downstream": [
-                {
-                    "id": "atom-cust-verify",
-                    "title": "Customer Verification",
-                    "depth": 1
-                }
-            ],
-            "impact_count": 5
+            "downstream": [{"id": "atom-cust-verify", "title": "Customer Verification", "depth": 1}],
+            "impact_count": 5,
         }
 
         assert expected_response["atom_id"] == atom_id
@@ -434,9 +379,9 @@ class TestLineageEndpoint:
             "total_impacted": 5,
             "impacted_atoms": [
                 {"id": "atom-cust-verify", "type": "process"},
-                {"id": "atom-bo-review", "type": "process"}
+                {"id": "atom-bo-review", "type": "process"},
             ],
-            "impacted_modules": ["mod-customer-onboarding", "mod-back-office"]
+            "impacted_modules": ["mod-customer-onboarding", "mod-back-office"],
         }
 
         assert expected_response["total_impacted"] > 0
@@ -471,20 +416,14 @@ class TestErrorHandling:
     def test_rate_limit_exceeded(self):
         """Should return 429 when rate limit exceeded"""
         expected_status = 429
-        expected_error = {
-            "error": "Rate limit exceeded",
-            "retry_after": 60
-        }
+        expected_error = {"error": "Rate limit exceeded", "retry_after": 60}
 
         assert expected_status == 429
 
     def test_internal_server_error(self):
         """Should return 500 for server errors"""
         expected_status = 500
-        expected_error = {
-            "error": "Internal server error",
-            "request_id": "req-12345"
-        }
+        expected_error = {"error": "Internal server error", "request_id": "req-12345"}
 
         assert expected_status == 500
 
@@ -507,12 +446,7 @@ class TestRequestValidation:
 
     def test_validate_query_parameters(self):
         """Should validate query parameter types"""
-        params = {
-            "type": "process",
-            "status": "active",
-            "limit": "10",
-            "offset": "0"
-        }
+        params = {"type": "process", "status": "active", "limit": "10", "offset": "0"}
 
         # Validate types
         assert params["type"] in ["process", "policy", "requirement", "design"]
@@ -547,10 +481,7 @@ class TestResponseFormatting:
         response = {
             "id": "atom-001",
             "title": "Test Atom",
-            "metadata": {
-                "created_at": "2025-01-15T10:00:00Z",
-                "version": "1.0.0"
-            }
+            "metadata": {"created_at": "2025-01-15T10:00:00Z", "version": "1.0.0"},
         }
 
         json_str = json.dumps(response)
@@ -564,7 +495,7 @@ class TestResponseFormatting:
         error_responses = [
             {"error": "Not found", "status": 404},
             {"error": "Invalid input", "status": 400},
-            {"error": "Server error", "status": 500}
+            {"error": "Server error", "status": 500},
         ]
 
         for error in error_responses:

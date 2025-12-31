@@ -9,11 +9,12 @@ Tests the document indexing feature including:
 - Document search and retrieval
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, mock_open
-from pathlib import Path
 import json
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, mock_open, patch
+
+import pytest
 
 
 class TestDocumentIndexing:
@@ -25,7 +26,7 @@ class TestDocumentIndexing:
 
         Verifies that a separate collection is created for documents.
         """
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_or_create_collection.return_value = mock_collection
@@ -48,10 +49,10 @@ class TestDocumentIndexing:
             "title": "Customer Onboarding SOP",
             "content": "Standard operating procedure for customer onboarding...",
             "atom_ids": ["atom-cust-kyc", "atom-cust-verify"],
-            "published_at": "2025-12-23T10:00:00Z"
+            "published_at": "2025-12-23T10:00:00Z",
         }
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_or_create_collection.return_value = mock_collection
@@ -61,11 +62,9 @@ class TestDocumentIndexing:
             mock_collection.add(
                 ids=[mock_document["id"]],
                 documents=[f"{mock_document['title']}\n\n{mock_document['content']}"],
-                metadatas=[{
-                    "type": "document",
-                    "title": mock_document["title"],
-                    "atom_count": len(mock_document["atom_ids"])
-                }]
+                metadatas=[
+                    {"type": "document", "title": mock_document["title"], "atom_count": len(mock_document["atom_ids"])}
+                ],
             )
 
             # Verify add was called
@@ -85,12 +84,12 @@ class TestDocumentIndexing:
                 "id": f"doc-sop-{i:03d}",
                 "title": f"SOP Document {i}",
                 "content": f"Content for document {i}",
-                "atom_ids": []
+                "atom_ids": [],
             }
             for i in range(10)
         ]
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_or_create_collection.return_value = mock_collection
@@ -115,7 +114,7 @@ class TestDocumentIndexing:
 
         Verifies that document count is accurately tracked.
         """
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_collection.count.return_value = 15
@@ -135,7 +134,7 @@ class TestDocumentIndexing:
         doc_id = "doc-sop-001"
         updated_content = "Updated SOP content with new procedures..."
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_or_create_collection.return_value = mock_collection
@@ -144,9 +143,7 @@ class TestDocumentIndexing:
             # Simulate update (delete + add)
             mock_collection.delete(ids=[doc_id])
             mock_collection.add(
-                ids=[doc_id],
-                documents=[updated_content],
-                metadatas=[{"type": "document", "title": "Updated SOP"}]
+                ids=[doc_id], documents=[updated_content], metadatas=[{"type": "document", "title": "Updated SOP"}]
             )
 
             # Verify both operations
@@ -161,16 +158,18 @@ class TestDocumentIndexing:
         """
         query = "customer onboarding procedures"
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_collection.query.return_value = {
                 "ids": [["doc-sop-001", "doc-sop-002"]],
                 "distances": [[0.234, 0.456]],
-                "metadatas": [[
-                    {"type": "document", "title": "Customer Onboarding SOP"},
-                    {"type": "document", "title": "KYC Procedures"}
-                ]]
+                "metadatas": [
+                    [
+                        {"type": "document", "title": "Customer Onboarding SOP"},
+                        {"type": "document", "title": "KYC Procedures"},
+                    ]
+                ],
             }
             mock_client.get_collection.return_value = mock_collection
             mock_client_class.return_value = mock_client
@@ -193,10 +192,10 @@ class TestDocumentIndexing:
             "id": "doc-sop-001",
             "title": "Customer Onboarding SOP",
             "content": "SOP content...",
-            "atom_ids": ["atom-cust-kyc", "atom-cust-verify", "atom-cust-approve"]
+            "atom_ids": ["atom-cust-kyc", "atom-cust-verify", "atom-cust-approve"],
         }
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_or_create_collection.return_value = mock_collection
@@ -206,12 +205,14 @@ class TestDocumentIndexing:
             mock_collection.add(
                 ids=[mock_document["id"]],
                 documents=[mock_document["content"]],
-                metadatas=[{
-                    "type": "document",
-                    "title": mock_document["title"],
-                    "atom_ids": json.dumps(mock_document["atom_ids"]),
-                    "atom_count": len(mock_document["atom_ids"])
-                }]
+                metadatas=[
+                    {
+                        "type": "document",
+                        "title": mock_document["title"],
+                        "atom_ids": json.dumps(mock_document["atom_ids"]),
+                        "atom_count": len(mock_document["atom_ids"]),
+                    }
+                ],
             )
 
             # Verify metadata includes atom references
@@ -228,16 +229,11 @@ class TestDocumentIndexing:
         """
         state_file_content = {
             "last_update": "2025-12-22T10:00:00Z",
-            "indexed_documents": {
-                "doc-sop-001": {
-                    "hash": "abc123",
-                    "last_modified": "2025-12-21T10:00:00Z"
-                }
-            }
+            "indexed_documents": {"doc-sop-001": {"hash": "abc123", "last_modified": "2025-12-21T10:00:00Z"}},
         }
 
-        with patch('builtins.open', mock_open(read_data=json.dumps(state_file_content))):
-            with patch('os.path.exists', return_value=True):
+        with patch("builtins.open", mock_open(read_data=json.dumps(state_file_content))):
+            with patch("os.path.exists", return_value=True):
                 # Simulate checking for changes
                 current_hash = "xyz789"  # Different hash = changed
                 needs_update = current_hash != state_file_content["indexed_documents"]["doc-sop-001"]["hash"]
@@ -252,7 +248,7 @@ class TestDocumentIndexing:
         """
         doc_id = "doc-sop-001"
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_collection.return_value = mock_collection
@@ -272,23 +268,19 @@ class TestDocumentIndexing:
         """
         query = "compliance procedures"
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_collection.query.return_value = {
                 "ids": [["doc-sop-001"]],
                 "distances": [[0.234]],
-                "metadatas": [[{"type": "document", "title": "Compliance SOP"}]]
+                "metadatas": [[{"type": "document", "title": "Compliance SOP"}]],
             }
             mock_client.get_collection.return_value = mock_collection
             mock_client_class.return_value = mock_client
 
             # Execute filtered search
-            results = mock_collection.query(
-                query_texts=[query],
-                n_results=5,
-                where={"type": "document"}
-            )
+            results = mock_collection.query(query_texts=[query], n_results=5, where={"type": "document"})
 
             # Verify filter was applied
             call_args = mock_collection.query.call_args
@@ -312,7 +304,7 @@ class TestDocumentIndexing:
             else:
                 return [[0.8, 0.9, 0.7]]
 
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_client.get_or_create_collection.return_value = mock_collection
@@ -335,7 +327,7 @@ class TestDocumentIndexingRAGIntegration:
         """
         from api.routes.rag import entity_rag
 
-        with patch('api.routes.rag.init_chroma_client') as mock_init:
+        with patch("api.routes.rag.init_chroma_client") as mock_init:
             mock_client = MagicMock()
 
             # Setup mock atom collection
@@ -343,7 +335,7 @@ class TestDocumentIndexingRAGIntegration:
             mock_atom_collection.query.return_value = {
                 "ids": [["atom-cust-001"]],
                 "distances": [[0.3]],
-                "metadatas": [[{"type": "PROCESS"}]]
+                "metadatas": [[{"type": "PROCESS"}]],
             }
 
             # Setup mock document collection
@@ -351,7 +343,7 @@ class TestDocumentIndexingRAGIntegration:
             mock_doc_collection.query.return_value = {
                 "ids": [["doc-sop-001"]],
                 "distances": [[0.25]],
-                "metadatas": [[{"type": "document", "title": "Customer SOP"}]]
+                "metadatas": [[{"type": "document", "title": "Customer SOP"}]],
             }
 
             def get_collection_side_effect(name):
@@ -374,7 +366,7 @@ class TestDocumentIndexingRAGIntegration:
         """
         mock_sources = [
             {"id": "atom-cust-001", "type": "PROCESS", "distance": 0.3},
-            {"id": "doc-sop-001", "type": "document", "distance": 0.25}
+            {"id": "doc-sop-001", "type": "document", "distance": 0.25},
         ]
 
         # Verify that document sources are marked differently
@@ -391,7 +383,7 @@ class TestDocumentIndexingRAGIntegration:
         mock_document = {
             "id": "doc-sop-001",
             "title": "Customer Onboarding SOP",
-            "content": "Step 1: Verify identity...\nStep 2: Check compliance..."
+            "content": "Step 1: Verify identity...\nStep 2: Check compliance...",
         }
 
         # Context string should include document content
@@ -409,7 +401,7 @@ class TestDocumentIndexingErrorHandling:
 
         Verifies graceful error handling for non-existent documents.
         """
-        with patch('builtins.open', side_effect=FileNotFoundError):
+        with patch("builtins.open", side_effect=FileNotFoundError):
             with pytest.raises(FileNotFoundError):
                 # Should raise error for missing file
                 with open("nonexistent-doc.json", "r") as f:
@@ -423,7 +415,7 @@ class TestDocumentIndexingErrorHandling:
         """
         malformed_json = "{invalid json content"
 
-        with patch('builtins.open', mock_open(read_data=malformed_json)):
+        with patch("builtins.open", mock_open(read_data=malformed_json)):
             with pytest.raises(json.JSONDecodeError):
                 with open("malformed.json", "r") as f:
                     json.load(f)
@@ -434,7 +426,7 @@ class TestDocumentIndexingErrorHandling:
 
         Verifies that embedding errors don't crash indexing.
         """
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_collection = MagicMock()
             mock_collection.add.side_effect = Exception("Embedding error")
@@ -452,7 +444,7 @@ class TestDocumentIndexingErrorHandling:
 
         Verifies that collection errors are caught.
         """
-        with patch('chromadb.PersistentClient') as mock_client_class:
+        with patch("chromadb.PersistentClient") as mock_client_class:
             mock_client = MagicMock()
             mock_client.get_or_create_collection.side_effect = Exception("Collection error")
             mock_client_class.return_value = mock_client

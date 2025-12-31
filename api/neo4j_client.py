@@ -6,16 +6,18 @@ implementing traversal patterns defined in the ontology.yaml file.
 """
 
 from neo4j import GraphDatabase
+
 try:
     # Older driver versions exposed ConnectionError/DatabaseError names
     from neo4j.exceptions import ConnectionError, DatabaseError
 except Exception:
     # Newer drivers use different exception classes; map common names for compatibility
-    from neo4j.exceptions import ServiceUnavailable, Neo4jError
+    from neo4j.exceptions import Neo4jError, ServiceUnavailable
+
     ConnectionError = ServiceUnavailable
     DatabaseError = Neo4jError
 import os
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class Neo4jClient:
@@ -131,9 +133,7 @@ class Neo4jClient:
                 result = session.run(query, atom_id=atom_id)
                 return [self._serialize_record(record) for record in result]
         except DatabaseError as e:
-            raise DatabaseError(
-                f"Error finding upstream dependencies for {atom_id}: {e}"
-            )
+            raise DatabaseError(f"Error finding upstream dependencies for {atom_id}: {e}")
 
     def find_downstream_impacts(
         self,
@@ -174,9 +174,7 @@ class Neo4jClient:
                 result = session.run(query, atom_id=atom_id)
                 return [self._serialize_record(record) for record in result]
         except DatabaseError as e:
-            raise DatabaseError(
-                f"Error finding downstream impacts for {atom_id}: {e}"
-            )
+            raise DatabaseError(f"Error finding downstream impacts for {atom_id}: {e}")
 
     def find_full_context(
         self,
@@ -216,10 +214,7 @@ class Neo4jClient:
         try:
             with self.driver.session() as session:
                 # Get the center atom
-                center_result = session.run(
-                    "MATCH (a:Atom {id: $atom_id}) RETURN a",
-                    atom_id=atom_id
-                )
+                center_result = session.run("MATCH (a:Atom {id: $atom_id}) RETURN a", atom_id=atom_id)
                 center_records = center_result.data()
                 if not center_records:
                     return {"error": f"Atom {atom_id} not found", "atom": None}
@@ -236,9 +231,7 @@ class Neo4jClient:
                     "total_related": len(related_atoms),
                 }
         except DatabaseError as e:
-            raise DatabaseError(
-                f"Error finding full context for {atom_id}: {e}"
-            )
+            raise DatabaseError(f"Error finding full context for {atom_id}: {e}")
 
     def find_implementation_chain(
         self,
@@ -263,10 +256,7 @@ class Neo4jClient:
         try:
             with self.driver.session() as session:
                 # Find the requirement
-                req_result = session.run(
-                    "MATCH (r:Atom {id: $id}) RETURN r",
-                    id=requirement_id
-                )
+                req_result = session.run("MATCH (r:Atom {id: $id}) RETURN r", id=requirement_id)
                 req_data = req_result.data()
                 if not req_data:
                     return {"error": f"Requirement {requirement_id} not found"}
@@ -275,7 +265,7 @@ class Neo4jClient:
                 design_result = session.run(
                     """MATCH (d:Atom)-[impl:implements]->(r:Atom {id: $id})
                        RETURN DISTINCT d""",
-                    id=requirement_id
+                    id=requirement_id,
                 )
 
                 # Find procedures that implement the designs
@@ -283,7 +273,7 @@ class Neo4jClient:
                     """MATCH (p:Atom)-[impl:implements]->(d:Atom)
                        -[impl2:implements]->(r:Atom {id: $id})
                        RETURN DISTINCT p""",
-                    id=requirement_id
+                    id=requirement_id,
                 )
 
                 # Find validations that validate the procedures
@@ -292,7 +282,7 @@ class Neo4jClient:
                        -[impl:implements]->(d:Atom)
                        -[impl2:implements]->(r:Atom {id: $id})
                        RETURN DISTINCT v""",
-                    id=requirement_id
+                    id=requirement_id,
                 )
 
                 return {
@@ -302,9 +292,7 @@ class Neo4jClient:
                     "validations": [self._serialize_record(r) for r in val_result.data()],
                 }
         except DatabaseError as e:
-            raise DatabaseError(
-                f"Error tracing implementation chain for {requirement_id}: {e}"
-            )
+            raise DatabaseError(f"Error tracing implementation chain for {requirement_id}: {e}")
 
     def find_by_type(
         self,
@@ -336,9 +324,7 @@ class Neo4jClient:
                 result = session.run(query, atom_type=atom_type.lower(), limit=limit)
                 return [self._serialize_record(record) for record in result]
         except DatabaseError as e:
-            raise DatabaseError(
-                f"Error finding atoms of type {atom_type}: {e}"
-            )
+            raise DatabaseError(f"Error finding atoms of type {atom_type}: {e}")
 
     def count_atoms(self) -> Dict[str, int]:
         """
@@ -358,8 +344,7 @@ class Neo4jClient:
 
                 # Count by type
                 by_type_result = session.run(
-                    "MATCH (a:Atom) RETURN a.type as type, count(a) as count "
-                    "ORDER BY count DESC"
+                    "MATCH (a:Atom) RETURN a.type as type, count(a) as count " "ORDER BY count DESC"
                 )
                 by_type = {record["type"]: record["count"] for record in by_type_result}
 
@@ -428,22 +413,19 @@ class Neo4jClient:
         Returns:
             Serializable dictionary representation
         """
-        if hasattr(record, 'items'):
+        if hasattr(record, "items"):
             # It's a dictionary-like record
             result = {}
             for key, value in record.items():
-                if hasattr(value, 'items'):
+                if hasattr(value, "items"):
                     # It's a node
                     result[key] = dict(value)
                 elif isinstance(value, (list, tuple)):
-                    result[key] = [
-                        dict(v) if hasattr(v, 'items') else v
-                        for v in value
-                    ]
+                    result[key] = [dict(v) if hasattr(v, "items") else v for v in value]
                 else:
                     result[key] = value
             return result
-        elif hasattr(record, '_properties'):
+        elif hasattr(record, "_properties"):
             # It's a Neo4j Node
             return dict(record)
         else:

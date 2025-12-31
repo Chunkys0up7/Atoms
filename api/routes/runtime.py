@@ -3,10 +3,11 @@ Dynamic Process Rewriting Engine
 Adapts workflows at runtime based on risk, compliance, and context
 """
 
+import copy
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import copy
 
 router = APIRouter(prefix="/api/runtime", tags=["runtime"])
 
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/api/runtime", tags=["runtime"])
 # Request/Response Models
 class RuntimeContext(BaseModel):
     """Context for runtime evaluation"""
+
     customer_data: Optional[Dict[str, Any]] = None
     transaction_data: Optional[Dict[str, Any]] = None
     risk_flags: List[str] = []
@@ -22,6 +24,7 @@ class RuntimeContext(BaseModel):
 
 class PhaseModification(BaseModel):
     """Modification applied to a phase"""
+
     action: str  # 'insert', 'remove', 'modify'
     phase_id: str
     reason: str
@@ -30,6 +33,7 @@ class PhaseModification(BaseModel):
 
 class JourneyEvaluation(BaseModel):
     """Result of runtime journey evaluation"""
+
     original_journey_id: str
     modified_journey: Dict[str, Any]
     modifications: List[PhaseModification]
@@ -65,13 +69,13 @@ class LowCreditScoreRule(ProcessRewriteRule):
             rule_id="rule-low-credit",
             name="Low Credit Score Manual Review",
             description="Requires manual review for credit scores below 620",
-            priority=9
+            priority=9,
         )
 
     def evaluate(self, journey: Dict[str, Any], context: RuntimeContext) -> bool:
         if not context.customer_data:
             return False
-        credit_score = context.customer_data.get('credit_score', 850)
+        credit_score = context.customer_data.get("credit_score", 850)
         return credit_score < 620
 
     def apply(self, journey: Dict[str, Any], context: RuntimeContext) -> tuple[Dict[str, Any], PhaseModification]:
@@ -82,19 +86,19 @@ class LowCreditScoreRule(ProcessRewriteRule):
             "description": "Enhanced review required due to credit risk",
             "modules": ["module-credit-analysis", "module-risk-assessment"],
             "targetDurationDays": 2,
-            "criticality": "HIGH"
+            "criticality": "HIGH",
         }
 
         modified = copy.deepcopy(journey)
         # Insert after phase 1 (typically initial assessment)
-        if len(modified.get('phases', [])) > 1:
-            modified['phases'].insert(1, review_phase['id'])
+        if len(modified.get("phases", [])) > 1:
+            modified["phases"].insert(1, review_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=review_phase['id'],
+            phase_id=review_phase["id"],
             reason=f"Credit score {context.customer_data.get('credit_score')} below threshold (620)",
-            criticality="HIGH"
+            criticality="HIGH",
         )
 
         return modified, modification
@@ -108,13 +112,13 @@ class HighValueTransactionRule(ProcessRewriteRule):
             rule_id="rule-high-value",
             name="Senior Approval for High Value",
             description="Requires senior management approval for transactions over $1M",
-            priority=10
+            priority=10,
         )
 
     def evaluate(self, journey: Dict[str, Any], context: RuntimeContext) -> bool:
         if not context.transaction_data:
             return False
-        amount = context.transaction_data.get('amount', 0)
+        amount = context.transaction_data.get("amount", 0)
         return amount > 1_000_000
 
     def apply(self, journey: Dict[str, Any], context: RuntimeContext) -> tuple[Dict[str, Any], PhaseModification]:
@@ -124,19 +128,19 @@ class HighValueTransactionRule(ProcessRewriteRule):
             "description": "Required for transactions exceeding $1M",
             "modules": ["module-exec-review", "module-risk-committee"],
             "targetDurationDays": 3,
-            "criticality": "CRITICAL"
+            "criticality": "CRITICAL",
         }
 
         modified = copy.deepcopy(journey)
         # Insert before final approval
-        if len(modified.get('phases', [])) > 2:
-            modified['phases'].insert(-1, approval_phase['id'])
+        if len(modified.get("phases", [])) > 2:
+            modified["phases"].insert(-1, approval_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=approval_phase['id'],
+            phase_id=approval_phase["id"],
             reason=f"Transaction amount ${context.transaction_data.get('amount'):,.2f} exceeds $1M threshold",
-            criticality="CRITICAL"
+            criticality="CRITICAL",
         )
 
         return modified, modification
@@ -150,12 +154,12 @@ class ComplianceCheckRule(ProcessRewriteRule):
             rule_id="rule-compliance",
             name="Regulatory Compliance Checks",
             description="Adds compliance verification for regulated transactions",
-            priority=8
+            priority=8,
         )
 
     def evaluate(self, journey: Dict[str, Any], context: RuntimeContext) -> bool:
         # Check if AML or KYC compliance required
-        return 'AML' in context.compliance_requirements or 'KYC' in context.compliance_requirements
+        return "AML" in context.compliance_requirements or "KYC" in context.compliance_requirements
 
     def apply(self, journey: Dict[str, Any], context: RuntimeContext) -> tuple[Dict[str, Any], PhaseModification]:
         compliance_phase = {
@@ -164,18 +168,18 @@ class ComplianceCheckRule(ProcessRewriteRule):
             "description": f"Required checks: {', '.join(context.compliance_requirements)}",
             "modules": ["module-aml-check", "module-kyc-verification"],
             "targetDurationDays": 1,
-            "criticality": "HIGH"
+            "criticality": "HIGH",
         }
 
         modified = copy.deepcopy(journey)
         # Insert at beginning for compliance
-        modified['phases'].insert(0, compliance_phase['id'])
+        modified["phases"].insert(0, compliance_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=compliance_phase['id'],
+            phase_id=compliance_phase["id"],
             reason=f"Compliance requirements: {', '.join(context.compliance_requirements)}",
-            criticality="HIGH"
+            criticality="HIGH",
         )
 
         return modified, modification
@@ -189,11 +193,11 @@ class FraudRiskRule(ProcessRewriteRule):
             rule_id="rule-fraud",
             name="Fraud Detection Enhancement",
             description="Adds fraud screening when risk flags are present",
-            priority=9
+            priority=9,
         )
 
     def evaluate(self, journey: Dict[str, Any], context: RuntimeContext) -> bool:
-        fraud_flags = ['suspicious_activity', 'identity_mismatch', 'velocity_check_failed']
+        fraud_flags = ["suspicious_activity", "identity_mismatch", "velocity_check_failed"]
         return any(flag in context.risk_flags for flag in fraud_flags)
 
     def apply(self, journey: Dict[str, Any], context: RuntimeContext) -> tuple[Dict[str, Any], PhaseModification]:
@@ -203,18 +207,18 @@ class FraudRiskRule(ProcessRewriteRule):
             "description": f"Triggered by: {', '.join([f for f in context.risk_flags if f in ['suspicious_activity', 'identity_mismatch', 'velocity_check_failed']])}",
             "modules": ["module-fraud-screening", "module-identity-verification"],
             "targetDurationDays": 2,
-            "criticality": "CRITICAL"
+            "criticality": "CRITICAL",
         }
 
         modified = copy.deepcopy(journey)
         # Insert early in process
-        modified['phases'].insert(0, fraud_phase['id'])
+        modified["phases"].insert(0, fraud_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=fraud_phase['id'],
+            phase_id=fraud_phase["id"],
             reason=f"Risk flags detected: {', '.join(context.risk_flags)}",
-            criticality="CRITICAL"
+            criticality="CRITICAL",
         )
 
         return modified, modification
@@ -228,13 +232,13 @@ class FirstTimeBorrowerRule(ProcessRewriteRule):
             rule_id="rule-first-time",
             name="First-Time Borrower Support",
             description="Adds education and documentation support for first-time borrowers",
-            priority=6
+            priority=6,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.customer_data:
             return False
-        return context.customer_data.get('first_time_borrower', False)
+        return context.customer_data.get("first_time_borrower", False)
 
     def apply(self, journey, context):
         education_phase = {
@@ -243,19 +247,19 @@ class FirstTimeBorrowerRule(ProcessRewriteRule):
             "description": "Additional support for first-time borrowers",
             "modules": ["module-education", "module-doc-assistance"],
             "targetDurationDays": 1,
-            "criticality": "MEDIUM"
+            "criticality": "MEDIUM",
         }
 
         modified = copy.deepcopy(journey)
         # Insert early, after application
-        if len(modified.get('phases', [])) > 0:
-            modified['phases'].insert(1, education_phase['id'])
+        if len(modified.get("phases", [])) > 0:
+            modified["phases"].insert(1, education_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=education_phase['id'],
+            phase_id=education_phase["id"],
             reason="First-time borrower requires additional education and support",
-            criticality="MEDIUM"
+            criticality="MEDIUM",
         )
 
         return modified, modification
@@ -269,13 +273,13 @@ class HighDebtToIncomeRule(ProcessRewriteRule):
             rule_id="rule-high-dti",
             name="High DTI Ratio Review",
             description="Requires debt counseling review for DTI > 43%",
-            priority=8
+            priority=8,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.customer_data:
             return False
-        dti = context.customer_data.get('debt_to_income_ratio', 0)
+        dti = context.customer_data.get("debt_to_income_ratio", 0)
         return dti > 0.43
 
     def apply(self, journey, context):
@@ -285,19 +289,19 @@ class HighDebtToIncomeRule(ProcessRewriteRule):
             "description": f"High DTI ratio ({context.customer_data.get('debt_to_income_ratio', 0):.1%}) requires review",
             "modules": ["module-debt-analysis", "module-underwriting-exception"],
             "targetDurationDays": 2,
-            "criticality": "HIGH"
+            "criticality": "HIGH",
         }
 
         modified = copy.deepcopy(journey)
         # Insert after assessment
-        if len(modified.get('phases', [])) > 2:
-            modified['phases'].insert(2, dti_phase['id'])
+        if len(modified.get("phases", [])) > 2:
+            modified["phases"].insert(2, dti_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=dti_phase['id'],
+            phase_id=dti_phase["id"],
             reason=f"DTI ratio {context.customer_data.get('debt_to_income_ratio', 0):.1%} exceeds 43% threshold",
-            criticality="HIGH"
+            criticality="HIGH",
         )
 
         return modified, modification
@@ -311,13 +315,13 @@ class SelfEmployedIncomeRule(ProcessRewriteRule):
             rule_id="rule-self-employed",
             name="Self-Employed Income Verification",
             description="Enhanced verification for self-employed income",
-            priority=7
+            priority=7,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.customer_data:
             return False
-        return context.customer_data.get('employment_type') == 'SELF_EMPLOYED'
+        return context.customer_data.get("employment_type") == "SELF_EMPLOYED"
 
     def apply(self, journey, context):
         verification_phase = {
@@ -326,19 +330,19 @@ class SelfEmployedIncomeRule(ProcessRewriteRule):
             "description": "Additional documentation and verification for self-employed income",
             "modules": ["module-tax-return-analysis", "module-business-verification"],
             "targetDurationDays": 3,
-            "criticality": "MEDIUM"
+            "criticality": "MEDIUM",
         }
 
         modified = copy.deepcopy(journey)
         # Insert after initial income verification
-        if len(modified.get('phases', [])) > 1:
-            modified['phases'].insert(2, verification_phase['id'])
+        if len(modified.get("phases", [])) > 1:
+            modified["phases"].insert(2, verification_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=verification_phase['id'],
+            phase_id=verification_phase["id"],
             reason="Self-employed income requires enhanced verification",
-            criticality="MEDIUM"
+            criticality="MEDIUM",
         )
 
         return modified, modification
@@ -352,14 +356,14 @@ class PropertyTypeRiskRule(ProcessRewriteRule):
             rule_id="rule-property-risk",
             name="Non-Standard Property Review",
             description="Enhanced appraisal for condos, multi-family, or rural properties",
-            priority=7
+            priority=7,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.transaction_data:
             return False
-        property_type = context.transaction_data.get('property_type', 'SINGLE_FAMILY')
-        risky_types = ['CONDO', 'MULTI_FAMILY', 'RURAL', 'MANUFACTURED']
+        property_type = context.transaction_data.get("property_type", "SINGLE_FAMILY")
+        risky_types = ["CONDO", "MULTI_FAMILY", "RURAL", "MANUFACTURED"]
         return property_type in risky_types
 
     def apply(self, journey, context):
@@ -369,19 +373,19 @@ class PropertyTypeRiskRule(ProcessRewriteRule):
             "description": f"Additional review for {context.transaction_data.get('property_type')} property",
             "modules": ["module-appraisal-review", "module-comparable-analysis"],
             "targetDurationDays": 2,
-            "criticality": "MEDIUM"
+            "criticality": "MEDIUM",
         }
 
         modified = copy.deepcopy(journey)
         # Insert before final approval
-        if len(modified.get('phases', [])) > 2:
-            modified['phases'].insert(-1, appraisal_phase['id'])
+        if len(modified.get("phases", [])) > 2:
+            modified["phases"].insert(-1, appraisal_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=appraisal_phase['id'],
+            phase_id=appraisal_phase["id"],
             reason=f"Property type {context.transaction_data.get('property_type')} requires enhanced appraisal",
-            criticality="MEDIUM"
+            criticality="MEDIUM",
         )
 
         return modified, modification
@@ -395,15 +399,15 @@ class CashOutRefinanceRule(ProcessRewriteRule):
             rule_id="rule-cash-out",
             name="Cash-Out Refinance Review",
             description="Additional review for cash-out refinance transactions",
-            priority=7
+            priority=7,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.transaction_data:
             return False
-        loan_purpose = context.transaction_data.get('loan_purpose', 'PURCHASE')
-        cash_out = context.transaction_data.get('cash_out_amount', 0)
-        return loan_purpose == 'REFINANCE' and cash_out > 0
+        loan_purpose = context.transaction_data.get("loan_purpose", "PURCHASE")
+        cash_out = context.transaction_data.get("cash_out_amount", 0)
+        return loan_purpose == "REFINANCE" and cash_out > 0
 
     def apply(self, journey, context):
         equity_phase = {
@@ -412,19 +416,19 @@ class CashOutRefinanceRule(ProcessRewriteRule):
             "description": f"Review cash-out amount ${context.transaction_data.get('cash_out_amount', 0):,.0f}",
             "modules": ["module-equity-analysis", "module-ltv-verification"],
             "targetDurationDays": 1,
-            "criticality": "MEDIUM"
+            "criticality": "MEDIUM",
         }
 
         modified = copy.deepcopy(journey)
         # Insert after assessment
-        if len(modified.get('phases', [])) > 1:
-            modified['phases'].insert(2, equity_phase['id'])
+        if len(modified.get("phases", [])) > 1:
+            modified["phases"].insert(2, equity_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=equity_phase['id'],
+            phase_id=equity_phase["id"],
             reason=f"Cash-out refinance with ${context.transaction_data.get('cash_out_amount', 0):,.0f} requires equity review",
-            criticality="MEDIUM"
+            criticality="MEDIUM",
         )
 
         return modified, modification
@@ -438,11 +442,11 @@ class ExpiredDocumentsRule(ProcessRewriteRule):
             rule_id="rule-doc-expiration",
             name="Document Expiration Check",
             description="Re-verification when documents are close to expiration",
-            priority=8
+            priority=8,
         )
 
     def evaluate(self, journey, context) -> bool:
-        return 'documents_expiring' in context.risk_flags
+        return "documents_expiring" in context.risk_flags
 
     def apply(self, journey, context):
         reverify_phase = {
@@ -451,19 +455,19 @@ class ExpiredDocumentsRule(ProcessRewriteRule):
             "description": "Update expiring documents before closing",
             "modules": ["module-doc-update", "module-reverification"],
             "targetDurationDays": 1,
-            "criticality": "HIGH"
+            "criticality": "HIGH",
         }
 
         modified = copy.deepcopy(journey)
         # Insert before final approval
-        if len(modified.get('phases', [])) > 2:
-            modified['phases'].insert(-1, reverify_phase['id'])
+        if len(modified.get("phases", [])) > 2:
+            modified["phases"].insert(-1, reverify_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=reverify_phase['id'],
+            phase_id=reverify_phase["id"],
             reason="Documents nearing expiration require re-verification",
-            criticality="HIGH"
+            criticality="HIGH",
         )
 
         return modified, modification
@@ -477,11 +481,11 @@ class LowAppraisalRule(ProcessRewriteRule):
             rule_id="rule-low-appraisal",
             name="Low Appraisal Handling",
             description="Add renegotiation when appraisal < purchase price",
-            priority=9
+            priority=9,
         )
 
     def evaluate(self, journey, context) -> bool:
-        return 'appraisal_below_value' in context.risk_flags
+        return "appraisal_below_value" in context.risk_flags
 
     def apply(self, journey, context):
         renegotiation_phase = {
@@ -490,19 +494,19 @@ class LowAppraisalRule(ProcessRewriteRule):
             "description": "Appraisal below purchase price requires renegotiation",
             "modules": ["module-price-negotiation", "module-contract-amendment"],
             "targetDurationDays": 3,
-            "criticality": "HIGH"
+            "criticality": "HIGH",
         }
 
         modified = copy.deepcopy(journey)
         # Insert before approval
-        if len(modified.get('phases', [])) > 2:
-            modified['phases'].insert(-2, renegotiation_phase['id'])
+        if len(modified.get("phases", [])) > 2:
+            modified["phases"].insert(-2, renegotiation_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=renegotiation_phase['id'],
+            phase_id=renegotiation_phase["id"],
             reason="Appraisal value below purchase price requires renegotiation",
-            criticality="HIGH"
+            criticality="HIGH",
         )
 
         return modified, modification
@@ -516,38 +520,38 @@ class StateSpecificRequirementsRule(ProcessRewriteRule):
             rule_id="rule-state-compliance",
             name="State-Specific Requirements",
             description="Add compliance phases for states with special requirements",
-            priority=8
+            priority=8,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.transaction_data:
             return False
         # States with special requirements
-        special_states = ['NY', 'TX', 'CA', 'NV']
-        state = context.transaction_data.get('property_state', '')
+        special_states = ["NY", "TX", "CA", "NV"]
+        state = context.transaction_data.get("property_state", "")
         return state in special_states
 
     def apply(self, journey, context):
-        state = context.transaction_data.get('property_state', '')
+        state = context.transaction_data.get("property_state", "")
         compliance_phase = {
             "id": f"phase-{state.lower()}-compliance",
             "name": f"{state} State Compliance",
             "description": f"State-specific requirements for {state}",
             "modules": [f"module-{state.lower()}-disclosure", "module-state-regulations"],
             "targetDurationDays": 1,
-            "criticality": "HIGH"
+            "criticality": "HIGH",
         }
 
         modified = copy.deepcopy(journey)
         # Insert early in process
-        if len(modified.get('phases', [])) > 0:
-            modified['phases'].insert(1, compliance_phase['id'])
+        if len(modified.get("phases", [])) > 0:
+            modified["phases"].insert(1, compliance_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=compliance_phase['id'],
+            phase_id=compliance_phase["id"],
             reason=f"Property in {state} requires state-specific compliance",
-            criticality="HIGH"
+            criticality="HIGH",
         )
 
         return modified, modification
@@ -561,13 +565,13 @@ class NonResidentRule(ProcessRewriteRule):
             rule_id="rule-non-resident",
             name="Non-Resident Verification",
             description="Enhanced verification for non-resident borrowers",
-            priority=7
+            priority=7,
         )
 
     def evaluate(self, journey, context) -> bool:
         if not context.customer_data:
             return False
-        return context.customer_data.get('residency_status') == 'NON_RESIDENT'
+        return context.customer_data.get("residency_status") == "NON_RESIDENT"
 
     def apply(self, journey, context):
         verification_phase = {
@@ -576,19 +580,19 @@ class NonResidentRule(ProcessRewriteRule):
             "description": "Additional documentation for non-resident borrowers",
             "modules": ["module-visa-verification", "module-international-credit"],
             "targetDurationDays": 3,
-            "criticality": "MEDIUM"
+            "criticality": "MEDIUM",
         }
 
         modified = copy.deepcopy(journey)
         # Insert early
-        if len(modified.get('phases', [])) > 0:
-            modified['phases'].insert(1, verification_phase['id'])
+        if len(modified.get("phases", [])) > 0:
+            modified["phases"].insert(1, verification_phase["id"])
 
         modification = PhaseModification(
             action="insert",
-            phase_id=verification_phase['id'],
+            phase_id=verification_phase["id"],
             reason="Non-resident status requires enhanced verification",
-            criticality="MEDIUM"
+            criticality="MEDIUM",
         )
 
         return modified, modification
@@ -597,8 +601,8 @@ class NonResidentRule(ProcessRewriteRule):
 # Dynamic Rule Loading
 def load_rules_from_storage():
     """Load rules from JSON storage"""
-    from pathlib import Path
     import json
+    from pathlib import Path
 
     rules_path = Path(__file__).parent.parent.parent / "data" / "rules" / "rules.json"
 
@@ -648,7 +652,7 @@ class ProcessRewriteEngine:
 
     def _evaluate_condition(self, condition: Dict[str, Any], context: RuntimeContext) -> bool:
         """Evaluate a condition group against runtime context"""
-        from routes.rules import evaluate_condition, ConditionGroup
+        from routes.rules import ConditionGroup, evaluate_condition
 
         try:
             # Convert context to dict for evaluation
@@ -656,7 +660,7 @@ class ProcessRewriteEngine:
                 "customer_data": context.customer_data or {},
                 "transaction_data": context.transaction_data or {},
                 "risk_flags": context.risk_flags,
-                "compliance_requirements": context.compliance_requirements
+                "compliance_requirements": context.compliance_requirements,
             }
 
             # Parse condition group
@@ -668,7 +672,9 @@ class ProcessRewriteEngine:
             print(f"Warning: Condition evaluation failed: {e}")
             return False
 
-    def _apply_rule_action(self, journey: Dict[str, Any], rule: Dict[str, Any], context: RuntimeContext) -> tuple[Dict[str, Any], PhaseModification]:
+    def _apply_rule_action(
+        self, journey: Dict[str, Any], rule: Dict[str, Any], context: RuntimeContext
+    ) -> tuple[Dict[str, Any], PhaseModification]:
         """Apply a rule action to a journey"""
         action = rule.get("action", {})
         action_type = action.get("type")
@@ -687,7 +693,7 @@ class ProcessRewriteEngine:
             "description": phase.get("description"),
             "modules": phase.get("modules", []),
             "targetDurationDays": phase.get("target_duration_days", 1),
-            "criticality": modification_meta.get("criticality", "MEDIUM")
+            "criticality": modification_meta.get("criticality", "MEDIUM"),
         }
 
         # Apply based on action type
@@ -697,10 +703,7 @@ class ProcessRewriteEngine:
             # Don't insert if phase already exists
             if phase_id in phases:
                 return modified, PhaseModification(
-                    action="noop",
-                    phase_id=phase_id,
-                    reason="Phase already exists in journey",
-                    criticality="LOW"
+                    action="noop", phase_id=phase_id, reason="Phase already exists in journey", criticality="LOW"
                 )
 
             if position == "AT_START":
@@ -737,7 +740,7 @@ class ProcessRewriteEngine:
             action=action_type.lower().replace("_", ""),
             phase_id=phase_id,
             reason=modification_meta.get("reason", f"Rule {rule.get('rule_id')} triggered"),
-            criticality=modification_meta.get("criticality", "MEDIUM")
+            criticality=modification_meta.get("criticality", "MEDIUM"),
         )
 
         return modified, modification
@@ -775,16 +778,16 @@ class ProcessRewriteEngine:
         risk_score = self._calculate_risk_score(modifications)
 
         # Count changes
-        original_phases = len(journey.get('phases', []))
-        modified_phases = len(modified_journey.get('phases', []))
+        original_phases = len(journey.get("phases", []))
+        modified_phases = len(modified_journey.get("phases", []))
 
         return JourneyEvaluation(
-            original_journey_id=journey.get('id', 'unknown'),
+            original_journey_id=journey.get("id", "unknown"),
             modified_journey=modified_journey,
             modifications=modifications,
             total_phases_added=max(0, modified_phases - original_phases),
             total_phases_removed=max(0, original_phases - modified_phases),
-            risk_score=risk_score
+            risk_score=risk_score,
         )
 
     def _calculate_risk_score(self, modifications: List[PhaseModification]) -> float:
@@ -792,12 +795,7 @@ class ProcessRewriteEngine:
         if not modifications:
             return 0.0
 
-        criticality_weights = {
-            'LOW': 0.1,
-            'MEDIUM': 0.3,
-            'HIGH': 0.6,
-            'CRITICAL': 1.0
-        }
+        criticality_weights = {"LOW": 0.1, "MEDIUM": 0.3, "HIGH": 0.6, "CRITICAL": 1.0}
 
         total_weight = sum(criticality_weights.get(m.criticality, 0.5) for m in modifications)
         return min(1.0, total_weight / len(modifications))
@@ -808,10 +806,7 @@ engine = ProcessRewriteEngine()
 
 
 @router.post("/evaluate", response_model=JourneyEvaluation)
-async def evaluate_journey(
-    journey: Dict[str, Any],
-    context: RuntimeContext
-):
+async def evaluate_journey(journey: Dict[str, Any], context: RuntimeContext):
     """
     Evaluate a journey with runtime context and return modified version
 
@@ -843,7 +838,7 @@ async def list_rules():
             "description": rule.get("description"),
             "priority": rule.get("priority"),
             "source": "storage",
-            "active": rule.get("active", True)
+            "active": rule.get("active", True),
         }
         for rule in engine.rule_definitions
     ]
@@ -855,7 +850,7 @@ async def list_rules():
             "description": rule.description,
             "priority": rule.priority,
             "source": "hardcoded",
-            "active": True
+            "active": True,
         }
         for rule in engine._legacy_rules
     ]
@@ -865,7 +860,7 @@ async def list_rules():
         "legacy_rules": legacy_rules,
         "total_dynamic": len(dynamic_rules),
         "total_legacy": len(legacy_rules),
-        "total_count": len(dynamic_rules) + len(legacy_rules)
+        "total_count": len(dynamic_rules) + len(legacy_rules),
     }
 
 
@@ -877,17 +872,14 @@ async def reload_rules():
         return {
             "status": "success",
             "message": f"Reloaded {len(engine.rule_definitions)} rules from storage",
-            "rules_count": len(engine.rule_definitions)
+            "rules_count": len(engine.rule_definitions),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to reload rules: {str(e)}")
 
 
 @router.post("/simulate")
-async def simulate_scenarios(
-    journey_id: str,
-    scenarios: List[RuntimeContext]
-):
+async def simulate_scenarios(journey_id: str, scenarios: List[RuntimeContext]):
     """
     Simulate multiple scenarios for a journey
 
@@ -897,19 +889,12 @@ async def simulate_scenarios(
     base_journey = {
         "id": journey_id,
         "name": "Loan Origination Journey",
-        "phases": ["phase-application", "phase-assessment", "phase-approval"]
+        "phases": ["phase-application", "phase-assessment", "phase-approval"],
     }
 
     results = []
     for scenario in scenarios:
         evaluation = engine.evaluate_journey(base_journey, scenario)
-        results.append({
-            "context": scenario.dict(),
-            "evaluation": evaluation.dict()
-        })
+        results.append({"context": scenario.dict(), "evaluation": evaluation.dict()})
 
-    return {
-        "journey_id": journey_id,
-        "scenarios_evaluated": len(scenarios),
-        "results": results
-    }
+    return {"journey_id": journey_id, "scenarios_evaluated": len(scenarios), "results": results}

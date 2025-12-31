@@ -4,11 +4,11 @@ Workflow Engine - Process Orchestration
 Manages process instance lifecycle, task execution, and state transitions.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
-from uuid import UUID, uuid4
 import logging
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from uuid import UUID, uuid4
 
 from ..database import get_postgres_client
 
@@ -17,31 +17,34 @@ logger = logging.getLogger(__name__)
 
 class ProcessStatus(str, Enum):
     """Process status enum"""
-    PENDING = 'pending'
-    RUNNING = 'running'
-    SUSPENDED = 'suspended'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
-    CANCELLED = 'cancelled'
+
+    PENDING = "pending"
+    RUNNING = "running"
+    SUSPENDED = "suspended"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 class TaskStatus(str, Enum):
     """Task status enum"""
-    PENDING = 'pending'
-    ASSIGNED = 'assigned'
-    IN_PROGRESS = 'in_progress'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
-    SKIPPED = 'skipped'
-    CANCELLED = 'cancelled'
+
+    PENDING = "pending"
+    ASSIGNED = "assigned"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+    CANCELLED = "cancelled"
 
 
 class SLAStatus(str, Enum):
     """SLA status enum"""
-    ON_TRACK = 'on_track'
-    AT_RISK = 'at_risk'
-    BREACHED = 'breached'
-    MET = 'met'
+
+    ON_TRACK = "on_track"
+    AT_RISK = "at_risk"
+    BREACHED = "breached"
+    MET = "met"
 
 
 class WorkflowEngine:
@@ -72,9 +75,9 @@ class WorkflowEngine:
         initiated_by: str,
         input_data: Optional[Dict[str, Any]] = None,
         assigned_to: Optional[str] = None,
-        priority: str = 'medium',
+        priority: str = "medium",
         sla_target_mins: Optional[int] = None,
-        business_context: Optional[Dict[str, Any]] = None
+        business_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Start a new process instance
@@ -132,19 +135,19 @@ class WorkflowEngine:
                     sla_target_mins,
                     due_date,
                     input_data or {},
-                    business_context or {}
+                    business_context or {},
                 ),
-                returning=True
+                returning=True,
             )
 
             # Log event
             self._log_event(
-                process_instance_id=process['id'],
-                event_type='process_started',
-                event_category='lifecycle',
+                process_instance_id=process["id"],
+                event_type="process_started",
+                event_category="lifecycle",
                 user_id=initiated_by,
                 message=f"Process '{process_name}' started",
-                details={'priority': priority, 'type': process_type}
+                details={"priority": priority, "type": process_type},
             )
 
             logger.info(f"Started process {process['id']}: {process_name}")
@@ -160,7 +163,7 @@ class WorkflowEngine:
         new_status: ProcessStatus,
         user_id: Optional[str] = None,
         error_message: Optional[str] = None,
-        output_data: Optional[Dict[str, Any]] = None
+        output_data: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Update process status
@@ -178,9 +181,7 @@ class WorkflowEngine:
         try:
             # Get current process
             current = self.db.execute_query(
-                "SELECT * FROM process_instances WHERE id = %s",
-                (str(process_id),),
-                fetch='one'
+                "SELECT * FROM process_instances WHERE id = %s", (str(process_id),), fetch="one"
             )
 
             if not current:
@@ -216,13 +217,13 @@ class WorkflowEngine:
             # Log event
             self._log_event(
                 process_instance_id=process_id,
-                event_type=f'process_{new_status.value}',
-                event_category='lifecycle',
-                user_id=user_id or 'system',
+                event_type=f"process_{new_status.value}",
+                event_category="lifecycle",
+                user_id=user_id or "system",
                 message=f"Process status changed to {new_status.value}",
-                old_status=current['status'],
+                old_status=current["status"],
                 new_status=new_status.value,
-                details={'error': error_message} if error_message else {}
+                details={"error": error_message} if error_message else {},
             )
 
             logger.info(f"Process {process_id} status updated to {new_status.value}")
@@ -232,48 +233,31 @@ class WorkflowEngine:
             logger.error(f"Failed to update process status: {e}")
             raise
 
-    def suspend_process(
-        self,
-        process_id: UUID,
-        user_id: str,
-        reason: str
-    ) -> Dict[str, Any]:
+    def suspend_process(self, process_id: UUID, user_id: str, reason: str) -> Dict[str, Any]:
         """Suspend a running process"""
-        process = self.update_process_status(
-            process_id,
-            ProcessStatus.SUSPENDED,
-            user_id=user_id
-        )
+        process = self.update_process_status(process_id, ProcessStatus.SUSPENDED, user_id=user_id)
 
         self._log_event(
             process_instance_id=process_id,
-            event_type='process_suspended',
-            event_category='lifecycle',
+            event_type="process_suspended",
+            event_category="lifecycle",
             user_id=user_id,
             message=f"Process suspended: {reason}",
-            details={'reason': reason}
+            details={"reason": reason},
         )
 
         return process
 
-    def resume_process(
-        self,
-        process_id: UUID,
-        user_id: str
-    ) -> Dict[str, Any]:
+    def resume_process(self, process_id: UUID, user_id: str) -> Dict[str, Any]:
         """Resume a suspended process"""
-        process = self.update_process_status(
-            process_id,
-            ProcessStatus.RUNNING,
-            user_id=user_id
-        )
+        process = self.update_process_status(process_id, ProcessStatus.RUNNING, user_id=user_id)
 
         self._log_event(
             process_instance_id=process_id,
-            event_type='process_resumed',
-            event_category='lifecycle',
+            event_type="process_resumed",
+            event_category="lifecycle",
             user_id=user_id,
-            message="Process resumed"
+            message="Process resumed",
         )
 
         return process
@@ -292,7 +276,7 @@ class WorkflowEngine:
         depends_on: Optional[List[UUID]] = None,
         priority: Optional[str] = None,
         sla_target_mins: Optional[int] = None,
-        input_data: Optional[Dict[str, Any]] = None
+        input_data: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Create a new task within a process
@@ -314,9 +298,7 @@ class WorkflowEngine:
         try:
             # Get process to inherit priority
             process = self.db.execute_query(
-                "SELECT priority FROM process_instances WHERE id = %s",
-                (str(process_instance_id),),
-                fetch='one'
+                "SELECT priority FROM process_instances WHERE id = %s", (str(process_instance_id),), fetch="one"
             )
 
             if not process:
@@ -361,23 +343,23 @@ class WorkflowEngine:
                     status,
                     assigned_to,
                     [str(tid) for tid in (depends_on or [])],
-                    priority or process['priority'],
+                    priority or process["priority"],
                     sla_target_mins,
                     due_date,
-                    input_data or {}
+                    input_data or {},
                 ),
-                returning=True
+                returning=True,
             )
 
             # Log event
             self._log_event(
                 process_instance_id=process_instance_id,
-                task_id=task['id'],
-                event_type='task_created',
-                event_category='lifecycle',
-                user_id='system',
+                task_id=task["id"],
+                event_type="task_created",
+                event_category="lifecycle",
+                user_id="system",
                 message=f"Task '{task_name}' created",
-                details={'type': task_type, 'assigned_to': assigned_to}
+                details={"type": task_type, "assigned_to": assigned_to},
             )
 
             logger.info(f"Created task {task['id']}: {task_name}")
@@ -388,11 +370,7 @@ class WorkflowEngine:
             raise
 
     def assign_task(
-        self,
-        task_id: UUID,
-        assigned_to: str,
-        assigned_by: str,
-        assignment_method: str = 'manual'
+        self, task_id: UUID, assigned_to: str, assigned_by: str, assignment_method: str = "manual"
     ) -> Dict[str, Any]:
         """
         Assign a task to a user
@@ -419,9 +397,7 @@ class WorkflowEngine:
             """
 
             task = self.db.execute_command(
-                query,
-                (assigned_to, TaskStatus.ASSIGNED.value, assignment_method, str(task_id)),
-                returning=True
+                query, (assigned_to, TaskStatus.ASSIGNED.value, assignment_method, str(task_id)), returning=True
             )
 
             # Record assignment
@@ -430,18 +406,18 @@ class WorkflowEngine:
                 INSERT INTO task_assignments (task_id, assigned_to, assigned_by, assignment_method)
                 VALUES (%s, %s, %s, %s)
                 """,
-                (str(task_id), assigned_to, assigned_by, assignment_method)
+                (str(task_id), assigned_to, assigned_by, assignment_method),
             )
 
             # Log event
             self._log_event(
-                process_instance_id=task['process_instance_id'],
+                process_instance_id=task["process_instance_id"],
                 task_id=task_id,
-                event_type='task_assigned',
-                event_category='assignment',
+                event_type="task_assigned",
+                event_category="assignment",
                 user_id=assigned_by,
                 message=f"Task assigned to {assigned_to}",
-                details={'method': assignment_method}
+                details={"method": assignment_method},
             )
 
             logger.info(f"Task {task_id} assigned to {assigned_to}")
@@ -451,11 +427,7 @@ class WorkflowEngine:
             logger.error(f"Failed to assign task: {e}")
             raise
 
-    def start_task(
-        self,
-        task_id: UUID,
-        user_id: str
-    ) -> Dict[str, Any]:
+    def start_task(self, task_id: UUID, user_id: str) -> Dict[str, Any]:
         """
         Start working on a task
 
@@ -478,20 +450,16 @@ class WorkflowEngine:
                 RETURNING *
             """
 
-            task = self.db.execute_command(
-                query,
-                (TaskStatus.IN_PROGRESS.value, user_id, str(task_id)),
-                returning=True
-            )
+            task = self.db.execute_command(query, (TaskStatus.IN_PROGRESS.value, user_id, str(task_id)), returning=True)
 
             # Log event
             self._log_event(
-                process_instance_id=task['process_instance_id'],
+                process_instance_id=task["process_instance_id"],
                 task_id=task_id,
-                event_type='task_started',
-                event_category='lifecycle',
+                event_type="task_started",
+                event_category="lifecycle",
                 user_id=user_id,
-                message="Task started"
+                message="Task started",
             )
 
             logger.info(f"Task {task_id} started by {user_id}")
@@ -502,10 +470,7 @@ class WorkflowEngine:
             raise
 
     def complete_task(
-        self,
-        task_id: UUID,
-        user_id: str,
-        output_data: Optional[Dict[str, Any]] = None
+        self, task_id: UUID, user_id: str, output_data: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Complete a task
@@ -531,24 +496,22 @@ class WorkflowEngine:
             """
 
             task = self.db.execute_command(
-                query,
-                (TaskStatus.COMPLETED.value, output_data or {}, str(task_id)),
-                returning=True
+                query, (TaskStatus.COMPLETED.value, output_data or {}, str(task_id)), returning=True
             )
 
             # Log event
             self._log_event(
-                process_instance_id=task['process_instance_id'],
+                process_instance_id=task["process_instance_id"],
                 task_id=task_id,
-                event_type='task_completed',
-                event_category='lifecycle',
+                event_type="task_completed",
+                event_category="lifecycle",
                 user_id=user_id,
                 message="Task completed",
-                details={'duration_mins': task.get('actual_duration_mins')}
+                details={"duration_mins": task.get("actual_duration_mins")},
             )
 
             # Check if we should advance the process
-            self._check_process_progress(task['process_instance_id'])
+            self._check_process_progress(task["process_instance_id"])
 
             logger.info(f"Task {task_id} completed by {user_id}")
             return task
@@ -591,15 +554,15 @@ class WorkflowEngine:
             results = self.db.execute_query(query)
 
             for row in results or []:
-                if row['sla_status'] in ['at_risk', 'breached']:
+                if row["sla_status"] in ["at_risk", "breached"]:
                     violations += 1
                     self._log_event(
-                        process_instance_id=row['id'],
+                        process_instance_id=row["id"],
                         event_type=f"sla_{row['sla_status']}",
-                        event_category='sla',
-                        severity='warning' if row['sla_status'] == 'at_risk' else 'error',
-                        user_id='system',
-                        message=f"Process SLA {row['sla_status']}"
+                        event_category="sla",
+                        severity="warning" if row["sla_status"] == "at_risk" else "error",
+                        user_id="system",
+                        message=f"Process SLA {row['sla_status']}",
                     )
 
             # Check tasks
@@ -622,16 +585,16 @@ class WorkflowEngine:
             task_results = self.db.execute_query(task_query)
 
             for row in task_results or []:
-                if row['sla_status'] in ['at_risk', 'breached']:
+                if row["sla_status"] in ["at_risk", "breached"]:
                     violations += 1
                     self._log_event(
-                        process_instance_id=row['process_instance_id'],
-                        task_id=row['id'],
+                        process_instance_id=row["process_instance_id"],
+                        task_id=row["id"],
                         event_type=f"sla_{row['sla_status']}",
-                        event_category='sla',
-                        severity='warning' if row['sla_status'] == 'at_risk' else 'error',
-                        user_id='system',
-                        message=f"Task SLA {row['sla_status']}"
+                        event_category="sla",
+                        severity="warning" if row["sla_status"] == "at_risk" else "error",
+                        user_id="system",
+                        message=f"Task SLA {row['sla_status']}",
                     )
 
             logger.info(f"SLA check complete: {violations} violations found")
@@ -653,10 +616,10 @@ class WorkflowEngine:
         user_id: str,
         message: str,
         task_id: Optional[UUID] = None,
-        severity: str = 'info',
+        severity: str = "info",
         old_status: Optional[str] = None,
         new_status: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         """Log a process event"""
         try:
@@ -690,8 +653,8 @@ class WorkflowEngine:
                     old_status,
                     new_status,
                     details or {},
-                    user_id == 'system'
-                )
+                    user_id == "system",
+                ),
             )
 
         except Exception as e:
@@ -712,14 +675,14 @@ class WorkflowEngine:
                 WHERE process_instance_id = %s
                 """,
                 (str(process_id),),
-                fetch='one'
+                fetch="one",
             )
 
-            if not stats or stats['total'] == 0:
+            if not stats or stats["total"] == 0:
                 return
 
             # Calculate progress
-            progress = (stats['completed'] / stats['total']) * 100
+            progress = (stats["completed"] / stats["total"]) * 100
 
             # Update process progress
             self.db.execute_command(
@@ -729,24 +692,20 @@ class WorkflowEngine:
                     updated_at = NOW()
                 WHERE id = %s
                 """,
-                (progress, str(process_id))
+                (progress, str(process_id)),
             )
 
             # Check if all tasks complete
-            if stats['completed'] == stats['total']:
-                self.update_process_status(
-                    process_id,
-                    ProcessStatus.COMPLETED,
-                    user_id='system'
-                )
+            if stats["completed"] == stats["total"]:
+                self.update_process_status(process_id, ProcessStatus.COMPLETED, user_id="system")
 
             # Check if any task failed
-            elif stats['failed'] > 0:
+            elif stats["failed"] > 0:
                 self.update_process_status(
                     process_id,
                     ProcessStatus.FAILED,
-                    user_id='system',
-                    error_message=f"{stats['failed']} task(s) failed"
+                    user_id="system",
+                    error_message=f"{stats['failed']} task(s) failed",
                 )
 
         except Exception as e:

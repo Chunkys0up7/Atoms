@@ -8,19 +8,20 @@ Implements RAG.md Phase 3 guidance:
 - File modification timestamp tracking
 """
 
+import hashlib
+import json
 import os
 import sys
-import json
-import hashlib
-from pathlib import Path
-from typing import List, Dict, Any, Set
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Set
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
     import chromadb
+
     HAS_CHROMA = True
 except ImportError:
     print("ERROR: chromadb not installed")
@@ -28,6 +29,7 @@ except ImportError:
 
 try:
     from neo4j import GraphDatabase
+
     HAS_NEO4J = True
 except ImportError:
     HAS_NEO4J = False
@@ -60,7 +62,7 @@ class IncrementalUpdater:
         return {
             "last_update": None,
             "atom_hashes": {},  # atom_id -> file hash
-            "last_modified": {}  # atom_id -> timestamp
+            "last_modified": {},  # atom_id -> timestamp
         }
 
     def _save_state(self):
@@ -83,11 +85,7 @@ class IncrementalUpdater:
         Returns:
             Dict with 'new', 'modified', 'deleted' lists of atom IDs
         """
-        changes = {
-            "new": [],
-            "modified": [],
-            "deleted": []
-        }
+        changes = {"new": [], "modified": [], "deleted": []}
 
         # Track current atoms
         current_atoms = set()
@@ -172,19 +170,19 @@ class IncrementalUpdater:
                 atom = json.load(f)
 
             # Prepare document
-            content = atom.get('content', {})
+            content = atom.get("content", {})
             if isinstance(content, dict):
-                summary = content.get('summary', '')
-                description = content.get('description', '')
+                summary = content.get("summary", "")
+                description = content.get("description", "")
             else:
-                summary = ''
-                description = ''
+                summary = ""
+                description = ""
 
             doc_parts = [
                 f"ID: {atom_id}",
                 f"Name: {atom.get('name', 'Unnamed')}",
                 f"Type: {atom.get('type', 'unknown')}",
-                f"Domain: {atom.get('domain', atom.get('ontologyDomain', 'unknown'))}"
+                f"Domain: {atom.get('domain', atom.get('ontologyDomain', 'unknown'))}",
             ]
 
             if summary:
@@ -202,16 +200,12 @@ class IncrementalUpdater:
                 "domain": atom.get("domain", atom.get("ontologyDomain", "unknown")),
                 "criticality": atom.get("criticality", "MEDIUM"),
                 "owner": atom.get("owner", ""),
-                "steward": atom.get("steward", "")
+                "steward": atom.get("steward", ""),
             }
 
             # Update in Chroma (upsert)
             try:
-                collection.upsert(
-                    ids=[atom_id],
-                    documents=[document],
-                    metadatas=[metadata]
-                )
+                collection.upsert(ids=[atom_id], documents=[document], metadatas=[metadata])
                 print(f"  ✓ Updated {atom_id}")
                 updated_count += 1
             except Exception as e:
@@ -241,10 +235,7 @@ class IncrementalUpdater:
 
         print(f"\nUpdating {len(atom_ids)} atoms in graph database...")
 
-        driver = GraphDatabase.driver(
-            neo4j_uri,
-            auth=(os.environ.get("NEO4J_USER", "neo4j"), neo4j_password)
-        )
+        driver = GraphDatabase.driver(neo4j_uri, auth=(os.environ.get("NEO4J_USER", "neo4j"), neo4j_password))
 
         updated_count = 0
 
@@ -255,10 +246,7 @@ class IncrementalUpdater:
                 if not atom_file.exists():
                     # Delete node and relationships
                     try:
-                        session.run(
-                            "MATCH (a:Atom {id: $atom_id}) DETACH DELETE a",
-                            atom_id=atom_id
-                        )
+                        session.run("MATCH (a:Atom {id: $atom_id}) DETACH DELETE a", atom_id=atom_id)
                         print(f"  ✓ Deleted {atom_id} from graph DB")
                         updated_count += 1
                     except Exception as e:
@@ -270,23 +258,21 @@ class IncrementalUpdater:
                     atom = json.load(f)
 
                 # Extract content
-                content = atom.get('content', {})
+                content = atom.get("content", {})
                 if isinstance(content, dict):
-                    summary = content.get('summary', '')
-                    description = content.get('description', '')
+                    summary = content.get("summary", "")
+                    description = content.get("description", "")
                 else:
-                    summary = ''
-                    description = ''
+                    summary = ""
+                    description = ""
 
                 try:
                     # Delete existing relationships
-                    session.run(
-                        "MATCH (a:Atom {id: $atom_id})-[r]-() DELETE r",
-                        atom_id=atom_id
-                    )
+                    session.run("MATCH (a:Atom {id: $atom_id})-[r]-() DELETE r", atom_id=atom_id)
 
                     # Upsert node
-                    session.run("""
+                    session.run(
+                        """
                         MERGE (a:Atom {id: $id})
                         SET a.name = $name,
                             a.type = $type,
@@ -297,18 +283,20 @@ class IncrementalUpdater:
                             a.owner = $owner,
                             a.steward = $steward,
                             a.compliance_score = $compliance_score
-                    """, {
-                        "id": atom_id,
-                        "name": atom.get("name", "Unnamed"),
-                        "type": atom.get("type", "unknown"),
-                        "domain": atom.get("domain", atom.get("ontologyDomain", "unknown")),
-                        "criticality": atom.get("criticality", "MEDIUM"),
-                        "summary": summary,
-                        "description": description,
-                        "owner": atom.get("owner", ""),
-                        "steward": atom.get("steward", ""),
-                        "compliance_score": atom.get("compliance_score", 0.0)
-                    })
+                    """,
+                        {
+                            "id": atom_id,
+                            "name": atom.get("name", "Unnamed"),
+                            "type": atom.get("type", "unknown"),
+                            "domain": atom.get("domain", atom.get("ontologyDomain", "unknown")),
+                            "criticality": atom.get("criticality", "MEDIUM"),
+                            "summary": summary,
+                            "description": description,
+                            "owner": atom.get("owner", ""),
+                            "steward": atom.get("steward", ""),
+                            "compliance_score": atom.get("compliance_score", 0.0),
+                        },
+                    )
 
                     # Recreate relationships
                     edges = atom.get("edges", [])
@@ -317,14 +305,14 @@ class IncrementalUpdater:
                         target_id = edge.get("targetId")
 
                         if target_id:
-                            session.run(f"""
+                            session.run(
+                                f"""
                                 MATCH (source:Atom {{id: $source_id}})
                                 MATCH (target:Atom {{id: $target_id}})
                                 CREATE (source)-[r:{edge_type}]->(target)
-                            """, {
-                                "source_id": atom_id,
-                                "target_id": target_id
-                            })
+                            """,
+                                {"source_id": atom_id, "target_id": target_id},
+                            )
 
                     print(f"  ✓ Updated {atom_id}")
                     updated_count += 1
@@ -342,10 +330,10 @@ class IncrementalUpdater:
         Args:
             force_all: Force update all atoms (ignore change detection)
         """
-        print("="*60)
+        print("=" * 60)
         print("GNDP Incremental RAG Update")
         print("30x faster than full rebuild (RAG.md Phase 3)")
-        print("="*60)
+        print("=" * 60)
         print()
 
         if force_all:
@@ -390,9 +378,9 @@ class IncrementalUpdater:
         self.state["last_update"] = datetime.utcnow().isoformat()
         self._save_state()
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✓ Incremental update complete!")
-        print("="*60)
+        print("=" * 60)
         print(f"\nUpdated: {len(atoms_to_update)} atoms")
         print(f"Deleted: {len(changes['deleted'])} atoms")
         print(f"State saved to: {self.state_file}")
@@ -403,16 +391,8 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Incremental RAG update")
-    parser.add_argument(
-        "--force-all",
-        action="store_true",
-        help="Force update all atoms (ignore change detection)"
-    )
-    parser.add_argument(
-        "--atom-id",
-        type=str,
-        help="Update specific atom by ID"
-    )
+    parser.add_argument("--force-all", action="store_true", help="Force update all atoms (ignore change detection)")
+    parser.add_argument("--atom-id", type=str, help="Update specific atom by ID")
 
     args = parser.parse_args()
 

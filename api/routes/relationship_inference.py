@@ -8,33 +8,36 @@ Uses dual-index approach:
 - Claude for reasoning about relationship types
 """
 
+import json
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
-import sys
-import json
 
 try:
     import chromadb
+
     HAS_CHROMA = True
 except ImportError:
     HAS_CHROMA = False
 
 try:
-    from ..neo4j_client import get_neo4j_client
     from ..claude_client import get_claude_client
+    from ..neo4j_client import get_neo4j_client
 except ImportError:
     # Fallback for direct execution
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from neo4j_client import get_neo4j_client
     from claude_client import get_claude_client
+    from neo4j_client import get_neo4j_client
 
 router = APIRouter()
 
 
 class SemanticRelationshipSuggestion(BaseModel):
     """Semantic relationship suggestion from LLM analysis"""
+
     source_atom_id: str
     source_name: str
     target_atom_id: str
@@ -48,6 +51,7 @@ class SemanticRelationshipSuggestion(BaseModel):
 
 class InferenceRequest(BaseModel):
     """Request for relationship inference"""
+
     atom_id: Optional[str] = None  # Infer for specific atom
     limit: int = 10
     min_confidence: float = 0.6
@@ -57,17 +61,11 @@ class InferenceRequest(BaseModel):
 def get_chroma_client():
     """Get ChromaDB client for semantic search"""
     if not HAS_CHROMA:
-        raise HTTPException(
-            status_code=503,
-            detail="ChromaDB not available. Install with: pip install chromadb"
-        )
+        raise HTTPException(status_code=503, detail="ChromaDB not available. Install with: pip install chromadb")
 
     persist_dir = Path(__file__).parent.parent.parent / "rag-index"
     if not persist_dir.exists():
-        raise HTTPException(
-            status_code=503,
-            detail="Vector database not initialized. Run indexing first."
-        )
+        raise HTTPException(status_code=503, detail="Vector database not initialized. Run indexing first.")
 
     return chromadb.PersistentClient(path=str(persist_dir))
 
@@ -76,59 +74,54 @@ def get_atom_embedding_context(atom_id: str, chroma_client) -> Optional[Dict[str
     """Get atom's content and embedding from ChromaDB"""
     try:
         collection = chroma_client.get_collection(name="gndp_atoms")
-        results = collection.get(
-            ids=[atom_id],
-            include=['embeddings', 'documents', 'metadatas']
-        )
+        results = collection.get(ids=[atom_id], include=["embeddings", "documents", "metadatas"])
 
-        if not results['ids']:
+        if not results["ids"]:
             return None
 
         return {
-            'id': results['ids'][0],
-            'content': results['documents'][0] if results['documents'] else "",
-            'metadata': results['metadatas'][0] if results['metadatas'] else {},
-            'embedding': results['embeddings'][0] if results.get('embeddings') else None
+            "id": results["ids"][0],
+            "content": results["documents"][0] if results["documents"] else "",
+            "metadata": results["metadatas"][0] if results["metadatas"] else {},
+            "embedding": results["embeddings"][0] if results.get("embeddings") else None,
         }
     except Exception as e:
         print(f"Error getting atom embedding: {e}", file=sys.stderr)
         return None
 
 
-def find_semantically_similar_atoms(
-    atom_id: str,
-    chroma_client,
-    n_results: int = 20
-) -> List[Dict[str, Any]]:
+def find_semantically_similar_atoms(atom_id: str, chroma_client, n_results: int = 20) -> List[Dict[str, Any]]:
     """Find atoms semantically similar to the given atom"""
     try:
         collection = chroma_client.get_collection(name="gndp_atoms")
 
         # Get the source atom's embedding
         source = get_atom_embedding_context(atom_id, chroma_client)
-        if not source or not source.get('embedding'):
+        if not source or not source.get("embedding"):
             return []
 
         # Find similar atoms
         results = collection.query(
-            query_embeddings=[source['embedding']],
+            query_embeddings=[source["embedding"]],
             n_results=n_results + 1,  # +1 because source will be in results
-            include=['documents', 'metadatas', 'distances']
+            include=["documents", "metadatas", "distances"],
         )
 
         similar = []
-        if results and results['ids'] and len(results['ids']) > 0:
-            for i, similar_id in enumerate(results['ids'][0]):
+        if results and results["ids"] and len(results["ids"]) > 0:
+            for i, similar_id in enumerate(results["ids"][0]):
                 # Skip the source atom itself
                 if similar_id == atom_id:
                     continue
 
-                similar.append({
-                    'id': similar_id,
-                    'content': results['documents'][0][i] if results['documents'] else "",
-                    'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                    'distance': results['distances'][0][i] if results.get('distances') else 1.0
-                })
+                similar.append(
+                    {
+                        "id": similar_id,
+                        "content": results["documents"][0][i] if results["documents"] else "",
+                        "metadata": results["metadatas"][0][i] if results["metadatas"] else {},
+                        "distance": results["distances"][0][i] if results.get("distances") else 1.0,
+                    }
+                )
 
         return similar
 
@@ -141,13 +134,17 @@ def check_existing_relationship(source_id: str, target_id: str, neo4j_client) ->
     """Check if relationship already exists between atoms"""
     try:
         with neo4j_client.driver.session() as session:
-            result = session.run("""
+            result = session.run(
+                """
                 MATCH (a:Atom {id: $source_id})-[r]-(b:Atom {id: $target_id})
                 RETURN count(r) as count
-            """, source_id=source_id, target_id=target_id)
+            """,
+                source_id=source_id,
+                target_id=target_id,
+            )
 
             record = result.single()
-            return record['count'] > 0 if record else False
+            return record["count"] > 0 if record else False
     except Exception:
         return False
 
@@ -157,22 +154,30 @@ def get_structural_context(source_id: str, target_id: str, neo4j_client) -> Opti
     try:
         with neo4j_client.driver.session() as session:
             # Check for common neighbors
-            result = session.run("""
+            result = session.run(
+                """
                 MATCH (a:Atom {id: $source_id})-[r1]-(c:Atom)-[r2]-(b:Atom {id: $target_id})
                 RETURN c.id as common_neighbor, type(r1) as r1_type, type(r2) as r2_type
                 LIMIT 3
-            """, source_id=source_id, target_id=target_id)
+            """,
+                source_id=source_id,
+                target_id=target_id,
+            )
 
             neighbors = list(result)
             if neighbors:
                 return f"Share {len(neighbors)} common neighbor(s)"
 
             # Check for transitive path
-            result = session.run("""
+            result = session.run(
+                """
                 MATCH path = (a:Atom {id: $source_id})-[*2..3]-(b:Atom {id: $target_id})
                 RETURN length(path) as path_length
                 LIMIT 1
-            """, source_id=source_id, target_id=target_id)
+            """,
+                source_id=source_id,
+                target_id=target_id,
+            )
 
             record = result.single()
             if record:
@@ -184,10 +189,7 @@ def get_structural_context(source_id: str, target_id: str, neo4j_client) -> Opti
 
 
 def infer_relationship_with_llm(
-    source: Dict[str, Any],
-    target: Dict[str, Any],
-    similarity: float,
-    structural_context: Optional[str]
+    source: Dict[str, Any], target: Dict[str, Any], similarity: float, structural_context: Optional[str]
 ) -> Optional[Dict[str, Any]]:
     """Use Claude to infer relationship type and reasoning"""
     try:
@@ -232,7 +234,7 @@ Respond ONLY with a JSON object (no markdown, no explanation):
             model="claude-3-5-sonnet-20241022",
             max_tokens=500,
             temperature=0.3,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
 
         response_text = response.content[0].text.strip()
@@ -240,11 +242,11 @@ Respond ONLY with a JSON object (no markdown, no explanation):
         # Parse JSON response
         result = json.loads(response_text)
 
-        if result.get('should_relate') and result.get('edge_type'):
+        if result.get("should_relate") and result.get("edge_type"):
             return {
-                'edge_type': result['edge_type'],
-                'confidence': float(result.get('confidence', 0.5)),
-                'reasoning': result.get('reasoning', 'LLM suggested relationship')
+                "edge_type": result["edge_type"],
+                "confidence": float(result.get("confidence", 0.5)),
+                "reasoning": result.get("reasoning", "LLM suggested relationship"),
             }
 
         return None
@@ -279,10 +281,7 @@ def infer_relationships(request: InferenceRequest) -> List[SemanticRelationshipS
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         suggestions = []
 
@@ -292,23 +291,21 @@ def infer_relationships(request: InferenceRequest) -> List[SemanticRelationshipS
         else:
             # Infer for all atoms (sample top N by centrality)
             with neo4j_client.driver.session() as session:
-                result = session.run("""
+                result = session.run(
+                    """
                     MATCH (a:Atom)
                     OPTIONAL MATCH (a)-[r]-()
                     WITH a, count(r) as degree
                     RETURN a.id as atom_id
                     ORDER BY degree DESC
                     LIMIT 50
-                """)
-                atom_ids = [record['atom_id'] for record in result]
+                """
+                )
+                atom_ids = [record["atom_id"] for record in result]
 
         for source_id in atom_ids:
             # Get semantically similar atoms
-            similar_atoms = find_semantically_similar_atoms(
-                source_id,
-                chroma_client,
-                n_results=10
-            )
+            similar_atoms = find_semantically_similar_atoms(source_id, chroma_client, n_results=10)
 
             if not similar_atoms:
                 continue
@@ -319,14 +316,14 @@ def infer_relationships(request: InferenceRequest) -> List[SemanticRelationshipS
                 continue
 
             for target in similar_atoms:
-                target_id = target['id']
+                target_id = target["id"]
 
                 # Skip if relationship already exists
                 if check_existing_relationship(source_id, target_id, neo4j_client):
                     continue
 
                 # Calculate semantic similarity (inverse of distance)
-                distance = target.get('distance', 1.0)
+                distance = target.get("distance", 1.0)
                 similarity = 1.0 - min(distance, 1.0)
 
                 # Skip if similarity too low
@@ -338,24 +335,18 @@ def infer_relationships(request: InferenceRequest) -> List[SemanticRelationshipS
 
                 # Use LLM to infer relationship
                 if request.include_reasoning:
-                    inference = infer_relationship_with_llm(
-                        source,
-                        target,
-                        similarity,
-                        structural
-                    )
+                    inference = infer_relationship_with_llm(source, target, similarity, structural)
 
                     if not inference:
                         continue
 
-                    edge_type = inference['edge_type']
-                    confidence = inference['confidence']
-                    reasoning = inference['reasoning']
+                    edge_type = inference["edge_type"]
+                    confidence = inference["confidence"]
+                    reasoning = inference["reasoning"]
                 else:
                     # Heuristic-based inference (faster, no LLM)
                     edge_type = infer_edge_type_heuristic(
-                        source['metadata'].get('type'),
-                        target['metadata'].get('type')
+                        source["metadata"].get("type"), target["metadata"].get("type")
                     )
                     confidence = similarity * 0.8
                     reasoning = f"Semantic similarity: {similarity:.2f}"
@@ -364,17 +355,19 @@ def infer_relationships(request: InferenceRequest) -> List[SemanticRelationshipS
                 if confidence < request.min_confidence:
                     continue
 
-                suggestions.append(SemanticRelationshipSuggestion(
-                    source_atom_id=source_id,
-                    source_name=source['metadata'].get('name', source_id),
-                    target_atom_id=target_id,
-                    target_name=target['metadata'].get('name', target_id),
-                    suggested_edge_type=edge_type,
-                    confidence=round(confidence, 3),
-                    reasoning=reasoning,
-                    semantic_similarity=round(similarity, 3),
-                    structural_support=structural
-                ))
+                suggestions.append(
+                    SemanticRelationshipSuggestion(
+                        source_atom_id=source_id,
+                        source_name=source["metadata"].get("name", source_id),
+                        target_atom_id=target_id,
+                        target_name=target["metadata"].get("name", target_id),
+                        suggested_edge_type=edge_type,
+                        confidence=round(confidence, 3),
+                        reasoning=reasoning,
+                        semantic_similarity=round(similarity, 3),
+                        structural_support=structural,
+                    )
+                )
 
                 # Limit results
                 if len(suggestions) >= request.limit:
@@ -386,16 +379,13 @@ def infer_relationships(request: InferenceRequest) -> List[SemanticRelationshipS
         # Sort by confidence
         suggestions.sort(key=lambda x: x.confidence, reverse=True)
 
-        return suggestions[:request.limit]
+        return suggestions[: request.limit]
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error in relationship inference: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Relationship inference failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Relationship inference failed: {str(e)}")
 
 
 def infer_edge_type_heuristic(source_type: Optional[str], target_type: Optional[str]) -> str:
@@ -451,7 +441,7 @@ def get_inference_stats() -> Dict[str, Any]:
             "neo4j_connected": False,
             "claude_available": False,
             "indexed_atoms": 0,
-            "inference_ready": False
+            "inference_ready": False,
         }
 
         # Check Neo4j
@@ -479,28 +469,21 @@ def get_inference_stats() -> Dict[str, Any]:
 
         # Overall readiness
         stats["inference_ready"] = (
-            stats["chroma_available"] and
-            stats["neo4j_connected"] and
-            stats["claude_available"] and
-            stats["indexed_atoms"] > 0
+            stats["chroma_available"]
+            and stats["neo4j_connected"]
+            and stats["claude_available"]
+            and stats["indexed_atoms"] > 0
         )
 
         return stats
 
     except Exception as e:
         print(f"Error getting inference stats: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
 
 
 @router.post("/api/relationships/apply-suggestion")
-def apply_relationship_suggestion(
-    source_id: str,
-    target_id: str,
-    edge_type: str
-) -> Dict[str, Any]:
+def apply_relationship_suggestion(source_id: str, target_id: str, edge_type: str) -> Dict[str, Any]:
     """
     Apply a suggested relationship to the graph.
 
@@ -521,11 +504,17 @@ def apply_relationship_suggestion(
 
         # Create relationship in Neo4j
         with neo4j_client.driver.session() as session:
-            session.run("""
+            session.run(
+                """
                 MATCH (a:Atom {id: $source_id}), (b:Atom {id: $target_id})
-                CREATE (a)-[r:""" + edge_type + """]->(b)
+                CREATE (a)-[r:"""
+                + edge_type
+                + """]->(b)
                 RETURN r
-            """, source_id=source_id, target_id=target_id)
+            """,
+                source_id=source_id,
+                target_id=target_id,
+            )
 
         # Update YAML file
         atoms_base = Path(__file__).parent.parent.parent / "atoms"
@@ -536,32 +525,27 @@ def apply_relationship_suggestion(
             break
 
         if yaml_file and yaml_file.exists():
-            with open(yaml_file, 'r', encoding='utf-8') as f:
+            with open(yaml_file, "r", encoding="utf-8") as f:
                 atom_data = yaml.safe_load(f)
 
-            if 'edges' not in atom_data:
-                atom_data['edges'] = []
+            if "edges" not in atom_data:
+                atom_data["edges"] = []
 
             # Add new edge
-            atom_data['edges'].append({
-                'type': edge_type,
-                'target': target_id,
-                'description': f'Inferred relationship: {edge_type}'
-            })
+            atom_data["edges"].append(
+                {"type": edge_type, "target": target_id, "description": f"Inferred relationship: {edge_type}"}
+            )
 
-            with open(yaml_file, 'w', encoding='utf-8') as f:
+            with open(yaml_file, "w", encoding="utf-8") as f:
                 yaml.dump(atom_data, f, default_flow_style=False, sort_keys=False)
 
         return {
             "status": "success",
             "message": f"Created {edge_type} relationship from {source_id} to {target_id}",
             "neo4j_updated": True,
-            "yaml_updated": yaml_file is not None
+            "yaml_updated": yaml_file is not None,
         }
 
     except Exception as e:
         print(f"Error applying suggestion: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to apply suggestion: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to apply suggestion: {str(e)}")

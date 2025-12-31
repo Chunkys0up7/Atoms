@@ -5,16 +5,18 @@ Tracks and manages change history for atoms with audit trail,
 version comparison, and revert capabilities.
 """
 
+import sys
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-from datetime import datetime
-import sys
 
 try:
     from ..neo4j_client import get_neo4j_client
 except ImportError:
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from neo4j_client import get_neo4j_client
 
@@ -24,6 +26,7 @@ router = APIRouter()
 
 class Change(BaseModel):
     """Change record"""
+
     id: str
     atom_id: str
     user_id: str
@@ -38,6 +41,7 @@ class Change(BaseModel):
 
 class ChangeStats(BaseModel):
     """Change statistics"""
+
     total_changes: int
     by_user: Dict[str, int]
     by_type: Dict[str, int]
@@ -46,6 +50,7 @@ class ChangeStats(BaseModel):
 
 class DiffResult(BaseModel):
     """Difference between two versions"""
+
     atom_id: str
     version_1: str
     version_2: str
@@ -53,11 +58,7 @@ class DiffResult(BaseModel):
 
 
 @router.get("/api/history/atom/{atom_id}")
-def get_atom_history(
-    atom_id: str,
-    limit: int = 50,
-    offset: int = 0
-) -> List[Change]:
+def get_atom_history(atom_id: str, limit: int = 50, offset: int = 0) -> List[Change]:
     """
     Get change history for an atom
 
@@ -73,10 +74,7 @@ def get_atom_history(
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             query = """
@@ -91,19 +89,21 @@ def get_atom_history(
 
             changes = []
             for record in result:
-                c = record['c']
-                changes.append(Change(
-                    id=c.get('id'),
-                    atom_id=c.get('atom_id'),
-                    user_id=c.get('user_id'),
-                    user_name=c.get('user_name'),
-                    timestamp=c.get('timestamp'),
-                    change_type=c.get('change_type'),
-                    field=c.get('field'),
-                    old_value=c.get('old_value'),
-                    new_value=c.get('new_value'),
-                    description=c.get('description')
-                ))
+                c = record["c"]
+                changes.append(
+                    Change(
+                        id=c.get("id"),
+                        atom_id=c.get("atom_id"),
+                        user_id=c.get("user_id"),
+                        user_name=c.get("user_name"),
+                        timestamp=c.get("timestamp"),
+                        change_type=c.get("change_type"),
+                        field=c.get("field"),
+                        old_value=c.get("old_value"),
+                        new_value=c.get("new_value"),
+                        description=c.get("description"),
+                    )
+                )
 
             return changes
 
@@ -111,18 +111,11 @@ def get_atom_history(
         raise
     except Exception as e:
         print(f"Error getting atom history: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get atom history: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get atom history: {str(e)}")
 
 
 @router.get("/api/history/user/{user_id}")
-def get_user_history(
-    user_id: str,
-    limit: int = 50,
-    offset: int = 0
-) -> List[Change]:
+def get_user_history(user_id: str, limit: int = 50, offset: int = 0) -> List[Change]:
     """
     Get all changes made by a user
 
@@ -138,10 +131,7 @@ def get_user_history(
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             query = """
@@ -156,19 +146,21 @@ def get_user_history(
 
             changes = []
             for record in result:
-                c = record['c']
-                changes.append(Change(
-                    id=c.get('id'),
-                    atom_id=c.get('atom_id'),
-                    user_id=c.get('user_id'),
-                    user_name=c.get('user_name'),
-                    timestamp=c.get('timestamp'),
-                    change_type=c.get('change_type'),
-                    field=c.get('field'),
-                    old_value=c.get('old_value'),
-                    new_value=c.get('new_value'),
-                    description=c.get('description')
-                ))
+                c = record["c"]
+                changes.append(
+                    Change(
+                        id=c.get("id"),
+                        atom_id=c.get("atom_id"),
+                        user_id=c.get("user_id"),
+                        user_name=c.get("user_name"),
+                        timestamp=c.get("timestamp"),
+                        change_type=c.get("change_type"),
+                        field=c.get("field"),
+                        old_value=c.get("old_value"),
+                        new_value=c.get("new_value"),
+                        description=c.get("description"),
+                    )
+                )
 
             return changes
 
@@ -176,10 +168,7 @@ def get_user_history(
         raise
     except Exception as e:
         print(f"Error getting user history: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get user history: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get user history: {str(e)}")
 
 
 @router.post("/api/history/track")
@@ -197,10 +186,7 @@ def track_change(change: Change) -> Change:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         # Generate change ID if not provided
         if not change.id:
@@ -238,15 +224,12 @@ def track_change(change: Change) -> Change:
                 field=change.field,
                 old_value=change.old_value,
                 new_value=change.new_value,
-                description=change.description
+                description=change.description,
             )
 
             record = result.single()
             if not record:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Failed to track change"
-                )
+                raise HTTPException(status_code=500, detail="Failed to track change")
 
             return change
 
@@ -254,10 +237,7 @@ def track_change(change: Change) -> Change:
         raise
     except Exception as e:
         print(f"Error tracking change: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to track change: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to track change: {str(e)}")
 
 
 @router.post("/api/history/revert/{change_id}")
@@ -275,10 +255,7 @@ def revert_change(change_id: str) -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             # Get the change
@@ -291,23 +268,17 @@ def revert_change(change_id: str) -> Dict[str, Any]:
             record = result.single()
 
             if not record:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Change {change_id} not found"
-                )
+                raise HTTPException(status_code=404, detail=f"Change {change_id} not found")
 
-            change = record['c']
+            change = record["c"]
 
             # Get the atom and revert the field
-            atom_id = change.get('atom_id')
-            field = change.get('field')
-            old_value = change.get('old_value')
+            atom_id = change.get("atom_id")
+            field = change.get("field")
+            old_value = change.get("old_value")
 
             if not atom_id or not field:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Cannot revert: missing atom_id or field"
-                )
+                raise HTTPException(status_code=400, detail="Cannot revert: missing atom_id or field")
 
             # Update the atom with old value
             update_query = f"""
@@ -320,10 +291,7 @@ def revert_change(change_id: str) -> Dict[str, Any]:
             update_record = update_result.single()
 
             if not update_record:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Atom {atom_id} not found"
-                )
+                raise HTTPException(status_code=404, detail=f"Atom {atom_id} not found")
 
             # Create a new change record for the revert
             revert_change_id = f"change-{datetime.now().timestamp()}"
@@ -349,9 +317,9 @@ def revert_change(change_id: str) -> Dict[str, Any]:
                 atom_id=atom_id,
                 timestamp=datetime.now().isoformat(),
                 field=field,
-                new_value=change.get('new_value'),
+                new_value=change.get("new_value"),
                 old_value=old_value,
-                description=f"Reverted change {change_id}"
+                description=f"Reverted change {change_id}",
             )
 
             return {
@@ -359,17 +327,14 @@ def revert_change(change_id: str) -> Dict[str, Any]:
                 "change_id": change_id,
                 "reverted_to": old_value,
                 "atom_id": atom_id,
-                "field": field
+                "field": field,
             }
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error reverting change: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to revert change: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to revert change: {str(e)}")
 
 
 @router.get("/api/history/diff/{change_id_1}/{change_id_2}")
@@ -388,10 +353,7 @@ def get_diff(change_id_1: str, change_id_2: str) -> DiffResult:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             # Get both changes
@@ -405,68 +367,52 @@ def get_diff(change_id_1: str, change_id_2: str) -> DiffResult:
 
             changes = {}
             for record in result:
-                c = record['c']
-                changes[c.get('id')] = c
+                c = record["c"]
+                changes[c.get("id")] = c
 
             if change_id_1 not in changes or change_id_2 not in changes:
-                raise HTTPException(
-                    status_code=404,
-                    detail="One or both changes not found"
-                )
+                raise HTTPException(status_code=404, detail="One or both changes not found")
 
             c1 = changes[change_id_1]
             c2 = changes[change_id_2]
 
             # Ensure same atom
-            if c1.get('atom_id') != c2.get('atom_id'):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Changes are for different atoms"
-                )
+            if c1.get("atom_id") != c2.get("atom_id"):
+                raise HTTPException(status_code=400, detail="Changes are for different atoms")
 
             # Build differences
             differences = []
 
             # Compare fields
-            field1 = c1.get('field')
-            field2 = c2.get('field')
+            field1 = c1.get("field")
+            field2 = c2.get("field")
 
             if field1 == field2:
-                differences.append({
-                    'field': field1,
-                    'version_1_value': c1.get('new_value'),
-                    'version_2_value': c2.get('new_value'),
-                    'changed': c1.get('new_value') != c2.get('new_value')
-                })
+                differences.append(
+                    {
+                        "field": field1,
+                        "version_1_value": c1.get("new_value"),
+                        "version_2_value": c2.get("new_value"),
+                        "changed": c1.get("new_value") != c2.get("new_value"),
+                    }
+                )
             else:
-                differences.append({
-                    'field': field1,
-                    'version_1_value': c1.get('new_value'),
-                    'version_2_value': None,
-                    'changed': True
-                })
-                differences.append({
-                    'field': field2,
-                    'version_1_value': None,
-                    'version_2_value': c2.get('new_value'),
-                    'changed': True
-                })
+                differences.append(
+                    {"field": field1, "version_1_value": c1.get("new_value"), "version_2_value": None, "changed": True}
+                )
+                differences.append(
+                    {"field": field2, "version_1_value": None, "version_2_value": c2.get("new_value"), "changed": True}
+                )
 
             return DiffResult(
-                atom_id=c1.get('atom_id'),
-                version_1=change_id_1,
-                version_2=change_id_2,
-                differences=differences
+                atom_id=c1.get("atom_id"), version_1=change_id_1, version_2=change_id_2, differences=differences
             )
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error getting diff: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get diff: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get diff: {str(e)}")
 
 
 @router.get("/api/history/stats")
@@ -481,10 +427,7 @@ def get_history_stats() -> ChangeStats:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             # Total changes
@@ -494,7 +437,7 @@ def get_history_stats() -> ChangeStats:
             """
             total_result = session.run(total_query)
             total_record = total_result.single()
-            total = total_record['total'] if total_record else 0
+            total = total_record["total"] if total_record else 0
 
             # By user
             user_query = """
@@ -504,7 +447,7 @@ def get_history_stats() -> ChangeStats:
             user_result = session.run(user_query)
             by_user = {}
             for record in user_result:
-                by_user[record['user']] = record['count']
+                by_user[record["user"]] = record["count"]
 
             # By type
             type_query = """
@@ -514,10 +457,11 @@ def get_history_stats() -> ChangeStats:
             type_result = session.run(type_query)
             by_type = {}
             for record in type_result:
-                by_type[record['type']] = record['count']
+                by_type[record["type"]] = record["count"]
 
             # Recent changes (last 24 hours)
             from datetime import timedelta
+
             yesterday = (datetime.now() - timedelta(days=1)).isoformat()
 
             recent_query = """
@@ -527,20 +471,12 @@ def get_history_stats() -> ChangeStats:
             """
             recent_result = session.run(recent_query, yesterday=yesterday)
             recent_record = recent_result.single()
-            recent = recent_record['count'] if recent_record else 0
+            recent = recent_record["count"] if recent_record else 0
 
-            return ChangeStats(
-                total_changes=total,
-                by_user=by_user,
-                by_type=by_type,
-                recent_changes=recent
-            )
+            return ChangeStats(total_changes=total, by_user=by_user, by_type=by_type, recent_changes=recent)
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error getting history stats: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get history stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get history stats: {str(e)}")

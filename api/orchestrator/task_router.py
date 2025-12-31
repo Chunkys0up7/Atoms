@@ -8,10 +8,10 @@ Handles task routing using different assignment strategies:
 - Manual: Direct assignment
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import datetime
 import logging
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from ..database import get_postgres_client
 
@@ -20,10 +20,11 @@ logger = logging.getLogger(__name__)
 
 class AssignmentMethod(str, Enum):
     """Assignment method enum"""
-    MANUAL = 'manual'
-    ROUND_ROBIN = 'round_robin'
-    LOAD_BALANCED = 'load_balanced'
-    SKILL_BASED = 'skill_based'
+
+    MANUAL = "manual"
+    ROUND_ROBIN = "round_robin"
+    LOAD_BALANCED = "load_balanced"
+    SKILL_BASED = "skill_based"
 
 
 class TaskRouter:
@@ -44,8 +45,8 @@ class TaskRouter:
         method: AssignmentMethod,
         team: Optional[str] = None,
         pool: Optional[List[str]] = None,
-        assigned_by: str = 'system',
-        task_requirements: Optional[Dict[str, Any]] = None
+        assigned_by: str = "system",
+        task_requirements: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Assign a task using specified method
@@ -77,11 +78,7 @@ class TaskRouter:
             raise ValueError(f"Unknown assignment method: {method}")
 
     def _assign_round_robin(
-        self,
-        task_id: str,
-        team: Optional[str],
-        pool: Optional[List[str]],
-        assigned_by: str
+        self, task_id: str, team: Optional[str], pool: Optional[List[str]], assigned_by: str
     ) -> str:
         """
         Round-robin assignment
@@ -95,7 +92,7 @@ class TaskRouter:
             raise ValueError(f"No candidates available for assignment (team={team})")
 
         # Get or initialize round-robin index for this team/pool
-        pool_key = team or 'default'
+        pool_key = team or "default"
         if pool_key not in self._round_robin_index:
             self._round_robin_index[pool_key] = 0
 
@@ -113,11 +110,7 @@ class TaskRouter:
         return assigned_to
 
     def _assign_load_balanced(
-        self,
-        task_id: str,
-        team: Optional[str],
-        pool: Optional[List[str]],
-        assigned_by: str
+        self, task_id: str, team: Optional[str], pool: Optional[List[str]], assigned_by: str
     ) -> str:
         """
         Load-balanced assignment
@@ -152,7 +145,7 @@ class TaskRouter:
         team: Optional[str],
         pool: Optional[List[str]],
         assigned_by: str,
-        task_requirements: Optional[Dict[str, Any]]
+        task_requirements: Optional[Dict[str, Any]],
     ) -> str:
         """
         Skill-based assignment
@@ -180,15 +173,15 @@ class TaskRouter:
         """
         # TODO: Implement team member lookup from user database
         # For now, return a mock team
-        if team == 'underwriters':
-            return ['underwriter-1', 'underwriter-2', 'underwriter-3']
-        elif team == 'processors':
-            return ['processor-1', 'processor-2', 'processor-3', 'processor-4']
-        elif team == 'loan-officers':
-            return ['lo-1', 'lo-2', 'lo-3']
+        if team == "underwriters":
+            return ["underwriter-1", "underwriter-2", "underwriter-3"]
+        elif team == "processors":
+            return ["processor-1", "processor-2", "processor-3", "processor-4"]
+        elif team == "loan-officers":
+            return ["lo-1", "lo-2", "lo-3"]
         else:
             # Default team
-            return ['user-1', 'user-2', 'user-3']
+            return ["user-1", "user-2", "user-3"]
 
     def _get_user_workloads(self, user_ids: List[str]) -> Dict[str, int]:
         """
@@ -218,7 +211,7 @@ class TaskRouter:
             workloads = {user_id: 0 for user_id in user_ids}
 
             for row in results or []:
-                workloads[row['assigned_to']] = row['task_count']
+                workloads[row["assigned_to"]] = row["task_count"]
 
             return workloads
 
@@ -227,13 +220,7 @@ class TaskRouter:
             # Return equal workload on error (will use round-robin-like behavior)
             return {user_id: 0 for user_id in user_ids}
 
-    def _execute_assignment(
-        self,
-        task_id: str,
-        assigned_to: str,
-        assigned_by: str,
-        method: AssignmentMethod
-    ):
+    def _execute_assignment(self, task_id: str, assigned_to: str, assigned_by: str, method: AssignmentMethod):
         """
         Execute the actual task assignment in database
 
@@ -255,11 +242,7 @@ class TaskRouter:
                 RETURNING process_instance_id
             """
 
-            result = self.db.execute_command(
-                query,
-                (assigned_to, method.value, task_id),
-                returning=True
-            )
+            result = self.db.execute_command(query, (assigned_to, method.value, task_id), returning=True)
 
             if not result:
                 raise ValueError(f"Task {task_id} not found")
@@ -275,7 +258,7 @@ class TaskRouter:
                 )
                 VALUES (%s, %s, %s, %s)
                 """,
-                (task_id, assigned_to, assigned_by, method.value)
+                (task_id, assigned_to, assigned_by, method.value),
             )
 
             # Log event
@@ -294,25 +277,19 @@ class TaskRouter:
                 VALUES (%s, %s, 'task_assigned', 'assignment', %s, %s, %s, true)
                 """,
                 (
-                    result['process_instance_id'],
+                    result["process_instance_id"],
                     task_id,
                     assigned_by,
                     f"Task assigned to {assigned_to} via {method.value}",
-                    {'method': method.value, 'assigned_to': assigned_to}
-                )
+                    {"method": method.value, "assigned_to": assigned_to},
+                ),
             )
 
         except Exception as e:
             logger.error(f"Failed to execute assignment: {e}")
             raise
 
-    def reassign_task(
-        self,
-        task_id: str,
-        new_assignee: str,
-        reassigned_by: str,
-        reason: str
-    ) -> Dict[str, Any]:
+    def reassign_task(self, task_id: str, new_assignee: str, reassigned_by: str, reason: str) -> Dict[str, Any]:
         """
         Reassign a task to a different user
 
@@ -328,9 +305,7 @@ class TaskRouter:
         try:
             # Get current assignment
             current = self.db.execute_query(
-                "SELECT assigned_to, process_instance_id FROM tasks WHERE id = %s",
-                (task_id,),
-                fetch='one'
+                "SELECT assigned_to, process_instance_id FROM tasks WHERE id = %s", (task_id,), fetch="one"
             )
 
             if not current:
@@ -345,11 +320,7 @@ class TaskRouter:
                 RETURNING *
             """
 
-            task = self.db.execute_command(
-                query,
-                (new_assignee, task_id),
-                returning=True
-            )
+            task = self.db.execute_command(query, (new_assignee, task_id), returning=True)
 
             # Mark old assignment as reassigned
             self.db.execute_command(
@@ -358,7 +329,7 @@ class TaskRouter:
                 SET status = 'reassigned'
                 WHERE task_id = %s AND status = 'active'
                 """,
-                (task_id,)
+                (task_id,),
             )
 
             # Create new assignment record
@@ -373,7 +344,7 @@ class TaskRouter:
                 )
                 VALUES (%s, %s, %s, 'manual', %s)
                 """,
-                (task_id, new_assignee, reassigned_by, reason)
+                (task_id, new_assignee, reassigned_by, reason),
             )
 
             # Log event
@@ -391,12 +362,12 @@ class TaskRouter:
                 VALUES (%s, %s, 'task_reassigned', 'assignment', %s, %s, %s)
                 """,
                 (
-                    current['process_instance_id'],
+                    current["process_instance_id"],
                     task_id,
                     reassigned_by,
                     f"Task reassigned from {current['assigned_to']} to {new_assignee}",
-                    {'from': current['assigned_to'], 'to': new_assignee, 'reason': reason}
-                )
+                    {"from": current["assigned_to"], "to": new_assignee, "reason": reason},
+                ),
             )
 
             logger.info(f"Task {task_id} reassigned from {current['assigned_to']} to {new_assignee}")
@@ -452,17 +423,17 @@ class TaskRouter:
                 WHERE assigned_at > NOW() - INTERVAL '7 days'
             """
 
-            reassign_stats = self.db.execute_query(reassign_query, fetch='one')
+            reassign_stats = self.db.execute_query(reassign_query, fetch="one")
 
             reassignment_rate = 0
-            if reassign_stats and reassign_stats['total'] > 0:
-                reassignment_rate = (reassign_stats['reassigned'] / reassign_stats['total']) * 100
+            if reassign_stats and reassign_stats["total"] > 0:
+                reassignment_rate = (reassign_stats["reassigned"] / reassign_stats["total"]) * 100
 
             return {
-                'assignment_methods': {row['assignment_method']: row['count'] for row in (methods or [])},
-                'user_workloads': workloads or [],
-                'reassignment_rate': round(reassignment_rate, 2),
-                'total_reassignments': reassign_stats['reassigned'] if reassign_stats else 0
+                "assignment_methods": {row["assignment_method"]: row["count"] for row in (methods or [])},
+                "user_workloads": workloads or [],
+                "reassignment_rate": round(reassignment_rate, 2),
+                "total_reassignments": reassign_stats["reassigned"] if reassign_stats else 0,
             }
 
         except Exception as e:

@@ -1,9 +1,39 @@
-from fastapi import FastAPI, Depends, HTTPException, Header
-from fastapi.middleware.cors import CORSMiddleware
 import os
 import secrets
 
-from .routes import graph, atoms, modules, rag, runtime, lineage, feedback, documentation, mkdocs_service, rules, ownership, chunking, git_status, schema, phases, glossary, graph_analytics, relationship_inference, graph_constraints, anomaly_detection, websocket, presence, notifications, history, processes, tasks, templates, approvals
+from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+from .routes import (
+    anomaly_detection,
+    approvals,
+    atoms,
+    chunking,
+    documentation,
+    feedback,
+    git_status,
+    glossary,
+    graph,
+    graph_analytics,
+    graph_constraints,
+    history,
+    lineage,
+    mkdocs_service,
+    modules,
+    notifications,
+    ownership,
+    phases,
+    presence,
+    processes,
+    rag,
+    relationship_inference,
+    rules,
+    runtime,
+    schema,
+    tasks,
+    templates,
+    websocket,
+)
 
 
 def get_admin_token():
@@ -13,14 +43,12 @@ def get_admin_token():
     return token
 
 
-app = FastAPI(
-    title="GNDP API",
-    description="Graph-Native Documentation Platform API",
-    version="0.1.0"
-)
+app = FastAPI(title="GNDP API", description="Graph-Native Documentation Platform API", version="0.1.0")
 
 # CORS configuration - restrict in production
-allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8000").split(",")
+allowed_origins = os.environ.get(
+    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8000"
+).split(",")
 
 app.add_middleware(
     CORSMiddleware,

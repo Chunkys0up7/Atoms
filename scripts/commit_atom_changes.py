@@ -11,24 +11,20 @@ Usage:
     python scripts/commit_atom_changes.py --message "Custom message"  # Use custom message
 """
 
+import argparse
 import subprocess
 import sys
-import yaml
-from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
-import argparse
+from pathlib import Path
+
+import yaml
 
 
 def run_git_command(cmd, capture_output=True):
     """Run a git command and return the result"""
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=capture_output,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(cmd, capture_output=capture_output, text=True, check=True)
         return result.stdout.strip() if capture_output else None
     except subprocess.CalledProcessError as e:
         print(f"Git command failed: {' '.join(cmd)}")
@@ -38,11 +34,11 @@ def run_git_command(cmd, capture_output=True):
 
 def get_changed_atom_files():
     """Get list of modified/new atom YAML files"""
-    result = run_git_command(['git', 'status', '--porcelain', 'atoms/', 'test_data/'])
+    result = run_git_command(["git", "status", "--porcelain", "atoms/", "test_data/"])
 
     files = []
-    for line in result.split('\n'):
-        if line and line.endswith('.yaml'):
+    for line in result.split("\n"):
+        if line and line.endswith(".yaml"):
             status = line[:2].strip()
             filepath = line[3:].strip()
             files.append((status, filepath))
@@ -53,16 +49,16 @@ def get_changed_atom_files():
 def analyze_atom_file(filepath):
     """Extract key information from an atom YAML file"""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         return {
-            'id': data.get('id', 'unknown'),
-            'name': data.get('name', 'Unnamed'),
-            'type': data.get('type', 'unknown'),
-            'category': data.get('category', 'unknown'),
-            'owning_team': data.get('owning_team') or data.get('team', 'unassigned'),
-            'author': data.get('author') or data.get('owner', 'unknown')
+            "id": data.get("id", "unknown"),
+            "name": data.get("name", "Unnamed"),
+            "type": data.get("type", "unknown"),
+            "category": data.get("category", "unknown"),
+            "owning_team": data.get("owning_team") or data.get("team", "unassigned"),
+            "author": data.get("author") or data.get("owner", "unknown"),
         }
     except Exception as e:
         print(f"Warning: Could not parse {filepath}: {e}")
@@ -77,9 +73,9 @@ def generate_commit_message(stats, custom_message=None):
 
     # Summary line
     summary_parts = []
-    if stats['new'] > 0:
+    if stats["new"] > 0:
         summary_parts.append(f"{stats['new']} new")
-    if stats['modified'] > 0:
+    if stats["modified"] > 0:
         summary_parts.append(f"{stats['modified']} modified")
 
     if not summary_parts:
@@ -91,25 +87,25 @@ def generate_commit_message(stats, custom_message=None):
     lines = [summary, ""]
 
     # Category breakdown
-    if stats['by_category']:
+    if stats["by_category"]:
         lines.append("Categories:")
-        for category, count in sorted(stats['by_category'].items()):
+        for category, count in sorted(stats["by_category"].items()):
             lines.append(f"  - {category}: {count}")
         lines.append("")
 
     # Type breakdown
-    if stats['by_type']:
+    if stats["by_type"]:
         lines.append("Types:")
-        for atom_type, count in sorted(stats['by_type'].items()):
+        for atom_type, count in sorted(stats["by_type"].items()):
             lines.append(f"  - {atom_type}: {count}")
         lines.append("")
 
     # List of affected atoms (limit to 15)
-    if stats['atoms']:
+    if stats["atoms"]:
         lines.append("Affected atoms:")
-        for atom_info in stats['atoms'][:15]:
+        for atom_info in stats["atoms"][:15]:
             lines.append(f"  - {atom_info}")
-        if len(stats['atoms']) > 15:
+        if len(stats["atoms"]) > 15:
             lines.append(f"  ... and {len(stats['atoms']) - 15} more")
         lines.append("")
 
@@ -117,14 +113,14 @@ def generate_commit_message(stats, custom_message=None):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     lines.append(f"Committed at: {timestamp}")
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Commit atom changes with intelligent messages')
-    parser.add_argument('--dry-run', action='store_true', help='Preview commit without executing')
-    parser.add_argument('--message', '-m', type=str, help='Custom commit message')
-    parser.add_argument('--push', action='store_true', help='Push changes after commit')
+    parser = argparse.ArgumentParser(description="Commit atom changes with intelligent messages")
+    parser.add_argument("--dry-run", action="store_true", help="Preview commit without executing")
+    parser.add_argument("--message", "-m", type=str, help="Custom commit message")
+    parser.add_argument("--push", action="store_true", help="Push changes after commit")
 
     args = parser.parse_args()
 
@@ -141,35 +137,35 @@ def main():
 
     # Analyze changes
     stats = {
-        'new': 0,
-        'modified': 0,
-        'by_category': defaultdict(int),
-        'by_type': defaultdict(int),
-        'by_team': defaultdict(int),
-        'atoms': []
+        "new": 0,
+        "modified": 0,
+        "by_category": defaultdict(int),
+        "by_type": defaultdict(int),
+        "by_team": defaultdict(int),
+        "atoms": [],
     }
 
     for status, filepath in changed_files:
         atom_info = analyze_atom_file(filepath)
         if atom_info:
             # Track status
-            if status == 'M':
-                stats['modified'] += 1
+            if status == "M":
+                stats["modified"] += 1
                 status_label = "modified"
-            elif status in ('A', '??'):
-                stats['new'] += 1
+            elif status in ("A", "??"):
+                stats["new"] += 1
                 status_label = "new"
             else:
                 status_label = status
 
             # Track by category/type/team
-            stats['by_category'][atom_info['category']] += 1
-            stats['by_type'][atom_info['type']] += 1
-            stats['by_team'][atom_info['owning_team']] += 1
+            stats["by_category"][atom_info["category"]] += 1
+            stats["by_type"][atom_info["type"]] += 1
+            stats["by_team"][atom_info["owning_team"]] += 1
 
             # Store atom info
             atom_entry = f"{atom_info['id']} ({atom_info['type']}, {status_label})"
-            stats['atoms'].append(atom_entry)
+            stats["atoms"].append(atom_entry)
 
             print(f"  - {status_label.upper()}: {atom_info['name']} [{atom_info['type']}]")
 
@@ -191,11 +187,11 @@ def main():
 
     # Stage changes
     print("\n[*] Staging atom files...")
-    run_git_command(['git', 'add', 'atoms/', 'test_data/'], capture_output=False)
+    run_git_command(["git", "add", "atoms/", "test_data/"], capture_output=False)
 
     # Commit
     print("[*] Creating commit...")
-    run_git_command(['git', 'commit', '-m', commit_message], capture_output=False)
+    run_git_command(["git", "commit", "-m", commit_message], capture_output=False)
 
     print("[+] Atom changes committed successfully!")
 
@@ -203,7 +199,7 @@ def main():
     if args.push:
         print("\n[*] Pushing to remote...")
         try:
-            run_git_command(['git', 'push'], capture_output=False)
+            run_git_command(["git", "push"], capture_output=False)
             print("[+] Changes pushed to remote!")
         except Exception as e:
             print(f"[!] Push failed: {e}")
@@ -212,5 +208,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -9,13 +9,14 @@ Provides endpoints for managing business glossary terms:
 - Export functionality
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
 import json
 import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -25,6 +26,7 @@ GLOSSARY_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "glossary.js
 
 class GlossaryTerm(BaseModel):
     """Glossary term model"""
+
     id: str
     term: str
     definition: str
@@ -45,7 +47,7 @@ def load_glossary() -> List[GlossaryTerm]:
         return get_default_glossary()
 
     try:
-        with open(GLOSSARY_DATA_PATH, 'r', encoding='utf-8') as f:
+        with open(GLOSSARY_DATA_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
             return [GlossaryTerm(**t) for t in data]
     except Exception as e:
@@ -58,7 +60,7 @@ def save_glossary(terms: List[GlossaryTerm]) -> None:
     GLOSSARY_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(GLOSSARY_DATA_PATH, 'w', encoding='utf-8') as f:
+        with open(GLOSSARY_DATA_PATH, "w", encoding="utf-8") as f:
             json.dump([t.dict() for t in terms], f, indent=2)
     except Exception as e:
         print(f"Error saving glossary: {e}", file=sys.stderr)
@@ -77,7 +79,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="System",
             synonyms=["Business Atom", "Process Atom"],
             related_terms=["Module", "Edge", "Graph"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="module",
@@ -86,7 +88,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="System",
             synonyms=["Workflow Module", "Process Module"],
             related_terms=["Atom", "Phase", "Journey"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="phase",
@@ -95,7 +97,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="System",
             synonyms=["Journey Phase", "Process Phase"],
             related_terms=["Journey", "Module"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="journey",
@@ -104,7 +106,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="System",
             synonyms=["Customer Journey", "Process Journey"],
             related_terms=["Phase", "Module"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="edge",
@@ -113,7 +115,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="System",
             synonyms=["Relationship", "Connection"],
             related_terms=["Atom", "Graph"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="criticality",
@@ -121,7 +123,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             definition="A measure of how important an atom or module is to business operations. Values: LOW, MEDIUM, HIGH, CRITICAL.",
             category="Governance",
             related_terms=["SLA", "Risk"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="ontology-domain",
@@ -130,7 +132,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="Governance",
             synonyms=["Domain", "Business Domain"],
             related_terms=["Schema", "Atom"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="schema",
@@ -138,7 +140,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             definition="A set of rules that define allowed atom types, relationships, and constraints within domains.",
             category="Governance",
             related_terms=["Ontology Domain", "Constraint"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="dtl",
@@ -147,7 +149,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="Lending",
             synonyms=["Debt-to-Income Ratio"],
             related_terms=["Underwriting", "Credit Analysis"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="ltv",
@@ -156,7 +158,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="Lending",
             synonyms=["Loan-to-Value Ratio"],
             related_terms=["Appraisal", "Underwriting"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="trid",
@@ -165,7 +167,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="Compliance",
             synonyms=["TILA-RESPA"],
             related_terms=["Closing Disclosure", "Loan Estimate"],
-            created_at=now
+            created_at=now,
         ),
         GlossaryTerm(
             id="aus",
@@ -174,8 +176,8 @@ def get_default_glossary() -> List[GlossaryTerm]:
             category="Technology",
             synonyms=["Automated Underwriting"],
             related_terms=["Underwriting", "Credit Analysis"],
-            created_at=now
-        )
+            created_at=now,
+        ),
     ]
 
 
@@ -198,10 +200,7 @@ def get_all_terms(category: Optional[str] = None, search: Optional[str] = None) 
 
     if search:
         search_lower = search.lower()
-        terms = [
-            t for t in terms
-            if search_lower in t.term.lower() or search_lower in t.definition.lower()
-        ]
+        terms = [t for t in terms if search_lower in t.term.lower() or search_lower in t.definition.lower()]
 
     return terms
 
@@ -345,7 +344,7 @@ def get_glossary_stats() -> Dict[str, Any]:
         "category_counts": category_counts,
         "total_synonyms": total_synonyms,
         "total_linked_items": total_links,
-        "avg_definition_length": round(sum(len(t.definition) for t in terms) / len(terms)) if terms else 0
+        "avg_definition_length": round(sum(len(t.definition) for t in terms) / len(terms)) if terms else 0,
     }
 
 
@@ -363,19 +362,13 @@ def export_glossary(format: str = "json") -> Dict[str, Any]:
     terms = load_glossary()
 
     if format == "json":
-        return {
-            "format": "json",
-            "data": [t.dict() for t in terms]
-        }
+        return {"format": "json", "data": [t.dict() for t in terms]}
     elif format == "csv":
         csv_lines = ["ID,Term,Definition,Category"]
         for t in terms:
             csv_lines.append(f'"{t.id}","{t.term}","{t.definition}","{t.category}"')
 
-        return {
-            "format": "csv",
-            "data": "\n".join(csv_lines)
-        }
+        return {"format": "csv", "data": "\n".join(csv_lines)}
     elif format == "markdown":
         md_lines = ["# Glossary\n"]
 
@@ -395,9 +388,6 @@ def export_glossary(format: str = "json") -> Dict[str, Any]:
                     md_lines.append(f"**Synonyms:** {', '.join(term.synonyms)}\n")
                 md_lines.append("")
 
-        return {
-            "format": "markdown",
-            "data": "\n".join(md_lines)
-        }
+        return {"format": "markdown", "data": "\n".join(md_lines)}
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")

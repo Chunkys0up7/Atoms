@@ -3,7 +3,9 @@
 
 import sys
 from pathlib import Path
+
 import yaml
+
 
 def fix_module_schemas():
     """Add missing version, id, and workflow_type fields to modules."""
@@ -19,7 +21,7 @@ def fix_module_schemas():
 
         for module_file in modules_dir.glob("*.yaml"):
             try:
-                with open(module_file, 'r', encoding='utf-8') as f:
+                with open(module_file, "r", encoding="utf-8") as f:
                     module_data = yaml.safe_load(f)
 
                 if not module_data:
@@ -30,47 +32,50 @@ def fix_module_schemas():
                 needs_update = False
 
                 # Add version if missing
-                if 'version' not in module_data:
-                    module_data['version'] = '1.0.0'
+                if "version" not in module_data:
+                    module_data["version"] = "1.0.0"
                     needs_update = True
                     print(f"  Adding version to {module_file.name}")
 
                 # Add id if missing (use filename without extension)
-                if 'id' not in module_data:
+                if "id" not in module_data:
                     module_id = module_file.stem  # filename without .yaml
-                    module_data['id'] = module_id
+                    module_data["id"] = module_id
                     needs_update = True
                     print(f"  Adding id={module_id} to {module_file.name}")
 
                 # Add workflow_type if missing
-                if 'workflow_type' not in module_data:
+                if "workflow_type" not in module_data:
                     # Determine workflow_type based on module name/description
-                    module_name = module_data.get('name', '').lower()
-                    module_desc = module_data.get('description', '').lower()
+                    module_name = module_data.get("name", "").lower()
+                    module_desc = module_data.get("description", "").lower()
 
                     # Default to BPM for mortgage process modules
-                    workflow_type = 'BPM'
+                    workflow_type = "BPM"
 
                     # Check if it's a system/technical module (not business process)
-                    if any(term in module_name or term in module_desc for term in ['system', 'gateway', 'authentication', 'data layer', 'graph', 'agent', 'api']):
-                        workflow_type = 'CUSTOM'
+                    if any(
+                        term in module_name or term in module_desc
+                        for term in ["system", "gateway", "authentication", "data layer", "graph", "agent", "api"]
+                    ):
+                        workflow_type = "CUSTOM"
 
-                    module_data['workflow_type'] = workflow_type
+                    module_data["workflow_type"] = workflow_type
                     needs_update = True
                     print(f"  Adding workflow_type={workflow_type} to {module_file.name}")
 
                 if needs_update:
                     # Write back with version, id, and workflow_type at the top
                     ordered_data = {}
-                    if 'id' in module_data:
-                        ordered_data['id'] = module_data.pop('id')
-                    if 'version' in module_data:
-                        ordered_data['version'] = module_data.pop('version')
-                    if 'workflow_type' in module_data:
-                        ordered_data['workflow_type'] = module_data.pop('workflow_type')
+                    if "id" in module_data:
+                        ordered_data["id"] = module_data.pop("id")
+                    if "version" in module_data:
+                        ordered_data["version"] = module_data.pop("version")
+                    if "workflow_type" in module_data:
+                        ordered_data["workflow_type"] = module_data.pop("workflow_type")
                     ordered_data.update(module_data)
 
-                    with open(module_file, 'w', encoding='utf-8') as f:
+                    with open(module_file, "w", encoding="utf-8") as f:
                         yaml.dump(ordered_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
                     print(f"OK {module_file.name}: Updated")
@@ -86,6 +91,7 @@ def fix_module_schemas():
     print(f"  Updated: {updated_count}")
     print(f"  Skipped: {skipped_count}")
     print(f"  Total: {updated_count + skipped_count}")
+
 
 if __name__ == "__main__":
     fix_module_schemas()

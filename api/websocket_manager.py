@@ -5,12 +5,13 @@ Manages WebSocket connections, presence tracking, and message broadcasting
 for real-time collaboration features.
 """
 
-from typing import Dict, Set, Optional, List
-from fastapi import WebSocket
-from datetime import datetime
-import json
 import asyncio
+import json
 from collections import defaultdict
+from datetime import datetime
+from typing import Dict, List, Optional, Set
+
+from fastapi import WebSocket
 
 
 class ConnectionManager:
@@ -44,19 +45,17 @@ class ConnectionManager:
         # Store user presence info
         self.user_presence[user_id] = {
             **user_info,
-            'connected_at': datetime.now().isoformat(),
-            'last_seen': datetime.now().isoformat(),
-            'status': 'online'
+            "connected_at": datetime.now().isoformat(),
+            "last_seen": datetime.now().isoformat(),
+            "status": "online",
         }
 
         print(f"[WebSocket] User {user_id} connected. Total connections: {len(self.active_connections)}")
 
         # Notify others of user connection
-        await self.broadcast_system_message({
-            'type': 'user_connected',
-            'user_id': user_id,
-            'user_info': self.user_presence[user_id]
-        })
+        await self.broadcast_system_message(
+            {"type": "user_connected", "user_id": user_id, "user_info": self.user_presence[user_id]}
+        )
 
     async def disconnect(self, user_id: str):
         """
@@ -73,16 +72,13 @@ class ConnectionManager:
 
         # Update presence
         if user_id in self.user_presence:
-            self.user_presence[user_id]['status'] = 'offline'
-            self.user_presence[user_id]['disconnected_at'] = datetime.now().isoformat()
+            self.user_presence[user_id]["status"] = "offline"
+            self.user_presence[user_id]["disconnected_at"] = datetime.now().isoformat()
 
         print(f"[WebSocket] User {user_id} disconnected. Total connections: {len(self.active_connections)}")
 
         # Notify others of user disconnection
-        await self.broadcast_system_message({
-            'type': 'user_disconnected',
-            'user_id': user_id
-        })
+        await self.broadcast_system_message({"type": "user_disconnected", "user_id": user_id})
 
     async def join_room(self, user_id: str, room_id: str):
         """
@@ -95,24 +91,30 @@ class ConnectionManager:
 
         # Update user presence
         if user_id in self.user_presence:
-            self.user_presence[user_id]['current_room'] = room_id
+            self.user_presence[user_id]["current_room"] = room_id
 
         # Notify room members
-        await self.broadcast_to_room(room_id, {
-            'type': 'user_joined_room',
-            'room_id': room_id,
-            'user_id': user_id,
-            'user_info': self.user_presence.get(user_id, {}),
-            'room_members': list(self.rooms[room_id])
-        })
+        await self.broadcast_to_room(
+            room_id,
+            {
+                "type": "user_joined_room",
+                "room_id": room_id,
+                "user_id": user_id,
+                "user_info": self.user_presence.get(user_id, {}),
+                "room_members": list(self.rooms[room_id]),
+            },
+        )
 
         # Send room history to new member
         if room_id in self.room_history:
-            await self.send_personal_message(user_id, {
-                'type': 'room_history',
-                'room_id': room_id,
-                'history': self.room_history[room_id][-50:]  # Last 50 messages
-            })
+            await self.send_personal_message(
+                user_id,
+                {
+                    "type": "room_history",
+                    "room_id": room_id,
+                    "history": self.room_history[room_id][-50:],  # Last 50 messages
+                },
+            )
 
     async def leave_room(self, user_id: str, room_id: str):
         """
@@ -134,15 +136,18 @@ class ConnectionManager:
 
         # Update user presence
         if user_id in self.user_presence:
-            self.user_presence[user_id]['current_room'] = None
+            self.user_presence[user_id]["current_room"] = None
 
         # Notify room members
-        await self.broadcast_to_room(room_id, {
-            'type': 'user_left_room',
-            'room_id': room_id,
-            'user_id': user_id,
-            'room_members': list(self.rooms.get(room_id, set()))
-        })
+        await self.broadcast_to_room(
+            room_id,
+            {
+                "type": "user_left_room",
+                "room_id": room_id,
+                "user_id": user_id,
+                "room_members": list(self.rooms.get(room_id, set())),
+            },
+        )
 
     async def send_personal_message(self, user_id: str, message: dict):
         """
@@ -163,10 +168,7 @@ class ConnectionManager:
             return
 
         # Add message to room history
-        message_with_timestamp = {
-            **message,
-            'timestamp': datetime.now().isoformat()
-        }
+        message_with_timestamp = {**message, "timestamp": datetime.now().isoformat()}
         self.room_history[room_id].append(message_with_timestamp)
 
         # Keep only last 50 messages
@@ -213,11 +215,7 @@ class ConnectionManager:
         """
         Send system-level message to all users
         """
-        system_message = {
-            **message,
-            'system': True,
-            'timestamp': datetime.now().isoformat()
-        }
+        system_message = {**message, "system": True, "timestamp": datetime.now().isoformat()}
         await self.broadcast_to_all(system_message)
 
     def get_room_members(self, room_id: str) -> List[dict]:
@@ -230,10 +228,7 @@ class ConnectionManager:
         members = []
         for user_id in self.rooms[room_id]:
             if user_id in self.user_presence:
-                members.append({
-                    'user_id': user_id,
-                    **self.user_presence[user_id]
-                })
+                members.append({"user_id": user_id, **self.user_presence[user_id]})
 
         return members
 
@@ -242,9 +237,9 @@ class ConnectionManager:
         Get list of all online users
         """
         return [
-            {'user_id': user_id, **info}
+            {"user_id": user_id, **info}
             for user_id, info in self.user_presence.items()
-            if info.get('status') == 'online'
+            if info.get("status") == "online"
         ]
 
     def get_user_info(self, user_id: str) -> Optional[dict]:
@@ -258,32 +253,29 @@ class ConnectionManager:
         Update user's status (online, away, busy)
         """
         if user_id in self.user_presence:
-            self.user_presence[user_id]['status'] = status
-            self.user_presence[user_id]['last_seen'] = datetime.now().isoformat()
+            self.user_presence[user_id]["status"] = status
+            self.user_presence[user_id]["last_seen"] = datetime.now().isoformat()
 
     async def handle_heartbeat(self, user_id: str):
         """
         Handle heartbeat from client to keep connection alive
         """
         if user_id in self.user_presence:
-            self.user_presence[user_id]['last_seen'] = datetime.now().isoformat()
+            self.user_presence[user_id]["last_seen"] = datetime.now().isoformat()
 
             # If status was 'away', change to 'online'
-            if self.user_presence[user_id].get('status') == 'away':
-                self.user_presence[user_id]['status'] = 'online'
+            if self.user_presence[user_id].get("status") == "away":
+                self.user_presence[user_id]["status"] = "online"
 
     def get_stats(self) -> dict:
         """
         Get WebSocket statistics
         """
         return {
-            'total_connections': len(self.active_connections),
-            'total_rooms': len(self.rooms),
-            'online_users': len([u for u in self.user_presence.values() if u.get('status') == 'online']),
-            'rooms': {
-                room_id: len(members)
-                for room_id, members in self.rooms.items()
-            }
+            "total_connections": len(self.active_connections),
+            "total_rooms": len(self.rooms),
+            "online_users": len([u for u in self.user_presence.values() if u.get("status") == "online"]),
+            "rooms": {room_id: len(members) for room_id, members in self.rooms.items()},
         }
 
 

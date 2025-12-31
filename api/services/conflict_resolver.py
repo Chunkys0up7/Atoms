@@ -4,13 +4,14 @@ Conflict Resolution Service
 Handles merge conflicts for collaborative editing using three-way merge algorithm.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime
 import json
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class ConflictType:
     """Types of conflicts"""
+
     NO_CONFLICT = "no_conflict"
     CLEAN_MERGE = "clean_merge"
     FIELD_CONFLICT = "field_conflict"
@@ -19,12 +20,13 @@ class ConflictType:
 
 class MergeResult:
     """Result of a merge operation"""
+
     def __init__(
         self,
         success: bool,
         merged_data: Dict[str, Any],
         conflicts: List[Dict[str, Any]],
-        conflict_type: str = ConflictType.NO_CONFLICT
+        conflict_type: str = ConflictType.NO_CONFLICT,
     ):
         self.success = success
         self.merged_data = merged_data
@@ -38,7 +40,7 @@ class MergeResult:
             "merged_data": self.merged_data,
             "conflicts": self.conflicts,
             "conflict_type": self.conflict_type,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
         }
 
 
@@ -57,7 +59,7 @@ class ConflictResolver:
         self.merge_strategies = {
             "last_write_wins": self._last_write_wins,
             "field_level": self._field_level_merge,
-            "three_way": self._three_way_merge
+            "three_way": self._three_way_merge,
         }
 
     def merge(
@@ -66,7 +68,7 @@ class ConflictResolver:
         local: Dict[str, Any],
         remote: Dict[str, Any],
         strategy: str = "three_way",
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> MergeResult:
         """
         Merge three versions of atom data
@@ -91,7 +93,7 @@ class ConflictResolver:
         base: Dict[str, Any],
         local: Dict[str, Any],
         remote: Dict[str, Any],
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> MergeResult:
         """
         Simple last-write-wins strategy
@@ -101,36 +103,32 @@ class ConflictResolver:
         """
         if not metadata:
             # No metadata, default to remote
-            return MergeResult(
-                success=True,
-                merged_data=remote,
-                conflicts=[],
-                conflict_type=ConflictType.NO_CONFLICT
-            )
+            return MergeResult(success=True, merged_data=remote, conflicts=[], conflict_type=ConflictType.NO_CONFLICT)
 
         local_timestamp = metadata.get("local_timestamp", "")
         remote_timestamp = metadata.get("remote_timestamp", "")
 
         if local_timestamp > remote_timestamp:
             winner = local
-            conflicts = [{
-                "field": "entire_document",
-                "resolution": "local_wins",
-                "reason": f"Local timestamp ({local_timestamp}) > Remote timestamp ({remote_timestamp})"
-            }]
+            conflicts = [
+                {
+                    "field": "entire_document",
+                    "resolution": "local_wins",
+                    "reason": f"Local timestamp ({local_timestamp}) > Remote timestamp ({remote_timestamp})",
+                }
+            ]
         else:
             winner = remote
-            conflicts = [{
-                "field": "entire_document",
-                "resolution": "remote_wins",
-                "reason": f"Remote timestamp ({remote_timestamp}) >= Local timestamp ({local_timestamp})"
-            }]
+            conflicts = [
+                {
+                    "field": "entire_document",
+                    "resolution": "remote_wins",
+                    "reason": f"Remote timestamp ({remote_timestamp}) >= Local timestamp ({local_timestamp})",
+                }
+            ]
 
         return MergeResult(
-            success=True,
-            merged_data=winner,
-            conflicts=conflicts,
-            conflict_type=ConflictType.CLEAN_MERGE
+            success=True, merged_data=winner, conflicts=conflicts, conflict_type=ConflictType.CLEAN_MERGE
         )
 
     def _field_level_merge(
@@ -138,7 +136,7 @@ class ConflictResolver:
         base: Dict[str, Any],
         local: Dict[str, Any],
         remote: Dict[str, Any],
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> MergeResult:
         """
         Field-level merge strategy
@@ -169,22 +167,21 @@ class ConflictResolver:
             else:
                 # Both changed differently - conflict
                 merged[field] = local_val  # Default to local
-                conflicts.append({
-                    "field": field,
-                    "base_value": base_val,
-                    "local_value": local_val,
-                    "remote_value": remote_val,
-                    "resolution": "local_chosen",
-                    "reason": "Both versions modified this field differently"
-                })
+                conflicts.append(
+                    {
+                        "field": field,
+                        "base_value": base_val,
+                        "local_value": local_val,
+                        "remote_value": remote_val,
+                        "resolution": "local_chosen",
+                        "reason": "Both versions modified this field differently",
+                    }
+                )
 
         conflict_type = ConflictType.FIELD_CONFLICT if conflicts else ConflictType.CLEAN_MERGE
 
         return MergeResult(
-            success=len(conflicts) == 0,
-            merged_data=merged,
-            conflicts=conflicts,
-            conflict_type=conflict_type
+            success=len(conflicts) == 0, merged_data=merged, conflicts=conflicts, conflict_type=conflict_type
         )
 
     def _three_way_merge(
@@ -192,7 +189,7 @@ class ConflictResolver:
         base: Dict[str, Any],
         local: Dict[str, Any],
         remote: Dict[str, Any],
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> MergeResult:
         """
         Three-way merge algorithm
@@ -234,31 +231,24 @@ class ConflictResolver:
             else:
                 # True conflict - cannot auto-merge
                 merged[field] = None  # Mark as conflicted
-                conflicts.append({
-                    "field": field,
-                    "base_value": base_val,
-                    "local_value": local_val,
-                    "remote_value": remote_val,
-                    "resolution": "manual_required",
-                    "reason": merge_attempt["reason"]
-                })
+                conflicts.append(
+                    {
+                        "field": field,
+                        "base_value": base_val,
+                        "local_value": local_val,
+                        "remote_value": remote_val,
+                        "resolution": "manual_required",
+                        "reason": merge_attempt["reason"],
+                    }
+                )
 
         conflict_type = ConflictType.FIELD_CONFLICT if conflicts else ConflictType.CLEAN_MERGE
 
         return MergeResult(
-            success=len(conflicts) == 0,
-            merged_data=merged,
-            conflicts=conflicts,
-            conflict_type=conflict_type
+            success=len(conflicts) == 0, merged_data=merged, conflicts=conflicts, conflict_type=conflict_type
         )
 
-    def _try_automatic_merge(
-        self,
-        field: str,
-        base_val: Any,
-        local_val: Any,
-        remote_val: Any
-    ) -> Dict[str, Any]:
+    def _try_automatic_merge(self, field: str, base_val: Any, local_val: Any, remote_val: Any) -> Dict[str, Any]:
         """
         Attempt to automatically merge a conflicting field
 
@@ -271,13 +261,13 @@ class ConflictResolver:
         if isinstance(base_val, str) and isinstance(local_val, str) and isinstance(remote_val, str):
             # If both added text to the end, concatenate
             if local_val.startswith(base_val) and remote_val.startswith(base_val):
-                local_addition = local_val[len(base_val):]
-                remote_addition = remote_val[len(base_val):]
+                local_addition = local_val[len(base_val) :]
+                remote_addition = remote_val[len(base_val) :]
 
                 return {
                     "success": True,
                     "value": base_val + local_addition + remote_addition,
-                    "reason": "Concatenated non-overlapping text additions"
+                    "reason": "Concatenated non-overlapping text additions",
                 }
 
         # List merging
@@ -288,11 +278,7 @@ class ConflictResolver:
 
             merged_list = base_val + local_additions + remote_additions
 
-            return {
-                "success": True,
-                "value": merged_list,
-                "reason": "Merged list additions from both versions"
-            }
+            return {"success": True, "value": merged_list, "reason": "Merged list additions from both versions"}
 
         # Dict merging
         if isinstance(base_val, dict) and isinstance(local_val, dict) and isinstance(remote_val, dict):
@@ -311,29 +297,15 @@ class ConflictResolver:
                     merged_dict[key] = val
                 elif base_val[key] != val and local_val.get(key) != val:
                     # Conflict - both changed same key
-                    return {
-                        "success": False,
-                        "reason": f"Both versions modified nested key '{key}'"
-                    }
+                    return {"success": False, "reason": f"Both versions modified nested key '{key}'"}
 
-            return {
-                "success": True,
-                "value": merged_dict,
-                "reason": "Merged dictionary changes"
-            }
+            return {"success": True, "value": merged_dict, "reason": "Merged dictionary changes"}
 
         # Cannot auto-merge
-        return {
-            "success": False,
-            "reason": "Incompatible changes - manual resolution required"
-        }
+        return {"success": False, "reason": "Incompatible changes - manual resolution required"}
 
     def resolve_manually(
-        self,
-        conflict: Dict[str, Any],
-        chosen_value: Any,
-        user_id: str,
-        reason: Optional[str] = None
+        self, conflict: Dict[str, Any], chosen_value: Any, user_id: str, reason: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Record a manual conflict resolution
@@ -355,7 +327,7 @@ class ConflictResolver:
             "chosen_value": chosen_value,
             "resolved_by": user_id,
             "resolved_at": datetime.now().isoformat(),
-            "reason": reason or "Manual resolution"
+            "reason": reason or "Manual resolution",
         }
 
     def get_conflict_summary(self, conflicts: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -371,12 +343,8 @@ class ConflictResolver:
         return {
             "total_conflicts": len(conflicts),
             "fields_affected": [c["field"] for c in conflicts],
-            "manual_resolution_required": sum(
-                1 for c in conflicts if c.get("resolution") == "manual_required"
-            ),
-            "auto_resolved": sum(
-                1 for c in conflicts if c.get("resolution") != "manual_required"
-            )
+            "manual_resolution_required": sum(1 for c in conflicts if c.get("resolution") == "manual_required"),
+            "auto_resolved": sum(1 for c in conflicts if c.get("resolution") != "manual_required"),
         }
 
 

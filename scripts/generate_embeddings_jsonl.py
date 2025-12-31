@@ -56,7 +56,9 @@ def build_text_from_atom(atom: Dict) -> str:
 def main(out: str):
     entries = []
     # atoms
-    for p in glob(os.path.join(ATOMS, "*.yaml")) + glob(os.path.join(ATOMS, "*.yml")) + glob(os.path.join(ATOMS, "*.json")):
+    for p in (
+        glob(os.path.join(ATOMS, "*.yaml")) + glob(os.path.join(ATOMS, "*.yml")) + glob(os.path.join(ATOMS, "*.json"))
+    ):
         atom = load_atom(p)
         aid = atom.get("id") or os.path.splitext(os.path.basename(p))[0]
         text = build_text_from_atom(atom)

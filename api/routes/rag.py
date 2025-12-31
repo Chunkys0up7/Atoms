@@ -1,17 +1,18 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+import json
 import os
 import sys
-import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from neo4j_client import get_neo4j_client
 from claude_client import get_claude_client
 from logging_config import get_logger
+from neo4j_client import get_neo4j_client
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -19,6 +20,7 @@ logger = get_logger(__name__)
 try:
     import chromadb
     from chromadb.utils import embedding_functions
+
     HAS_CHROMA = True
 except ImportError:
     HAS_CHROMA = False
@@ -26,6 +28,7 @@ except ImportError:
 
 class RAGQuery(BaseModel):
     """RAG query request model."""
+
     query: str
     top_k: int = 5
     atom_type: Optional[str] = None  # Filter by atom type
@@ -34,6 +37,7 @@ class RAGQuery(BaseModel):
 
 class RAGResponse(BaseModel):
     """RAG query response model."""
+
     answer: str
     sources: List[Dict[str, Any]]
     context_atoms: List[str]
@@ -69,21 +73,17 @@ def entity_rag(query: str, top_k: int = 5, atom_type: Optional[str] = None) -> L
             where_clause = {"type": atom_type}
 
         # Query the vector database
-        results = collection.query(
-            query_texts=[query],
-            n_results=top_k,
-            where=where_clause
-        )
+        results = collection.query(query_texts=[query], n_results=top_k, where=where_clause)
 
         # Format results
         atoms = []
-        if results and results['ids'] and len(results['ids']) > 0:
-            for i, atom_id in enumerate(results['ids'][0]):
+        if results and results["ids"] and len(results["ids"]) > 0:
+            for i, atom_id in enumerate(results["ids"][0]):
                 atom = {
-                    'id': atom_id,
-                    'content': results['documents'][0][i] if results['documents'] else "",
-                    'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                    'distance': results['distances'][0][i] if results.get('distances') else None
+                    "id": atom_id,
+                    "content": results["documents"][0][i] if results["documents"] else "",
+                    "metadata": results["metadatas"][0][i] if results["metadatas"] else {},
+                    "distance": results["distances"][0][i] if results.get("distances") else None,
                 }
                 atoms.append(atom)
 
@@ -91,10 +91,7 @@ def entity_rag(query: str, top_k: int = 5, atom_type: Optional[str] = None) -> L
     except Exception as e:
         # SECURITY: Log exception without exposing sensitive details
         logger.exception("Entity RAG query failed")
-        raise HTTPException(
-            status_code=503,
-            detail="Search service temporarily unavailable"
-        )
+        raise HTTPException(status_code=503, detail="Search service temporarily unavailable")
 
 
 def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -119,7 +116,7 @@ def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         expanded_atoms = seed_atoms.copy()
 
         for seed_atom in seed_atoms:
-            atom_id = seed_atom.get('id')
+            atom_id = seed_atom.get("id")
             if not atom_id:
                 continue
 
@@ -128,14 +125,16 @@ def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
                 related_atoms = neo4j_client.find_full_context(atom_id, max_depth=2, limit=10)
                 for related in related_atoms:
                     # Avoid duplicates
-                    if not any(a.get('id') == related['id'] for a in expanded_atoms):
-                        expanded_atoms.append({
-                            'id': related['id'],
-                            'type': related.get('type', 'unknown'),
-                            'title': related.get('title', ''),
-                            'source': 'neo4j_graph',
-                            'relationship': 'connected'
-                        })
+                    if not any(a.get("id") == related["id"] for a in expanded_atoms):
+                        expanded_atoms.append(
+                            {
+                                "id": related["id"],
+                                "type": related.get("type", "unknown"),
+                                "title": related.get("title", ""),
+                                "source": "neo4j_graph",
+                                "relationship": "connected",
+                            }
+                        )
             except Exception as e:
                 logger.exception(f"Neo4j traversal failed for atom {atom_id}")
                 continue
@@ -150,19 +149,18 @@ def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
 
     if graph_path.exists():
         import json
-        with open(graph_path, 'r', encoding='utf-8') as f:
+
+        with open(graph_path, "r", encoding="utf-8") as f:
             graph_data = json.load(f)
 
-        seed_ids = {a['id'] for a in seed_atoms}
-        for edge in graph_data.get('edges', []):
-            if edge['source'] in seed_ids or edge['target'] in seed_ids:
-                related_id = edge['target'] if edge['source'] in seed_ids else edge['source']
+        seed_ids = {a["id"] for a in seed_atoms}
+        for edge in graph_data.get("edges", []):
+            if edge["source"] in seed_ids or edge["target"] in seed_ids:
+                related_id = edge["target"] if edge["source"] in seed_ids else edge["source"]
                 if related_id not in seed_ids:
-                    expanded_atoms.append({
-                        'id': related_id,
-                        'relationship': edge.get('type', 'related'),
-                        'source': 'graph_json'
-                    })
+                    expanded_atoms.append(
+                        {"id": related_id, "relationship": edge.get("type", "related"), "source": "graph_json"}
+                    )
 
     return expanded_atoms
 
@@ -188,7 +186,7 @@ def impact_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         impact_chain = []
 
         for target_atom in target_atoms:
-            atom_id = target_atom.get('id')
+            atom_id = target_atom.get("id")
             if not atom_id:
                 continue
 
@@ -196,47 +194,48 @@ def impact_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
             try:
                 downstream_atoms = neo4j_client.find_downstream_impacts(atom_id, max_depth=3)
 
-                impact_chain.append({
-                    **target_atom,
-                    'impact_scope': 'downstream',
-                    'affected_count': len(downstream_atoms),
-                    'affected_atoms': [a['id'] for a in downstream_atoms[:10]],  # Limit to top 10
-                    'source': 'neo4j_graph'
-                })
+                impact_chain.append(
+                    {
+                        **target_atom,
+                        "impact_scope": "downstream",
+                        "affected_count": len(downstream_atoms),
+                        "affected_atoms": [a["id"] for a in downstream_atoms[:10]],  # Limit to top 10
+                        "source": "neo4j_graph",
+                    }
+                )
 
                 # Add affected atoms to the chain
                 for affected in downstream_atoms[:5]:  # Top 5 most impacted
-                    impact_chain.append({
-                        'id': affected['id'],
-                        'type': affected.get('type', 'unknown'),
-                        'title': affected.get('title', ''),
-                        'relationship_path': affected.get('relationship_path', []),
-                        'impact_level': 'affected',
-                        'source': 'neo4j_graph'
-                    })
+                    impact_chain.append(
+                        {
+                            "id": affected["id"],
+                            "type": affected.get("type", "unknown"),
+                            "title": affected.get("title", ""),
+                            "relationship_path": affected.get("relationship_path", []),
+                            "impact_level": "affected",
+                            "source": "neo4j_graph",
+                        }
+                    )
 
             except Exception as e:
                 logger.exception(f"Neo4j impact analysis failed for atom {atom_id}")
                 # Fallback: return target with no impact data
-                impact_chain.append({
-                    **target_atom,
-                    'impact_scope': 'unknown',
-                    'affected_count': 0,
-                    'error': str(e)
-                })
+                impact_chain.append({**target_atom, "impact_scope": "unknown", "affected_count": 0, "error": str(e)})
 
         return impact_chain
 
     # Fallback: return targets with basic impact data
     impact_chain = []
     for atom in target_atoms:
-        impact_chain.append({
-            **atom,
-            'impact_scope': 'downstream',
-            'affected_count': 0,
-            'source': 'fallback',
-            'note': 'Neo4j not available - install and configure for full impact analysis'
-        })
+        impact_chain.append(
+            {
+                **atom,
+                "impact_scope": "downstream",
+                "affected_count": 0,
+                "source": "fallback",
+                "note": "Neo4j not available - install and configure for full impact analysis",
+            }
+        )
 
     return impact_chain
 
@@ -251,10 +250,7 @@ async def query_rag(request: RAGQuery):
     - impact: Change impact analysis
     """
     if not HAS_CHROMA:
-        raise HTTPException(
-            status_code=500,
-            detail="RAG system not available. Install chromadb: pip install chromadb"
-        )
+        raise HTTPException(status_code=500, detail="RAG system not available. Install chromadb: pip install chromadb")
 
     # Route to appropriate RAG mode
     if request.rag_mode == "entity":
@@ -267,11 +263,7 @@ async def query_rag(request: RAGQuery):
         raise HTTPException(status_code=400, detail=f"Unknown RAG mode: {request.rag_mode}")
 
     if not results:
-        return RAGResponse(
-            answer="No relevant atoms found for your query.",
-            sources=[],
-            context_atoms=[]
-        )
+        return RAGResponse(answer="No relevant atoms found for your query.", sources=[], context_atoms=[])
 
     # Try to generate natural language answer with Claude
     claude_client = get_claude_client()
@@ -280,10 +272,7 @@ async def query_rag(request: RAGQuery):
         try:
             # Generate context-grounded answer using Claude
             claude_response = claude_client.generate_rag_answer(
-                query=request.query,
-                context_atoms=results,
-                rag_mode=request.rag_mode,
-                max_tokens=1024
+                query=request.query, context_atoms=results, rag_mode=request.rag_mode, max_tokens=1024
             )
 
             answer = claude_response.get("answer", "Error generating answer")
@@ -292,11 +281,7 @@ async def query_rag(request: RAGQuery):
             # Extract context atom IDs
             context_ids = [s["id"] for s in sources if s.get("id")]
 
-            return RAGResponse(
-                answer=answer,
-                sources=sources,
-                context_atoms=context_ids
-            )
+            return RAGResponse(answer=answer, sources=sources, context_atoms=context_ids)
         except Exception as e:
             logger.exception("Claude API request failed")
             # Fall through to fallback answer
@@ -315,31 +300,29 @@ async def query_rag(request: RAGQuery):
     sources = []
     context_ids = []
     for result in results:
-        sources.append({
-            'id': result.get('id', ''),
-            'type': result.get('metadata', {}).get('type', result.get('type', 'unknown')),
-            'file_path': result.get('metadata', {}).get('file_path', ''),
-            'distance': result.get('distance'),
-        })
-        context_ids.append(result.get('id', ''))
+        sources.append(
+            {
+                "id": result.get("id", ""),
+                "type": result.get("metadata", {}).get("type", result.get("type", "unknown")),
+                "file_path": result.get("metadata", {}).get("file_path", ""),
+                "distance": result.get("distance"),
+            }
+        )
+        context_ids.append(result.get("id", ""))
 
-    return RAGResponse(
-        answer=answer,
-        sources=sources,
-        context_atoms=context_ids
-    )
+    return RAGResponse(answer=answer, sources=sources, context_atoms=context_ids)
 
 
 @router.get("/api/rag/health")
 def rag_health():
     """Check RAG system health (vector DB, graph DB, and LLM)."""
     status = {
-        'chromadb_installed': HAS_CHROMA,
-        'vector_db_exists': False,
-        'collection_count': 0,
-        'neo4j_connected': False,
-        'graph_atom_count': 0,
-        'claude_api_available': False
+        "chromadb_installed": HAS_CHROMA,
+        "vector_db_exists": False,
+        "collection_count": 0,
+        "neo4j_connected": False,
+        "graph_atom_count": 0,
+        "claude_api_available": False,
     }
 
     # Check Chroma vector database
@@ -347,45 +330,43 @@ def rag_health():
         try:
             client = init_chroma_client()
             collection = client.get_collection(name="gndp_atoms")
-            status['vector_db_exists'] = True
-            status['collection_count'] = collection.count()
+            status["vector_db_exists"] = True
+            status["collection_count"] = collection.count()
 
             # Check documents collection
             try:
                 doc_collection = client.get_collection(name="gndp_documents")
-                status['document_collection_count'] = doc_collection.count()
+                status["document_collection_count"] = doc_collection.count()
             except:
-                status['document_collection_count'] = 0
+                status["document_collection_count"] = 0
         except Exception as e:
-            status['chroma_error'] = str(e)
+            status["chroma_error"] = str(e)
 
     # Check Neo4j graph database
     neo4j_client = get_neo4j_client()
     if neo4j_client:
         neo4j_health = neo4j_client.health_check()
-        status['neo4j_connected'] = neo4j_health.get('connected', False)
-        if neo4j_health.get('connected'):
-            graph_stats = neo4j_health.get('graph_stats', {})
-            status['graph_atom_count'] = graph_stats.get('atom_count', 0)
-            status['graph_relationship_count'] = graph_stats.get('relationship_count', 0)
-            status['neo4j_uri'] = neo4j_client.uri if hasattr(neo4j_client, 'uri') else ''
+        status["neo4j_connected"] = neo4j_health.get("connected", False)
+        if neo4j_health.get("connected"):
+            graph_stats = neo4j_health.get("graph_stats", {})
+            status["graph_atom_count"] = graph_stats.get("atom_count", 0)
+            status["graph_relationship_count"] = graph_stats.get("relationship_count", 0)
+            status["neo4j_uri"] = neo4j_client.uri if hasattr(neo4j_client, "uri") else ""
         else:
-            status['neo4j_error'] = neo4j_health.get('error', 'Unknown error')
+            status["neo4j_error"] = neo4j_health.get("error", "Unknown error")
 
     # Check Claude API
     claude_client = get_claude_client()
     if claude_client:
-        status['claude_api_available'] = True
-        status['claude_model'] = claude_client.model
+        status["claude_api_available"] = True
+        status["claude_model"] = claude_client.model
     else:
-        status['claude_error'] = 'Claude client not initialized - check ANTHROPIC_API_KEY'
+        status["claude_error"] = "Claude client not initialized - check ANTHROPIC_API_KEY"
 
     # Overall system status
-    status['dual_index_ready'] = status['vector_db_exists'] and status['neo4j_connected']
-    status['full_rag_ready'] = (
-        status['vector_db_exists'] and
-        status['neo4j_connected'] and
-        status['claude_api_available']
+    status["dual_index_ready"] = status["vector_db_exists"] and status["neo4j_connected"]
+    status["full_rag_ready"] = (
+        status["vector_db_exists"] and status["neo4j_connected"] and status["claude_api_available"]
     )
 
     return status
@@ -394,6 +375,7 @@ def rag_health():
 # Document Indexing
 class IndexDocumentRequest(BaseModel):
     """Request to index a document in RAG system."""
+
     doc_id: str
     title: str
     content: str
@@ -419,8 +401,7 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
         rag_index_dir = Path(__file__).parent.parent.parent / "rag-index"
         if not rag_index_dir.exists():
             raise HTTPException(
-                status_code=503,
-                detail="RAG system not initialized. Run scripts/initialize_vectors.py first"
+                status_code=503, detail="RAG system not initialized. Run scripts/initialize_vectors.py first"
             )
 
         client = chromadb.PersistentClient(path=str(rag_index_dir))
@@ -432,19 +413,15 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
             # Create collection if it doesn't exist
             openai_api_key = os.environ.get("OPENAI_API_KEY")
             if not openai_api_key:
-                raise HTTPException(
-                    status_code=503,
-                    detail="OPENAI_API_KEY not set. Required for document embeddings."
-                )
+                raise HTTPException(status_code=503, detail="OPENAI_API_KEY not set. Required for document embeddings.")
 
             embedding_fn = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=openai_api_key,
-                model_name="text-embedding-3-small"
+                api_key=openai_api_key, model_name="text-embedding-3-small"
             )
             collection = client.create_collection(
                 name="gndp_documents",
                 embedding_function=embedding_fn,
-                metadata={"description": "Published GNDP documents"}
+                metadata={"description": "Published GNDP documents"},
             )
 
         # Prepare document for indexing
@@ -452,6 +429,7 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
         if len(request.content) > 2000:
             # Call chunking API to split document
             import httpx
+
             try:
                 chunk_response = httpx.post(
                     "http://localhost:8001/api/chunking/chunk",
@@ -460,9 +438,9 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
                         "parent_atom_id": request.doc_id,
                         "chunk_strategy": "semantic",
                         "similarity_threshold": 0.8,
-                        "preserve_structure": True
+                        "preserve_structure": True,
                     },
-                    timeout=30.0
+                    timeout=30.0,
                 )
 
                 if chunk_response.status_code == 200:
@@ -482,22 +460,18 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
                             "module_id": request.module_id,
                             "chunk_index": chunk["chunk_index"],
                             "section_header": chunk.get("section_header", ""),
-                            "type": "document_chunk"
+                            "type": "document_chunk",
                         }
 
                         # Upsert chunk
-                        collection.upsert(
-                            ids=[chunk_id],
-                            documents=[chunk_text],
-                            metadatas=[chunk_metadata]
-                        )
+                        collection.upsert(ids=[chunk_id], documents=[chunk_text], metadatas=[chunk_metadata])
 
                     return {
                         "status": "indexed",
                         "doc_id": request.doc_id,
                         "strategy": "chunked",
                         "chunks_indexed": len(chunks),
-                        "message": f"Document chunked into {len(chunks)} semantic segments and indexed"
+                        "message": f"Document chunked into {len(chunks)} semantic segments and indexed",
                     }
             except Exception as e:
                 # Fallback to full document indexing if chunking fails
@@ -510,7 +484,7 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
             f"Title: {request.title}",
             f"Type: {request.template_type}",
             f"Module: {request.module_id}",
-            f"\nContent:\n{request.content}"
+            f"\nContent:\n{request.content}",
         ]
 
         document_text = "\n".join(doc_parts)
@@ -522,32 +496,25 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
             "template_type": request.template_type,
             "module_id": request.module_id,
             "atom_count": len(request.atom_ids),
-            "type": "document"
+            "type": "document",
         }
 
         if request.metadata:
             metadata.update(request.metadata)
 
         # Upsert to vector DB (creates or updates)
-        collection.upsert(
-            ids=[request.doc_id],
-            documents=[document_text],
-            metadatas=[metadata]
-        )
+        collection.upsert(ids=[request.doc_id], documents=[document_text], metadatas=[metadata])
 
         return {
             "status": "indexed",
             "doc_id": request.doc_id,
             "strategy": "full_document",
             "chunks_indexed": 1,
-            "message": "Document indexed successfully in RAG system"
+            "message": "Document indexed successfully in RAG system",
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to index document: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to index document: {str(e)}")
 
 
 # RAG Metrics and Performance Monitoring
@@ -562,12 +529,7 @@ def get_rag_metrics() -> Dict[str, Any]:
         - Index health (atom count, document count, staleness)
         - Usage statistics
     """
-    metrics = {
-        "retrieval_quality": {},
-        "performance": {},
-        "index_health": {},
-        "usage_stats": {}
-    }
+    metrics = {"retrieval_quality": {}, "performance": {}, "index_health": {}, "usage_stats": {}}
 
     # Index Health Metrics
     if HAS_CHROMA:
@@ -605,7 +567,8 @@ def get_rag_metrics() -> Dict[str, Any]:
                         # Calculate staleness
                         if last_update:
                             from datetime import datetime
-                            last_update_dt = datetime.fromisoformat(last_update.replace('Z', '+00:00'))
+
+                            last_update_dt = datetime.fromisoformat(last_update.replace("Z", "+00:00"))
                             now = datetime.utcnow()
                             staleness_hours = (now - last_update_dt).total_seconds() / 3600
                             metrics["index_health"]["staleness_hours"] = round(staleness_hours, 2)
@@ -623,7 +586,7 @@ def get_rag_metrics() -> Dict[str, Any]:
         "p95_latency_ms": 1850,  # P95
         "p99_latency_ms": 2400,  # P99
         "target_p95_ms": 2000,  # Target from RAG.md
-        "meets_target": True
+        "meets_target": True,
     }
 
     # Retrieval Quality Metrics (simulated - requires evaluation dataset)
@@ -632,19 +595,15 @@ def get_rag_metrics() -> Dict[str, Any]:
         "target_mrr": 0.80,  # From RAG.md
         "estimated_accuracy": 0.87,  # Based on dual-index architecture (+35%)
         "duplicate_rate": 0.01,  # < 2% target from RAG.md
-        "meets_quality_targets": True
+        "meets_quality_targets": True,
     }
 
     # Usage Statistics (simulated - requires query logging)
     metrics["usage_stats"] = {
         "total_queries_24h": 0,  # Would track in production
-        "queries_by_mode": {
-            "entity": 0,
-            "path": 0,
-            "impact": 0
-        },
+        "queries_by_mode": {"entity": 0, "path": 0, "impact": 0},
         "avg_results_per_query": 5.2,
-        "queries_with_no_results": 0
+        "queries_with_no_results": 0,
     }
 
     # Overall system score
@@ -652,7 +611,7 @@ def get_rag_metrics() -> Dict[str, Any]:
         "index_health_score": 1.0 if metrics["index_health"].get("atoms_indexed", 0) > 0 else 0.0,
         "performance_score": 1.0 if metrics["performance"]["meets_target"] else 0.75,
         "quality_score": 1.0 if metrics["retrieval_quality"]["meets_quality_targets"] else 0.75,
-        "total_score": 0.95  # Weighted average
+        "total_score": 0.95,  # Weighted average
     }
 
     return metrics

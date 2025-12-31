@@ -4,12 +4,14 @@ Ownership Analytics API
 Provides bulk reporting and analysis of ownership assignments across the knowledge graph.
 """
 
-from fastapi import APIRouter, HTTPException
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
-from pathlib import Path
 import json
 from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
 from .atoms import _load_all_atoms
 
 router = APIRouter()
@@ -18,6 +20,7 @@ router = APIRouter()
 # Data Models
 class OwnershipCoverage(BaseModel):
     """Coverage statistics for ownership assignments."""
+
     total_atoms: int
     atoms_with_owner: int
     atoms_with_steward: int
@@ -30,6 +33,7 @@ class OwnershipCoverage(BaseModel):
 
 class OwnerStats(BaseModel):
     """Statistics for a specific owner/steward."""
+
     name: str
     atom_count: int
     domains: List[str]
@@ -40,6 +44,7 @@ class OwnerStats(BaseModel):
 
 class AtomOwnershipInfo(BaseModel):
     """Ownership information for a single atom."""
+
     atom_id: str
     name: str
     atom_type: str
@@ -55,6 +60,7 @@ class AtomOwnershipInfo(BaseModel):
 
 class OwnershipReport(BaseModel):
     """Complete ownership analysis report."""
+
     coverage: OwnershipCoverage
     top_owners: List[OwnerStats]
     top_stewards: List[OwnerStats]
@@ -72,33 +78,34 @@ def load_atoms() -> List[Dict[str, Any]]:
     """
     # Use the direct import instead of HTTP call to avoid circular dependency
     result = _load_all_atoms()
-    
+
     # If cache returns empty, reload without cache
     if not result:
         print("DEBUG: Cache returned empty, reloading atoms directly from disk")
         atoms = []
         base = Path(__file__).parent.parent.parent / "atoms"
-        
+
         if not base.exists():
             print(f"ERROR: atoms directory not found at {base}")
             return atoms
-        
+
         yaml_files = list(base.rglob("*.yaml"))
         print(f"DEBUG: Found {len(yaml_files)} YAML files")
-        
+
         import yaml
+
         for yaml_file in yaml_files:
             try:
                 with open(yaml_file, "r", encoding="utf-8") as fh:
                     data = yaml.safe_load(fh)
                 if data:
-                    if 'id' not in data and 'atom_id' in data:
-                        data['id'] = data['atom_id']
+                    if "id" not in data and "atom_id" in data:
+                        data["id"] = data["atom_id"]
                     atoms.append(data)
             except Exception as e:
                 print(f"Warning: Could not read {yaml_file}: {e}")
                 continue
-        
+
         result = atoms
         print(f"DEBUG: Direct load returned {len(result)} atoms")
     return result
@@ -120,7 +127,7 @@ def calculate_coverage(atoms: List[Dict[str, Any]]) -> OwnershipCoverage:
         atoms_with_neither=with_neither,
         owner_coverage_pct=round((with_owner / total * 100) if total > 0 else 0, 1),
         steward_coverage_pct=round((with_steward / total * 100) if total > 0 else 0, 1),
-        full_coverage_pct=round((with_both / total * 100) if total > 0 else 0, 1)
+        full_coverage_pct=round((with_both / total * 100) if total > 0 else 0, 1),
     )
 
 
@@ -148,14 +155,16 @@ def get_owner_stats(atoms: List[Dict[str, Any]], field: str = "owner") -> List[O
         scores = [a.get("compliance_score") for a in atom_list if a.get("compliance_score") is not None]
         avg_score = round(sum(scores) / len(scores), 2) if scores else None
 
-        stats.append(OwnerStats(
-            name=name,
-            atom_count=len(atom_list),
-            domains=domains,
-            atom_types=dict(type_counts),
-            criticality_breakdown=dict(criticality_counts),
-            avg_compliance_score=avg_score
-        ))
+        stats.append(
+            OwnerStats(
+                name=name,
+                atom_count=len(atom_list),
+                domains=domains,
+                atom_types=dict(type_counts),
+                criticality_breakdown=dict(criticality_counts),
+                avg_compliance_score=avg_score,
+            )
+        )
 
     # Sort by atom count (descending)
     stats.sort(key=lambda s: s.atom_count, reverse=True)
@@ -188,19 +197,21 @@ def get_unassigned_atoms(atoms: List[Dict[str, Any]], limit: int = 100) -> List[
 
         # Only include atoms missing at least one assignment
         if not has_owner or not has_steward:
-            unassigned.append(AtomOwnershipInfo(
-                atom_id=atom.get("id", "unknown"),
-                name=atom.get("name", "Unnamed"),
-                atom_type=atom.get("type", "unknown"),
-                domain=atom.get("domain"),
-                owner=atom.get("owner"),
-                steward=atom.get("steward"),
-                criticality=atom.get("criticality", "MEDIUM"),
-                compliance_score=atom.get("compliance_score"),
-                last_modified=atom.get("updated_at"),
-                has_owner=has_owner,
-                has_steward=has_steward
-            ))
+            unassigned.append(
+                AtomOwnershipInfo(
+                    atom_id=atom.get("id", "unknown"),
+                    name=atom.get("name", "Unnamed"),
+                    atom_type=atom.get("type", "unknown"),
+                    domain=atom.get("domain"),
+                    owner=atom.get("owner"),
+                    steward=atom.get("steward"),
+                    criticality=atom.get("criticality", "MEDIUM"),
+                    compliance_score=atom.get("compliance_score"),
+                    last_modified=atom.get("updated_at"),
+                    has_owner=has_owner,
+                    has_steward=has_steward,
+                )
+            )
 
     # Sort by criticality (CRITICAL first), then by name
     criticality_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
@@ -272,7 +283,7 @@ def get_ownership_report() -> OwnershipReport:
             top_stewards=top_stewards,
             domain_coverage=domain_coverage,
             unassigned_atoms=unassigned_atoms,
-            ownership_gaps=gaps
+            ownership_gaps=gaps,
         )
 
     except Exception as e:
@@ -385,19 +396,21 @@ def get_atoms_by_owner(owner_name: str, role: str = "owner") -> List[AtomOwnersh
     filtered = []
     for atom in atoms:
         if atom.get(role) == owner_name:
-            filtered.append(AtomOwnershipInfo(
-                atom_id=atom.get("id", "unknown"),
-                name=atom.get("name", "Unnamed"),
-                atom_type=atom.get("type", "unknown"),
-                domain=atom.get("domain"),
-                owner=atom.get("owner"),
-                steward=atom.get("steward"),
-                criticality=atom.get("criticality", "MEDIUM"),
-                compliance_score=atom.get("compliance_score"),
-                last_modified=atom.get("updated_at"),
-                has_owner=bool(atom.get("owner")),
-                has_steward=bool(atom.get("steward"))
-            ))
+            filtered.append(
+                AtomOwnershipInfo(
+                    atom_id=atom.get("id", "unknown"),
+                    name=atom.get("name", "Unnamed"),
+                    atom_type=atom.get("type", "unknown"),
+                    domain=atom.get("domain"),
+                    owner=atom.get("owner"),
+                    steward=atom.get("steward"),
+                    criticality=atom.get("criticality", "MEDIUM"),
+                    compliance_score=atom.get("compliance_score"),
+                    last_modified=atom.get("updated_at"),
+                    has_owner=bool(atom.get("owner")),
+                    has_steward=bool(atom.get("steward")),
+                )
+            )
 
     if not filtered:
         raise HTTPException(status_code=404, detail=f"No atoms found for {role} '{owner_name}'")

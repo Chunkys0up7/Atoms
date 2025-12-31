@@ -9,19 +9,21 @@ Provides git metadata for atoms including:
 - Change summary
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
-from datetime import datetime, timedelta
 import subprocess
 import sys
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 router = APIRouter()
 
 
 class AtomGitStatus(BaseModel):
     """Git status information for an atom"""
+
     atom_id: str
     file_path: str
     status: str  # 'uncommitted', 'committed', 'new', 'modified'
@@ -42,7 +44,7 @@ def run_git_command(cmd: List[str]) -> str:
             capture_output=True,
             text=True,
             check=False,  # Don't raise exception, check return code manually
-            cwd=cwd_path
+            cwd=cwd_path,
         )
 
         if result.returncode != 0:
@@ -62,21 +64,21 @@ def run_git_command(cmd: List[str]) -> str:
 
 def get_uncommitted_files() -> Dict[str, str]:
     """Get map of uncommitted atom files and their status"""
-    output = run_git_command(['git', 'status', '--porcelain', 'atoms/', 'test_data/'])
+    output = run_git_command(["git", "status", "--porcelain", "atoms/", "test_data/"])
 
     uncommitted = {}
-    for line in output.split('\n'):
-        if line and line.endswith('.yaml'):
+    for line in output.split("\n"):
+        if line and line.endswith(".yaml"):
             status = line[:2].strip()
             filepath = line[3:].strip()
 
             # Map git status codes to readable status
-            if status in ('??', 'A'):
-                uncommitted[filepath] = 'new'
-            elif status == 'M':
-                uncommitted[filepath] = 'modified'
+            if status in ("??", "A"):
+                uncommitted[filepath] = "new"
+            elif status == "M":
+                uncommitted[filepath] = "modified"
             else:
-                uncommitted[filepath] = 'uncommitted'
+                uncommitted[filepath] = "uncommitted"
 
     return uncommitted
 
@@ -84,17 +86,12 @@ def get_uncommitted_files() -> Dict[str, str]:
 def get_file_git_info(filepath: str) -> Dict[str, Any]:
     """Get git commit information for a specific file"""
     # Get last commit for this file
-    log_output = run_git_command([
-        'git', 'log', '-1',
-        '--format=%H|%an|%ad|%s',
-        '--date=iso',
-        '--', filepath
-    ])
+    log_output = run_git_command(["git", "log", "-1", "--format=%H|%an|%ad|%s", "--date=iso", "--", filepath])
 
     if not log_output:
         return {}
 
-    parts = log_output.split('|', 3)
+    parts = log_output.split("|", 3)
     if len(parts) != 4:
         return {}
 
@@ -102,7 +99,7 @@ def get_file_git_info(filepath: str) -> Dict[str, Any]:
 
     # Parse commit date
     try:
-        commit_date = datetime.fromisoformat(date_str.replace(' +', '+').replace(' -', '-').split()[0])
+        commit_date = datetime.fromisoformat(date_str.replace(" +", "+").replace(" -", "-").split()[0])
         days_ago = (datetime.now() - commit_date).days
         is_recent = days_ago <= 7  # Recent if within last 7 days
     except (ValueError, AttributeError):
@@ -111,12 +108,12 @@ def get_file_git_info(filepath: str) -> Dict[str, Any]:
         is_recent = False
 
     return {
-        'last_commit_hash': commit_hash[:8],  # Short hash
-        'last_commit_author': author,
-        'last_commit_date': date_str.split()[0] if date_str else None,
-        'last_commit_message': message,
-        'days_since_commit': days_ago,
-        'is_recently_changed': is_recent
+        "last_commit_hash": commit_hash[:8],  # Short hash
+        "last_commit_author": author,
+        "last_commit_date": date_str.split()[0] if date_str else None,
+        "last_commit_message": message,
+        "days_since_commit": days_ago,
+        "is_recently_changed": is_recent,
     }
 
 
@@ -159,7 +156,7 @@ def get_all_atoms_git_status() -> List[AtomGitStatus]:
             relative_path = str(yaml_file.relative_to(Path(__file__).parent.parent.parent))
 
             # Normalize path separators for git (always use forward slashes)
-            git_path = relative_path.replace('\\', '/')
+            git_path = relative_path.replace("\\", "/")
 
             atom_id = get_atom_id_from_filepath(relative_path)
 
@@ -168,20 +165,15 @@ def get_all_atoms_git_status() -> List[AtomGitStatus]:
                 status = uncommitted[git_path]
                 # Modified files still have git history from previous commits
                 # Only new files should have empty git info
-                if status == 'new':
+                if status == "new":
                     git_info = {}
                 else:
                     git_info = get_file_git_info(git_path)
             else:
-                status = 'committed'
+                status = "committed"
                 git_info = get_file_git_info(git_path)
 
-            statuses.append(AtomGitStatus(
-                atom_id=atom_id,
-                file_path=git_path,
-                status=status,
-                **git_info
-            ))
+            statuses.append(AtomGitStatus(atom_id=atom_id, file_path=git_path, status=status, **git_info))
 
         except Exception as e:
             print(f"Warning: Could not get git status for {yaml_file}: {e}", file=sys.stderr)
@@ -205,10 +197,7 @@ def get_atom_git_status(atom_id: str) -> AtomGitStatus:
     base = Path(__file__).parent.parent.parent
 
     # Search in both atoms/ and test_data/
-    search_paths = [
-        base / "atoms",
-        base / "test_data"
-    ]
+    search_paths = [base / "atoms", base / "test_data"]
 
     atom_file = None
     for search_path in search_paths:
@@ -223,7 +212,7 @@ def get_atom_git_status(atom_id: str) -> AtomGitStatus:
 
     # Get relative path
     relative_path = str(atom_file.relative_to(base))
-    git_path = relative_path.replace('\\', '/')
+    git_path = relative_path.replace("\\", "/")
 
     # Check uncommitted status
     uncommitted = get_uncommitted_files()
@@ -232,20 +221,15 @@ def get_atom_git_status(atom_id: str) -> AtomGitStatus:
         status = uncommitted[git_path]
         # Modified files still have git history from previous commits
         # Only new files should have empty git info
-        if status == 'new':
+        if status == "new":
             git_info = {}
         else:
             git_info = get_file_git_info(git_path)
     else:
-        status = 'committed'
+        status = "committed"
         git_info = get_file_git_info(git_path)
 
-    return AtomGitStatus(
-        atom_id=atom_id,
-        file_path=git_path,
-        status=status,
-        **git_info
-    )
+    return AtomGitStatus(atom_id=atom_id, file_path=git_path, status=status, **git_info)
 
 
 @router.get("/api/git/atoms/recent")
@@ -263,15 +247,13 @@ def get_recently_changed_atoms(days: int = 7) -> List[AtomGitStatus]:
 
     # Filter for recently changed
     recent = [
-        status for status in all_statuses
-        if status.is_recently_changed or status.status in ('new', 'modified', 'uncommitted')
+        status
+        for status in all_statuses
+        if status.is_recently_changed or status.status in ("new", "modified", "uncommitted")
     ]
 
     # Sort by most recent first
-    recent.sort(
-        key=lambda s: s.days_since_commit if s.days_since_commit is not None else 999,
-        reverse=False
-    )
+    recent.sort(key=lambda s: s.days_since_commit if s.days_since_commit is not None else 999, reverse=False)
 
     return recent
 
@@ -287,18 +269,17 @@ def get_uncommitted_atoms() -> List[AtomGitStatus]:
     all_statuses = get_all_atoms_git_status()
 
     # Filter for uncommitted
-    uncommitted = [
-        status for status in all_statuses
-        if status.status in ('new', 'modified', 'uncommitted')
-    ]
+    uncommitted = [status for status in all_statuses if status.status in ("new", "modified", "uncommitted")]
 
     return uncommitted
 
 
 # Module Git Status Endpoints
 
+
 class ModuleGitStatus(BaseModel):
     """Git status information for a module"""
+
     module_id: str
     file_path: str
     status: str  # 'uncommitted', 'committed', 'new', 'modified'
@@ -312,21 +293,21 @@ class ModuleGitStatus(BaseModel):
 
 def get_uncommitted_module_files() -> Dict[str, str]:
     """Get map of uncommitted module files and their status"""
-    output = run_git_command(['git', 'status', '--porcelain', 'modules/'])
+    output = run_git_command(["git", "status", "--porcelain", "modules/"])
 
     uncommitted = {}
-    for line in output.split('\n'):
-        if line and line.endswith('.yaml'):
+    for line in output.split("\n"):
+        if line and line.endswith(".yaml"):
             status = line[:2].strip()
             filepath = line[3:].strip()
 
             # Map git status codes to readable status
-            if status in ('??', 'A'):
-                uncommitted[filepath] = 'new'
-            elif status == 'M':
-                uncommitted[filepath] = 'modified'
+            if status in ("??", "A"):
+                uncommitted[filepath] = "new"
+            elif status == "M":
+                uncommitted[filepath] = "modified"
             else:
-                uncommitted[filepath] = 'uncommitted'
+                uncommitted[filepath] = "uncommitted"
 
     return uncommitted
 
@@ -365,7 +346,7 @@ def get_all_modules_git_status() -> List[ModuleGitStatus]:
             relative_path = str(yaml_file.relative_to(Path(__file__).parent.parent.parent))
 
             # Normalize path separators for git (always use forward slashes)
-            git_path = relative_path.replace('\\', '/')
+            git_path = relative_path.replace("\\", "/")
 
             module_id = get_module_id_from_filepath(relative_path)
 
@@ -374,20 +355,15 @@ def get_all_modules_git_status() -> List[ModuleGitStatus]:
                 status = uncommitted[git_path]
                 # Modified files still have git history from previous commits
                 # Only new files should have empty git info
-                if status == 'new':
+                if status == "new":
                     git_info = {}
                 else:
                     git_info = get_file_git_info(git_path)
             else:
-                status = 'committed'
+                status = "committed"
                 git_info = get_file_git_info(git_path)
 
-            statuses.append(ModuleGitStatus(
-                module_id=module_id,
-                file_path=git_path,
-                status=status,
-                **git_info
-            ))
+            statuses.append(ModuleGitStatus(module_id=module_id, file_path=git_path, status=status, **git_info))
 
         except Exception as e:
             print(f"Warning: Could not get git status for {yaml_file}: {e}", file=sys.stderr)
@@ -416,7 +392,7 @@ def get_module_git_status(module_id: str) -> ModuleGitStatus:
     # Search for module file
     module_file = None
     for yaml_file in base.glob("*.yaml"):
-        if yaml_file.stem == module_id or yaml_file.stem.replace('-', '_') == module_id:
+        if yaml_file.stem == module_id or yaml_file.stem.replace("-", "_") == module_id:
             module_file = yaml_file
             break
 
@@ -425,7 +401,7 @@ def get_module_git_status(module_id: str) -> ModuleGitStatus:
 
     # Get relative path
     relative_path = str(module_file.relative_to(Path(__file__).parent.parent.parent))
-    git_path = relative_path.replace('\\', '/')
+    git_path = relative_path.replace("\\", "/")
 
     # Check uncommitted status
     uncommitted = get_uncommitted_module_files()
@@ -434,17 +410,12 @@ def get_module_git_status(module_id: str) -> ModuleGitStatus:
         status = uncommitted[git_path]
         # Modified files still have git history from previous commits
         # Only new files should have empty git info
-        if status == 'new':
+        if status == "new":
             git_info = {}
         else:
             git_info = get_file_git_info(git_path)
     else:
-        status = 'committed'
+        status = "committed"
         git_info = get_file_git_info(git_path)
 
-    return ModuleGitStatus(
-        module_id=module_id,
-        file_path=git_path,
-        status=status,
-        **git_info
-    )
+    return ModuleGitStatus(module_id=module_id, file_path=git_path, status=status, **git_info)

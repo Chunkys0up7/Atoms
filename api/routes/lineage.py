@@ -3,13 +3,14 @@ Git Lineage & Ownership Tracking
 Extracts git history for atoms to show who created/modified documentation and when
 """
 
+import os
+import re
+import subprocess
+from datetime import datetime
+from typing import List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
-import subprocess
-import os
-from datetime import datetime
-import re
 
 router = APIRouter(prefix="/api/lineage", tags=["lineage"])
 
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/api/lineage", tags=["lineage"])
 # Response Models
 class CommitInfo(BaseModel):
     """Single commit in an atom's history"""
+
     commit_hash: str
     author_name: str
     author_email: str
@@ -27,6 +29,7 @@ class CommitInfo(BaseModel):
 
 class AtomLineage(BaseModel):
     """Complete lineage information for an atom"""
+
     atom_id: str
     file_path: str
     created_by: str
@@ -39,6 +42,7 @@ class AtomLineage(BaseModel):
 
 class OwnershipSummary(BaseModel):
     """Ownership statistics across atoms"""
+
     author_name: str
     author_email: str
     atoms_created: int
@@ -50,12 +54,7 @@ class OwnershipSummary(BaseModel):
 def get_git_root() -> str:
     """Find the git repository root"""
     try:
-        result = subprocess.run(
-            ['git', 'rev-parse', '--show-toplevel'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True)
         return result.stdout.strip()
     except subprocess.CalledProcessError:
         raise HTTPException(status_code=500, detail="Not a git repository")
@@ -70,9 +69,9 @@ def get_atom_file_path(atom_id: str) -> Optional[str]:
 
     # Search in multiple locations
     search_dirs = [
-        os.path.join(git_root, 'atoms'),
-        os.path.join(git_root, 'test_data', 'atoms'),
-        os.path.join(git_root, 'test_data'),
+        os.path.join(git_root, "atoms"),
+        os.path.join(git_root, "test_data", "atoms"),
+        os.path.join(git_root, "test_data"),
     ]
 
     for base_dir in search_dirs:
@@ -86,7 +85,7 @@ def get_atom_file_path(atom_id: str) -> Optional[str]:
                 if file == f"{atom_id}.yaml" or file == f"{atom_id}.yml":
                     full_path = os.path.join(root, file)
                     # Return relative path from git root
-                    return os.path.relpath(full_path, git_root).replace('\\', '/')
+                    return os.path.relpath(full_path, git_root).replace("\\", "/")
 
     return None
 
@@ -101,70 +100,46 @@ def get_file_commits(file_path: str) -> List[CommitInfo]:
 
         # Git log command with custom format
         # Format: hash|author name|author email|timestamp|commit message
-        cmd = [
-            'git', 'log',
-            '--follow',  # Track renames
-            '--pretty=format:%H|%an|%ae|%aI|%s',
-            '--',
-            file_path
-        ]
+        cmd = ["git", "log", "--follow", "--pretty=format:%H|%an|%ae|%aI|%s", "--", file_path]  # Track renames
 
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd=git_root,
-            check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=git_root, check=False)
 
         if result.returncode != 0:
             return []
 
         commits = []
-        for line in result.stdout.strip().split('\n'):
+        for line in result.stdout.strip().split("\n"):
             if not line:
                 continue
 
-            parts = line.split('|', 4)
+            parts = line.split("|", 4)
             if len(parts) < 5:
                 continue
 
             commit_hash, author_name, author_email, timestamp, message = parts
 
             # Get stats for this commit
-            stats_cmd = [
-                'git', 'show',
-                '--stat',
-                '--oneline',
-                '--pretty=format:',
-                commit_hash,
-                '--',
-                file_path
-            ]
+            stats_cmd = ["git", "show", "--stat", "--oneline", "--pretty=format:", commit_hash, "--", file_path]
 
-            stats_result = subprocess.run(
-                stats_cmd,
-                capture_output=True,
-                text=True,
-                cwd=git_root,
-                check=False
-            )
+            stats_result = subprocess.run(stats_cmd, capture_output=True, text=True, cwd=git_root, check=False)
 
             changes_summary = None
             if stats_result.returncode == 0:
                 # Parse stats output (e.g., "1 file changed, 5 insertions(+), 2 deletions(-)")
-                stats_lines = [l for l in stats_result.stdout.strip().split('\n') if l]
+                stats_lines = [l for l in stats_result.stdout.strip().split("\n") if l]
                 if stats_lines:
                     changes_summary = stats_lines[-1].strip()
 
-            commits.append(CommitInfo(
-                commit_hash=commit_hash[:8],  # Short hash
-                author_name=author_name,
-                author_email=author_email,
-                timestamp=datetime.fromisoformat(timestamp),
-                message=message,
-                changes_summary=changes_summary
-            ))
+            commits.append(
+                CommitInfo(
+                    commit_hash=commit_hash[:8],  # Short hash
+                    author_name=author_name,
+                    author_email=author_email,
+                    timestamp=datetime.fromisoformat(timestamp),
+                    message=message,
+                    changes_summary=changes_summary,
+                )
+            )
 
         return commits
 
@@ -189,7 +164,7 @@ async def get_atom_lineage(atom_id: str):
     if not file_path:
         raise HTTPException(
             status_code=404,
-            detail=f"Atom file not found for {atom_id}. Make sure the atom exists in atoms/ or test_data/ directories."
+            detail=f"Atom file not found for {atom_id}. Make sure the atom exists in atoms/ or test_data/ directories.",
         )
 
     # Get all commits
@@ -197,8 +172,7 @@ async def get_atom_lineage(atom_id: str):
 
     if not commits:
         raise HTTPException(
-            status_code=404,
-            detail=f"No git history found for {atom_id}. File may not be committed yet."
+            status_code=404, detail=f"No git history found for {atom_id}. File may not be committed yet."
         )
 
     # First commit = creation
@@ -215,7 +189,7 @@ async def get_atom_lineage(atom_id: str):
         last_modified_by=last_commit.author_name,
         last_modified_at=last_commit.timestamp,
         total_commits=len(commits),
-        commits=commits
+        commits=commits,
     )
 
 
@@ -229,9 +203,9 @@ async def get_ownership_summary():
 
     # Search in multiple locations
     search_dirs = [
-        os.path.join(git_root, 'atoms'),
-        os.path.join(git_root, 'test_data', 'atoms'),
-        os.path.join(git_root, 'test_data'),
+        os.path.join(git_root, "atoms"),
+        os.path.join(git_root, "test_data", "atoms"),
+        os.path.join(git_root, "test_data"),
     ]
 
     # Track author statistics
@@ -244,10 +218,10 @@ async def get_ownership_summary():
 
         for root, dirs, files in os.walk(atoms_dir):
             for file in files:
-                if not (file.endswith('.yaml') or file.endswith('.yml')):
+                if not (file.endswith(".yaml") or file.endswith(".yml")):
                     continue
 
-                file_path = os.path.relpath(os.path.join(root, file), git_root).replace('\\', '/')
+                file_path = os.path.relpath(os.path.join(root, file), git_root).replace("\\", "/")
                 commits = get_file_commits(file_path)
 
                 if not commits:
@@ -258,36 +232,28 @@ async def get_ownership_summary():
                 creator_key = (creator.author_name, creator.author_email)
 
                 if creator_key not in author_stats:
-                    author_stats[creator_key] = {
-                        'atoms_created': 0,
-                        'atoms_modified': 0,
-                        'total_commits': 0
-                    }
+                    author_stats[creator_key] = {"atoms_created": 0, "atoms_modified": 0, "total_commits": 0}
 
-                author_stats[creator_key]['atoms_created'] += 1
+                author_stats[creator_key]["atoms_created"] += 1
 
                 # Track all contributors
                 for commit in commits:
                     author_key = (commit.author_name, commit.author_email)
 
                     if author_key not in author_stats:
-                        author_stats[author_key] = {
-                            'atoms_created': 0,
-                            'atoms_modified': 0,
-                            'total_commits': 0
-                        }
+                        author_stats[author_key] = {"atoms_created": 0, "atoms_modified": 0, "total_commits": 0}
 
-                    author_stats[author_key]['atoms_modified'] += 1
-                    author_stats[author_key]['total_commits'] += 1
+                    author_stats[author_key]["atoms_modified"] += 1
+                    author_stats[author_key]["total_commits"] += 1
 
     # Convert to response format
     summaries = [
         OwnershipSummary(
             author_name=name,
             author_email=email,
-            atoms_created=stats['atoms_created'],
-            atoms_modified=stats['atoms_modified'],
-            total_commits=stats['total_commits']
+            atoms_created=stats["atoms_created"],
+            atoms_modified=stats["atoms_modified"],
+            total_commits=stats["total_commits"],
         )
         for (name, email), stats in author_stats.items()
     ]
@@ -313,30 +279,11 @@ async def get_commit_diff(atom_id: str, commit_hash: str):
         git_root = get_git_root()
 
         # Get the diff for this commit
-        cmd = [
-            'git', 'show',
-            '--pretty=format:',  # No commit message
-            commit_hash,
-            '--',
-            file_path
-        ]
+        cmd = ["git", "show", "--pretty=format:", commit_hash, "--", file_path]  # No commit message
 
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd=git_root,
-            check=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=git_root, check=True)
 
-        return {
-            "atom_id": atom_id,
-            "commit_hash": commit_hash,
-            "diff": result.stdout
-        }
+        return {"atom_id": atom_id, "commit_hash": commit_hash, "diff": result.stdout}
 
     except subprocess.CalledProcessError as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get diff: {e.stderr}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get diff: {e.stderr}")

@@ -8,15 +8,17 @@ Creates and manages Neo4j database constraints for graph integrity:
 - Schema validation at database level
 """
 
+import sys
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import sys
 
 try:
     from ..neo4j_client import get_neo4j_client
 except ImportError:
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from neo4j_client import get_neo4j_client
 
@@ -25,6 +27,7 @@ router = APIRouter()
 
 class Constraint(BaseModel):
     """Database constraint definition"""
+
     name: str
     type: str  # 'unique', 'exists', 'relationship'
     entity: str  # 'node' or 'relationship'
@@ -37,6 +40,7 @@ class Constraint(BaseModel):
 
 class ConstraintResult(BaseModel):
     """Result of constraint operation"""
+
     constraint_name: str
     status: str
     message: str
@@ -53,7 +57,7 @@ def get_recommended_constraints() -> List[Constraint]:
             label="Atom",
             property="id",
             description="Ensures each Atom has a unique ID",
-            cypher="CREATE CONSTRAINT atom_id_unique IF NOT EXISTS FOR (a:Atom) REQUIRE a.id IS UNIQUE"
+            cypher="CREATE CONSTRAINT atom_id_unique IF NOT EXISTS FOR (a:Atom) REQUIRE a.id IS UNIQUE",
         ),
         Constraint(
             name="atom_type_exists",
@@ -62,7 +66,7 @@ def get_recommended_constraints() -> List[Constraint]:
             label="Atom",
             property="type",
             description="Ensures every Atom has a type property",
-            cypher="CREATE CONSTRAINT atom_type_exists IF NOT EXISTS FOR (a:Atom) REQUIRE a.type IS NOT NULL"
+            cypher="CREATE CONSTRAINT atom_type_exists IF NOT EXISTS FOR (a:Atom) REQUIRE a.type IS NOT NULL",
         ),
         Constraint(
             name="atom_name_exists",
@@ -71,7 +75,7 @@ def get_recommended_constraints() -> List[Constraint]:
             label="Atom",
             property="name",
             description="Ensures every Atom has a name property",
-            cypher="CREATE CONSTRAINT atom_name_exists IF NOT EXISTS FOR (a:Atom) REQUIRE a.name IS NOT NULL"
+            cypher="CREATE CONSTRAINT atom_name_exists IF NOT EXISTS FOR (a:Atom) REQUIRE a.name IS NOT NULL",
         ),
         Constraint(
             name="module_id_unique",
@@ -80,7 +84,7 @@ def get_recommended_constraints() -> List[Constraint]:
             label="Module",
             property="id",
             description="Ensures each Module has a unique ID",
-            cypher="CREATE CONSTRAINT module_id_unique IF NOT EXISTS FOR (m:Module) REQUIRE m.id IS UNIQUE"
+            cypher="CREATE CONSTRAINT module_id_unique IF NOT EXISTS FOR (m:Module) REQUIRE m.id IS UNIQUE",
         ),
         Constraint(
             name="phase_id_unique",
@@ -89,8 +93,8 @@ def get_recommended_constraints() -> List[Constraint]:
             label="Phase",
             property="id",
             description="Ensures each Phase has a unique ID",
-            cypher="CREATE CONSTRAINT phase_id_unique IF NOT EXISTS FOR (p:Phase) REQUIRE p.id IS UNIQUE"
-        )
+            cypher="CREATE CONSTRAINT phase_id_unique IF NOT EXISTS FOR (p:Phase) REQUIRE p.id IS UNIQUE",
+        ),
     ]
 
 
@@ -102,15 +106,17 @@ def get_existing_constraints(neo4j_client) -> List[Dict[str, Any]]:
             constraints = []
 
             for record in result:
-                constraints.append({
-                    'id': record.get('id'),
-                    'name': record.get('name'),
-                    'type': record.get('type'),
-                    'entityType': record.get('entityType'),
-                    'labelsOrTypes': record.get('labelsOrTypes'),
-                    'properties': record.get('properties'),
-                    'ownedIndexId': record.get('ownedIndexId')
-                })
+                constraints.append(
+                    {
+                        "id": record.get("id"),
+                        "name": record.get("name"),
+                        "type": record.get("type"),
+                        "entityType": record.get("entityType"),
+                        "labelsOrTypes": record.get("labelsOrTypes"),
+                        "properties": record.get("properties"),
+                        "ownedIndexId": record.get("ownedIndexId"),
+                    }
+                )
 
             return constraints
 
@@ -131,17 +137,14 @@ def list_constraints() -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         # Get recommended constraints
         recommended = get_recommended_constraints()
 
         # Get existing constraints
         existing = get_existing_constraints(neo4j_client)
-        existing_names = {c['name'] for c in existing}
+        existing_names = {c["name"] for c in existing}
 
         # Mark which recommended constraints are active
         for constraint in recommended:
@@ -152,17 +155,14 @@ def list_constraints() -> Dict[str, Any]:
             "existing": existing,
             "total_recommended": len(recommended),
             "total_existing": len(existing),
-            "active_count": sum(1 for c in recommended if c.is_active)
+            "active_count": sum(1 for c in recommended if c.is_active),
         }
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error listing constraints: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list constraints: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to list constraints: {str(e)}")
 
 
 @router.post("/api/graph/constraints/create")
@@ -180,20 +180,14 @@ def create_constraint(constraint_name: str) -> ConstraintResult:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         # Find the constraint definition
         recommended = get_recommended_constraints()
         constraint = next((c for c in recommended if c.name == constraint_name), None)
 
         if not constraint:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Constraint '{constraint_name}' not found in recommendations"
-            )
+            raise HTTPException(status_code=404, detail=f"Constraint '{constraint_name}' not found in recommendations")
 
         # Create the constraint
         with neo4j_client.driver.session() as session:
@@ -203,7 +197,7 @@ def create_constraint(constraint_name: str) -> ConstraintResult:
                 return ConstraintResult(
                     constraint_name=constraint_name,
                     status="success",
-                    message=f"Created constraint: {constraint.description}"
+                    message=f"Created constraint: {constraint.description}",
                 )
 
             except Exception as e:
@@ -215,7 +209,7 @@ def create_constraint(constraint_name: str) -> ConstraintResult:
                         constraint_name=constraint_name,
                         status="already_exists",
                         message=f"Constraint already exists: {constraint_name}",
-                        error=error_msg
+                        error=error_msg,
                     )
 
                 raise
@@ -225,10 +219,7 @@ def create_constraint(constraint_name: str) -> ConstraintResult:
     except Exception as e:
         print(f"Error creating constraint: {e}", file=sys.stderr)
         return ConstraintResult(
-            constraint_name=constraint_name,
-            status="error",
-            message=f"Failed to create constraint",
-            error=str(e)
+            constraint_name=constraint_name, status="error", message=f"Failed to create constraint", error=str(e)
         )
 
 
@@ -244,10 +235,7 @@ def create_all_constraints() -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         recommended = get_recommended_constraints()
         results = []
@@ -256,9 +244,9 @@ def create_all_constraints() -> Dict[str, Any]:
             result = create_constraint(constraint.name)
             results.append(result.dict())
 
-        success_count = sum(1 for r in results if r['status'] == 'success')
-        already_exist_count = sum(1 for r in results if r['status'] == 'already_exists')
-        error_count = sum(1 for r in results if r['status'] == 'error')
+        success_count = sum(1 for r in results if r["status"] == "success")
+        already_exist_count = sum(1 for r in results if r["status"] == "already_exists")
+        error_count = sum(1 for r in results if r["status"] == "error")
 
         return {
             "results": results,
@@ -266,18 +254,15 @@ def create_all_constraints() -> Dict[str, Any]:
                 "total": len(results),
                 "created": success_count,
                 "already_existed": already_exist_count,
-                "errors": error_count
-            }
+                "errors": error_count,
+            },
         }
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error creating all constraints: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create constraints: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to create constraints: {str(e)}")
 
 
 @router.delete("/api/graph/constraints/{constraint_name}")
@@ -295,10 +280,7 @@ def drop_constraint(constraint_name: str) -> ConstraintResult:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         # Drop the constraint
         with neo4j_client.driver.session() as session:
@@ -306,17 +288,12 @@ def drop_constraint(constraint_name: str) -> ConstraintResult:
                 session.run(f"DROP CONSTRAINT {constraint_name} IF EXISTS")
 
                 return ConstraintResult(
-                    constraint_name=constraint_name,
-                    status="success",
-                    message=f"Dropped constraint: {constraint_name}"
+                    constraint_name=constraint_name, status="success", message=f"Dropped constraint: {constraint_name}"
                 )
 
             except Exception as e:
                 return ConstraintResult(
-                    constraint_name=constraint_name,
-                    status="error",
-                    message=f"Failed to drop constraint",
-                    error=str(e)
+                    constraint_name=constraint_name, status="error", message=f"Failed to drop constraint", error=str(e)
                 )
 
     except HTTPException:
@@ -324,10 +301,7 @@ def drop_constraint(constraint_name: str) -> ConstraintResult:
     except Exception as e:
         print(f"Error dropping constraint: {e}", file=sys.stderr)
         return ConstraintResult(
-            constraint_name=constraint_name,
-            status="error",
-            message=f"Failed to drop constraint",
-            error=str(e)
+            constraint_name=constraint_name, status="error", message=f"Failed to drop constraint", error=str(e)
         )
 
 
@@ -343,68 +317,77 @@ def validate_graph_against_constraints() -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         violations = []
 
         with neo4j_client.driver.session() as session:
             # Check for duplicate atom IDs (if unique constraint not enforced)
-            result = session.run("""
+            result = session.run(
+                """
                 MATCH (a:Atom)
                 WITH a.id as atom_id, count(*) as count
                 WHERE count > 1
                 RETURN atom_id, count
-            """)
+            """
+            )
 
             for record in result:
-                violations.append({
-                    'type': 'duplicate_id',
-                    'severity': 'error',
-                    'entity': 'Atom',
-                    'property': 'id',
-                    'value': record['atom_id'],
-                    'count': record['count'],
-                    'message': f"Atom ID '{record['atom_id']}' is duplicated {record['count']} times"
-                })
+                violations.append(
+                    {
+                        "type": "duplicate_id",
+                        "severity": "error",
+                        "entity": "Atom",
+                        "property": "id",
+                        "value": record["atom_id"],
+                        "count": record["count"],
+                        "message": f"Atom ID '{record['atom_id']}' is duplicated {record['count']} times",
+                    }
+                )
 
             # Check for atoms without type
-            result = session.run("""
+            result = session.run(
+                """
                 MATCH (a:Atom)
                 WHERE a.type IS NULL OR a.type = ''
                 RETURN a.id as atom_id
                 LIMIT 50
-            """)
+            """
+            )
 
             for record in result:
-                violations.append({
-                    'type': 'missing_property',
-                    'severity': 'error',
-                    'entity': 'Atom',
-                    'property': 'type',
-                    'atom_id': record['atom_id'],
-                    'message': f"Atom '{record['atom_id']}' is missing required property 'type'"
-                })
+                violations.append(
+                    {
+                        "type": "missing_property",
+                        "severity": "error",
+                        "entity": "Atom",
+                        "property": "type",
+                        "atom_id": record["atom_id"],
+                        "message": f"Atom '{record['atom_id']}' is missing required property 'type'",
+                    }
+                )
 
             # Check for atoms without name
-            result = session.run("""
+            result = session.run(
+                """
                 MATCH (a:Atom)
                 WHERE a.name IS NULL OR a.name = ''
                 RETURN a.id as atom_id
                 LIMIT 50
-            """)
+            """
+            )
 
             for record in result:
-                violations.append({
-                    'type': 'missing_property',
-                    'severity': 'warning',
-                    'entity': 'Atom',
-                    'property': 'name',
-                    'atom_id': record['atom_id'],
-                    'message': f"Atom '{record['atom_id']}' is missing property 'name'"
-                })
+                violations.append(
+                    {
+                        "type": "missing_property",
+                        "severity": "warning",
+                        "entity": "Atom",
+                        "property": "name",
+                        "atom_id": record["atom_id"],
+                        "message": f"Atom '{record['atom_id']}' is missing property 'name'",
+                    }
+                )
 
         # Get constraint status
         existing = get_existing_constraints(neo4j_client)
@@ -413,20 +396,17 @@ def validate_graph_against_constraints() -> Dict[str, Any]:
             "status": "completed",
             "violations": violations,
             "total_violations": len(violations),
-            "errors": sum(1 for v in violations if v['severity'] == 'error'),
-            "warnings": sum(1 for v in violations if v['severity'] == 'warning'),
+            "errors": sum(1 for v in violations if v["severity"] == "error"),
+            "warnings": sum(1 for v in violations if v["severity"] == "warning"),
             "active_constraints": len(existing),
-            "is_valid": len([v for v in violations if v['severity'] == 'error']) == 0
+            "is_valid": len([v for v in violations if v["severity"] == "error"]) == 0,
         }
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error validating graph: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Validation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
 
 
 @router.get("/api/graph/constraints/stats")
@@ -441,39 +421,33 @@ def get_constraint_stats() -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         recommended = get_recommended_constraints()
         existing = get_existing_constraints(neo4j_client)
-        existing_names = {c['name'] for c in existing}
+        existing_names = {c["name"] for c in existing}
 
         # Count by type
         constraint_types = {}
         for c in existing:
-            ctype = c.get('type', 'unknown')
+            ctype = c.get("type", "unknown")
             constraint_types[ctype] = constraint_types.get(ctype, 0) + 1
 
         return {
             "total_recommended": len(recommended),
             "total_existing": len(existing),
             "implemented_count": sum(1 for c in recommended if c.name in existing_names),
-            "implementation_percentage": round(
-                100 * sum(1 for c in recommended if c.name in existing_names) / len(recommended)
-            ) if recommended else 0,
+            "implementation_percentage": (
+                round(100 * sum(1 for c in recommended if c.name in existing_names) / len(recommended))
+                if recommended
+                else 0
+            ),
             "constraint_types": constraint_types,
-            "missing_recommended": [
-                c.name for c in recommended if c.name not in existing_names
-            ]
+            "missing_recommended": [c.name for c in recommended if c.name not in existing_names],
         }
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error getting constraint stats: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")

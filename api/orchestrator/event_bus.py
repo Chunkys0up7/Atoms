@@ -4,57 +4,54 @@ Event Bus - Asynchronous Event Communication
 Pub/sub system for decoupled communication between workflow components.
 """
 
-from typing import Dict, Any, List, Callable, Optional
-from datetime import datetime
-from enum import Enum
 import asyncio
 import logging
 from collections import defaultdict
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class EventType(str, Enum):
     """Event type enum"""
+
     # Process lifecycle
-    PROCESS_STARTED = 'process.started'
-    PROCESS_COMPLETED = 'process.completed'
-    PROCESS_FAILED = 'process.failed'
-    PROCESS_SUSPENDED = 'process.suspended'
-    PROCESS_RESUMED = 'process.resumed'
-    PROCESS_CANCELLED = 'process.cancelled'
+    PROCESS_STARTED = "process.started"
+    PROCESS_COMPLETED = "process.completed"
+    PROCESS_FAILED = "process.failed"
+    PROCESS_SUSPENDED = "process.suspended"
+    PROCESS_RESUMED = "process.resumed"
+    PROCESS_CANCELLED = "process.cancelled"
 
     # Task lifecycle
-    TASK_CREATED = 'task.created'
-    TASK_ASSIGNED = 'task.assigned'
-    TASK_STARTED = 'task.started'
-    TASK_COMPLETED = 'task.completed'
-    TASK_FAILED = 'task.failed'
-    TASK_REASSIGNED = 'task.reassigned'
+    TASK_CREATED = "task.created"
+    TASK_ASSIGNED = "task.assigned"
+    TASK_STARTED = "task.started"
+    TASK_COMPLETED = "task.completed"
+    TASK_FAILED = "task.failed"
+    TASK_REASSIGNED = "task.reassigned"
 
     # SLA events
-    SLA_AT_RISK = 'sla.at_risk'
-    SLA_BREACHED = 'sla.breached'
-    SLA_MET = 'sla.met'
+    SLA_AT_RISK = "sla.at_risk"
+    SLA_BREACHED = "sla.breached"
+    SLA_MET = "sla.met"
 
     # Assignment events
-    ASSIGNMENT_NEEDED = 'assignment.needed'
-    WORKLOAD_IMBALANCE = 'workload.imbalance'
+    ASSIGNMENT_NEEDED = "assignment.needed"
+    WORKLOAD_IMBALANCE = "workload.imbalance"
 
     # Notifications
-    NOTIFICATION_SEND = 'notification.send'
-    ESCALATION_TRIGGERED = 'escalation.triggered'
+    NOTIFICATION_SEND = "notification.send"
+    ESCALATION_TRIGGERED = "escalation.triggered"
 
 
 class Event:
     """Event object"""
 
     def __init__(
-        self,
-        event_type: EventType,
-        data: Dict[str, Any],
-        source: str = 'system',
-        correlation_id: Optional[str] = None
+        self, event_type: EventType, data: Dict[str, Any], source: str = "system", correlation_id: Optional[str] = None
     ):
         self.event_type = event_type
         self.data = data
@@ -66,12 +63,12 @@ class Event:
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary"""
         return {
-            'event_id': self.event_id,
-            'event_type': self.event_type.value,
-            'data': self.data,
-            'source': self.source,
-            'correlation_id': self.correlation_id,
-            'timestamp': self.timestamp.isoformat()
+            "event_id": self.event_id,
+            "event_type": self.event_type.value,
+            "data": self.data,
+            "source": self.source,
+            "correlation_id": self.correlation_id,
+            "timestamp": self.timestamp.isoformat(),
         }
 
 
@@ -90,7 +87,7 @@ class EventBus:
     - Error isolation (one handler failure doesn't affect others)
     """
 
-    _instance: Optional['EventBus'] = None
+    _instance: Optional["EventBus"] = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -110,11 +107,7 @@ class EventBus:
 
         logger.info("EventBus initialized")
 
-    def subscribe(
-        self,
-        event_type: EventType,
-        handler: EventHandler
-    ):
+    def subscribe(self, event_type: EventType, handler: EventHandler):
         """
         Subscribe to an event type
 
@@ -135,11 +128,7 @@ class EventBus:
         self._wildcard_subscribers.append(handler)
         logger.info(f"Subscribed to all events: {handler.__name__}")
 
-    def unsubscribe(
-        self,
-        event_type: EventType,
-        handler: EventHandler
-    ):
+    def unsubscribe(self, event_type: EventType, handler: EventHandler):
         """
         Unsubscribe from an event type
 
@@ -152,11 +141,7 @@ class EventBus:
             logger.info(f"Unsubscribed from {event_type.value}: {handler.__name__}")
 
     def publish(
-        self,
-        event_type: EventType,
-        data: Dict[str, Any],
-        source: str = 'system',
-        correlation_id: Optional[str] = None
+        self, event_type: EventType, data: Dict[str, Any], source: str = "system", correlation_id: Optional[str] = None
     ):
         """
         Publish an event
@@ -192,11 +177,7 @@ class EventBus:
                 logger.error(f"Error in wildcard handler {handler.__name__}: {e}", exc_info=True)
 
     async def publish_async(
-        self,
-        event_type: EventType,
-        data: Dict[str, Any],
-        source: str = 'system',
-        correlation_id: Optional[str] = None
+        self, event_type: EventType, data: Dict[str, Any], source: str = "system", correlation_id: Optional[str] = None
     ):
         """
         Publish an event asynchronously
@@ -246,11 +227,7 @@ class EventBus:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    def get_event_history(
-        self,
-        event_type: Optional[EventType] = None,
-        limit: int = 100
-    ) -> List[Dict[str, Any]]:
+    def get_event_history(self, event_type: Optional[EventType] = None, limit: int = 100) -> List[Dict[str, Any]]:
         """
         Get recent event history
 
@@ -311,6 +288,7 @@ def get_event_bus() -> EventBus:
 # ============================================================================
 # Built-in Event Handlers
 # ============================================================================
+
 
 def setup_default_handlers():
     """

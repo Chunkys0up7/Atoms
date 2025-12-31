@@ -15,16 +15,17 @@ Usage:
     python scripts/validate_atoms.py --fix              # Auto-fix minor issues
 """
 
-import sys
 import json
-import yaml
-from pathlib import Path
-from typing import List, Dict, Any, Tuple
 import re
+import sys
 from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+import yaml
 
 try:
-    from jsonschema import validate, ValidationError, Draft7Validator
+    from jsonschema import Draft7Validator, ValidationError, validate
 except ImportError:
     print("Error: jsonschema not installed. Run: pip install jsonschema")
     sys.exit(1)
@@ -46,7 +47,7 @@ class AtomValidator:
         if not self.schema_path.exists():
             raise FileNotFoundError(f"Schema not found: {self.schema_path}")
 
-        with open(self.schema_path, 'r', encoding='utf-8') as f:
+        with open(self.schema_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
     def validate_file(self, file_path: Path) -> Tuple[bool, List[str], List[str]]:
@@ -60,13 +61,13 @@ class AtomValidator:
         warnings = []
 
         # Check file extension
-        if file_path.suffix not in ['.yaml', '.yml']:
+        if file_path.suffix not in [".yaml", ".yml"]:
             errors.append(f"Invalid file extension: {file_path.suffix}")
             return False, errors, warnings
 
         try:
             # Load YAML
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 atom = yaml.safe_load(f)
 
             if not atom:
@@ -78,35 +79,37 @@ class AtomValidator:
             errors.extend(schema_errors)
 
             # Additional validations
-            if 'id' in atom:
+            if "id" in atom:
                 # Check ID format
-                id_errors = self._validate_id_format(atom['id'])
+                id_errors = self._validate_id_format(atom["id"])
                 errors.extend(id_errors)
 
                 # Check for duplicate IDs
-                if atom['id'] in self.atom_ids:
+                if atom["id"] in self.atom_ids:
                     errors.append(f"Duplicate atom ID: {atom['id']}")
                 else:
-                    self.atom_ids.add(atom['id'])
+                    self.atom_ids.add(atom["id"])
 
                 # Check ID matches filename
                 expected_filename = f"{atom['id']}.yaml"
                 if file_path.name != expected_filename:
-                    warnings.append(f"Filename '{file_path.name}' doesn't match atom ID '{atom['id']}' (expected: {expected_filename})")
+                    warnings.append(
+                        f"Filename '{file_path.name}' doesn't match atom ID '{atom['id']}' (expected: {expected_filename})"
+                    )
 
             # Validate relationships
-            if 'edges' in atom:
-                edge_warnings = self._validate_edges(atom['edges'])
+            if "edges" in atom:
+                edge_warnings = self._validate_edges(atom["edges"])
                 warnings.extend(edge_warnings)
 
             # Check required content
-            if 'content' in atom:
-                content_warnings = self._validate_content(atom['content'])
+            if "content" in atom:
+                content_warnings = self._validate_content(atom["content"])
                 warnings.extend(content_warnings)
 
             # Validate version format
-            if 'version' in atom:
-                if not re.match(r'^\d+\.\d+\.\d+$', atom['version']):
+            if "version" in atom:
+                if not re.match(r"^\d+\.\d+\.\d+$", atom["version"]):
                     errors.append(f"Invalid version format: {atom['version']} (expected semver like 1.0.0)")
 
         except yaml.YAMLError as e:
@@ -129,11 +132,11 @@ class AtomValidator:
         """Validate atom ID follows naming convention"""
         errors = []
 
-        if not atom_id.startswith('atom-'):
+        if not atom_id.startswith("atom-"):
             errors.append(f"Atom ID must start with 'atom-': {atom_id}")
 
         # Check format: atom-category-name
-        parts = atom_id.split('-')
+        parts = atom_id.split("-")
         if len(parts) < 3:
             errors.append(f"Atom ID must follow pattern 'atom-category-name': {atom_id}")
 
@@ -142,7 +145,7 @@ class AtomValidator:
             errors.append(f"Atom ID must be lowercase: {atom_id}")
 
         # Check valid characters
-        if not re.match(r'^[a-z0-9-]+$', atom_id):
+        if not re.match(r"^[a-z0-9-]+$", atom_id):
             errors.append(f"Atom ID contains invalid characters (only lowercase letters, numbers, hyphens): {atom_id}")
 
         return errors
@@ -152,14 +155,14 @@ class AtomValidator:
         warnings = []
 
         for i, edge in enumerate(edges):
-            if 'target' not in edge:
+            if "target" not in edge:
                 warnings.append(f"Edge {i} missing 'target' field")
                 continue
 
-            target = edge['target']
+            target = edge["target"]
 
             # Check target follows atom ID pattern
-            if not target.startswith('atom-'):
+            if not target.startswith("atom-"):
                 warnings.append(f"Edge target should be atom ID: {target}")
 
             # Note: We can't validate if target exists here without loading all atoms
@@ -172,15 +175,15 @@ class AtomValidator:
         warnings = []
 
         # Check for meaningful summary
-        if 'summary' in content:
-            if len(content['summary']) < 10:
+        if "summary" in content:
+            if len(content["summary"]) < 10:
                 warnings.append("Content summary is too short (minimum 10 characters)")
 
         # Check steps for process atoms
-        if 'steps' in content:
-            if not content['steps']:
+        if "steps" in content:
+            if not content["steps"]:
                 warnings.append("Process has empty steps array")
-            elif len(content['steps']) == 1:
+            elif len(content["steps"]) == 1:
                 warnings.append("Process has only one step - consider if this should be broken down")
 
         return warnings
@@ -192,36 +195,31 @@ class AtomValidator:
         Returns:
             Summary dictionary with validation results
         """
-        pattern = '**/*.yaml' if recursive else '*.yaml'
+        pattern = "**/*.yaml" if recursive else "*.yaml"
         yaml_files = list(directory.glob(pattern))
 
         results = {
-            'total_files': len(yaml_files),
-            'valid_files': 0,
-            'invalid_files': 0,
-            'files_with_warnings': 0,
-            'details': []
+            "total_files": len(yaml_files),
+            "valid_files": 0,
+            "invalid_files": 0,
+            "files_with_warnings": 0,
+            "details": [],
         }
 
         for file_path in yaml_files:
             is_valid, errors, warnings = self.validate_file(file_path)
 
-            result = {
-                'file': str(file_path),
-                'valid': is_valid,
-                'errors': errors,
-                'warnings': warnings
-            }
+            result = {"file": str(file_path), "valid": is_valid, "errors": errors, "warnings": warnings}
 
             if is_valid:
-                results['valid_files'] += 1
+                results["valid_files"] += 1
             else:
-                results['invalid_files'] += 1
+                results["invalid_files"] += 1
 
             if warnings:
-                results['files_with_warnings'] += 1
+                results["files_with_warnings"] += 1
 
-            results['details'].append(result)
+            results["details"].append(result)
 
         return results
 
@@ -240,16 +238,16 @@ def print_results(results: Dict[str, Any], verbose: bool = False):
     error_count = 0
     warning_count = 0
 
-    for detail in results['details']:
-        if detail['errors'] or (verbose and detail['warnings']):
+    for detail in results["details"]:
+        if detail["errors"] or (verbose and detail["warnings"]):
             print(f"\n{detail['file']}:")
 
-            for error in detail['errors']:
+            for error in detail["errors"]:
                 print(f"  [ERROR] {error}")
                 error_count += 1
 
             if verbose:
-                for warning in detail['warnings']:
+                for warning in detail["warnings"]:
                     print(f"  [WARNING] {warning}")
                     warning_count += 1
 
@@ -262,11 +260,11 @@ def main():
     """Main entry point"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Validate atom YAML files')
-    parser.add_argument('path', nargs='?', default='atoms', help='Directory or file to validate')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Show warnings')
-    parser.add_argument('--schema', default='schemas/atom.schema.json', help='Path to JSON schema')
-    parser.add_argument('--no-recursive', action='store_true', help='Don\'t recurse into subdirectories')
+    parser = argparse.ArgumentParser(description="Validate atom YAML files")
+    parser.add_argument("path", nargs="?", default="atoms", help="Directory or file to validate")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Show warnings")
+    parser.add_argument("--schema", default="schemas/atom.schema.json", help="Path to JSON schema")
+    parser.add_argument("--no-recursive", action="store_true", help="Don't recurse into subdirectories")
 
     args = parser.parse_args()
 
@@ -301,8 +299,8 @@ def main():
         print_results(results, verbose=args.verbose)
 
         # Exit with error code if any files are invalid
-        sys.exit(1 if results['invalid_files'] > 0 else 0)
+        sys.exit(1 if results["invalid_files"] > 0 else 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

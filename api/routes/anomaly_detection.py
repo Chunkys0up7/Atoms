@@ -8,12 +8,13 @@ Detects unusual patterns in the knowledge graph:
 - Quality anomalies (missing attributes, inconsistent data)
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
 import sys
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 try:
     from ..neo4j_client import get_neo4j_client
@@ -26,6 +27,7 @@ router = APIRouter()
 
 class Anomaly(BaseModel):
     """Detected anomaly"""
+
     id: str
     type: str  # 'structural', 'semantic', 'temporal', 'quality'
     severity: str  # 'critical', 'high', 'medium', 'low'
@@ -40,6 +42,7 @@ class Anomaly(BaseModel):
 
 class AnomalyReport(BaseModel):
     """Anomaly detection report"""
+
     status: str
     scan_timestamp: str
     total_anomalies: int
@@ -55,60 +58,62 @@ def detect_structural_anomalies(neo4j_client) -> List[Anomaly]:
 
     with neo4j_client.driver.session() as session:
         # Anomaly 1: Isolated atoms (no connections)
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE NOT (a)-[]-()
             RETURN a.id as atom_id, a.name as atom_name, a.type as atom_type
             LIMIT 20
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"struct-isolated-{record['atom_id']}",
-                type="structural",
-                severity="high",
-                category="isolated_atom",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description=f"Atom is completely isolated with no relationships",
-                details={
-                    "atom_type": record.get('atom_type'),
-                    "connection_count": 0
-                },
-                suggested_action="Add DEPENDS_ON, ENABLES, or RELATED_TO relationships",
-                confidence=1.0
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"struct-isolated-{record['atom_id']}",
+                    type="structural",
+                    severity="high",
+                    category="isolated_atom",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description=f"Atom is completely isolated with no relationships",
+                    details={"atom_type": record.get("atom_type"), "connection_count": 0},
+                    suggested_action="Add DEPENDS_ON, ENABLES, or RELATED_TO relationships",
+                    confidence=1.0,
+                )
+            )
 
         # Anomaly 2: Over-connected atoms (potential hubs or anti-patterns)
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)-[r]-()
             WITH a, count(r) as degree
             WHERE degree > 20
             RETURN a.id as atom_id, a.name as atom_name, a.type as atom_type, degree
             ORDER BY degree DESC
             LIMIT 10
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"struct-overconnected-{record['atom_id']}",
-                type="structural",
-                severity="medium",
-                category="over_connected",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description=f"Atom has unusually high degree ({record['degree']} connections)",
-                details={
-                    "degree": record['degree'],
-                    "atom_type": record.get('atom_type'),
-                    "threshold": 20
-                },
-                suggested_action="Consider breaking down into smaller atoms or reviewing relationship accuracy",
-                confidence=0.8
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"struct-overconnected-{record['atom_id']}",
+                    type="structural",
+                    severity="medium",
+                    category="over_connected",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description=f"Atom has unusually high degree ({record['degree']} connections)",
+                    details={"degree": record["degree"], "atom_type": record.get("atom_type"), "threshold": 20},
+                    suggested_action="Consider breaking down into smaller atoms or reviewing relationship accuracy",
+                    confidence=0.8,
+                )
+            )
 
         # Anomaly 3: Singleton clusters (small disconnected groups)
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)-[*1..2]-(connected:Atom)
             WITH a, collect(DISTINCT connected.id) as cluster
             WHERE size(cluster) <= 3 AND size(cluster) > 0
@@ -119,23 +124,24 @@ def detect_structural_anomalies(neo4j_client) -> List[Anomaly]:
             WHERE external_connections = 0
             RETURN a.id as atom_id, a.name as atom_name, cluster_size
             LIMIT 10
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"struct-singleton-{record['atom_id']}",
-                type="structural",
-                severity="medium",
-                category="singleton_cluster",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description=f"Part of small disconnected cluster ({record['cluster_size']} atoms)",
-                details={
-                    "cluster_size": record['cluster_size']
-                },
-                suggested_action="Connect cluster to main graph or verify if atoms are obsolete",
-                confidence=0.7
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"struct-singleton-{record['atom_id']}",
+                    type="structural",
+                    severity="medium",
+                    category="singleton_cluster",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description=f"Part of small disconnected cluster ({record['cluster_size']} atoms)",
+                    details={"cluster_size": record["cluster_size"]},
+                    suggested_action="Connect cluster to main graph or verify if atoms are obsolete",
+                    confidence=0.7,
+                )
+            )
 
     return anomalies
 
@@ -146,84 +152,90 @@ def detect_semantic_anomalies(neo4j_client) -> List[Anomaly]:
 
     with neo4j_client.driver.session() as session:
         # Anomaly 1: PROCESS atoms without PERFORMED_BY
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE a.type = 'PROCESS' OR a.type = 'process'
             AND NOT (a)-[:PERFORMED_BY]->()
             RETURN a.id as atom_id, a.name as atom_name
             LIMIT 20
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"sem-no-performer-{record['atom_id']}",
-                type="semantic",
-                severity="critical",
-                category="missing_performer",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description="PROCESS atom missing PERFORMED_BY relationship to ROLE",
-                details={
-                    "atom_type": "PROCESS",
-                    "missing_relationship": "PERFORMED_BY"
-                },
-                suggested_action="Add PERFORMED_BY edge to appropriate ROLE atom",
-                confidence=1.0
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"sem-no-performer-{record['atom_id']}",
+                    type="semantic",
+                    severity="critical",
+                    category="missing_performer",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description="PROCESS atom missing PERFORMED_BY relationship to ROLE",
+                    details={"atom_type": "PROCESS", "missing_relationship": "PERFORMED_BY"},
+                    suggested_action="Add PERFORMED_BY edge to appropriate ROLE atom",
+                    confidence=1.0,
+                )
+            )
 
         # Anomaly 2: DOCUMENT atoms without creator
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE a.type = 'DOCUMENT' OR a.type = 'document'
             AND NOT (a)-[:CREATED_BY|MODIFIED_BY]->()
             RETURN a.id as atom_id, a.name as atom_name
             LIMIT 20
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"sem-no-creator-{record['atom_id']}",
-                type="semantic",
-                severity="high",
-                category="missing_creator",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description="DOCUMENT atom missing CREATED_BY or MODIFIED_BY relationship",
-                details={
-                    "atom_type": "DOCUMENT",
-                    "missing_relationship": "CREATED_BY or MODIFIED_BY"
-                },
-                suggested_action="Add CREATED_BY edge to PROCESS or ROLE that creates this document",
-                confidence=0.9
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"sem-no-creator-{record['atom_id']}",
+                    type="semantic",
+                    severity="high",
+                    category="missing_creator",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description="DOCUMENT atom missing CREATED_BY or MODIFIED_BY relationship",
+                    details={"atom_type": "DOCUMENT", "missing_relationship": "CREATED_BY or MODIFIED_BY"},
+                    suggested_action="Add CREATED_BY edge to PROCESS or ROLE that creates this document",
+                    confidence=0.9,
+                )
+            )
 
         # Anomaly 3: Mismatched edge types (e.g., DOCUMENT -> PERFORMS)
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)-[r:PERFORMED_BY]->(b:Atom)
             WHERE a.type <> 'PROCESS' AND a.type <> 'process'
             RETURN a.id as atom_id, a.name as atom_name, a.type as source_type,
                    type(r) as edge_type, b.type as target_type
             LIMIT 10
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"sem-mismatch-{record['atom_id']}",
-                type="semantic",
-                severity="high",
-                category="type_mismatch",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description=f"Invalid edge type: {record['source_type']} -{record['edge_type']}-> {record['target_type']}",
-                details={
-                    "source_type": record['source_type'],
-                    "edge_type": record['edge_type'],
-                    "target_type": record['target_type'],
-                    "expected": "Only PROCESS atoms should have PERFORMED_BY edges"
-                },
-                suggested_action="Change edge type or correct atom type",
-                confidence=1.0
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"sem-mismatch-{record['atom_id']}",
+                    type="semantic",
+                    severity="high",
+                    category="type_mismatch",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description=f"Invalid edge type: {record['source_type']} -{record['edge_type']}-> {record['target_type']}",
+                    details={
+                        "source_type": record["source_type"],
+                        "edge_type": record["edge_type"],
+                        "target_type": record["target_type"],
+                        "expected": "Only PROCESS atoms should have PERFORMED_BY edges",
+                    },
+                    suggested_action="Change edge type or correct atom type",
+                    confidence=1.0,
+                )
+            )
 
     return anomalies
 
@@ -235,31 +247,32 @@ def detect_temporal_anomalies(neo4j_client) -> List[Anomaly]:
     with neo4j_client.driver.session() as session:
         # Anomaly 1: Stale atoms (no updates in long time)
         # Note: Requires lastModified property on atoms
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE a.lastModified IS NOT NULL
             WITH a, duration.between(datetime(a.lastModified), datetime()).days as days_old
             WHERE days_old > 365
             RETURN a.id as atom_id, a.name as atom_name, a.type as atom_type, days_old
             LIMIT 10
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"temp-stale-{record['atom_id']}",
-                type="temporal",
-                severity="low",
-                category="stale_atom",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description=f"Atom hasn't been updated in {record['days_old']} days",
-                details={
-                    "days_old": record['days_old'],
-                    "atom_type": record.get('atom_type')
-                },
-                suggested_action="Review atom relevance and update if still applicable",
-                confidence=0.6
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"temp-stale-{record['atom_id']}",
+                    type="temporal",
+                    severity="low",
+                    category="stale_atom",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description=f"Atom hasn't been updated in {record['days_old']} days",
+                    details={"days_old": record["days_old"], "atom_type": record.get("atom_type")},
+                    suggested_action="Review atom relevance and update if still applicable",
+                    confidence=0.6,
+                )
+            )
 
         # Anomaly 2: Rapidly changing atoms (potential instability)
         # Would require change history tracking
@@ -273,7 +286,8 @@ def detect_quality_anomalies(neo4j_client) -> List[Anomaly]:
 
     with neo4j_client.driver.session() as session:
         # Anomaly 1: Missing required attributes
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE a.name IS NULL OR a.name = ''
             OR a.type IS NULL OR a.type = ''
@@ -281,83 +295,86 @@ def detect_quality_anomalies(neo4j_client) -> List[Anomaly]:
                    a.name IS NULL OR a.name = '' as missing_name,
                    a.type IS NULL OR a.type = '' as missing_type
             LIMIT 20
-        """)
+        """
+        )
 
         for record in result:
             missing_attrs = []
-            if record['missing_name']:
-                missing_attrs.append('name')
-            if record['missing_type']:
-                missing_attrs.append('type')
+            if record["missing_name"]:
+                missing_attrs.append("name")
+            if record["missing_type"]:
+                missing_attrs.append("type")
 
-            anomalies.append(Anomaly(
-                id=f"qual-missing-{record['atom_id']}",
-                type="quality",
-                severity="critical",
-                category="missing_attributes",
-                atom_id=record['atom_id'],
-                atom_name="[Missing Name]",
-                description=f"Missing required attributes: {', '.join(missing_attrs)}",
-                details={
-                    "missing_attributes": missing_attrs
-                },
-                suggested_action="Add missing required attributes to atom definition",
-                confidence=1.0
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"qual-missing-{record['atom_id']}",
+                    type="quality",
+                    severity="critical",
+                    category="missing_attributes",
+                    atom_id=record["atom_id"],
+                    atom_name="[Missing Name]",
+                    description=f"Missing required attributes: {', '.join(missing_attrs)}",
+                    details={"missing_attributes": missing_attrs},
+                    suggested_action="Add missing required attributes to atom definition",
+                    confidence=1.0,
+                )
+            )
 
         # Anomaly 2: Duplicate atoms (same name, different IDs)
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE a.name IS NOT NULL
             WITH a.name as name, collect(a.id) as atom_ids
             WHERE size(atom_ids) > 1
             RETURN name, atom_ids, size(atom_ids) as count
             LIMIT 10
-        """)
+        """
+        )
 
         for record in result:
-            for atom_id in record['atom_ids']:
-                anomalies.append(Anomaly(
-                    id=f"qual-duplicate-{atom_id}",
-                    type="quality",
-                    severity="high",
-                    category="duplicate_name",
-                    atom_id=atom_id,
-                    atom_name=record['name'],
-                    description=f"Duplicate name found ({record['count']} atoms with name '{record['name']}')",
-                    details={
-                        "duplicate_count": record['count'],
-                        "all_ids": record['atom_ids']
-                    },
-                    suggested_action="Merge duplicate atoms or make names unique",
-                    confidence=0.9
-                ))
+            for atom_id in record["atom_ids"]:
+                anomalies.append(
+                    Anomaly(
+                        id=f"qual-duplicate-{atom_id}",
+                        type="quality",
+                        severity="high",
+                        category="duplicate_name",
+                        atom_id=atom_id,
+                        atom_name=record["name"],
+                        description=f"Duplicate name found ({record['count']} atoms with name '{record['name']}')",
+                        details={"duplicate_count": record["count"], "all_ids": record["atom_ids"]},
+                        suggested_action="Merge duplicate atoms or make names unique",
+                        confidence=0.9,
+                    )
+                )
 
         # Anomaly 3: Incomplete descriptions
-        result = session.run("""
+        result = session.run(
+            """
             MATCH (a:Atom)
             WHERE a.description IS NULL OR a.description = '' OR size(a.description) < 20
             RETURN a.id as atom_id, a.name as atom_name, a.type as atom_type,
                    coalesce(size(a.description), 0) as desc_length
             LIMIT 20
-        """)
+        """
+        )
 
         for record in result:
-            anomalies.append(Anomaly(
-                id=f"qual-incomplete-{record['atom_id']}",
-                type="quality",
-                severity="low",
-                category="incomplete_description",
-                atom_id=record['atom_id'],
-                atom_name=record.get('atom_name', 'Unknown'),
-                description=f"Description too short ({record['desc_length']} chars)",
-                details={
-                    "description_length": record['desc_length'],
-                    "recommended_min": 50
-                },
-                suggested_action="Add detailed description to improve discoverability",
-                confidence=0.5
-            ))
+            anomalies.append(
+                Anomaly(
+                    id=f"qual-incomplete-{record['atom_id']}",
+                    type="quality",
+                    severity="low",
+                    category="incomplete_description",
+                    atom_id=record["atom_id"],
+                    atom_name=record.get("atom_name", "Unknown"),
+                    description=f"Description too short ({record['desc_length']} chars)",
+                    details={"description_length": record["desc_length"], "recommended_min": 50},
+                    suggested_action="Add detailed description to improve discoverability",
+                    confidence=0.5,
+                )
+            )
 
     return anomalies
 
@@ -368,7 +385,7 @@ def detect_anomalies(
     include_semantic: bool = True,
     include_temporal: bool = True,
     include_quality: bool = True,
-    min_severity: Optional[str] = None
+    min_severity: Optional[str] = None,
 ) -> AnomalyReport:
     """
     Run anomaly detection scan on the knowledge graph.
@@ -387,10 +404,7 @@ def detect_anomalies(
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         all_anomalies = []
 
@@ -408,13 +422,10 @@ def detect_anomalies(
             all_anomalies.extend(detect_quality_anomalies(neo4j_client))
 
         # Filter by severity if specified
-        severity_order = {'critical': 4, 'high': 3, 'medium': 2, 'low': 1}
+        severity_order = {"critical": 4, "high": 3, "medium": 2, "low": 1}
         if min_severity:
             min_level = severity_order.get(min_severity.lower(), 0)
-            all_anomalies = [
-                a for a in all_anomalies
-                if severity_order.get(a.severity, 0) >= min_level
-            ]
+            all_anomalies = [a for a in all_anomalies if severity_order.get(a.severity, 0) >= min_level]
 
         # Calculate statistics
         by_severity = {}
@@ -433,17 +444,14 @@ def detect_anomalies(
             by_severity=by_severity,
             by_type=by_type,
             anomalies=all_anomalies,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error detecting anomalies: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Anomaly detection failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Anomaly detection failed: {str(e)}")
 
 
 def generate_recommendations(anomalies: List[Anomaly]) -> List[str]:
@@ -456,35 +464,35 @@ def generate_recommendations(anomalies: List[Anomaly]) -> List[str]:
         categories[anomaly.category] = categories.get(anomaly.category, 0) + 1
 
     # Generate recommendations
-    if categories.get('isolated_atom', 0) > 5:
+    if categories.get("isolated_atom", 0) > 5:
         recommendations.append(
             f"Found {categories['isolated_atom']} isolated atoms. "
             "Consider adding relationships or removing obsolete atoms."
         )
 
-    if categories.get('missing_performer', 0) > 0:
+    if categories.get("missing_performer", 0) > 0:
         recommendations.append(
             f"Found {categories['missing_performer']} PROCESS atoms without PERFORMED_BY edges. "
             "Add role assignments to clarify responsibilities."
         )
 
-    if categories.get('duplicate_name', 0) > 0:
+    if categories.get("duplicate_name", 0) > 0:
         recommendations.append(
             f"Found {categories['duplicate_name']} atoms with duplicate names. "
             "Review and merge or rename to ensure uniqueness."
         )
 
-    if categories.get('over_connected', 0) > 0:
+    if categories.get("over_connected", 0) > 0:
         recommendations.append(
             f"Found {categories['over_connected']} over-connected atoms. "
             "Consider breaking down complex atoms into smaller units."
         )
 
     # Critical issues
-    critical_count = sum(1 for a in anomalies if a.severity == 'critical')
+    critical_count = sum(1 for a in anomalies if a.severity == "critical")
     if critical_count > 0:
-        recommendations.insert(0,
-            f"⚠️ {critical_count} critical issues detected. Address these first for graph integrity."
+        recommendations.insert(
+            0, f"⚠️ {critical_count} critical issues detected. Address these first for graph integrity."
         )
 
     return recommendations
@@ -502,50 +510,40 @@ def get_anomaly_stats() -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             # Get total atoms
-            total_atoms = session.run("MATCH (a:Atom) RETURN count(a) as count").single()['count']
+            total_atoms = session.run("MATCH (a:Atom) RETURN count(a) as count").single()["count"]
 
             # Quick anomaly counts
-            isolated = session.run("""
+            isolated = session.run(
+                """
                 MATCH (a:Atom)
                 WHERE NOT (a)-[]-()
                 RETURN count(a) as count
-            """).single()['count']
+            """
+            ).single()["count"]
 
-            missing_type = session.run("""
+            missing_type = session.run(
+                """
                 MATCH (a:Atom)
                 WHERE a.type IS NULL OR a.type = ''
                 RETURN count(a) as count
-            """).single()['count']
+            """
+            ).single()["count"]
 
             return {
                 "total_atoms": total_atoms,
-                "quick_scan": {
-                    "isolated_atoms": isolated,
-                    "missing_type": missing_type
-                },
-                "detection_modules": {
-                    "structural": True,
-                    "semantic": True,
-                    "temporal": True,
-                    "quality": True
-                }
+                "quick_scan": {"isolated_atoms": isolated, "missing_type": missing_type},
+                "detection_modules": {"structural": True, "semantic": True, "temporal": True, "quality": True},
             }
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error getting anomaly stats: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
 
 
 @router.get("/api/anomalies/categories")
@@ -561,60 +559,60 @@ def get_anomaly_categories() -> List[Dict[str, str]]:
             "category": "isolated_atom",
             "type": "structural",
             "severity": "high",
-            "description": "Atoms with no relationships to other atoms"
+            "description": "Atoms with no relationships to other atoms",
         },
         {
             "category": "over_connected",
             "type": "structural",
             "severity": "medium",
-            "description": "Atoms with unusually high number of connections"
+            "description": "Atoms with unusually high number of connections",
         },
         {
             "category": "singleton_cluster",
             "type": "structural",
             "severity": "medium",
-            "description": "Small disconnected groups of atoms"
+            "description": "Small disconnected groups of atoms",
         },
         {
             "category": "missing_performer",
             "type": "semantic",
             "severity": "critical",
-            "description": "PROCESS atoms without PERFORMED_BY relationship"
+            "description": "PROCESS atoms without PERFORMED_BY relationship",
         },
         {
             "category": "missing_creator",
             "type": "semantic",
             "severity": "high",
-            "description": "DOCUMENT atoms without CREATED_BY relationship"
+            "description": "DOCUMENT atoms without CREATED_BY relationship",
         },
         {
             "category": "type_mismatch",
             "type": "semantic",
             "severity": "high",
-            "description": "Invalid edge types for atom types"
+            "description": "Invalid edge types for atom types",
         },
         {
             "category": "stale_atom",
             "type": "temporal",
             "severity": "low",
-            "description": "Atoms not updated in over a year"
+            "description": "Atoms not updated in over a year",
         },
         {
             "category": "missing_attributes",
             "type": "quality",
             "severity": "critical",
-            "description": "Missing required attributes like name or type"
+            "description": "Missing required attributes like name or type",
         },
         {
             "category": "duplicate_name",
             "type": "quality",
             "severity": "high",
-            "description": "Multiple atoms with identical names"
+            "description": "Multiple atoms with identical names",
         },
         {
             "category": "incomplete_description",
             "type": "quality",
             "severity": "low",
-            "description": "Description too short or missing"
-        }
+            "description": "Description too short or missing",
+        },
     ]

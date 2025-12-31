@@ -4,18 +4,19 @@ Integration tests for Atom API endpoints.
 Tests the complete atom lifecycle: create, read, list, with caching validation.
 """
 
-import pytest
-from fastapi.testclient import TestClient
-from pathlib import Path
-import tempfile
 import shutil
-import yaml
 import sys
+import tempfile
+from pathlib import Path
+
+import pytest
+import yaml
+from fastapi.testclient import TestClient
 
 # Add API to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from api.server import app
 from api.cache import get_atom_cache
+from api.server import app
 
 
 @pytest.fixture
@@ -33,8 +34,7 @@ def temp_atoms_dir(monkeypatch):
 
     # Monkeypatch the atoms directory in atoms.py
     monkeypatch.setattr(
-        "routes.atoms.Path.__truediv__",
-        lambda self, other: atoms_dir if other == "atoms" else self / other
+        "routes.atoms.Path.__truediv__", lambda self, other: atoms_dir if other == "atoms" else self / other
     )
 
     yield atoms_dir
@@ -61,16 +61,9 @@ def sample_atom():
         "team": "Engineering",
         "ontologyDomain": "Testing",
         "criticality": "MEDIUM",
-        "content": {
-            "summary": "Test atom for integration testing"
-        },
+        "content": {"summary": "Test atom for integration testing"},
         "edges": [],
-        "metrics": {
-            "automation_level": 0.8,
-            "avg_cycle_time_mins": 5,
-            "error_rate": 0.01,
-            "compliance_score": 0.95
-        }
+        "metrics": {"automation_level": 0.8, "avg_cycle_time_mins": 5, "error_rate": 0.01, "compliance_score": 0.95},
     }
 
 
@@ -89,7 +82,7 @@ class TestAtomList:
         """Should return atoms when they exist."""
         # Create test atom file
         atom_file = temp_atoms_dir / f"{sample_atom['id']}.yaml"
-        with open(atom_file, 'w') as f:
+        with open(atom_file, "w") as f:
             yaml.dump(sample_atom, f)
 
         response = client.get("/api/atoms")
@@ -103,12 +96,8 @@ class TestAtomList:
         """Should respect limit and offset parameters."""
         # Create 5 test atoms
         for i in range(5):
-            atom = {
-                "id": f"TEST-{i:03d}",
-                "type": "PROCESS",
-                "name": f"Test {i}"
-            }
-            with open(temp_atoms_dir / f"{atom['id']}.yaml", 'w') as f:
+            atom = {"id": f"TEST-{i:03d}", "type": "PROCESS", "name": f"Test {i}"}
+            with open(temp_atoms_dir / f"{atom['id']}.yaml", "w") as f:
                 yaml.dump(atom, f)
 
         # Test pagination
@@ -129,12 +118,8 @@ class TestAtomList:
         # Create atoms of different types
         types = ["PROCESS", "DECISION", "PROCESS"]
         for i, atom_type in enumerate(types):
-            atom = {
-                "id": f"TEST-{i:03d}",
-                "type": atom_type,
-                "name": f"Test {i}"
-            }
-            with open(temp_atoms_dir / f"{atom['id']}.yaml", 'w') as f:
+            atom = {"id": f"TEST-{i:03d}", "type": atom_type, "name": f"Test {i}"}
+            with open(temp_atoms_dir / f"{atom['id']}.yaml", "w") as f:
                 yaml.dump(atom, f)
 
         response = client.get("/api/atoms?type_filter=PROCESS")
@@ -146,7 +131,7 @@ class TestAtomList:
     def test_list_atoms_summary_only(self, client, temp_atoms_dir, sample_atom):
         """Should return minimal data when summary_only=true."""
         atom_file = temp_atoms_dir / f"{sample_atom['id']}.yaml"
-        with open(atom_file, 'w') as f:
+        with open(atom_file, "w") as f:
             yaml.dump(sample_atom, f)
 
         response = client.get("/api/atoms?summary_only=true")
@@ -164,7 +149,7 @@ class TestAtomList:
     def test_list_atoms_caching(self, client, temp_atoms_dir, sample_atom):
         """Should use cache for repeated requests."""
         atom_file = temp_atoms_dir / f"{sample_atom['id']}.yaml"
-        with open(atom_file, 'w') as f:
+        with open(atom_file, "w") as f:
             yaml.dump(sample_atom, f)
 
         # First request - loads from disk
@@ -173,7 +158,7 @@ class TestAtomList:
 
         # Modify file on disk
         sample_atom["name"] = "Modified Name"
-        with open(atom_file, 'w') as f:
+        with open(atom_file, "w") as f:
             yaml.dump(sample_atom, f)
 
         # Second request - should return cached data (original name)
@@ -189,7 +174,7 @@ class TestAtomGet:
     def test_get_atom_success(self, client, temp_atoms_dir, sample_atom):
         """Should return atom when it exists."""
         atom_file = temp_atoms_dir / f"{sample_atom['id']}.yaml"
-        with open(atom_file, 'w') as f:
+        with open(atom_file, "w") as f:
             yaml.dump(sample_atom, f)
 
         response = client.get(f"/api/atoms/{sample_atom['id']}")
@@ -208,7 +193,7 @@ class TestAtomGet:
     def test_get_atom_uses_cache(self, client, temp_atoms_dir, sample_atom):
         """Should use cached data for single atom lookup."""
         atom_file = temp_atoms_dir / f"{sample_atom['id']}.yaml"
-        with open(atom_file, 'w') as f:
+        with open(atom_file, "w") as f:
             yaml.dump(sample_atom, f)
 
         # Load into cache via list

@@ -8,12 +8,12 @@ Implements RAG.md guidance for semantic indexing:
 - Creates semantic search foundation for dual-index RAG
 """
 
+import json
 import os
 import sys
-import json
-from pathlib import Path
-from typing import List, Dict, Any
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     import chromadb
     from chromadb.utils import embedding_functions
+
     HAS_CHROMA = True
 except ImportError:
     print("ERROR: chromadb not installed. Run: pip install chromadb")
@@ -28,6 +29,7 @@ except ImportError:
 
 try:
     import openai
+
     HAS_OPENAI = True
 except ImportError:
     print("WARNING: openai not installed. Install with: pip install openai")
@@ -93,10 +95,10 @@ def prepare_atom_documents(atoms: List[Dict[str, Any]]) -> tuple:
         ]
 
         # Add content fields
-        content = atom.get('content', {})
+        content = atom.get("content", {})
         if isinstance(content, dict):
-            summary = content.get('summary', '')
-            description = content.get('description', '')
+            summary = content.get("summary", "")
+            description = content.get("description", "")
 
             if summary:
                 doc_parts.append(f"Summary: {summary}")
@@ -104,7 +106,7 @@ def prepare_atom_documents(atoms: List[Dict[str, Any]]) -> tuple:
                 doc_parts.append(f"Description: {description}")
 
         # Add tags if present
-        tags = atom.get('tags', [])
+        tags = atom.get("tags", [])
         if tags:
             doc_parts.append(f"Tags: {', '.join(tags)}")
 
@@ -135,10 +137,7 @@ def prepare_atom_documents(atoms: List[Dict[str, Any]]) -> tuple:
     return ids, documents, metadatas
 
 
-def initialize_chroma_collection(
-    persist_dir: str = "rag-index",
-    use_openai: bool = True
-) -> chromadb.Collection:
+def initialize_chroma_collection(persist_dir: str = "rag-index", use_openai: bool = True) -> chromadb.Collection:
     """
     Initialize Chroma collection with embeddings.
 
@@ -159,8 +158,7 @@ def initialize_chroma_collection(
         else:
             print("✓ Using OpenAI embeddings (text-embedding-3-small)")
             embedding_fn = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=api_key,
-                model_name="text-embedding-3-small"
+                api_key=api_key, model_name="text-embedding-3-small"
             )
     else:
         print("Using default SentenceTransformer embeddings")
@@ -180,8 +178,8 @@ def initialize_chroma_collection(
         metadata={
             "description": "GNDP Atom Registry - Semantic Search Index",
             "created_at": datetime.utcnow().isoformat(),
-            "version": "1.0"
-        }
+            "version": "1.0",
+        },
     )
 
     print(f"✓ Created Chroma collection: gndp_atoms")
@@ -193,7 +191,7 @@ def index_atoms(
     ids: List[str],
     documents: List[str],
     metadatas: List[Dict[str, Any]],
-    batch_size: int = 100
+    batch_size: int = 100,
 ):
     """
     Index atoms in batches for efficient processing.
@@ -213,11 +211,7 @@ def index_atoms(
         batch_meta = metadatas[i:batch_end]
 
         try:
-            collection.add(
-                ids=batch_ids,
-                documents=batch_docs,
-                metadatas=batch_meta
-            )
+            collection.add(ids=batch_ids, documents=batch_docs, metadatas=batch_meta)
             print(f"  ✓ Indexed batch {i//batch_size + 1} ({batch_end}/{total} atoms)")
         except Exception as e:
             print(f"  ✗ Error indexing batch {i//batch_size + 1}: {e}")
@@ -228,28 +222,20 @@ def index_atoms(
 
 def verify_index(collection: chromadb.Collection):
     """Verify index by running test queries."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Vector Index")
-    print("="*60)
+    print("=" * 60)
 
-    test_queries = [
-        "loan application process",
-        "credit score verification",
-        "compliance controls",
-        "risk assessment"
-    ]
+    test_queries = ["loan application process", "credit score verification", "compliance controls", "risk assessment"]
 
     for query in test_queries:
-        results = collection.query(
-            query_texts=[query],
-            n_results=3
-        )
+        results = collection.query(query_texts=[query], n_results=3)
 
-        if results and results['ids'] and len(results['ids']) > 0:
+        if results and results["ids"] and len(results["ids"]) > 0:
             print(f"\nQuery: '{query}'")
             print(f"  Found {len(results['ids'][0])} results:")
-            for i, atom_id in enumerate(results['ids'][0][:3]):
-                distance = results['distances'][0][i] if results.get('distances') else 0
+            for i, atom_id in enumerate(results["ids"][0][:3]):
+                distance = results["distances"][0][i] if results.get("distances") else 0
                 print(f"    {i+1}. {atom_id} (distance: {distance:.3f})")
         else:
             print(f"\nQuery: '{query}' - No results")
@@ -259,10 +245,10 @@ def verify_index(collection: chromadb.Collection):
 
 def main():
     """Main initialization workflow."""
-    print("="*60)
+    print("=" * 60)
     print("GNDP Vector Database Initialization")
     print("Following RAG.md Dual-Index Architecture")
-    print("="*60)
+    print("=" * 60)
     print()
 
     # Step 1: Load atoms from disk
@@ -280,10 +266,7 @@ def main():
     persist_dir.mkdir(exist_ok=True)
 
     use_openai = HAS_OPENAI and os.environ.get("OPENAI_API_KEY")
-    collection = initialize_chroma_collection(
-        persist_dir=str(persist_dir),
-        use_openai=bool(use_openai)
-    )
+    collection = initialize_chroma_collection(persist_dir=str(persist_dir), use_openai=bool(use_openai))
 
     # Step 4: Index atoms
     index_atoms(collection, ids, documents, metadatas)
@@ -291,9 +274,9 @@ def main():
     # Step 5: Verify index
     verify_index(collection)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("✓ Vector database initialization complete!")
-    print("="*60)
+    print("=" * 60)
     print(f"\nLocation: {persist_dir}")
     print(f"Collection: gndp_atoms")
     print(f"Atom count: {collection.count()}")

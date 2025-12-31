@@ -4,11 +4,11 @@ Simple in-memory cache with TTL for GNDP API.
 Provides caching for expensive file loading operations with automatic expiration.
 """
 
-from typing import Any, Dict, Optional, Callable
-from datetime import datetime, timedelta
-from functools import wraps
 import hashlib
 import json
+from datetime import datetime, timedelta
+from functools import wraps
+from typing import Any, Callable, Dict, Optional
 
 
 class Cache:
@@ -47,11 +47,7 @@ class Cache:
             Hash-based cache key
         """
         # Create deterministic representation of arguments
-        key_data = {
-            'func': func_name,
-            'args': args,
-            'kwargs': sorted(kwargs.items())
-        }
+        key_data = {"func": func_name, "args": args, "kwargs": sorted(kwargs.items())}
         key_str = json.dumps(key_data, sort_keys=True, default=str)
         return hashlib.sha256(key_str.encode()).hexdigest()
 
@@ -69,14 +65,14 @@ class Cache:
             return None
 
         entry = self._cache[key]
-        expires_at = entry['expires_at']
+        expires_at = entry["expires_at"]
 
         # Check if expired
         if datetime.now() > expires_at:
             del self._cache[key]
             return None
 
-        return entry['value']
+        return entry["value"]
 
     def set(self, key: str, value: Any) -> None:
         """
@@ -87,11 +83,7 @@ class Cache:
             value: Value to cache
         """
         expires_at = datetime.now() + timedelta(seconds=self._ttl_seconds)
-        self._cache[key] = {
-            'value': value,
-            'expires_at': expires_at,
-            'created_at': datetime.now()
-        }
+        self._cache[key] = {"value": value, "expires_at": expires_at, "created_at": datetime.now()}
 
     def invalidate(self, key: str) -> None:
         """
@@ -115,16 +107,16 @@ class Cache:
             Dictionary with cache size and entry count
         """
         return {
-            'entry_count': len(self._cache),
-            'ttl_seconds': self._ttl_seconds,
-            'entries': [
+            "entry_count": len(self._cache),
+            "ttl_seconds": self._ttl_seconds,
+            "entries": [
                 {
-                    'key': key[:16] + '...',  # Truncate for readability
-                    'created_at': entry['created_at'].isoformat(),
-                    'expires_at': entry['expires_at'].isoformat()
+                    "key": key[:16] + "...",  # Truncate for readability
+                    "created_at": entry["created_at"].isoformat(),
+                    "expires_at": entry["expires_at"].isoformat(),
                 }
                 for key, entry in self._cache.items()
-            ]
+            ],
         }
 
     def memoize(self):
@@ -139,6 +131,7 @@ class Cache:
                 # Expensive operation
                 return atoms
         """
+
         def decorator(func: Callable) -> Callable:
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -160,6 +153,7 @@ class Cache:
             wrapper.cache_stats = lambda: self.stats()
 
             return wrapper
+
         return decorator
 
 
@@ -178,7 +172,7 @@ def get_module_cache() -> Cache:
     return module_cache
 
 
-def atomic_write(file_path: str, content: str, encoding: str = 'utf-8') -> None:
+def atomic_write(file_path: str, content: str, encoding: str = "utf-8") -> None:
     """
     Atomically write content to file using temp + rename pattern.
 
@@ -204,11 +198,11 @@ def atomic_write(file_path: str, content: str, encoding: str = 'utf-8') -> None:
     target_dir.mkdir(parents=True, exist_ok=True)
 
     # Create temp file in same directory (ensures same filesystem for atomic rename)
-    fd, temp_path = tempfile.mkstemp(dir=target_dir, prefix='.tmp_', suffix='.yaml')
+    fd, temp_path = tempfile.mkstemp(dir=target_dir, prefix=".tmp_", suffix=".yaml")
 
     try:
         # Write to temp file
-        with os.fdopen(fd, 'w', encoding=encoding) as fh:
+        with os.fdopen(fd, "w", encoding=encoding) as fh:
             fh.write(content)
             fh.flush()
             os.fsync(fh.fileno())  # Force write to disk

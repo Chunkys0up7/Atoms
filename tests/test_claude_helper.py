@@ -1,6 +1,6 @@
+import importlib.util
 import os
 import unittest
-import importlib.util
 
 
 def load_module_from_path(path, name):
@@ -13,15 +13,15 @@ def load_module_from_path(path, name):
 class TestClaudeHelper(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.mod = load_module_from_path(os.path.join('scripts', 'claude_helper.py'), 'claude_helper')
+        cls.mod = load_module_from_path(os.path.join("scripts", "claude_helper.py"), "claude_helper")
 
     def test_parse_json_or_fallback(self):
         f = self.mod.parse_json_or_fallback
         self.assertEqual(f('{"a":1}'), {"a": 1})
-        self.assertEqual(f('not json'), {"summary": 'not json'})
+        self.assertEqual(f("not json"), {"summary": "not json"})
         # text with JSON embedded
         self.assertEqual(f('Here: {"x":2} end'), {"x": 2})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

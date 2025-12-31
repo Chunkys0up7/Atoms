@@ -1,8 +1,8 @@
+import importlib.util
+import json
 import os
 import tempfile
-import json
 import unittest
-import importlib.util
 
 
 def load_module_from_path(path, name):
@@ -15,19 +15,19 @@ def load_module_from_path(path, name):
 class TestSyncNeo4j(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.mod = load_module_from_path(os.path.join('scripts', 'sync_neo4j.py'), 'sync_neo4j')
+        cls.mod = load_module_from_path(os.path.join("scripts", "sync_neo4j.py"), "sync_neo4j")
 
     def test_sanitize_relation_type(self):
         f = self.mod.sanitize_relation_type
-        self.assertEqual(f('TRIGGERS'), 'TRIGGERS')
-        self.assertEqual(f('Requires!'), 'Requires_')
-        self.assertEqual(f(''), 'RELATED')
-        long = 'A'*100
+        self.assertEqual(f("TRIGGERS"), "TRIGGERS")
+        self.assertEqual(f("Requires!"), "Requires_")
+        self.assertEqual(f(""), "RELATED")
+        long = "A" * 100
         self.assertEqual(len(f(long)), 64)
 
     def test_validate_graph(self):
-        data = {'nodes': [{'id': 'A'}], 'edges': [{'source': 'A', 'target': 'B'}]}
-        with tempfile.NamedTemporaryFile('w', delete=False, suffix='.json') as fh:
+        data = {"nodes": [{"id": "A"}], "edges": [{"source": "A", "target": "B"}]}
+        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as fh:
             json.dump(data, fh)
             path = fh.name
         try:
@@ -38,5 +38,5 @@ class TestSyncNeo4j(unittest.TestCase):
             os.remove(path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -13,9 +13,9 @@ Usage:
 
 import argparse
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-from collections import defaultdict
 
 try:
     import yaml
@@ -42,11 +42,11 @@ class GraphIntegrityChecker:
 
         for atom_file in atoms_dir.rglob("*.yaml"):
             try:
-                with open(atom_file, 'r', encoding='utf-8') as f:
+                with open(atom_file, "r", encoding="utf-8") as f:
                     atom_data = yaml.safe_load(f)
-                    atom_id = atom_data.get('id')
+                    atom_id = atom_data.get("id")
                     if atom_id:
-                        atom_data['_file_path'] = str(atom_file)
+                        atom_data["_file_path"] = str(atom_file)
                         self.atoms[atom_id] = atom_data
             except Exception as e:
                 self.warnings.append(f"Failed to load {atom_file}: {e}")
@@ -60,11 +60,11 @@ class GraphIntegrityChecker:
 
         for module_file in modules_dir.glob("*.yaml"):
             try:
-                with open(module_file, 'r', encoding='utf-8') as f:
+                with open(module_file, "r", encoding="utf-8") as f:
                     module_data = yaml.safe_load(f)
-                    module_id = module_data.get('module_id')
+                    module_id = module_data.get("module_id")
                     if module_id:
-                        module_data['_file_path'] = str(module_file)
+                        module_data["_file_path"] = str(module_file)
                         self.modules[module_id] = module_data
             except Exception as e:
                 self.warnings.append(f"Failed to load {module_file}: {e}")
@@ -74,14 +74,12 @@ class GraphIntegrityChecker:
         orphans = []
 
         for atom_id, atom in self.atoms.items():
-            upstream = atom.get('upstream_ids', [])
-            downstream = atom.get('downstream_ids', [])
+            upstream = atom.get("upstream_ids", [])
+            downstream = atom.get("downstream_ids", [])
 
             if not upstream and not downstream:
                 orphans.append(atom_id)
-                self.warnings.append(
-                    f"Orphaned atom: {atom_id} ({atom.get('type')}) - no relationships"
-                )
+                self.warnings.append(f"Orphaned atom: {atom_id} ({atom.get('type')}) - no relationships")
 
         return orphans
 
@@ -92,20 +90,16 @@ class GraphIntegrityChecker:
 
         for atom_id, atom in self.atoms.items():
             # Check upstream references
-            for upstream_id in atom.get('upstream_ids', []):
+            for upstream_id in atom.get("upstream_ids", []):
                 if upstream_id not in all_atom_ids:
                     broken_refs.append((atom_id, upstream_id))
-                    self.issues.append(
-                        f"Broken reference: {atom_id} -> {upstream_id} (upstream atom not found)"
-                    )
+                    self.issues.append(f"Broken reference: {atom_id} -> {upstream_id} (upstream atom not found)")
 
             # Check downstream references
-            for downstream_id in atom.get('downstream_ids', []):
+            for downstream_id in atom.get("downstream_ids", []):
                 if downstream_id not in all_atom_ids:
                     broken_refs.append((atom_id, downstream_id))
-                    self.issues.append(
-                        f"Broken reference: {atom_id} -> {downstream_id} (downstream atom not found)"
-                    )
+                    self.issues.append(f"Broken reference: {atom_id} -> {downstream_id} (downstream atom not found)")
 
         return broken_refs
 
@@ -115,26 +109,22 @@ class GraphIntegrityChecker:
 
         for atom_id, atom in self.atoms.items():
             # For each downstream, check if it has this atom as upstream
-            for downstream_id in atom.get('downstream_ids', []):
+            for downstream_id in atom.get("downstream_ids", []):
                 if downstream_id in self.atoms:
                     downstream_atom = self.atoms[downstream_id]
-                    if atom_id not in downstream_atom.get('upstream_ids', []):
-                        inconsistencies.append(
-                            f"{atom_id} -> {downstream_id} not reciprocated"
-                        )
+                    if atom_id not in downstream_atom.get("upstream_ids", []):
+                        inconsistencies.append(f"{atom_id} -> {downstream_id} not reciprocated")
                         self.issues.append(
                             f"Inconsistent relationship: {atom_id} lists {downstream_id} as downstream, "
                             f"but {downstream_id} doesn't list {atom_id} as upstream"
                         )
 
             # For each upstream, check if it has this atom as downstream
-            for upstream_id in atom.get('upstream_ids', []):
+            for upstream_id in atom.get("upstream_ids", []):
                 if upstream_id in self.atoms:
                     upstream_atom = self.atoms[upstream_id]
-                    if atom_id not in upstream_atom.get('downstream_ids', []):
-                        inconsistencies.append(
-                            f"{upstream_id} <- {atom_id} not reciprocated"
-                        )
+                    if atom_id not in upstream_atom.get("downstream_ids", []):
+                        inconsistencies.append(f"{upstream_id} <- {atom_id} not reciprocated")
                         self.issues.append(
                             f"Inconsistent relationship: {atom_id} lists {upstream_id} as upstream, "
                             f"but {upstream_id} doesn't list {atom_id} as downstream"
@@ -144,6 +134,7 @@ class GraphIntegrityChecker:
 
     def check_circular_dependencies(self) -> List[List[str]]:
         """Detect circular dependencies using DFS."""
+
         def dfs(node: str, visited: Set[str], rec_stack: Set[str], path: List[str]) -> List[str]:
             """DFS to detect cycles."""
             visited.add(node)
@@ -151,7 +142,7 @@ class GraphIntegrityChecker:
             path.append(node)
 
             atom = self.atoms.get(node, {})
-            for downstream_id in atom.get('downstream_ids', []):
+            for downstream_id in atom.get("downstream_ids", []):
                 if downstream_id not in visited:
                     cycle = dfs(downstream_id, visited, rec_stack, path.copy())
                     if cycle:
@@ -172,9 +163,7 @@ class GraphIntegrityChecker:
                 cycle = dfs(atom_id, visited, set(), [])
                 if cycle:
                     cycles.append(cycle)
-                    self.issues.append(
-                        f"Circular dependency detected: {' -> '.join(cycle)}"
-                    )
+                    self.issues.append(f"Circular dependency detected: {' -> '.join(cycle)}")
 
         return cycles
 
@@ -183,12 +172,10 @@ class GraphIntegrityChecker:
         invalid_refs = []
 
         for module_id, module in self.modules.items():
-            for atom_id in module.get('atom_ids', []):
+            for atom_id in module.get("atom_ids", []):
                 if atom_id not in self.atoms:
                     invalid_refs.append(f"{module_id} -> {atom_id}")
-                    self.issues.append(
-                        f"Module {module_id} references non-existent atom {atom_id}"
-                    )
+                    self.issues.append(f"Module {module_id} references non-existent atom {atom_id}")
 
         return invalid_refs
 
@@ -198,13 +185,11 @@ class GraphIntegrityChecker:
         all_module_ids = set(self.modules.keys())
 
         for module_id, module in self.modules.items():
-            dependencies = module.get('metadata', {}).get('dependencies', [])
+            dependencies = module.get("metadata", {}).get("dependencies", [])
             for dep_id in dependencies:
                 if dep_id not in all_module_ids:
                     invalid_deps.append(f"{module_id} -> {dep_id}")
-                    self.issues.append(
-                        f"Module {module_id} depends on non-existent module {dep_id}"
-                    )
+                    self.issues.append(f"Module {module_id} depends on non-existent module {dep_id}")
 
         return invalid_deps
 
@@ -218,23 +203,23 @@ class GraphIntegrityChecker:
         module_deps = self.check_module_dependencies()
 
         return {
-            'total_atoms': len(self.atoms),
-            'total_modules': len(self.modules),
-            'orphaned_atoms': len(orphans),
-            'broken_references': len(broken_refs),
-            'inconsistent_relationships': len(inconsistencies),
-            'circular_dependencies': len(cycles),
-            'invalid_module_atom_refs': len(module_atom_refs),
-            'invalid_module_deps': len(module_deps),
-            'orphan_details': orphans,
-            'cycle_details': cycles
+            "total_atoms": len(self.atoms),
+            "total_modules": len(self.modules),
+            "orphaned_atoms": len(orphans),
+            "broken_references": len(broken_refs),
+            "inconsistent_relationships": len(inconsistencies),
+            "circular_dependencies": len(cycles),
+            "invalid_module_atom_refs": len(module_atom_refs),
+            "invalid_module_deps": len(module_deps),
+            "orphan_details": orphans,
+            "cycle_details": cycles,
         }
 
     def print_results(self, report: dict, report_only: bool = False):
         """Print integrity check results."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("GNDP Graph Integrity Report")
-        print("="*60)
+        print("=" * 60)
 
         print(f"\nSummary:")
         print(f"  Total Atoms: {report['total_atoms']}")
@@ -263,30 +248,21 @@ class GraphIntegrityChecker:
                 print(f"  ... and {len(self.warnings) - 10} more warnings")
 
         # Overall status
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         if not self.issues:
             print("[OK] Graph integrity check passed!")
         elif report_only:
             print("[WARN] Issues found (report-only mode, not failing)")
         else:
             print("[ERROR] Graph integrity check failed!")
-        print("="*60)
+        print("=" * 60)
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Check GNDP graph integrity"
-    )
+    parser = argparse.ArgumentParser(description="Check GNDP graph integrity")
+    parser.add_argument("--report-only", action="store_true", help="Generate report without failing on issues")
     parser.add_argument(
-        '--report-only',
-        action='store_true',
-        help='Generate report without failing on issues'
-    )
-    parser.add_argument(
-        '--root',
-        type=Path,
-        default=Path(__file__).parent.parent,
-        help='Root directory of GNDP project'
+        "--root", type=Path, default=Path(__file__).parent.parent, help="Root directory of GNDP project"
     )
 
     args = parser.parse_args()
@@ -317,9 +293,10 @@ def main():
     except Exception as e:
         print(f"Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

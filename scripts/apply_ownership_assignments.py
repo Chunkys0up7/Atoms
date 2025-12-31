@@ -1,5 +1,6 @@
-import yaml
 from pathlib import Path
+
+import yaml
 
 assignments_file = Path("test_data/ownership/ownership-assignments.yaml")
 atoms_dir = Path("atoms")
@@ -16,7 +17,7 @@ found = 0
 updated = 0
 
 # Build lookup by atomId
-assign_map = {a['atomId']: a for a in assignments if 'atomId' in a}
+assign_map = {a["atomId"]: a for a in assignments if "atomId" in a}
 
 for atom_file in atoms_dir.rglob("*.yaml"):
     try:
@@ -25,21 +26,21 @@ for atom_file in atoms_dir.rglob("*.yaml"):
     except Exception:
         continue
 
-    if not atom or 'id' not in atom:
+    if not atom or "id" not in atom:
         continue
 
-    atom_id = atom.get('id')
+    atom_id = atom.get("id")
     if atom_id in assign_map:
         found += 1
         assignment = assign_map[atom_id]
-        steward = assignment.get('steward')
-        owner = assignment.get('owner')
+        steward = assignment.get("steward")
+        owner = assignment.get("owner")
         changed = False
-        if steward and atom.get('steward') != steward:
-            atom['steward'] = steward
+        if steward and atom.get("steward") != steward:
+            atom["steward"] = steward
             changed = True
-        if owner and atom.get('owner') != owner:
-            atom['owner'] = owner
+        if owner and atom.get("owner") != owner:
+            atom["owner"] = owner
             changed = True
         if changed:
             with open(atom_file, "w", encoding="utf-8") as fh:

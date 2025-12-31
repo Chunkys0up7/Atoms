@@ -11,11 +11,12 @@ Tests the Neo4jClient class with comprehensive coverage of:
 - Connection lifecycle management
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, call
-from neo4j.exceptions import ServiceUnavailable, DatabaseError, Neo4jError
+from unittest.mock import MagicMock, Mock, call, patch
 
-from api.neo4j_client import Neo4jClient, get_neo4j_client, close_neo4j_client
+import pytest
+from neo4j.exceptions import DatabaseError, Neo4jError, ServiceUnavailable
+
+from api.neo4j_client import Neo4jClient, close_neo4j_client, get_neo4j_client
 
 
 class TestNeo4jClientInitialization:
@@ -27,14 +28,10 @@ class TestNeo4jClientInitialization:
 
         Verifies that the client correctly stores provided URI, username, and password.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
-            client = Neo4jClient(
-                uri="neo4j://test-server:7687",
-                user="testuser",
-                password="testpass"
-            )
+            client = Neo4jClient(uri="neo4j://test-server:7687", user="testuser", password="testpass")
 
             assert client.uri == "neo4j://test-server:7687"
             assert client.user == "testuser"
@@ -48,7 +45,7 @@ class TestNeo4jClientInitialization:
         Verifies that the client reads connection parameters from environment when
         not explicitly provided.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
             client = Neo4jClient()
@@ -67,11 +64,7 @@ class TestNeo4jClientInitialization:
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
 
         with pytest.raises(ValueError, match="Neo4j password required"):
-            Neo4jClient(
-                uri="neo4j://localhost:7687",
-                user="neo4j",
-                password=None
-            )
+            Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password=None)
 
     def test_connection_error_on_failed_connect(self):
         """
@@ -79,15 +72,11 @@ class TestNeo4jClientInitialization:
 
         Verifies proper error handling during the initial connection attempt.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.side_effect = Exception("Connection refused")
 
             with pytest.raises(ServiceUnavailable, match="Failed to connect to Neo4j"):
-                Neo4jClient(
-                    uri="neo4j://unreachable:7687",
-                    user="neo4j",
-                    password="password"
-                )
+                Neo4jClient(uri="neo4j://unreachable:7687", user="neo4j", password="password")
 
     def test_driver_instantiation_with_correct_parameters(self):
         """
@@ -95,14 +84,10 @@ class TestNeo4jClientInitialization:
 
         Verifies that the Neo4j driver is initialized with proper auth and encryption settings.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
-            client = Neo4jClient(
-                uri="neo4j://localhost:7687",
-                user="neo4j",
-                password="password"
-            )
+            client = Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password="password")
 
             mock_driver.assert_called_once_with(
                 "neo4j://localhost:7687",
@@ -174,8 +159,8 @@ class TestConnectionManagement:
 
         Verifies that __enter__ and __exit__ methods work correctly.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver'):
-            with patch.object(Neo4jClient, '_connect'):
+        with patch("api.neo4j_client.GraphDatabase.driver"):
+            with patch.object(Neo4jClient, "_connect"):
                 client = Neo4jClient.__new__(Neo4jClient)
                 driver_mock = MagicMock()
                 client.driver = driver_mock
@@ -249,7 +234,7 @@ class TestUpstreamDependencies:
         result_record.items.return_value = [
             ("upstream", {"id": "DESIGN-001", "type": "design"}),
             ("rel_path", ["implements"]),
-            ("depth", 1)
+            ("depth", 1),
         ]
 
         session_mock = MagicMock()
@@ -324,7 +309,7 @@ class TestFullContext:
         center_atom = {"id": "REQ-001", "type": "requirement", "title": "Test Requirement"}
         related_atoms = [
             {"id": "DESIGN-001", "type": "design", "title": "Test Design"},
-            {"id": "PROC-001", "type": "procedure", "title": "Test Procedure"}
+            {"id": "PROC-001", "type": "procedure", "title": "Test Procedure"},
         ]
 
         center_result = MagicMock()
@@ -332,10 +317,7 @@ class TestFullContext:
 
         related_result = MagicMock()
         related_result_record = MagicMock()
-        related_result_record.items.return_value = [
-            ("related", related_atoms[0]),
-            ("connection_count", 2)
-        ]
+        related_result_record.items.return_value = [("related", related_atoms[0]), ("connection_count", 2)]
         related_result.__iter__ = Mock(return_value=iter([related_result_record]))
 
         session_mock = MagicMock()
@@ -454,10 +436,7 @@ class TestFindByType:
 
         Verifies that the correct atoms are returned for a given type.
         """
-        requirements = [
-            {"id": "REQ-001", "type": "requirement"},
-            {"id": "REQ-002", "type": "requirement"}
-        ]
+        requirements = [{"id": "REQ-001", "type": "requirement"}, {"id": "REQ-002", "type": "requirement"}]
 
         result_record = MagicMock()
         result_record.items.return_value = [("a", requirements[0])]
@@ -523,10 +502,9 @@ class TestCountAtoms:
         type_result_record1.items.return_value = [("type", "requirement"), ("count", 2)]
         type_result_record2 = MagicMock()
         type_result_record2.items.return_value = [("type", "design"), ("count", 3)]
-        type_result.__iter__ = Mock(return_value=iter([
-            {"type": "requirement", "count": 2},
-            {"type": "design", "count": 3}
-        ]))
+        type_result.__iter__ = Mock(
+            return_value=iter([{"type": "requirement", "count": 2}, {"type": "design", "count": 3}])
+        )
 
         session_mock = MagicMock()
         session_mock.run.side_effect = [total_result, type_result]
@@ -651,11 +629,12 @@ class TestSingleton:
 
         Verifies singleton pattern implementation.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver'):
-            with patch.object(Neo4jClient, '_connect'):
-                with patch.object(Neo4jClient, '__init__', return_value=None):
+        with patch("api.neo4j_client.GraphDatabase.driver"):
+            with patch.object(Neo4jClient, "_connect"):
+                with patch.object(Neo4jClient, "__init__", return_value=None):
                     # Clear global state
                     import api.neo4j_client
+
                     api.neo4j_client._neo4j_client = None
 
                     client1 = get_neo4j_client()
@@ -669,11 +648,12 @@ class TestSingleton:
 
         Verifies that global instance is properly cleaned up.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver'):
-            with patch.object(Neo4jClient, '_connect'):
-                with patch.object(Neo4jClient, '__init__', return_value=None):
-                    with patch.object(Neo4jClient, 'close'):
+        with patch("api.neo4j_client.GraphDatabase.driver"):
+            with patch.object(Neo4jClient, "_connect"):
+                with patch.object(Neo4jClient, "__init__", return_value=None):
+                    with patch.object(Neo4jClient, "close"):
                         import api.neo4j_client
+
                         api.neo4j_client._neo4j_client = None
 
                         client = get_neo4j_client()

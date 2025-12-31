@@ -1,13 +1,15 @@
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from pathlib import Path
-import yaml
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from cache import get_atom_cache, atomic_write
+from cache import atomic_write, get_atom_cache
 
 router = APIRouter()
 cache = get_atom_cache()
@@ -18,12 +20,12 @@ class CreateAtomRequest(BaseModel):
     category: str
     type: str
     name: str
-    version: Optional[str] = '1.0.0'
-    status: Optional[str] = 'DRAFT'
+    version: Optional[str] = "1.0.0"
+    status: Optional[str] = "DRAFT"
     owner: Optional[str] = None
     team: Optional[str] = None
-    ontologyDomain: Optional[str] = 'Home Lending'
-    criticality: Optional[str] = 'MEDIUM'
+    ontologyDomain: Optional[str] = "Home Lending"
+    criticality: Optional[str] = "MEDIUM"
     phaseId: Optional[str] = None
     moduleId: Optional[str] = None
     content: Optional[Dict[str, Any]] = None
@@ -62,35 +64,35 @@ def _load_all_atoms() -> List[Dict[str, Any]]:
                 data = yaml.safe_load(fh)
             if data:
                 # Ensure id field (support both 'id' and 'atom_id')
-                if 'id' not in data and 'atom_id' in data:
-                    data['id'] = data['atom_id']
-                elif 'atom_id' not in data and 'id' in data:
-                    data['atom_id'] = data['id']
+                if "id" not in data and "atom_id" in data:
+                    data["id"] = data["atom_id"]
+                elif "atom_id" not in data and "id" in data:
+                    data["atom_id"] = data["id"]
 
                 # Normalize type field (handle both old lowercase and new uppercase)
-                atom_type = data.get('type', '')
+                atom_type = data.get("type", "")
                 if isinstance(atom_type, str):
                     normalized_type = atom_type.upper()
-                    data['type'] = normalized_type
+                    data["type"] = normalized_type
                 else:
                     normalized_type = str(atom_type).upper()
-                    data['type'] = normalized_type
+                    data["type"] = normalized_type
 
                 # Extract and ensure summary is set
-                summary = data.get('summary')
-                if not summary and 'content' in data:
-                    if isinstance(data['content'], dict):
-                        summary = data['content'].get('summary')
-                    elif isinstance(data['content'], str):
-                        summary = data['content']
+                summary = data.get("summary")
+                if not summary and "content" in data:
+                    if isinstance(data["content"], dict):
+                        summary = data["content"].get("summary")
+                    elif isinstance(data["content"], str):
+                        summary = data["content"]
 
                 if not summary:
-                    summary = ''
-                if 'summary' not in data:
-                    data['summary'] = summary
+                    summary = ""
+                if "summary" not in data:
+                    data["summary"] = summary
 
                 # Add file path for reference
-                data['_file_path'] = str(yaml_file)
+                data["_file_path"] = str(yaml_file)
                 atoms.append(data)
 
         except (OSError, IOError) as e:
@@ -107,7 +109,9 @@ def _load_all_atoms() -> List[Dict[str, Any]]:
 
 
 @router.get("/api/atoms")
-def list_atoms(limit: int = 100, offset: int = 0, summary_only: bool = False, type_filter: str = None) -> Dict[str, Any]:
+def list_atoms(
+    limit: int = 100, offset: int = 0, summary_only: bool = False, type_filter: str = None
+) -> Dict[str, Any]:
     """
     List all atoms in the system.
 
@@ -137,37 +141,39 @@ def list_atoms(limit: int = 100, offset: int = 0, summary_only: bool = False, ty
     for data in all_atoms:
         # Apply type filter if specified
         if type_filter:
-            atom_type = data.get('type', '').upper()
+            atom_type = data.get("type", "").upper()
             if atom_type != type_filter.upper():
                 continue
 
         if summary_only:
             # Return minimal data for faster loading
-            filtered_atoms.append({
-                'id': data.get('id'),
-                'type': data.get('type'),
-                'title': data.get('title') or data.get('name'),
-                'summary': data.get('summary', ''),
-                'owner': data.get('owner'),
-                'status': data.get('status'),
-                'category': data.get('category'),
-                'moduleId': data.get('moduleId'),
-                'phaseId': data.get('phaseId'),
-                '_file_path': data.get('_file_path')
-            })
+            filtered_atoms.append(
+                {
+                    "id": data.get("id"),
+                    "type": data.get("type"),
+                    "title": data.get("title") or data.get("name"),
+                    "summary": data.get("summary", ""),
+                    "owner": data.get("owner"),
+                    "status": data.get("status"),
+                    "category": data.get("category"),
+                    "moduleId": data.get("moduleId"),
+                    "phaseId": data.get("phaseId"),
+                    "_file_path": data.get("_file_path"),
+                }
+            )
         else:
             filtered_atoms.append(data)
 
     # Apply pagination
     total = len(filtered_atoms)
-    paginated_atoms = filtered_atoms[offset:offset + limit]
+    paginated_atoms = filtered_atoms[offset : offset + limit]
 
     return {
-        'atoms': paginated_atoms,
-        'total': total,
-        'limit': limit,
-        'offset': offset,
-        'has_more': (offset + limit) < total
+        "atoms": paginated_atoms,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "has_more": (offset + limit) < total,
     }
 
 
@@ -183,7 +189,7 @@ def get_atom(atom_id: str) -> Dict[str, Any]:
 
     # Search for matching atom
     for data in all_atoms:
-        if data.get('id') == atom_id or data.get('atom_id') == atom_id:
+        if data.get("id") == atom_id or data.get("atom_id") == atom_id:
             return data
 
     raise HTTPException(status_code=404, detail=f"Atom '{atom_id}' not found")
@@ -204,50 +210,44 @@ async def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
         try:
             with open(yaml_file, "r", encoding="utf-8") as fh:
                 data = yaml.safe_load(fh)
-            if data and (data.get('id') == atom.id or data.get('atom_id') == atom.id):
+            if data and (data.get("id") == atom.id or data.get("atom_id") == atom.id):
                 raise HTTPException(status_code=400, detail=f"Atom with ID '{atom.id}' already exists")
         except yaml.YAMLError:
             continue
 
     # Create atom data structure matching the test data format
     atom_data = {
-        'id': atom.id,
-        'category': atom.category.upper(),
-        'type': atom.type.upper(),
-        'name': atom.name,
-        'version': atom.version or '1.0.0',
-        'status': atom.status or 'DRAFT',
-        'owner': atom.owner or '',
-        'team': atom.team or '',
-        'ontologyDomain': atom.ontologyDomain or 'Home Lending',
-        'criticality': atom.criticality or 'MEDIUM',
-        'phaseId': atom.phaseId,
-        'moduleId': atom.moduleId,
-        'content': atom.content or {'summary': ''},
-        'edges': atom.edges or [],
-        'metrics': atom.metrics or {
-            'automation_level': 0,
-            'avg_cycle_time_mins': 0,
-            'error_rate': 0,
-            'compliance_score': 0
-        }
+        "id": atom.id,
+        "category": atom.category.upper(),
+        "type": atom.type.upper(),
+        "name": atom.name,
+        "version": atom.version or "1.0.0",
+        "status": atom.status or "DRAFT",
+        "owner": atom.owner or "",
+        "team": atom.team or "",
+        "ontologyDomain": atom.ontologyDomain or "Home Lending",
+        "criticality": atom.criticality or "MEDIUM",
+        "phaseId": atom.phaseId,
+        "moduleId": atom.moduleId,
+        "content": atom.content or {"summary": ""},
+        "edges": atom.edges or [],
+        "metrics": atom.metrics
+        or {"automation_level": 0, "avg_cycle_time_mins": 0, "error_rate": 0, "compliance_score": 0},
     }
 
     # Validate atom against schema
     try:
         async with httpx.AsyncClient() as client:
             validation_response = await client.post(
-                'http://localhost:8000/api/schema/validate-atom',
-                json=atom_data,
-                timeout=5.0
+                "http://localhost:8000/api/schema/validate-atom", json=atom_data, timeout=5.0
             )
             if validation_response.status_code == 200:
                 validation_result = validation_response.json()
 
                 # Log validation results
-                if not validation_result.get('is_valid'):
-                    errors = validation_result.get('errors', [])
-                    warnings = validation_result.get('warnings', [])
+                if not validation_result.get("is_valid"):
+                    errors = validation_result.get("errors", [])
+                    warnings = validation_result.get("warnings", [])
                     error_msg = f"Schema validation failed for atom '{atom.id}':\n"
                     error_msg += "\n".join([f"  - {err}" for err in errors])
                     if warnings:
@@ -256,7 +256,7 @@ async def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
                     raise HTTPException(status_code=400, detail=error_msg)
 
                 # Log warnings even if valid
-                warnings = validation_result.get('warnings', [])
+                warnings = validation_result.get("warnings", [])
                 if warnings:
                     print(f"[Atom Creation] Warnings for atom '{atom.id}':", file=sys.stderr)
                     for warn in warnings:
@@ -282,11 +282,11 @@ async def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
 
     try:
         # Atomic write: temp file + rename (prevents corruption on crash/error)
-        atomic_write(str(file_path), yaml_content, encoding='utf-8')
+        atomic_write(str(file_path), yaml_content, encoding="utf-8")
     except (OSError, IOError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to write atom file: {str(e)}")
 
-    atom_data['_file_path'] = str(file_path)
+    atom_data["_file_path"] = str(file_path)
 
     # Invalidate cache after creating new atom
     _load_all_atoms.cache_invalidate()

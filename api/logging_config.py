@@ -10,18 +10,16 @@ from typing import Any
 
 # Configure logging format
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
 
 # Patterns to mask in log messages
 SENSITIVE_PATTERNS = [
-    (re.compile(r'(api[_-]?key["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r'\1***REDACTED***'),
-    (re.compile(r'(token["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r'\1***REDACTED***'),
-    (re.compile(r'(password["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r'\1***REDACTED***'),
-    (re.compile(r'(secret["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r'\1***REDACTED***'),
-    (re.compile(r'Bearer\s+[A-Za-z0-9\-._~+/]+=*', re.IGNORECASE), 'Bearer ***REDACTED***'),
+    (re.compile(r'(api[_-]?key["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r"\1***REDACTED***"),
+    (re.compile(r'(token["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r"\1***REDACTED***"),
+    (re.compile(r'(password["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r"\1***REDACTED***"),
+    (re.compile(r'(secret["\']?\s*[:=]\s*["\']?)([^"\'}\s]+)', re.IGNORECASE), r"\1***REDACTED***"),
+    (re.compile(r"Bearer\s+[A-Za-z0-9\-._~+/]+=*", re.IGNORECASE), "Bearer ***REDACTED***"),
 ]
 
 
@@ -76,10 +74,10 @@ def mask_sensitive_data(data: Any) -> Any:
     """
     if isinstance(data, dict):
         masked = {}
-        sensitive_keys = {'api_key', 'apikey', 'token', 'password', 'secret', 'auth', 'authorization'}
+        sensitive_keys = {"api_key", "apikey", "token", "password", "secret", "auth", "authorization"}
         for key, value in data.items():
             if key.lower() in sensitive_keys:
-                masked[key] = '***REDACTED***'
+                masked[key] = "***REDACTED***"
             elif isinstance(value, dict):
                 masked[key] = mask_sensitive_data(value)
             elif isinstance(value, str):

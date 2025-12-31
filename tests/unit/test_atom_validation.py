@@ -9,9 +9,10 @@ Tests cover:
 - Edge cases and boundary conditions
 """
 
-import pytest
-from pathlib import Path
 import json
+from pathlib import Path
+
+import pytest
 
 
 class TestAtomValidation:
@@ -24,19 +25,9 @@ class TestAtomValidation:
             "type": "process",
             "title": "Test Process",
             "summary": "A test summary for validation",
-            "content": {
-                "steps": ["Step 1", "Step 2"],
-                "summary": "Process summary"
-            },
-            "metadata": {
-                "owner": "test-team",
-                "status": "active",
-                "version": "1.0.0"
-            },
-            "relationships": {
-                "upstream": [],
-                "downstream": []
-            }
+            "content": {"steps": ["Step 1", "Step 2"], "summary": "Process summary"},
+            "metadata": {"owner": "test-team", "status": "active", "version": "1.0.0"},
+            "relationships": {"upstream": [], "downstream": []},
         }
 
         # Basic structure validation
@@ -48,22 +39,14 @@ class TestAtomValidation:
 
     def test_missing_required_id_fails(self):
         """Atom missing required 'id' field should fail"""
-        atom = {
-            "type": "process",
-            "title": "Test",
-            "summary": "Test summary"
-        }
+        atom = {"type": "process", "title": "Test", "summary": "Test summary"}
 
         assert "id" not in atom
         # In production, this would raise ValidationError
 
     def test_missing_required_type_fails(self):
         """Atom missing required 'type' field should fail"""
-        atom = {
-            "id": "test-atom-002",
-            "title": "Test",
-            "summary": "Test summary"
-        }
+        atom = {"id": "test-atom-002", "title": "Test", "summary": "Test summary"}
 
         assert "type" not in atom
 
@@ -73,7 +56,7 @@ class TestAtomValidation:
             "id": "test-atom-003",
             "type": "invalid_type",  # Not in allowed types
             "title": "Test",
-            "summary": "Test"
+            "summary": "Test",
         }
 
         valid_types = ["process", "policy", "requirement", "design", "validation", "risk"]
@@ -81,11 +64,7 @@ class TestAtomValidation:
 
     def test_atom_id_format_validation(self):
         """Atom ID should follow naming convention"""
-        valid_ids = [
-            "atom-cust-kyc",
-            "atom-bo-underwriting",
-            "atom-sys-validation"
-        ]
+        valid_ids = ["atom-cust-kyc", "atom-bo-underwriting", "atom-sys-validation"]
 
         for atom_id in valid_ids:
             assert atom_id.startswith("atom-")
@@ -107,11 +86,7 @@ class TestAtomValidation:
 
     def test_atom_content_structure(self):
         """Atom content should have proper structure"""
-        content = {
-            "steps": ["Step 1", "Step 2"],
-            "summary": "Content summary",
-            "details": "Detailed information"
-        }
+        content = {"steps": ["Step 1", "Step 2"], "summary": "Content summary", "details": "Detailed information"}
 
         assert "summary" in content
         assert isinstance(content.get("steps"), list)
@@ -124,7 +99,7 @@ class TestAtomValidation:
             "status": "active",
             "version": "1.0.0",
             "created_date": "2025-01-01",
-            "last_modified": "2025-01-15"
+            "last_modified": "2025-01-15",
         }
 
         required_fields = ["owner", "status", "version"]
@@ -133,10 +108,7 @@ class TestAtomValidation:
 
     def test_atom_relationships_structure(self):
         """Atom relationships should have upstream/downstream"""
-        relationships = {
-            "upstream": ["atom-cust-identify"],
-            "downstream": ["atom-cust-verify", "atom-bo-review"]
-        }
+        relationships = {"upstream": ["atom-cust-identify"], "downstream": ["atom-cust-verify", "atom-bo-review"]}
 
         assert "upstream" in relationships
         assert "downstream" in relationships
@@ -145,10 +117,7 @@ class TestAtomValidation:
 
     def test_empty_relationships_allowed(self):
         """Empty relationship arrays should be valid"""
-        relationships = {
-            "upstream": [],
-            "downstream": []
-        }
+        relationships = {"upstream": [], "downstream": []}
 
         assert relationships["upstream"] == []
         assert relationships["downstream"] == []
@@ -171,16 +140,7 @@ class TestAtomValidation:
 
     def test_atom_type_enum_validation(self):
         """Atom type must be from allowed enum"""
-        allowed_types = [
-            "process",
-            "policy",
-            "requirement",
-            "design",
-            "validation",
-            "risk",
-            "procedure",
-            "guideline"
-        ]
+        allowed_types = ["process", "policy", "requirement", "design", "validation", "risk", "procedure", "guideline"]
 
         test_type = "process"
         invalid_type = "random_type"
@@ -222,12 +182,12 @@ class TestAtomFileStructure:
 
     def test_load_atom_from_json(self):
         """Should load atom from JSON file"""
-        atom_json = '''{
+        atom_json = """{
             "id": "atom-test-load",
             "type": "process",
             "title": "Test Load",
             "summary": "Test loading from JSON"
-        }'''
+        }"""
 
         atom = json.loads(atom_json)
         assert atom["id"] == "atom-test-load"
@@ -242,7 +202,7 @@ class TestAtomFileStructure:
             "summary": "Test JSON serialization",
             "content": {"steps": ["Step 1"]},
             "metadata": {"owner": "test"},
-            "relationships": {"upstream": [], "downstream": []}
+            "relationships": {"upstream": [], "downstream": []},
         }
 
         json_str = json.dumps(atom, indent=2)
@@ -290,15 +250,9 @@ class TestAtomEdgeCases:
 
     def test_atom_relationship_circular_reference(self):
         """Detect potential circular references"""
-        atom_a = {
-            "id": "atom-a",
-            "relationships": {"downstream": ["atom-b"]}
-        }
+        atom_a = {"id": "atom-a", "relationships": {"downstream": ["atom-b"]}}
 
-        atom_b = {
-            "id": "atom-b",
-            "relationships": {"downstream": ["atom-a"]}  # Circular!
-        }
+        atom_b = {"id": "atom-b", "relationships": {"downstream": ["atom-a"]}}  # Circular!
 
         # Check if atom-a is in downstream of something in its own downstream
         assert "atom-a" in atom_b["relationships"]["downstream"]

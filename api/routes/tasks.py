@@ -4,20 +4,34 @@ Task Management API Routes
 REST API for managing workflow tasks.
 """
 
+import sys
+from typing import Any, Dict, List, Optional
+from uuid import UUID
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-from uuid import UUID
-import sys
 
 try:
-    from ..orchestrator import WorkflowEngine, TaskRouter, AssignmentMethod, get_event_bus, EventType
     from ..database import get_postgres_client
+    from ..orchestrator import (
+        AssignmentMethod,
+        EventType,
+        TaskRouter,
+        WorkflowEngine,
+        get_event_bus,
+    )
 except ImportError:
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from orchestrator import WorkflowEngine, TaskRouter, AssignmentMethod, get_event_bus, EventType
     from database import get_postgres_client
+    from orchestrator import (
+        AssignmentMethod,
+        EventType,
+        TaskRouter,
+        WorkflowEngine,
+        get_event_bus,
+    )
 
 
 router = APIRouter()
@@ -31,8 +45,10 @@ event_bus = get_event_bus()
 # Request/Response Models
 # ============================================================================
 
+
 class CreateTaskRequest(BaseModel):
     """Request to create a new task"""
+
     process_instance_id: str
     task_definition_id: str
     task_name: str
@@ -46,24 +62,28 @@ class CreateTaskRequest(BaseModel):
 
 class AssignTaskRequest(BaseModel):
     """Request to assign a task"""
+
     assigned_to: Optional[str] = None
-    assignment_method: str = 'manual'
+    assignment_method: str = "manual"
     team: Optional[str] = None
 
 
 class StartTaskRequest(BaseModel):
     """Request to start a task"""
+
     user_id: str
 
 
 class CompleteTaskRequest(BaseModel):
     """Request to complete a task"""
+
     user_id: str
     output_data: Optional[Dict[str, Any]] = {}
 
 
 class ReassignTaskRequest(BaseModel):
     """Request to reassign a task"""
+
     new_assignee: str
     reassigned_by: str
     reason: str
@@ -72,6 +92,7 @@ class ReassignTaskRequest(BaseModel):
 # ============================================================================
 # Endpoints
 # ============================================================================
+
 
 @router.post("/api/tasks")
 def create_task(request: CreateTaskRequest) -> Dict[str, Any]:
@@ -94,18 +115,14 @@ def create_task(request: CreateTaskRequest) -> Dict[str, Any]:
             depends_on=[UUID(tid) for tid in request.depends_on] if request.depends_on else None,
             priority=request.priority,
             sla_target_mins=request.sla_target_mins,
-            input_data=request.input_data
+            input_data=request.input_data,
         )
 
         # Publish event
         event_bus.publish(
             EventType.TASK_CREATED,
-            {
-                'task_id': str(task['id']),
-                'task_name': task['task_name'],
-                'process_id': request.process_instance_id
-            },
-            source='system'
+            {"task_id": str(task["id"]), "task_name": task["task_name"], "process_id": request.process_instance_id},
+            source="system",
         )
 
         return task
@@ -120,7 +137,7 @@ def list_tasks(
     status: Optional[str] = Query(None, description="Filter by status"),
     assigned_to: Optional[str] = Query(None, description="Filter by assignee"),
     limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0)
+    offset: int = Query(0, ge=0),
 ) -> Dict[str, Any]:
     """
     List tasks with filtering
@@ -156,8 +173,8 @@ def list_tasks(
 
         # Get total count
         count_query = f"SELECT COUNT(*) as count FROM tasks {where_sql}"
-        count_result = db.execute_query(count_query, tuple(params), fetch='one')
-        total = count_result['count'] if count_result else 0
+        count_result = db.execute_query(count_query, tuple(params), fetch="one")
+        total = count_result["count"] if count_result else 0
 
         # Get tasks
         params.extend([limit, offset])
@@ -171,12 +188,7 @@ def list_tasks(
 
         tasks = db.execute_query(query, tuple(params))
 
-        return {
-            'tasks': tasks or [],
-            'total': total,
-            'limit': limit,
-            'offset': offset
-        }
+        return {"tasks": tasks or [], "total": total, "limit": limit, "offset": offset}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list tasks: {str(e)}")
@@ -195,7 +207,7 @@ def get_task(task_id: str) -> Dict[str, Any]:
     """
     try:
         query = "SELECT * FROM tasks WHERE id = %s"
-        task = db.execute_query(query, (task_id,), fetch='one')
+        task = db.execute_query(query, (task_id,), fetch="one")
 
         if not task:
             raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
@@ -232,34 +244,19 @@ def assign_task(task_id: str, request: AssignTaskRequest) -> Dict[str, Any]:
                 raise HTTPException(status_code=400, detail="assigned_to required for manual assignment")
 
             task = engine.assign_task(
-                UUID(task_id),
-                request.assigned_to,
-                assigned_by='system',
-                assignment_method='manual'
+                UUID(task_id), request.assigned_to, assigned_by="system", assignment_method="manual"
             )
         else:
             # Use TaskRouter for intelligent assignment
-            assigned_to = task_router.assign_task(
-                task_id,
-                method,
-                team=request.team
-            )
+            assigned_to = task_router.assign_task(task_id, method, team=request.team)
 
-            task = db.execute_query(
-                "SELECT * FROM tasks WHERE id = %s",
-                (task_id,),
-                fetch='one'
-            )
+            task = db.execute_query("SELECT * FROM tasks WHERE id = %s", (task_id,), fetch="one")
 
         # Publish event
         event_bus.publish(
             EventType.TASK_ASSIGNED,
-            {
-                'task_id': task_id,
-                'assigned_to': task['assigned_to'],
-                'method': request.assignment_method
-            },
-            source='system'
+            {"task_id": task_id, "assigned_to": task["assigned_to"], "method": request.assignment_method},
+            source="system",
         )
 
         return task
@@ -287,9 +284,7 @@ def start_task(task_id: str, request: StartTaskRequest) -> Dict[str, Any]:
 
         # Publish event
         event_bus.publish(
-            EventType.TASK_STARTED,
-            {'task_id': task_id, 'user_id': request.user_id},
-            source=request.user_id
+            EventType.TASK_STARTED, {"task_id": task_id, "user_id": request.user_id}, source=request.user_id
         )
 
         return task
@@ -311,17 +306,11 @@ def complete_task(task_id: str, request: CompleteTaskRequest) -> Dict[str, Any]:
         Updated task
     """
     try:
-        task = engine.complete_task(
-            UUID(task_id),
-            request.user_id,
-            output_data=request.output_data
-        )
+        task = engine.complete_task(UUID(task_id), request.user_id, output_data=request.output_data)
 
         # Publish event
         event_bus.publish(
-            EventType.TASK_COMPLETED,
-            {'task_id': task_id, 'user_id': request.user_id},
-            source=request.user_id
+            EventType.TASK_COMPLETED, {"task_id": task_id, "user_id": request.user_id}, source=request.user_id
         )
 
         return task
@@ -343,22 +332,13 @@ def reassign_task(task_id: str, request: ReassignTaskRequest) -> Dict[str, Any]:
         Updated task
     """
     try:
-        task = task_router.reassign_task(
-            UUID(task_id),
-            request.new_assignee,
-            request.reassigned_by,
-            request.reason
-        )
+        task = task_router.reassign_task(UUID(task_id), request.new_assignee, request.reassigned_by, request.reason)
 
         # Publish event
         event_bus.publish(
             EventType.TASK_REASSIGNED,
-            {
-                'task_id': task_id,
-                'new_assignee': request.new_assignee,
-                'reason': request.reason
-            },
-            source=request.reassigned_by
+            {"task_id": task_id, "new_assignee": request.new_assignee, "reason": request.reason},
+            source=request.reassigned_by,
         )
 
         return task
@@ -435,7 +415,7 @@ def get_workload_stats() -> Dict[str, Any]:
         """
 
         workloads = db.execute_query(query)
-        return {'user_workloads': workloads or []}
+        return {"user_workloads": workloads or []}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get workload stats: {str(e)}")

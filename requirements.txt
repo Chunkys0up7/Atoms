@@ -11,6 +11,7 @@ sentence-transformers>=2.2.2
 langchain>=0.1.0
 langchain-community>=0.0.10
 anthropic>=0.18.0
+psycopg2-binary>=2.9.0
 
 # Testing dependencies
 pytest>=7.4.0

@@ -1,10 +1,11 @@
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Literal, Optional
+
+import yaml
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Literal
-from datetime import datetime
-import json
-import yaml
 
 router = APIRouter()
 
@@ -12,18 +13,32 @@ router = APIRouter()
 # DATA MODELS
 # ============================================================================
 
+
 class ConditionRule(BaseModel):
     """Single condition in a rule (e.g., credit_score < 620)"""
+
     field: str = Field(..., description="Field path (e.g., 'customer_data.credit_score')")
-    operator: Literal["EQUALS", "NOT_EQUALS", "GREATER_THAN", "LESS_THAN", "GREATER_EQUAL", "LESS_EQUAL", "CONTAINS", "NOT_CONTAINS", "IN", "NOT_IN"] = Field(..., description="Comparison operator")
+    operator: Literal[
+        "EQUALS",
+        "NOT_EQUALS",
+        "GREATER_THAN",
+        "LESS_THAN",
+        "GREATER_EQUAL",
+        "LESS_EQUAL",
+        "CONTAINS",
+        "NOT_CONTAINS",
+        "IN",
+        "NOT_IN",
+    ] = Field(..., description="Comparison operator")
     value: Any = Field(..., description="Value to compare against")
 
 
 class ConditionGroup(BaseModel):
     """Group of conditions with logical operator"""
+
     type: Literal["AND", "OR", "NOT"] = Field(..., description="Logical operator for this group")
     rules: List[ConditionRule] = Field(default_factory=list, description="List of conditions in this group")
-    groups: Optional[List['ConditionGroup']] = Field(default=None, description="Nested condition groups")
+    groups: Optional[List["ConditionGroup"]] = Field(default=None, description="Nested condition groups")
 
 
 # Enable forward references for recursive model
@@ -32,10 +47,13 @@ ConditionGroup.model_rebuild()
 
 class PhaseAction(BaseModel):
     """Definition of a phase to insert/modify"""
+
     id: str = Field(..., description="Phase ID (e.g., 'phase-manual-credit-review')")
     name: str = Field(..., description="Human-readable phase name")
     description: str = Field(..., description="Description of what this phase does")
-    position: Literal["BEFORE", "AFTER", "REPLACE", "AT_START", "AT_END"] = Field(..., description="Where to insert the phase")
+    position: Literal["BEFORE", "AFTER", "REPLACE", "AT_START", "AT_END"] = Field(
+        ..., description="Where to insert the phase"
+    )
     reference_phase: Optional[str] = Field(None, description="Reference phase ID for BEFORE/AFTER/REPLACE")
     modules: List[str] = Field(default_factory=list, description="Module IDs to include in this phase")
     target_duration_days: int = Field(default=1, description="Expected duration in days")
@@ -43,19 +61,26 @@ class PhaseAction(BaseModel):
 
 class RuleModification(BaseModel):
     """Metadata about the modification"""
+
     reason: str = Field(..., description="Why this modification is being applied")
-    criticality: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = Field(default="MEDIUM", description="Impact level of this modification")
+    criticality: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = Field(
+        default="MEDIUM", description="Impact level of this modification"
+    )
 
 
 class RuleAction(BaseModel):
     """Action to take when rule triggers"""
-    type: Literal["INSERT_PHASE", "REMOVE_PHASE", "REPLACE_PHASE", "MODIFY_PHASE"] = Field(..., description="Type of modification")
+
+    type: Literal["INSERT_PHASE", "REMOVE_PHASE", "REPLACE_PHASE", "MODIFY_PHASE"] = Field(
+        ..., description="Type of modification"
+    )
     phase: PhaseAction = Field(..., description="Phase definition")
     modification: RuleModification = Field(..., description="Modification metadata")
 
 
 class RuleDefinition(BaseModel):
     """Complete rule definition"""
+
     rule_id: str = Field(..., description="Unique rule identifier")
     name: str = Field(..., description="Human-readable rule name")
     description: str = Field(..., description="What this rule does and why")
@@ -72,6 +97,7 @@ class RuleDefinition(BaseModel):
 
 class CreateRuleRequest(BaseModel):
     """Request to create a new rule"""
+
     name: str
     description: str
     priority: int = Field(ge=1, le=10)
@@ -83,6 +109,7 @@ class CreateRuleRequest(BaseModel):
 
 class UpdateRuleRequest(BaseModel):
     """Request to update an existing rule"""
+
     name: Optional[str] = None
     description: Optional[str] = None
     priority: Optional[int] = Field(None, ge=1, le=10)
@@ -93,6 +120,7 @@ class UpdateRuleRequest(BaseModel):
 
 class TestRuleResult(BaseModel):
     """Result of testing a rule"""
+
     rule_id: str
     triggered: bool
     reason: Optional[str] = None
@@ -103,6 +131,7 @@ class TestRuleResult(BaseModel):
 # ============================================================================
 # STORAGE LAYER
 # ============================================================================
+
 
 def get_rules_dir() -> Path:
     """Get the rules storage directory."""
@@ -127,11 +156,7 @@ def load_rules_from_storage() -> Dict[str, Any]:
 
     if not rules_path.exists():
         # Initialize empty storage
-        default_storage = {
-            "version": "1.0",
-            "last_updated": datetime.utcnow().isoformat(),
-            "rules": []
-        }
+        default_storage = {"version": "1.0", "last_updated": datetime.utcnow().isoformat(), "rules": []}
         save_rules_to_storage(default_storage)
         return default_storage
 
@@ -179,6 +204,7 @@ def generate_rule_id(name: str) -> str:
 # ============================================================================
 # API ENDPOINTS
 # ============================================================================
+
 
 @router.get("/api/rules")
 def list_rules(active_only: bool = False) -> List[RuleDefinition]:
@@ -261,7 +287,7 @@ def create_rule(request: CreateRuleRequest) -> RuleDefinition:
         created_at=now,
         updated_at=now,
         created_by=request.created_by,
-        version=1
+        version=1,
     )
 
     # Add to storage
@@ -403,13 +429,15 @@ def get_rule_versions(rule_id: str) -> List[Dict[str, Any]]:
             with open(yaml_file, "r", encoding="utf-8") as f:
                 rule_data = yaml.safe_load(f)
 
-            versions.append({
-                "version": version,
-                "updated_at": rule_data.get("updated_at"),
-                "name": rule_data.get("name"),
-                "active": rule_data.get("active"),
-                "file": str(yaml_file.name)
-            })
+            versions.append(
+                {
+                    "version": version,
+                    "updated_at": rule_data.get("updated_at"),
+                    "name": rule_data.get("name"),
+                    "active": rule_data.get("active"),
+                    "file": str(yaml_file.name),
+                }
+            )
         except Exception as e:
             print(f"Warning: Failed to load version {yaml_file}: {e}")
             continue
@@ -438,11 +466,7 @@ def test_rule(rule_id: str, context: Dict[str, Any]) -> TestRuleResult:
     # Evaluate condition
     triggered = evaluate_condition(rule.condition, context)
 
-    result = TestRuleResult(
-        rule_id=rule_id,
-        triggered=triggered,
-        would_modify=triggered and rule.active
-    )
+    result = TestRuleResult(rule_id=rule_id, triggered=triggered, would_modify=triggered and rule.active)
 
     if triggered:
         result.reason = rule.action.modification.reason
@@ -451,7 +475,7 @@ def test_rule(rule_id: str, context: Dict[str, Any]) -> TestRuleResult:
             "phase_id": rule.action.phase.id,
             "phase_name": rule.action.phase.name,
             "position": rule.action.phase.position,
-            "criticality": rule.action.modification.criticality
+            "criticality": rule.action.modification.criticality,
         }
 
     return result

@@ -10,13 +10,13 @@ Tests validation of:
 - Edge cases in schema validation
 """
 
-import pytest
-from typing import Dict, Any, List
-import yaml
 import json
-from jsonschema import validate, ValidationError, Draft7Validator
 from pathlib import Path
+from typing import Any, Dict, List
 
+import pytest
+import yaml
+from jsonschema import Draft7Validator, ValidationError, validate
 
 # ==================== Schema Definitions ====================
 
@@ -25,66 +25,28 @@ ATOM_SCHEMA = {
     "type": "object",
     "required": ["id", "type", "title", "description"],
     "properties": {
-        "id": {
-            "type": "string",
-            "pattern": "^[A-Z]+-[0-9]+$",
-            "description": "Unique atom identifier"
-        },
-        "atom_id": {
-            "type": "string",
-            "pattern": "^[A-Z]+-[0-9]+$",
-            "description": "Alternative ID field"
-        },
+        "id": {"type": "string", "pattern": "^[A-Z]+-[0-9]+$", "description": "Unique atom identifier"},
+        "atom_id": {"type": "string", "pattern": "^[A-Z]+-[0-9]+$", "description": "Alternative ID field"},
         "type": {
             "type": "string",
             "enum": ["requirement", "design", "procedure", "validation", "risk", "policy"],
-            "description": "Type of atom"
+            "description": "Type of atom",
         },
-        "title": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500,
-            "description": "Short descriptive title"
-        },
-        "description": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Detailed description"
-        },
+        "title": {"type": "string", "minLength": 1, "maxLength": 500, "description": "Short descriptive title"},
+        "description": {"type": "string", "minLength": 1, "description": "Detailed description"},
         "status": {
             "type": "string",
             "enum": ["draft", "active", "deprecated", "archived"],
-            "description": "Current status"
+            "description": "Current status",
         },
-        "priority": {
-            "type": "string",
-            "enum": ["low", "medium", "high", "critical"],
-            "description": "Priority level"
-        },
-        "created_date": {
-            "type": "string",
-            "format": "date",
-            "description": "Creation date in YYYY-MM-DD format"
-        },
-        "last_modified": {
-            "type": "string",
-            "format": "date",
-            "description": "Last modification date"
-        },
-        "metadata": {
-            "type": "object",
-            "description": "Additional metadata"
-        },
-        "content": {
-            "type": "string",
-            "description": "Full content for embedding"
-        },
-        "summary": {
-            "type": "string",
-            "description": "Summary for display"
-        }
+        "priority": {"type": "string", "enum": ["low", "medium", "high", "critical"], "description": "Priority level"},
+        "created_date": {"type": "string", "format": "date", "description": "Creation date in YYYY-MM-DD format"},
+        "last_modified": {"type": "string", "format": "date", "description": "Last modification date"},
+        "metadata": {"type": "object", "description": "Additional metadata"},
+        "content": {"type": "string", "description": "Full content for embedding"},
+        "summary": {"type": "string", "description": "Summary for display"},
     },
-    "additionalProperties": True
+    "additionalProperties": True,
 }
 
 
@@ -93,32 +55,13 @@ MODULE_SCHEMA = {
     "type": "object",
     "required": ["name", "description"],
     "properties": {
-        "name": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Module name"
-        },
-        "description": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Module description"
-        },
-        "atoms": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "List of atom IDs in module"
-        },
-        "submodules": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "List of submodule names"
-        },
-        "metadata": {
-            "type": "object",
-            "description": "Module metadata"
-        }
+        "name": {"type": "string", "minLength": 1, "description": "Module name"},
+        "description": {"type": "string", "minLength": 1, "description": "Module description"},
+        "atoms": {"type": "array", "items": {"type": "string"}, "description": "List of atom IDs in module"},
+        "submodules": {"type": "array", "items": {"type": "string"}, "description": "List of submodule names"},
+        "metadata": {"type": "object", "description": "Module metadata"},
     },
-    "additionalProperties": True
+    "additionalProperties": True,
 }
 
 
@@ -129,8 +72,8 @@ GRAPH_NODE_SCHEMA = {
         "id": {"type": "string"},
         "type": {"type": "string"},
         "label": {"type": "string"},
-        "metadata": {"type": "object"}
-    }
+        "metadata": {"type": "object"},
+    },
 }
 
 
@@ -143,13 +86,19 @@ GRAPH_EDGE_SCHEMA = {
         "type": {
             "type": "string",
             "enum": [
-                "requires", "depends_on", "implements", "validates",
-                "affects", "contains", "related_to", "part_of"
-            ]
+                "requires",
+                "depends_on",
+                "implements",
+                "validates",
+                "affects",
+                "contains",
+                "related_to",
+                "part_of",
+            ],
         },
         "weight": {"type": "number"},
-        "metadata": {"type": "object"}
-    }
+        "metadata": {"type": "object"},
+    },
 }
 
 
@@ -158,22 +107,15 @@ GRAPH_SCHEMA = {
     "type": "object",
     "required": ["nodes", "edges"],
     "properties": {
-        "nodes": {
-            "type": "array",
-            "items": GRAPH_NODE_SCHEMA
-        },
-        "edges": {
-            "type": "array",
-            "items": GRAPH_EDGE_SCHEMA
-        },
-        "metadata": {
-            "type": "object"
-        }
-    }
+        "nodes": {"type": "array", "items": GRAPH_NODE_SCHEMA},
+        "edges": {"type": "array", "items": GRAPH_EDGE_SCHEMA},
+        "metadata": {"type": "object"},
+    },
 }
 
 
 # ==================== Atom Schema Tests ====================
+
 
 class TestAtomSchema:
     """Tests for atom schema validation."""
@@ -188,7 +130,7 @@ class TestAtomSchema:
             "id": "REQ-001",
             "type": "requirement",
             "title": "User Authentication",
-            "description": "System must support user authentication"
+            "description": "System must support user authentication",
         }
 
         validate(instance=atom, schema=ATOM_SCHEMA)  # Should not raise
@@ -203,7 +145,7 @@ class TestAtomSchema:
             "id": "DESIGN-001",
             "type": "design",
             "title": "OAuth 2.0 Design",
-            "description": "Design for OAuth 2.0 implementation"
+            "description": "Design for OAuth 2.0 implementation",
         }
 
         validate(instance=atom, schema=ATOM_SCHEMA)
@@ -223,10 +165,7 @@ class TestAtomSchema:
             "priority": "high",
             "created_date": "2025-01-15",
             "last_modified": "2025-01-20",
-            "metadata": {
-                "module": "auth",
-                "owner": "dev-team"
-            }
+            "metadata": {"module": "auth", "owner": "dev-team"},
         }
 
         validate(instance=atom, schema=ATOM_SCHEMA)
@@ -237,11 +176,7 @@ class TestAtomSchema:
 
         Verifies required field validation.
         """
-        atom = {
-            "type": "requirement",
-            "title": "Test",
-            "description": "Test description"
-        }
+        atom = {"type": "requirement", "title": "Test", "description": "Test description"}
 
         with pytest.raises(ValidationError):
             validate(instance=atom, schema=ATOM_SCHEMA)
@@ -252,11 +187,7 @@ class TestAtomSchema:
 
         Verifies type field is required.
         """
-        atom = {
-            "id": "REQ-001",
-            "title": "Test",
-            "description": "Test description"
-        }
+        atom = {"id": "REQ-001", "title": "Test", "description": "Test description"}
 
         with pytest.raises(ValidationError):
             validate(instance=atom, schema=ATOM_SCHEMA)
@@ -267,11 +198,7 @@ class TestAtomSchema:
 
         Verifies title field is required.
         """
-        atom = {
-            "id": "REQ-001",
-            "type": "requirement",
-            "description": "Test description"
-        }
+        atom = {"id": "REQ-001", "type": "requirement", "description": "Test description"}
 
         with pytest.raises(ValidationError):
             validate(instance=atom, schema=ATOM_SCHEMA)
@@ -282,11 +209,7 @@ class TestAtomSchema:
 
         Verifies description field is required.
         """
-        atom = {
-            "id": "REQ-001",
-            "type": "requirement",
-            "title": "Test"
-        }
+        atom = {"id": "REQ-001", "type": "requirement", "title": "Test"}
 
         with pytest.raises(ValidationError):
             validate(instance=atom, schema=ATOM_SCHEMA)
@@ -301,7 +224,7 @@ class TestAtomSchema:
             "id": "INVALID-ID",  # Missing hyphen number format
             "type": "requirement",
             "title": "Test",
-            "description": "Test"
+            "description": "Test",
         }
 
         with pytest.raises(ValidationError):
@@ -313,12 +236,7 @@ class TestAtomSchema:
 
         Verifies type enum validation.
         """
-        atom = {
-            "id": "REQ-001",
-            "type": "invalid_type",
-            "title": "Test",
-            "description": "Test"
-        }
+        atom = {"id": "REQ-001", "type": "invalid_type", "title": "Test", "description": "Test"}
 
         with pytest.raises(ValidationError):
             validate(instance=atom, schema=ATOM_SCHEMA)
@@ -329,12 +247,7 @@ class TestAtomSchema:
 
         Verifies minLength validation on title.
         """
-        atom = {
-            "id": "REQ-001",
-            "type": "requirement",
-            "title": "",
-            "description": "Test"
-        }
+        atom = {"id": "REQ-001", "type": "requirement", "title": "", "description": "Test"}
 
         with pytest.raises(ValidationError):
             validate(instance=atom, schema=ATOM_SCHEMA)
@@ -350,7 +263,7 @@ class TestAtomSchema:
             "type": "requirement",
             "title": "Test",
             "description": "Test",
-            "status": "invalid_status"
+            "status": "invalid_status",
         }
 
         with pytest.raises(ValidationError):
@@ -367,7 +280,7 @@ class TestAtomSchema:
             "type": "requirement",
             "title": "Test",
             "description": "Test",
-            "priority": "urgent"  # Not in enum
+            "priority": "urgent",  # Not in enum
         }
 
         with pytest.raises(ValidationError):
@@ -379,13 +292,7 @@ class TestAtomSchema:
 
         Verifies alternate ID field format.
         """
-        atom = {
-            "id": "REQ-001",
-            "atom_id": "REQ-001",
-            "type": "requirement",
-            "title": "Test",
-            "description": "Test"
-        }
+        atom = {"id": "REQ-001", "atom_id": "REQ-001", "type": "requirement", "title": "Test", "description": "Test"}
 
         validate(instance=atom, schema=ATOM_SCHEMA)
 
@@ -396,12 +303,7 @@ class TestAtomSchema:
 
         Parametrized test for each atom type enum value.
         """
-        atom = {
-            "id": "TEST-001",
-            "type": atom_type,
-            "title": "Test",
-            "description": "Test"
-        }
+        atom = {"id": "TEST-001", "type": atom_type, "title": "Test", "description": "Test"}
 
         validate(instance=atom, schema=ATOM_SCHEMA)
 
@@ -412,18 +314,13 @@ class TestAtomSchema:
 
         Parametrized test for each priority enum value.
         """
-        atom = {
-            "id": "TEST-001",
-            "type": "requirement",
-            "title": "Test",
-            "description": "Test",
-            "priority": priority
-        }
+        atom = {"id": "TEST-001", "type": "requirement", "title": "Test", "description": "Test", "priority": priority}
 
         validate(instance=atom, schema=ATOM_SCHEMA)
 
 
 # ==================== Module Schema Tests ====================
+
 
 class TestModuleSchema:
     """Tests for module schema validation."""
@@ -434,10 +331,7 @@ class TestModuleSchema:
 
         Verifies properly formed module passes validation.
         """
-        module = {
-            "name": "Authentication",
-            "description": "Authentication module"
-        }
+        module = {"name": "Authentication", "description": "Authentication module"}
 
         validate(instance=module, schema=MODULE_SCHEMA)
 
@@ -450,7 +344,7 @@ class TestModuleSchema:
         module = {
             "name": "Authentication",
             "description": "Authentication module",
-            "atoms": ["REQ-001", "DESIGN-001", "PROC-001"]
+            "atoms": ["REQ-001", "DESIGN-001", "PROC-001"],
         }
 
         validate(instance=module, schema=MODULE_SCHEMA)
@@ -461,11 +355,7 @@ class TestModuleSchema:
 
         Verifies module hierarchy is supported.
         """
-        module = {
-            "name": "Core",
-            "description": "Core module",
-            "submodules": ["auth", "database", "api"]
-        }
+        module = {"name": "Core", "description": "Core module", "submodules": ["auth", "database", "api"]}
 
         validate(instance=module, schema=MODULE_SCHEMA)
 
@@ -475,9 +365,7 @@ class TestModuleSchema:
 
         Verifies name field is required.
         """
-        module = {
-            "description": "Test module"
-        }
+        module = {"description": "Test module"}
 
         with pytest.raises(ValidationError):
             validate(instance=module, schema=MODULE_SCHEMA)
@@ -488,9 +376,7 @@ class TestModuleSchema:
 
         Verifies description field is required.
         """
-        module = {
-            "name": "Test Module"
-        }
+        module = {"name": "Test Module"}
 
         with pytest.raises(ValidationError):
             validate(instance=module, schema=MODULE_SCHEMA)
@@ -501,16 +387,14 @@ class TestModuleSchema:
 
         Verifies minLength validation.
         """
-        module = {
-            "name": "",
-            "description": "Test"
-        }
+        module = {"name": "", "description": "Test"}
 
         with pytest.raises(ValidationError):
             validate(instance=module, schema=MODULE_SCHEMA)
 
 
 # ==================== Graph Schema Tests ====================
+
 
 class TestGraphSchema:
     """Tests for graph schema validation."""
@@ -522,13 +406,8 @@ class TestGraphSchema:
         Verifies properly formed graph passes validation.
         """
         graph = {
-            "nodes": [
-                {"id": "REQ-001", "type": "requirement"},
-                {"id": "DESIGN-001", "type": "design"}
-            ],
-            "edges": [
-                {"source": "REQ-001", "target": "DESIGN-001", "type": "implements"}
-            ]
+            "nodes": [{"id": "REQ-001", "type": "requirement"}, {"id": "DESIGN-001", "type": "design"}],
+            "edges": [{"source": "REQ-001", "target": "DESIGN-001", "type": "implements"}],
         }
 
         validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -540,16 +419,9 @@ class TestGraphSchema:
         Verifies metadata is properly handled.
         """
         graph = {
-            "nodes": [
-                {"id": "REQ-001", "type": "requirement", "label": "Requirement 1"}
-            ],
-            "edges": [
-                {"source": "REQ-001", "target": "DESIGN-001", "type": "implements"}
-            ],
-            "metadata": {
-                "created": "2025-01-01",
-                "version": "1.0"
-            }
+            "nodes": [{"id": "REQ-001", "type": "requirement", "label": "Requirement 1"}],
+            "edges": [{"source": "REQ-001", "target": "DESIGN-001", "type": "implements"}],
+            "metadata": {"created": "2025-01-01", "version": "1.0"},
         }
 
         validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -560,9 +432,7 @@ class TestGraphSchema:
 
         Verifies nodes field is required.
         """
-        graph = {
-            "edges": []
-        }
+        graph = {"edges": []}
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -573,9 +443,7 @@ class TestGraphSchema:
 
         Verifies edges field is required.
         """
-        graph = {
-            "nodes": []
-        }
+        graph = {"nodes": []}
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -586,12 +454,7 @@ class TestGraphSchema:
 
         Verifies node ID requirement.
         """
-        graph = {
-            "nodes": [
-                {"type": "requirement"}  # Missing id
-            ],
-            "edges": []
-        }
+        graph = {"nodes": [{"type": "requirement"}], "edges": []}  # Missing id
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -602,12 +465,7 @@ class TestGraphSchema:
 
         Verifies node type requirement.
         """
-        graph = {
-            "nodes": [
-                {"id": "REQ-001"}  # Missing type
-            ],
-            "edges": []
-        }
+        graph = {"nodes": [{"id": "REQ-001"}], "edges": []}  # Missing type
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -618,12 +476,7 @@ class TestGraphSchema:
 
         Verifies edge source requirement.
         """
-        graph = {
-            "nodes": [],
-            "edges": [
-                {"target": "DESIGN-001", "type": "implements"}
-            ]
-        }
+        graph = {"nodes": [], "edges": [{"target": "DESIGN-001", "type": "implements"}]}
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -634,12 +487,7 @@ class TestGraphSchema:
 
         Verifies edge target requirement.
         """
-        graph = {
-            "nodes": [],
-            "edges": [
-                {"source": "REQ-001", "type": "implements"}
-            ]
-        }
+        graph = {"nodes": [], "edges": [{"source": "REQ-001", "type": "implements"}]}
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -650,12 +498,7 @@ class TestGraphSchema:
 
         Verifies edge type requirement.
         """
-        graph = {
-            "nodes": [],
-            "edges": [
-                {"source": "REQ-001", "target": "DESIGN-001"}
-            ]
-        }
+        graph = {"nodes": [], "edges": [{"source": "REQ-001", "target": "DESIGN-001"}]}
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -666,37 +509,28 @@ class TestGraphSchema:
 
         Verifies edge type enum validation.
         """
-        graph = {
-            "nodes": [],
-            "edges": [
-                {"source": "REQ-001", "target": "DESIGN-001", "type": "invalid"}
-            ]
-        }
+        graph = {"nodes": [], "edges": [{"source": "REQ-001", "target": "DESIGN-001", "type": "invalid"}]}
 
         with pytest.raises(ValidationError):
             validate(instance=graph, schema=GRAPH_SCHEMA)
 
-    @pytest.mark.parametrize("edge_type", [
-        "requires", "depends_on", "implements", "validates",
-        "affects", "contains", "related_to", "part_of"
-    ])
+    @pytest.mark.parametrize(
+        "edge_type",
+        ["requires", "depends_on", "implements", "validates", "affects", "contains", "related_to", "part_of"],
+    )
     def test_all_valid_edge_types(self, edge_type):
         """
         Test all valid edge types.
 
         Parametrized test for each relationship type.
         """
-        graph = {
-            "nodes": [],
-            "edges": [
-                {"source": "A", "target": "B", "type": edge_type}
-            ]
-        }
+        graph = {"nodes": [], "edges": [{"source": "A", "target": "B", "type": edge_type}]}
 
         validate(instance=graph, schema=GRAPH_SCHEMA)
 
 
 # ==================== Integration Schema Tests ====================
+
 
 class TestSchemaIntegration:
     """Integration tests for schema validation."""
@@ -713,14 +547,14 @@ class TestSchemaIntegration:
                 "id": "REQ-001",
                 "type": "requirement",
                 "title": "User Authentication",
-                "description": "System must support authentication"
+                "description": "System must support authentication",
             },
             {
                 "id": "DESIGN-001",
                 "type": "design",
                 "title": "OAuth Design",
-                "description": "OAuth implementation design"
-            }
+                "description": "OAuth implementation design",
+            },
         ]
 
         # Validate each atom
@@ -728,22 +562,14 @@ class TestSchemaIntegration:
             validate(instance=atom, schema=ATOM_SCHEMA)
 
         # Create module
-        module = {
-            "name": "Authentication",
-            "description": "Authentication module",
-            "atoms": ["REQ-001", "DESIGN-001"]
-        }
+        module = {"name": "Authentication", "description": "Authentication module", "atoms": ["REQ-001", "DESIGN-001"]}
 
         validate(instance=module, schema=MODULE_SCHEMA)
 
         # Create graph
         graph = {
-            "nodes": [
-                {"id": a["id"], "type": a["type"]} for a in atoms
-            ],
-            "edges": [
-                {"source": "REQ-001", "target": "DESIGN-001", "type": "implements"}
-            ]
+            "nodes": [{"id": a["id"], "type": a["type"]} for a in atoms],
+            "edges": [{"source": "REQ-001", "target": "DESIGN-001", "type": "implements"}],
         }
 
         validate(instance=graph, schema=GRAPH_SCHEMA)
@@ -754,20 +580,11 @@ class TestSchemaIntegration:
 
         Verifies nodes reference valid atom IDs and types.
         """
-        atoms = [
-            {"id": "REQ-001", "type": "requirement"},
-            {"id": "DESIGN-001", "type": "design"}
-        ]
+        atoms = [{"id": "REQ-001", "type": "requirement"}, {"id": "DESIGN-001", "type": "design"}]
 
-        graph_nodes = [
-            {"id": atom["id"], "type": atom["type"]}
-            for atom in atoms
-        ]
+        graph_nodes = [{"id": atom["id"], "type": atom["type"]} for atom in atoms]
 
-        graph = {
-            "nodes": graph_nodes,
-            "edges": []
-        }
+        graph = {"nodes": graph_nodes, "edges": []}
 
         validate(instance=graph, schema=GRAPH_SCHEMA)
 
@@ -786,13 +603,10 @@ class TestSchemaIntegration:
 
         edges = [
             {"source": "REQ-001", "target": "DESIGN-001", "type": "implements"},
-            {"source": "DESIGN-001", "target": "PROC-001", "type": "implements"}
+            {"source": "DESIGN-001", "target": "PROC-001", "type": "implements"},
         ]
 
-        graph = {
-            "nodes": [{"id": nid, "type": "test"} for nid in node_ids],
-            "edges": edges
-        }
+        graph = {"nodes": [{"id": nid, "type": "test"} for nid in node_ids], "edges": edges}
 
         validate(instance=graph, schema=GRAPH_SCHEMA)
 
@@ -803,6 +617,7 @@ class TestSchemaIntegration:
 
 
 # ==================== Edge Case Tests ====================
+
 
 class TestSchemaEdgeCases:
     """Tests for edge cases and boundary conditions."""
@@ -817,7 +632,7 @@ class TestSchemaEdgeCases:
             "id": "REQ-001",
             "type": "requirement",
             "title": "x" * 501,  # Exceeds maxLength of 500
-            "description": "Test"
+            "description": "Test",
         }
 
         with pytest.raises(ValidationError):
@@ -833,7 +648,7 @@ class TestSchemaEdgeCases:
             "id": "REQ-001",
             "type": "requirement",
             "title": "User's Authentication & Authorization",
-            "description": "Test with <special> & \"quotes\" and 'apostrophes'"
+            "description": "Test with <special> & \"quotes\" and 'apostrophes'",
         }
 
         validate(instance=atom, schema=ATOM_SCHEMA)
@@ -848,7 +663,7 @@ class TestSchemaEdgeCases:
             "id": "REQ-001",
             "type": "requirement",
             "title": "Autenticación de Usuarios",
-            "description": "認証システム - Authentication System"
+            "description": "認証システム - Authentication System",
         }
 
         validate(instance=atom, schema=ATOM_SCHEMA)
@@ -873,10 +688,7 @@ class TestSchemaEdgeCases:
         Verifies edge handling at scale.
         """
         nodes = [{"id": "A", "type": "test"}]
-        edges = [
-            {"source": "A", "target": "A", "type": "requires"}
-            for _ in range(100)
-        ]
+        edges = [{"source": "A", "target": "A", "type": "requires"} for _ in range(100)]
 
         graph = {"nodes": nodes, "edges": edges}
 
@@ -893,17 +705,7 @@ class TestSchemaEdgeCases:
             "type": "requirement",
             "title": "Test",
             "description": "Test",
-            "metadata": {
-                "level1": {
-                    "level2": {
-                        "level3": {
-                            "level4": {
-                                "value": "deeply nested"
-                            }
-                        }
-                    }
-                }
-            }
+            "metadata": {"level1": {"level2": {"level3": {"level4": {"value": "deeply nested"}}}}},
         }
 
         validate(instance=atom, schema=ATOM_SCHEMA)

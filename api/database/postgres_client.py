@@ -4,13 +4,14 @@ PostgreSQL Client for Workflow Execution Engine
 Manages PostgreSQL connections for process state, tasks, and execution history.
 """
 
+import logging
 import os
-from typing import Optional, Dict, Any, List
 from contextlib import contextmanager
+from typing import Any, Dict, List, Optional
+
 import psycopg2
 from psycopg2 import pool
-from psycopg2.extras import RealDictCursor, Json
-import logging
+from psycopg2.extras import Json, RealDictCursor
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class PostgreSQLClient:
     """PostgreSQL database client with connection pooling"""
 
-    _instance: Optional['PostgreSQLClient'] = None
+    _instance: Optional["PostgreSQLClient"] = None
     _pool: Optional[pool.ThreadedConnectionPool] = None
 
     def __new__(cls):
@@ -36,37 +37,37 @@ class PostgreSQLClient:
         try:
             # Get connection details from environment
             db_config = {
-                'host': os.getenv('POSTGRES_HOST', 'localhost'),
-                'port': int(os.getenv('POSTGRES_PORT', '5432')),
-                'database': os.getenv('POSTGRES_DB', 'workflow_db'),
-                'user': os.getenv('POSTGRES_USER', 'postgres'),
-                'password': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+                "host": os.getenv("POSTGRES_HOST", "localhost"),
+                "port": int(os.getenv("POSTGRES_PORT", "5432")),
+                "database": os.getenv("POSTGRES_DB", "workflow_db"),
+                "user": os.getenv("POSTGRES_USER", "postgres"),
+                "password": os.getenv("POSTGRES_PASSWORD", "postgres"),
             }
 
             # Create connection pool
-            self._pool = pool.ThreadedConnectionPool(
-                minconn=2,
-                maxconn=20,
-                **db_config
-            )
+            self._pool = pool.ThreadedConnectionPool(minconn=2, maxconn=20, **db_config)
 
-            logger.info(f"PostgreSQL connection pool created: {db_config['host']}:{db_config['port']}/{db_config['database']}")
+            logger.info(
+                f"PostgreSQL connection pool created: {db_config['host']}:{db_config['port']}/{db_config['database']}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to create PostgreSQL connection pool: {e}")
             # If the error is because the database does not exist, try to create it
             try:
-                if isinstance(e, psycopg2.OperationalError) and 'does not exist' in str(e):
-                    admin_db = os.getenv('POSTGRES_ADMIN_DB', 'postgres')
-                    logger.info(f"Attempting to create missing database '{db_config['database']}' using admin DB '{admin_db}'")
+                if isinstance(e, psycopg2.OperationalError) and "does not exist" in str(e):
+                    admin_db = os.getenv("POSTGRES_ADMIN_DB", "postgres")
+                    logger.info(
+                        f"Attempting to create missing database '{db_config['database']}' using admin DB '{admin_db}'"
+                    )
 
                     # Connect to the admin DB and create the target database
                     admin_conn = psycopg2.connect(
-                        host=db_config['host'],
-                        port=db_config['port'],
-                        user=db_config['user'],
-                        password=db_config['password'],
-                        dbname=admin_db
+                        host=db_config["host"],
+                        port=db_config["port"],
+                        user=db_config["user"],
+                        password=db_config["password"],
+                        dbname=admin_db,
                     )
                     admin_conn.autocommit = True
                     with admin_conn.cursor() as cur:
@@ -74,13 +75,11 @@ class PostgreSQLClient:
                     admin_conn.close()
 
                     # Retry creating the pool
-                    self._pool = pool.ThreadedConnectionPool(
-                        minconn=2,
-                        maxconn=20,
-                        **db_config
-                    )
+                    self._pool = pool.ThreadedConnectionPool(minconn=2, maxconn=20, **db_config)
 
-                    logger.info(f"PostgreSQL database '{db_config['database']}' created and connection pool established")
+                    logger.info(
+                        f"PostgreSQL database '{db_config['database']}' created and connection pool established"
+                    )
                     return
             except Exception as e2:
                 logger.error(f"Failed to create database '{db_config.get('database')}' automatically: {e2}")
@@ -142,10 +141,7 @@ class PostgreSQLClient:
                 cursor.close()
 
     def execute_query(
-        self,
-        query: str,
-        params: Optional[tuple] = None,
-        fetch: str = 'all'
+        self, query: str, params: Optional[tuple] = None, fetch: str = "all"
     ) -> Optional[List[Dict[str, Any]]]:
         """
         Execute a SELECT query and return results
@@ -161,18 +157,15 @@ class PostgreSQLClient:
         with self.get_cursor() as cursor:
             cursor.execute(query, params or ())
 
-            if fetch == 'all':
+            if fetch == "all":
                 return cursor.fetchall()
-            elif fetch == 'one':
+            elif fetch == "one":
                 return cursor.fetchone()
             else:
                 return None
 
     def execute_command(
-        self,
-        command: str,
-        params: Optional[tuple] = None,
-        returning: bool = False
+        self, command: str, params: Optional[tuple] = None, returning: bool = False
     ) -> Optional[Dict[str, Any]]:
         """
         Execute an INSERT/UPDATE/DELETE command
@@ -193,11 +186,7 @@ class PostgreSQLClient:
 
             return None
 
-    def execute_batch(
-        self,
-        command: str,
-        params_list: List[tuple]
-    ) -> int:
+    def execute_batch(self, command: str, params_list: List[tuple]) -> int:
         """
         Execute a batch of commands
 
@@ -214,11 +203,7 @@ class PostgreSQLClient:
             execute_batch(cursor, command, params_list)
             return cursor.rowcount
 
-    def call_function(
-        self,
-        function_name: str,
-        params: Optional[tuple] = None
-    ) -> Any:
+    def call_function(self, function_name: str, params: Optional[tuple] = None) -> Any:
         """
         Call a PostgreSQL function
 
@@ -229,7 +214,7 @@ class PostgreSQLClient:
         Returns:
             Function result
         """
-        placeholders = ','.join(['%s'] * len(params or ()))
+        placeholders = ",".join(["%s"] * len(params or ()))
         query = f"SELECT {function_name}({placeholders})"
 
         with self.get_cursor() as cursor:
@@ -237,7 +222,7 @@ class PostgreSQLClient:
             result = cursor.fetchone()
             return result[function_name] if result else None
 
-    def initialize_schema(self, schema_file: str = 'api/database/schema.sql'):
+    def initialize_schema(self, schema_file: str = "api/database/schema.sql"):
         """
         Initialize database schema from SQL file
 
@@ -246,7 +231,7 @@ class PostgreSQLClient:
         """
         try:
             # Read schema file
-            with open(schema_file, 'r') as f:
+            with open(schema_file, "r") as f:
                 schema_sql = f.read()
 
             # Execute schema

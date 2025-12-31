@@ -169,7 +169,9 @@ def generate(count: int = 500) -> None:
     with open(os.path.join(TEST_OUT, "graph.json"), "w", encoding="utf-8") as fh:
         json.dump(graph, fh, indent=2)
 
-    print(f"Generated demo data: {len(nodes)} nodes, {len(edges)} edges. Atoms in {ATOMS_ROOT}, modules in {MODULES_ROOT}, graph at {TEST_OUT}/graph.json")
+    print(
+        f"Generated demo data: {len(nodes)} nodes, {len(edges)} edges. Atoms in {ATOMS_ROOT}, modules in {MODULES_ROOT}, graph at {TEST_OUT}/graph.json"
+    )
 
 
 def cli():

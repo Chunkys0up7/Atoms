@@ -8,12 +8,13 @@ Provides endpoints for managing ontology schemas including:
 - Atom validation against schemas
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
 import json
 import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -23,6 +24,7 @@ SCHEMA_CONFIG_PATH = Path(__file__).parent.parent.parent / "config" / "schema_co
 
 class DomainDefinition(BaseModel):
     """Domain definition with constraints"""
+
     id: str
     name: str
     description: str
@@ -33,6 +35,7 @@ class DomainDefinition(BaseModel):
 
 class EdgeConstraint(BaseModel):
     """Edge constraint definition"""
+
     id: str
     edge_type: str
     source_type: str
@@ -43,6 +46,7 @@ class EdgeConstraint(BaseModel):
 
 class SchemaConfig(BaseModel):
     """Complete schema configuration"""
+
     domains: List[DomainDefinition]
     constraints: List[EdgeConstraint]
     version: str = "1.0.0"
@@ -51,6 +55,7 @@ class SchemaConfig(BaseModel):
 
 class AtomValidationResult(BaseModel):
     """Result of validating an atom against schema"""
+
     atom_id: str
     is_valid: bool
     errors: List[str] = []
@@ -64,7 +69,7 @@ def load_schema_config() -> SchemaConfig:
         return get_default_schema()
 
     try:
-        with open(SCHEMA_CONFIG_PATH, 'r', encoding='utf-8') as f:
+        with open(SCHEMA_CONFIG_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
             return SchemaConfig(**data)
     except Exception as e:
@@ -78,7 +83,7 @@ def save_schema_config(config: SchemaConfig) -> None:
     SCHEMA_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(SCHEMA_CONFIG_PATH, 'w', encoding='utf-8') as f:
+        with open(SCHEMA_CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config.dict(), f, indent=2)
     except Exception as e:
         print(f"Error saving schema config: {e}", file=sys.stderr)
@@ -99,10 +104,7 @@ def get_default_schema() -> SchemaConfig:
                 description="Core loan origination processes and workflows",
                 allowed_types=["PROCESS", "DOCUMENT", "POLICY", "CONTROL"],
                 required_attributes=["name", "type", "category"],
-                validation_rules=[
-                    "Must have at least one PROCESS atom",
-                    "DOCUMENT atoms must specify document_type"
-                ]
+                validation_rules=["Must have at least one PROCESS atom", "DOCUMENT atoms must specify document_type"],
             ),
             DomainDefinition(
                 id="risk-management",
@@ -112,8 +114,8 @@ def get_default_schema() -> SchemaConfig:
                 required_attributes=["name", "type", "category", "criticality"],
                 validation_rules=[
                     "All atoms must have criticality defined",
-                    "DECISION atoms must specify decision criteria"
-                ]
+                    "DECISION atoms must specify decision criteria",
+                ],
             ),
             DomainDefinition(
                 id="compliance",
@@ -121,11 +123,8 @@ def get_default_schema() -> SchemaConfig:
                 description="Regulatory compliance and policy enforcement",
                 allowed_types=["POLICY", "CONTROL", "DOCUMENT", "PROCESS"],
                 required_attributes=["name", "type", "category", "steward"],
-                validation_rules=[
-                    "POLICY atoms must have steward assigned",
-                    "Must reference applicable regulations"
-                ]
-            )
+                validation_rules=["POLICY atoms must have steward assigned", "Must reference applicable regulations"],
+            ),
         ],
         constraints=[
             # Dependency constraints
@@ -135,7 +134,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="PROCESS",
                 target_type="SYSTEM",
                 description="Process atoms can require system atoms",
-                is_required=False
+                is_required=False,
             ),
             EdgeConstraint(
                 id="process-requires-role",
@@ -143,7 +142,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="PROCESS",
                 target_type="ROLE",
                 description="Process atoms can require role atoms",
-                is_required=False
+                is_required=False,
             ),
             # Composition constraints
             EdgeConstraint(
@@ -152,7 +151,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="PROCESS",
                 target_type="DOCUMENT",
                 description="Process atoms can produce document atoms",
-                is_required=False
+                is_required=False,
             ),
             EdgeConstraint(
                 id="process-consumes-document",
@@ -160,7 +159,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="PROCESS",
                 target_type="DOCUMENT",
                 description="Process atoms can consume document atoms",
-                is_required=False
+                is_required=False,
             ),
             # Governance constraints
             EdgeConstraint(
@@ -169,7 +168,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="PROCESS",
                 target_type="POLICY",
                 description="Process atoms implement policy atoms",
-                is_required=False
+                is_required=False,
             ),
             EdgeConstraint(
                 id="control-enforces-policy",
@@ -177,7 +176,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="CONTROL",
                 target_type="POLICY",
                 description="Control atoms enforce policy atoms",
-                is_required=False
+                is_required=False,
             ),
             # Workflow constraints
             EdgeConstraint(
@@ -186,7 +185,7 @@ def get_default_schema() -> SchemaConfig:
                 source_type="PROCESS",
                 target_type="PROCESS",
                 description="Process atoms can trigger other process atoms",
-                is_required=False
+                is_required=False,
             ),
             EdgeConstraint(
                 id="decision-leads-to-process",
@@ -194,9 +193,9 @@ def get_default_schema() -> SchemaConfig:
                 source_type="DECISION",
                 target_type="PROCESS",
                 description="Decision atoms lead to process atoms",
-                is_required=False
-            )
-        ]
+                is_required=False,
+            ),
+        ],
     )
 
 
@@ -242,11 +241,7 @@ def update_domains(domains: List[DomainDefinition]) -> Dict[str, Any]:
 
     save_schema_config(config)
 
-    return {
-        "status": "success",
-        "message": f"Updated {len(domains)} domain definitions",
-        "domain_count": len(domains)
-    }
+    return {"status": "success", "message": f"Updated {len(domains)} domain definitions", "domain_count": len(domains)}
 
 
 @router.get("/api/schema/constraints")
@@ -283,7 +278,7 @@ def update_constraints(constraints: List[EdgeConstraint]) -> Dict[str, Any]:
     return {
         "status": "success",
         "message": f"Updated {len(constraints)} edge constraints",
-        "constraint_count": len(constraints)
+        "constraint_count": len(constraints),
     }
 
 
@@ -298,9 +293,9 @@ def validate_atom(atom_data: Dict[str, Any]) -> AtomValidationResult:
     Returns:
         Validation result with errors and warnings
     """
-    atom_id = atom_data.get('id', 'unknown')
-    atom_type = atom_data.get('type', '')
-    domain = atom_data.get('ontologyDomain', '')
+    atom_id = atom_data.get("id", "unknown")
+    atom_type = atom_data.get("type", "")
+    domain = atom_data.get("ontologyDomain", "")
 
     errors = []
     warnings = []
@@ -330,40 +325,28 @@ def validate_atom(atom_data: Dict[str, Any]) -> AtomValidationResult:
                 errors.append(f"Required attribute '{attr}' is missing or empty")
 
     # Validate edges against constraints
-    edges = atom_data.get('edges', [])
+    edges = atom_data.get("edges", [])
     for edge in edges:
-        edge_type = edge.get('type', '')
-        target_id = edge.get('target', '')
+        edge_type = edge.get("type", "")
+        target_id = edge.get("target", "")
 
         # Check if this edge type is allowed for this source type
         valid_constraint = False
         for constraint in config.constraints:
-            if (constraint.source_type == atom_type and
-                constraint.edge_type == edge_type):
+            if constraint.source_type == atom_type and constraint.edge_type == edge_type:
                 valid_constraint = True
                 break
 
         if not valid_constraint:
-            warnings.append(
-                f"Edge type '{edge_type}' from '{atom_type}' may not be defined in schema"
-            )
+            warnings.append(f"Edge type '{edge_type}' from '{atom_type}' may not be defined in schema")
 
     is_valid = len(errors) == 0
 
-    return AtomValidationResult(
-        atom_id=atom_id,
-        is_valid=is_valid,
-        errors=errors,
-        warnings=warnings
-    )
+    return AtomValidationResult(atom_id=atom_id, is_valid=is_valid, errors=errors, warnings=warnings)
 
 
 @router.post("/api/schema/validate-edge")
-def validate_edge(
-    source_type: str,
-    edge_type: str,
-    target_type: str
-) -> Dict[str, Any]:
+def validate_edge(source_type: str, edge_type: str, target_type: str) -> Dict[str, Any]:
     """
     Validate if an edge is allowed by schema constraints.
 
@@ -379,20 +362,22 @@ def validate_edge(
 
     # Check if constraint exists
     for constraint in config.constraints:
-        if (constraint.source_type == source_type and
-            constraint.edge_type == edge_type and
-            constraint.target_type == target_type):
+        if (
+            constraint.source_type == source_type
+            and constraint.edge_type == edge_type
+            and constraint.target_type == target_type
+        ):
             return {
                 "is_valid": True,
                 "message": f"Valid edge: {constraint.description}",
-                "constraint_id": constraint.id
+                "constraint_id": constraint.id,
             }
 
     # No exact match found
     return {
         "is_valid": False,
         "message": f"No schema constraint allows {edge_type} edge from {source_type} to {target_type}",
-        "suggestion": "Add this constraint to schema or choose a different edge type"
+        "suggestion": "Add this constraint to schema or choose a different edge type",
     }
 
 
@@ -425,7 +410,7 @@ def get_schema_stats() -> Dict[str, Any]:
         "edge_types": len(constraint_by_category),
         "constraint_by_edge_type": constraint_by_category,
         "version": config.version,
-        "last_updated": config.updated_at
+        "last_updated": config.updated_at,
     }
 
 
@@ -458,7 +443,7 @@ def import_schema(schema_data: SchemaConfig) -> Dict[str, Any]:
         "message": "Schema imported successfully",
         "domain_count": len(schema_data.domains),
         "constraint_count": len(schema_data.constraints),
-        "version": schema_data.version
+        "version": schema_data.version,
     }
 
 
@@ -488,14 +473,12 @@ def reset_schema() -> Dict[str, Any]:
         "status": "success",
         "message": "Schema reset to defaults",
         "domain_count": len(default_schema.domains),
-        "constraint_count": len(default_schema.constraints)
+        "constraint_count": len(default_schema.constraints),
     }
 
 
 @router.post("/api/schema/impact-analysis")
-async def analyze_constraint_impact(
-    constraint_change: Dict[str, Any]
-) -> Dict[str, Any]:
+async def analyze_constraint_impact(constraint_change: Dict[str, Any]) -> Dict[str, Any]:
     """
     Analyze impact of adding, removing, or modifying a constraint.
 
@@ -509,18 +492,16 @@ async def analyze_constraint_impact(
     Returns:
         Impact analysis with affected atoms and validation changes
     """
-    import httpx
     from pathlib import Path
+
+    import httpx
     import yaml
 
     action = constraint_change.get("action")
     constraint_data = constraint_change.get("constraint", {})
 
     if not action or not constraint_data:
-        raise HTTPException(
-            status_code=400,
-            detail="Must provide 'action' and 'constraint' fields"
-        )
+        raise HTTPException(status_code=400, detail="Must provide 'action' and 'constraint' fields")
 
     # Load all atoms to analyze
     atoms_base = Path(__file__).parent.parent.parent / "atoms"
@@ -529,15 +510,15 @@ async def analyze_constraint_impact(
 
     for yaml_file in atoms_base.rglob("*.yaml"):
         try:
-            with open(yaml_file, 'r', encoding='utf-8') as f:
+            with open(yaml_file, "r", encoding="utf-8") as f:
                 atom_data = yaml.safe_load(f)
 
             if not atom_data:
                 continue
 
             total_atoms += 1
-            atom_type = atom_data.get('type', '')
-            edges = atom_data.get('edges', [])
+            atom_type = atom_data.get("type", "")
+            edges = atom_data.get("edges", [])
 
             # Check if this atom is affected by the constraint change
             is_affected = False
@@ -545,35 +526,36 @@ async def analyze_constraint_impact(
             if action == "add":
                 # New constraint might restrict existing edges
                 for edge in edges:
-                    if (edge.get('type') == constraint_data.get('edge_type') and
-                        atom_type == constraint_data.get('source_type')):
+                    if edge.get("type") == constraint_data.get("edge_type") and atom_type == constraint_data.get(
+                        "source_type"
+                    ):
                         is_affected = True
                         break
 
             elif action == "remove":
                 # Removing constraint might invalidate dependent validations
                 for edge in edges:
-                    if (edge.get('type') == constraint_data.get('edge_type') and
-                        atom_type == constraint_data.get('source_type')):
+                    if edge.get("type") == constraint_data.get("edge_type") and atom_type == constraint_data.get(
+                        "source_type"
+                    ):
                         is_affected = True
                         break
 
             elif action == "modify":
                 # Modified constraint affects atoms using that edge type
                 for edge in edges:
-                    if edge.get('type') == constraint_data.get('edge_type'):
+                    if edge.get("type") == constraint_data.get("edge_type"):
                         is_affected = True
                         break
 
             if is_affected:
-                affected_atoms.append({
-                    "atom_id": atom_data.get('id'),
-                    "atom_type": atom_type,
-                    "affected_edges": [
-                        e for e in edges
-                        if e.get('type') == constraint_data.get('edge_type')
-                    ]
-                })
+                affected_atoms.append(
+                    {
+                        "atom_id": atom_data.get("id"),
+                        "atom_type": atom_type,
+                        "affected_edges": [e for e in edges if e.get("type") == constraint_data.get("edge_type")],
+                    }
+                )
 
         except Exception as e:
             print(f"Error analyzing atom {yaml_file}: {e}", file=sys.stderr)
@@ -587,7 +569,7 @@ async def analyze_constraint_impact(
         "affected_atoms": affected_atoms[:50],  # Limit to first 50 for response size
         "has_more": len(affected_atoms) > 50,
         "impact_level": "HIGH" if len(affected_atoms) > 10 else "MEDIUM" if len(affected_atoms) > 0 else "LOW",
-        "recommendation": get_impact_recommendation(action, len(affected_atoms))
+        "recommendation": get_impact_recommendation(action, len(affected_atoms)),
     }
 
 
@@ -599,7 +581,9 @@ def get_impact_recommendation(action: str, affected_count: int) -> str:
     if action == "add":
         return f"Adding this constraint may require updating {affected_count} atom(s) to ensure compliance"
     elif action == "remove":
-        return f"Removing this constraint will affect validation for {affected_count} atom(s). Ensure this is intentional."
+        return (
+            f"Removing this constraint will affect validation for {affected_count} atom(s). Ensure this is intentional."
+        )
     elif action == "modify":
         return f"Modifying this constraint impacts {affected_count} atom(s). Review each carefully before applying."
 
@@ -626,7 +610,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Loan origination, processing, and servicing",
                     "allowed_types": ["PROCESS", "DOCUMENT", "DECISION", "CONTROL"],
                     "required_attributes": ["owner", "criticality", "compliance_score"],
-                    "validation_rules": ["All loan processes must have compliance_score >= 0.8"]
+                    "validation_rules": ["All loan processes must have compliance_score >= 0.8"],
                 },
                 {
                     "id": "risk-compliance",
@@ -634,7 +618,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Risk management and regulatory compliance",
                     "allowed_types": ["RISK", "POLICY", "REGULATION", "CONTROL", "METRIC"],
                     "required_attributes": ["regulatory_context", "steward", "effective_date"],
-                    "validation_rules": ["All REGULATION atoms must reference external regulation ID"]
+                    "validation_rules": ["All REGULATION atoms must reference external regulation ID"],
                 },
                 {
                     "id": "customer-experience",
@@ -642,15 +626,15 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Customer-facing processes and touchpoints",
                     "allowed_types": ["PROCESS", "DOCUMENT", "GATEWAY", "EVENT"],
                     "required_attributes": ["customer_impact", "channel"],
-                    "validation_rules": ["Customer-facing processes must define SLA"]
-                }
+                    "validation_rules": ["Customer-facing processes must define SLA"],
+                },
             ],
             "constraints": [
                 {"edge_type": "REQUIRES", "source_type": "PROCESS", "target_type": "SYSTEM"},
                 {"edge_type": "GOVERNED_BY", "source_type": "PROCESS", "target_type": "POLICY"},
                 {"edge_type": "IMPLEMENTS", "source_type": "CONTROL", "target_type": "POLICY"},
-                {"edge_type": "PRODUCES", "source_type": "PROCESS", "target_type": "DOCUMENT"}
-            ]
+                {"edge_type": "PRODUCES", "source_type": "PROCESS", "target_type": "DOCUMENT"},
+            ],
         },
         {
             "id": "healthcare",
@@ -663,7 +647,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Patient care processes and clinical workflows",
                     "allowed_types": ["PROCESS", "PROTOCOL", "DECISION", "ASSESSMENT"],
                     "required_attributes": ["clinical_owner", "patient_safety_impact", "evidence_level"],
-                    "validation_rules": ["Clinical processes must reference evidence-based guidelines"]
+                    "validation_rules": ["Clinical processes must reference evidence-based guidelines"],
                 },
                 {
                     "id": "administrative",
@@ -671,7 +655,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Administrative and operational processes",
                     "allowed_types": ["PROCESS", "DOCUMENT", "SYSTEM", "CONTROL"],
                     "required_attributes": ["department", "hipaa_applicable"],
-                    "validation_rules": ["HIPAA-applicable processes must have privacy controls"]
+                    "validation_rules": ["HIPAA-applicable processes must have privacy controls"],
                 },
                 {
                     "id": "regulatory-quality",
@@ -679,14 +663,14 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Regulatory compliance and quality management",
                     "allowed_types": ["REGULATION", "POLICY", "CONTROL", "AUDIT"],
                     "required_attributes": ["regulatory_body", "compliance_level", "review_frequency"],
-                    "validation_rules": ["All regulations must be reviewed annually"]
-                }
+                    "validation_rules": ["All regulations must be reviewed annually"],
+                },
             ],
             "constraints": [
                 {"edge_type": "REQUIRES", "source_type": "PROCESS", "target_type": "PROTOCOL"},
                 {"edge_type": "GOVERNED_BY", "source_type": "PROCESS", "target_type": "REGULATION"},
-                {"edge_type": "VALIDATES", "source_type": "CONTROL", "target_type": "PROCESS"}
-            ]
+                {"edge_type": "VALIDATES", "source_type": "CONTROL", "target_type": "PROCESS"},
+            ],
         },
         {
             "id": "manufacturing",
@@ -699,7 +683,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Manufacturing processes and production workflows",
                     "allowed_types": ["PROCESS", "PROCEDURE", "EQUIPMENT", "METRIC"],
                     "required_attributes": ["line", "shift_applicable", "safety_critical"],
-                    "validation_rules": ["Safety-critical processes must have redundant controls"]
+                    "validation_rules": ["Safety-critical processes must have redundant controls"],
                 },
                 {
                     "id": "quality-control",
@@ -707,7 +691,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Quality assurance and testing",
                     "allowed_types": ["CONTROL", "TEST", "INSPECTION", "STANDARD"],
                     "required_attributes": ["quality_standard", "inspection_frequency", "tolerance"],
-                    "validation_rules": ["All quality controls must specify tolerances"]
+                    "validation_rules": ["All quality controls must specify tolerances"],
                 },
                 {
                     "id": "supply-chain",
@@ -715,14 +699,14 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Procurement, logistics, and inventory",
                     "allowed_types": ["PROCESS", "SYSTEM", "METRIC", "SUPPLIER"],
                     "required_attributes": ["lead_time", "criticality"],
-                    "validation_rules": ["Critical suppliers must have backup alternatives"]
-                }
+                    "validation_rules": ["Critical suppliers must have backup alternatives"],
+                },
             ],
             "constraints": [
                 {"edge_type": "REQUIRES", "source_type": "PROCESS", "target_type": "EQUIPMENT"},
                 {"edge_type": "VALIDATED_BY", "source_type": "PROCESS", "target_type": "CONTROL"},
-                {"edge_type": "PRODUCES", "source_type": "PROCESS", "target_type": "METRIC"}
-            ]
+                {"edge_type": "PRODUCES", "source_type": "PROCESS", "target_type": "METRIC"},
+            ],
         },
         {
             "id": "minimal",
@@ -735,7 +719,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Primary business processes",
                     "allowed_types": ["PROCESS", "DOCUMENT", "SYSTEM"],
                     "required_attributes": ["name", "owner"],
-                    "validation_rules": []
+                    "validation_rules": [],
                 },
                 {
                     "id": "governance",
@@ -743,14 +727,14 @@ def get_schema_templates() -> List[Dict[str, Any]]:
                     "description": "Policies and controls",
                     "allowed_types": ["POLICY", "CONTROL", "REGULATION"],
                     "required_attributes": ["name", "owner", "effective_date"],
-                    "validation_rules": []
-                }
+                    "validation_rules": [],
+                },
             ],
             "constraints": [
                 {"edge_type": "REQUIRES", "source_type": "PROCESS", "target_type": "SYSTEM"},
-                {"edge_type": "GOVERNED_BY", "source_type": "PROCESS", "target_type": "POLICY"}
-            ]
-        }
+                {"edge_type": "GOVERNED_BY", "source_type": "PROCESS", "target_type": "POLICY"},
+            ],
+        },
     ]
 
     return templates
@@ -783,16 +767,11 @@ def apply_schema_template(template_id: str, merge: bool = False) -> Dict[str, An
 
         # Combine domains (no duplicates by ID)
         existing_domain_ids = {d.id for d in existing.domains}
-        new_domains = [
-            DomainDefinition(**d) for d in template["domains"]
-            if d["id"] not in existing_domain_ids
-        ]
+        new_domains = [DomainDefinition(**d) for d in template["domains"] if d["id"] not in existing_domain_ids]
         all_domains = existing.domains + new_domains
 
         # Combine constraints
-        existing_constraint_keys = {
-            (c.edge_type, c.source_type, c.target_type) for c in existing.constraints
-        }
+        existing_constraint_keys = {(c.edge_type, c.source_type, c.target_type) for c in existing.constraints}
         new_constraints = [
             EdgeConstraint(
                 id=f"{c['edge_type'].lower()}-{c['source_type'].lower()}-{c['target_type'].lower()}",
@@ -800,7 +779,7 @@ def apply_schema_template(template_id: str, merge: bool = False) -> Dict[str, An
                 source_type=c["source_type"],
                 target_type=c["target_type"],
                 description=f"{c['source_type']} {c['edge_type']} {c['target_type']}",
-                is_required=False
+                is_required=False,
             )
             for c in template["constraints"]
             if (c["edge_type"], c["source_type"], c["target_type"]) not in existing_constraint_keys
@@ -811,7 +790,7 @@ def apply_schema_template(template_id: str, merge: bool = False) -> Dict[str, An
             domains=all_domains,
             constraints=all_constraints,
             version=existing.version,
-            updated_at=datetime.utcnow().isoformat()
+            updated_at=datetime.utcnow().isoformat(),
         )
     else:
         # Replace entirely with template
@@ -824,12 +803,12 @@ def apply_schema_template(template_id: str, merge: bool = False) -> Dict[str, An
                     source_type=c["source_type"],
                     target_type=c["target_type"],
                     description=f"{c['source_type']} {c['edge_type']} {c['target_type']}",
-                    is_required=False
+                    is_required=False,
                 )
                 for c in template["constraints"]
             ],
             version="1.0.0",
-            updated_at=datetime.utcnow().isoformat()
+            updated_at=datetime.utcnow().isoformat(),
         )
 
     # Save the new schema
@@ -840,7 +819,7 @@ def apply_schema_template(template_id: str, merge: bool = False) -> Dict[str, An
         "message": f"Applied template '{template['name']}'",
         "mode": "merged" if merge else "replaced",
         "domain_count": len(new_schema.domains),
-        "constraint_count": len(new_schema.constraints)
+        "constraint_count": len(new_schema.constraints),
     }
 
 
@@ -866,12 +845,7 @@ def generate_schema_documentation(format: str = "markdown") -> Dict[str, Any]:
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
 
-    return {
-        "format": format,
-        "documentation": doc,
-        "version": config.version,
-        "generated_at": config.updated_at
-    }
+    return {"format": format, "documentation": doc, "version": config.version, "generated_at": config.updated_at}
 
 
 def generate_markdown_docs(config: SchemaConfig) -> str:
@@ -893,7 +867,9 @@ def generate_markdown_docs(config: SchemaConfig) -> str:
 
     # Overview
     md.append("## Overview\n")
-    md.append(f"This schema defines **{len(config.domains)} domains** and **{len(config.constraints)} edge constraints** ")
+    md.append(
+        f"This schema defines **{len(config.domains)} domains** and **{len(config.constraints)} edge constraints** "
+    )
     md.append(f"for the Graph-Native Documentation Platform.\n")
 
     # Domains
@@ -959,12 +935,16 @@ def generate_html_docs(config: SchemaConfig) -> str:
     html.append("  <meta name='viewport' content='width=device-width, initial-scale=1.0'>")
     html.append("  <title>Schema Documentation</title>")
     html.append("  <style>")
-    html.append("    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }")
+    html.append(
+        "    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }"
+    )
     html.append("    h1 { color: #1e293b; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }")
     html.append("    h2 { color: #334155; margin-top: 30px; }")
     html.append("    h3 { color: #475569; }")
     html.append("    .domain { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin: 15px 0; }")
-    html.append("    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 2px; }")
+    html.append(
+        "    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 2px; }"
+    )
     html.append("    table { width: 100%; border-collapse: collapse; margin: 20px 0; }")
     html.append("    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }")
     html.append("    th { background: #f1f5f9; font-weight: 600; }")
@@ -974,7 +954,9 @@ def generate_html_docs(config: SchemaConfig) -> str:
     html.append("<body>")
 
     html.append(f"  <h1>Schema Documentation</h1>")
-    html.append(f"  <p><strong>Version:</strong> {config.version} | <strong>Last Updated:</strong> {config.updated_at}</p>")
+    html.append(
+        f"  <p><strong>Version:</strong> {config.version} | <strong>Last Updated:</strong> {config.updated_at}</p>"
+    )
 
     html.append(f"  <h2>Domains ({len(config.domains)})</h2>")
     for domain in config.domains:
@@ -990,13 +972,17 @@ def generate_html_docs(config: SchemaConfig) -> str:
             html.append(f"</p>")
 
         if domain.required_attributes:
-            html.append(f"    <p><strong>Required Attributes:</strong> {', '.join([f'<code>{a}</code>' for a in domain.required_attributes])}</p>")
+            html.append(
+                f"    <p><strong>Required Attributes:</strong> {', '.join([f'<code>{a}</code>' for a in domain.required_attributes])}</p>"
+            )
 
         html.append(f"  </div>")
 
     html.append(f"  <h2>Edge Constraints ({len(config.constraints)})</h2>")
     html.append(f"  <table>")
-    html.append(f"    <thead><tr><th>Edge Type</th><th>Source</th><th>Target</th><th>Description</th><th>Required</th></tr></thead>")
+    html.append(
+        f"    <thead><tr><th>Edge Type</th><th>Source</th><th>Target</th><th>Description</th><th>Required</th></tr></thead>"
+    )
     html.append(f"    <tbody>")
 
     for constraint in config.constraints:

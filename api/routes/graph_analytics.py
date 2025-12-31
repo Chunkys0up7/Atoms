@@ -9,11 +9,12 @@ Provides graph algorithm endpoints for deeper insights:
 - Bottleneck identification
 """
 
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
-import sys
 
 try:
     from ..neo4j_client import get_neo4j_client
@@ -26,6 +27,7 @@ router = APIRouter()
 
 class CentralityResult(BaseModel):
     """Centrality analysis result for an atom"""
+
     atom_id: str
     atom_name: str
     atom_type: str
@@ -38,6 +40,7 @@ class CentralityResult(BaseModel):
 
 class Community(BaseModel):
     """Community detection result"""
+
     community_id: int
     atom_ids: List[str]
     atom_count: int
@@ -48,6 +51,7 @@ class Community(BaseModel):
 
 class IntegrityIssue(BaseModel):
     """Graph integrity validation issue"""
+
     atom_id: str
     atom_name: str
     atom_type: str
@@ -59,6 +63,7 @@ class IntegrityIssue(BaseModel):
 
 class RelationshipSuggestion(BaseModel):
     """Suggested relationship between atoms"""
+
     source_atom_id: str
     target_atom_id: str
     suggested_edge_type: str
@@ -70,16 +75,12 @@ def _ensure_neo4j():
     """Ensure Neo4j client is available"""
     if get_neo4j_client is None:
         raise HTTPException(
-            status_code=503,
-            detail="Neo4j client not available. Check NEO4J_PASSWORD environment variable."
+            status_code=503, detail="Neo4j client not available. Check NEO4J_PASSWORD environment variable."
         )
 
     client = get_neo4j_client()
     if not client.is_connected():
-        raise HTTPException(
-            status_code=503,
-            detail="Neo4j database is not connected. Check connection settings."
-        )
+        raise HTTPException(status_code=503, detail="Neo4j database is not connected. Check connection settings.")
 
     return client
 
@@ -118,10 +119,7 @@ def analyze_centrality(limit: int = 50) -> List[CentralityResult]:
             """
 
             degree_result = session.run(degree_query, limit=limit)
-            degree_map = {
-                record["atom_id"]: record["degree"]
-                for record in degree_result
-            }
+            degree_map = {record["atom_id"]: record["degree"] for record in degree_result}
 
             # Calculate betweenness centrality (approximation via shortest paths)
             # In production, use Neo4j GDS library for accurate betweenness
@@ -156,10 +154,7 @@ def analyze_centrality(limit: int = 50) -> List[CentralityResult]:
             """
 
             pagerank_result = session.run(pagerank_query, limit=limit)
-            pagerank_map = {
-                record["atom_id"]: record["incoming_edges"]
-                for record in pagerank_result
-            }
+            pagerank_map = {record["atom_id"]: record["incoming_edges"] for record in pagerank_result}
 
             # Combine results
             results = []
@@ -179,25 +174,24 @@ def analyze_centrality(limit: int = 50) -> List[CentralityResult]:
                 # Identify bottlenecks (high betweenness + high degree)
                 is_bottleneck = betweenness_score > 0.7 and degree > 5
 
-                results.append(CentralityResult(
-                    atom_id=atom_id,
-                    atom_name=record["atom_name"] or atom_id,
-                    atom_type=record["atom_type"] or "unknown",
-                    betweenness_score=round(betweenness_score, 3),
-                    pagerank_score=round(pagerank_score, 3),
-                    degree_centrality=degree,
-                    is_bottleneck=is_bottleneck,
-                    rank=idx + 1
-                ))
+                results.append(
+                    CentralityResult(
+                        atom_id=atom_id,
+                        atom_name=record["atom_name"] or atom_id,
+                        atom_type=record["atom_type"] or "unknown",
+                        betweenness_score=round(betweenness_score, 3),
+                        pagerank_score=round(pagerank_score, 3),
+                        degree_centrality=degree,
+                        is_bottleneck=is_bottleneck,
+                        rank=idx + 1,
+                    )
+                )
 
             return results
 
     except Exception as e:
         print(f"Error calculating centrality: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to calculate centrality metrics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to calculate centrality metrics: {str(e)}")
 
 
 @router.get("/api/graph/analytics/communities")
@@ -284,23 +278,22 @@ def detect_communities(min_size: int = 3) -> List[Community]:
                 primary_type = primary_types[0] if primary_types else "unknown"
                 suggested_name = f"{primary_type.title()} Cluster {idx + 1}"
 
-                communities.append(Community(
-                    community_id=idx + 1,
-                    atom_ids=atom_ids,
-                    atom_count=len(atom_ids),
-                    suggested_module_name=suggested_name,
-                    cohesion_score=round(cohesion, 3),
-                    primary_types=primary_types
-                ))
+                communities.append(
+                    Community(
+                        community_id=idx + 1,
+                        atom_ids=atom_ids,
+                        atom_count=len(atom_ids),
+                        suggested_module_name=suggested_name,
+                        cohesion_score=round(cohesion, 3),
+                        primary_types=primary_types,
+                    )
+                )
 
             return communities
 
     except Exception as e:
         print(f"Error detecting communities: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to detect communities: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to detect communities: {str(e)}")
 
 
 @router.get("/api/graph/analytics/integrity")
@@ -334,15 +327,17 @@ def validate_integrity() -> Dict[str, Any]:
 
             orphan_result = session.run(orphan_query)
             for record in orphan_result:
-                issues.append(IntegrityIssue(
-                    atom_id=record["atom_id"],
-                    atom_name=record["atom_name"] or record["atom_id"],
-                    atom_type=record["atom_type"] or "unknown",
-                    issue_type="orphan",
-                    severity="warning",
-                    description="Atom has no relationships to other atoms",
-                    suggested_fix="Add DEPENDS_ON or ENABLES relationships, or consider removing if obsolete"
-                ))
+                issues.append(
+                    IntegrityIssue(
+                        atom_id=record["atom_id"],
+                        atom_name=record["atom_name"] or record["atom_id"],
+                        atom_type=record["atom_type"] or "unknown",
+                        issue_type="orphan",
+                        severity="warning",
+                        description="Atom has no relationships to other atoms",
+                        suggested_fix="Add DEPENDS_ON or ENABLES relationships, or consider removing if obsolete",
+                    )
+                )
 
             # Check 2: Circular dependencies (cycles in DEPENDS_ON)
             # Note: This is a simplified check. Full cycle detection is complex.
@@ -357,15 +352,17 @@ def validate_integrity() -> Dict[str, Any]:
 
             cycle_result = session.run(cycle_query)
             for record in cycle_result:
-                issues.append(IntegrityIssue(
-                    atom_id=record["atom_id"],
-                    atom_name=record["atom_name"] or record["atom_id"],
-                    atom_type=record["atom_type"] or "unknown",
-                    issue_type="circular_dependency",
-                    severity="error",
-                    description=f"Circular dependency detected (cycle length: {record['cycle_length']})",
-                    suggested_fix="Break dependency cycle by restructuring relationships or adding intermediary atoms"
-                ))
+                issues.append(
+                    IntegrityIssue(
+                        atom_id=record["atom_id"],
+                        atom_name=record["atom_name"] or record["atom_id"],
+                        atom_type=record["atom_type"] or "unknown",
+                        issue_type="circular_dependency",
+                        severity="error",
+                        description=f"Circular dependency detected (cycle length: {record['cycle_length']})",
+                        suggested_fix="Break dependency cycle by restructuring relationships or adding intermediary atoms",
+                    )
+                )
 
             # Check 3: PROCESS atoms without PERFORMED_BY edges
             process_query = """
@@ -379,15 +376,17 @@ def validate_integrity() -> Dict[str, Any]:
 
             process_result = session.run(process_query)
             for record in process_result:
-                issues.append(IntegrityIssue(
-                    atom_id=record["atom_id"],
-                    atom_name=record["atom_name"] or record["atom_id"],
-                    atom_type=record["atom_type"],
-                    issue_type="missing_performer",
-                    severity="error",
-                    description="PROCESS atom has no PERFORMED_BY relationship to a ROLE",
-                    suggested_fix="Add PERFORMED_BY edge to appropriate ROLE atom"
-                ))
+                issues.append(
+                    IntegrityIssue(
+                        atom_id=record["atom_id"],
+                        atom_name=record["atom_name"] or record["atom_id"],
+                        atom_type=record["atom_type"],
+                        issue_type="missing_performer",
+                        severity="error",
+                        description="PROCESS atom has no PERFORMED_BY relationship to a ROLE",
+                        suggested_fix="Add PERFORMED_BY edge to appropriate ROLE atom",
+                    )
+                )
 
             # Check 4: DOCUMENT atoms without CREATED_BY or MODIFIED_BY
             document_query = """
@@ -401,15 +400,17 @@ def validate_integrity() -> Dict[str, Any]:
 
             document_result = session.run(document_query)
             for record in document_result:
-                issues.append(IntegrityIssue(
-                    atom_id=record["atom_id"],
-                    atom_name=record["atom_name"] or record["atom_id"],
-                    atom_type=record["atom_type"],
-                    issue_type="missing_performer",
-                    severity="warning",
-                    description="DOCUMENT atom has no CREATED_BY or MODIFIED_BY relationship",
-                    suggested_fix="Add CREATED_BY or MODIFIED_BY edge to appropriate PROCESS or ROLE atom"
-                ))
+                issues.append(
+                    IntegrityIssue(
+                        atom_id=record["atom_id"],
+                        atom_name=record["atom_name"] or record["atom_id"],
+                        atom_type=record["atom_type"],
+                        issue_type="missing_performer",
+                        severity="warning",
+                        description="DOCUMENT atom has no CREATED_BY or MODIFIED_BY relationship",
+                        suggested_fix="Add CREATED_BY or MODIFIED_BY edge to appropriate PROCESS or ROLE atom",
+                    )
+                )
 
             # Get summary statistics
             total_atoms = session.run("MATCH (a:Atom) RETURN count(a) as count").single()["count"]
@@ -428,18 +429,15 @@ def validate_integrity() -> Dict[str, Any]:
                     "total_issues": len(issues),
                     "errors": len(errors),
                     "warnings": len(warnings),
-                    "info": len(infos)
+                    "info": len(infos),
                 },
                 "issues": [issue.dict() for issue in issues],
-                "health_score": round(100 * (1 - len(errors) / max(total_atoms, 1)), 1)
+                "health_score": round(100 * (1 - len(errors) / max(total_atoms, 1)), 1),
             }
 
     except Exception as e:
         print(f"Error validating integrity: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to validate graph integrity: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to validate graph integrity: {str(e)}")
 
 
 @router.get("/api/graph/analytics/suggestions")
@@ -497,13 +495,15 @@ def suggest_relationships(limit: int = 20) -> List[RelationshipSuggestion]:
 
                 confidence = min(0.8, 0.4 + (record["common_count"] * 0.1))
 
-                suggestions.append(RelationshipSuggestion(
-                    source_atom_id=record["source_id"],
-                    target_atom_id=record["target_id"],
-                    suggested_edge_type=suggested_edge,
-                    confidence=round(confidence, 2),
-                    reason=f"Atoms share {record['common_count']} common neighbors"
-                ))
+                suggestions.append(
+                    RelationshipSuggestion(
+                        source_atom_id=record["source_id"],
+                        target_atom_id=record["target_id"],
+                        suggested_edge_type=suggested_edge,
+                        confidence=round(confidence, 2),
+                        reason=f"Atoms share {record['common_count']} common neighbors",
+                    )
+                )
 
             # Strategy 2: Transitive closure candidates
             # If A->B->C and path length is consistently 2, maybe A->C is direct
@@ -525,22 +525,21 @@ def suggest_relationships(limit: int = 20) -> List[RelationshipSuggestion]:
             for record in transitive_result:
                 confidence = min(0.7, 0.3 + (record["path_count"] * 0.05))
 
-                suggestions.append(RelationshipSuggestion(
-                    source_atom_id=record["source_id"],
-                    target_atom_id=record["target_id"],
-                    suggested_edge_type=record["edge_type"],
-                    confidence=round(confidence, 2),
-                    reason=f"Found {record['path_count']} transitive paths with {record['edge_type']} relationships"
-                ))
+                suggestions.append(
+                    RelationshipSuggestion(
+                        source_atom_id=record["source_id"],
+                        target_atom_id=record["target_id"],
+                        suggested_edge_type=record["edge_type"],
+                        confidence=round(confidence, 2),
+                        reason=f"Found {record['path_count']} transitive paths with {record['edge_type']} relationships",
+                    )
+                )
 
             return suggestions[:limit]
 
     except Exception as e:
         print(f"Error suggesting relationships: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to suggest relationships: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to suggest relationships: {str(e)}")
 
 
 @router.get("/api/graph/analytics/bottlenecks")
@@ -563,15 +562,14 @@ def identify_bottlenecks(threshold: float = 0.6) -> Dict[str, Any]:
     centrality_results = analyze_centrality(limit=100)
 
     bottlenecks = [
-        result for result in centrality_results
-        if result.is_bottleneck and result.betweenness_score >= threshold
+        result for result in centrality_results if result.is_bottleneck and result.betweenness_score >= threshold
     ]
 
     return {
         "total_bottlenecks": len(bottlenecks),
         "threshold": threshold,
         "bottlenecks": [b.dict() for b in bottlenecks],
-        "recommendation": "Consider adding redundant paths or breaking down bottleneck atoms into smaller components"
+        "recommendation": "Consider adding redundant paths or breaking down bottleneck atoms into smaller components",
     }
 
 
@@ -592,48 +590,48 @@ def get_analytics_stats() -> Dict[str, Any]:
             edge_count = session.run("MATCH ()-[r]->() RETURN count(r) as count").single()["count"]
 
             # Average degree
-            avg_degree_result = session.run("""
+            avg_degree_result = session.run(
+                """
                 MATCH (a:Atom)
                 OPTIONAL MATCH (a)-[r]-()
                 WITH a, count(r) as degree
                 RETURN avg(degree) as avg_degree, max(degree) as max_degree
-            """).single()
+            """
+            ).single()
 
             # Count by type
-            type_counts = session.run("""
+            type_counts = session.run(
+                """
                 MATCH (a:Atom)
                 RETURN a.type as type, count(*) as count
                 ORDER BY count DESC
-            """)
+            """
+            )
             type_distribution = {r["type"]: r["count"] for r in type_counts}
 
             # Edge type distribution
-            edge_type_counts = session.run("""
+            edge_type_counts = session.run(
+                """
                 MATCH ()-[r]->()
                 RETURN type(r) as edge_type, count(*) as count
                 ORDER BY count DESC
-            """)
+            """
+            )
             edge_distribution = {r["edge_type"]: r["count"] for r in edge_type_counts}
 
             return {
                 "graph_size": {
                     "atoms": atom_count,
                     "relationships": edge_count,
-                    "density": round(edge_count / max(atom_count * (atom_count - 1), 1), 4)
+                    "density": round(edge_count / max(atom_count * (atom_count - 1), 1), 4),
                 },
                 "connectivity": {
                     "avg_degree": round(avg_degree_result["avg_degree"], 2),
-                    "max_degree": avg_degree_result["max_degree"]
+                    "max_degree": avg_degree_result["max_degree"],
                 },
-                "distribution": {
-                    "atom_types": type_distribution,
-                    "edge_types": edge_distribution
-                }
+                "distribution": {"atom_types": type_distribution, "edge_types": edge_distribution},
             }
 
     except Exception as e:
         print(f"Error getting analytics stats: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get analytics statistics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get analytics statistics: {str(e)}")

@@ -8,13 +8,14 @@ Provides endpoints for managing phases and customer journeys:
 - Phase metrics and analytics
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from pathlib import Path
 import json
 import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -25,6 +26,7 @@ JOURNEYS_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "journeys.js
 
 class Phase(BaseModel):
     """Phase model"""
+
     id: str
     name: str
     description: str
@@ -39,6 +41,7 @@ class Phase(BaseModel):
 
 class Journey(BaseModel):
     """Customer journey model"""
+
     id: str
     name: str
     description: str
@@ -54,7 +57,7 @@ def load_phases() -> List[Phase]:
         return get_default_phases()
 
     try:
-        with open(PHASES_DATA_PATH, 'r', encoding='utf-8') as f:
+        with open(PHASES_DATA_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
             return [Phase(**p) for p in data]
     except Exception as e:
@@ -67,7 +70,7 @@ def save_phases(phases: List[Phase]) -> None:
     PHASES_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(PHASES_DATA_PATH, 'w', encoding='utf-8') as f:
+        with open(PHASES_DATA_PATH, "w", encoding="utf-8") as f:
             json.dump([p.dict() for p in phases], f, indent=2)
     except Exception as e:
         print(f"Error saving phases: {e}", file=sys.stderr)
@@ -80,7 +83,7 @@ def load_journeys() -> List[Journey]:
         return get_default_journeys()
 
     try:
-        with open(JOURNEYS_DATA_PATH, 'r', encoding='utf-8') as f:
+        with open(JOURNEYS_DATA_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
             return [Journey(**j) for j in data]
     except Exception as e:
@@ -93,7 +96,7 @@ def save_journeys(journeys: List[Journey]) -> None:
     JOURNEYS_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(JOURNEYS_DATA_PATH, 'w', encoding='utf-8') as f:
+        with open(JOURNEYS_DATA_PATH, "w", encoding="utf-8") as f:
             json.dump([j.dict() for j in journeys], f, indent=2)
     except Exception as e:
         print(f"Error saving journeys: {e}", file=sys.stderr)
@@ -111,7 +114,7 @@ def get_default_phases() -> List[Phase]:
             targetDurationDays=3,
             sequence=1,
             entry_criteria=["Customer interest expressed"],
-            exit_criteria=["Pre-qualification completed", "Customer ready to apply"]
+            exit_criteria=["Pre-qualification completed", "Customer ready to apply"],
         ),
         Phase(
             id="phase-application-intake",
@@ -121,7 +124,7 @@ def get_default_phases() -> List[Phase]:
             targetDurationDays=7,
             sequence=2,
             entry_criteria=["Pre-qualification completed"],
-            exit_criteria=["Complete application submitted", "Initial documents collected"]
+            exit_criteria=["Complete application submitted", "Initial documents collected"],
         ),
         Phase(
             id="phase-processing",
@@ -131,7 +134,7 @@ def get_default_phases() -> List[Phase]:
             targetDurationDays=14,
             sequence=3,
             entry_criteria=["Application submitted"],
-            exit_criteria=["All documents verified", "Appraisal completed"]
+            exit_criteria=["All documents verified", "Appraisal completed"],
         ),
         Phase(
             id="phase-underwriting",
@@ -141,7 +144,7 @@ def get_default_phases() -> List[Phase]:
             targetDurationDays=7,
             sequence=4,
             entry_criteria=["Documents verified", "Appraisal received"],
-            exit_criteria=["Loan approved or denied", "Conditions identified"]
+            exit_criteria=["Loan approved or denied", "Conditions identified"],
         ),
         Phase(
             id="phase-closing",
@@ -151,8 +154,8 @@ def get_default_phases() -> List[Phase]:
             targetDurationDays=14,
             sequence=5,
             entry_criteria=["Loan approved", "All conditions cleared"],
-            exit_criteria=["Loan closed and funded"]
-        )
+            exit_criteria=["Loan closed and funded"],
+        ),
     ]
 
 
@@ -163,33 +166,52 @@ def get_default_journeys() -> List[Journey]:
             id="journey-purchase-conventional",
             name="Home Purchase - Conventional",
             description="Conventional loan for home purchase",
-            phases=["phase-pre-application", "phase-application-intake", "phase-processing", "phase-underwriting", "phase-closing"],
+            phases=[
+                "phase-pre-application",
+                "phase-application-intake",
+                "phase-processing",
+                "phase-underwriting",
+                "phase-closing",
+            ],
             journey_type="purchase",
             product_type="conventional",
-            target_duration_days=45
+            target_duration_days=45,
         ),
         Journey(
             id="journey-purchase-fha",
             name="Home Purchase - FHA",
             description="FHA loan for home purchase",
-            phases=["phase-pre-application", "phase-application-intake", "phase-processing", "phase-underwriting", "phase-closing"],
+            phases=[
+                "phase-pre-application",
+                "phase-application-intake",
+                "phase-processing",
+                "phase-underwriting",
+                "phase-closing",
+            ],
             journey_type="purchase",
             product_type="fha",
-            target_duration_days=50
+            target_duration_days=50,
         ),
         Journey(
             id="journey-refinance-rate-term",
             name="Refinance - Rate & Term",
             description="Rate and term refinance",
-            phases=["phase-pre-application", "phase-application-intake", "phase-processing", "phase-underwriting", "phase-closing"],
+            phases=[
+                "phase-pre-application",
+                "phase-application-intake",
+                "phase-processing",
+                "phase-underwriting",
+                "phase-closing",
+            ],
             journey_type="refinance",
             product_type="conventional",
-            target_duration_days=35
-        )
+            target_duration_days=35,
+        ),
     ]
 
 
 # Phase Endpoints
+
 
 @router.get("/api/phases")
 def get_all_phases() -> List[Phase]:
@@ -289,6 +311,7 @@ def delete_phase(phase_id: str) -> Dict[str, Any]:
 
 
 # Journey Endpoints
+
 
 @router.get("/api/journeys")
 def get_all_journeys() -> List[Journey]:
@@ -428,8 +451,5 @@ def get_phase_stats() -> Dict[str, Any]:
         "total_journeys": len(journeys),
         "total_modules_in_phases": total_modules,
         "avg_phase_duration_days": round(avg_duration, 1),
-        "phases_by_journey": {
-            j.id: len([p for p in phases if p.journeyId == j.id])
-            for j in journeys
-        }
+        "phases_by_journey": {j.id: len([p for p in phases if p.journeyId == j.id]) for j in journeys},
     }

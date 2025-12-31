@@ -4,10 +4,11 @@ Standardized error response models for GNDP API.
 Provides consistent error formatting across all API endpoints.
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class ErrorCode(str, Enum):
@@ -36,13 +37,7 @@ class ErrorDetail(BaseModel):
     code: Optional[str] = Field(None, description="Machine-readable error code")
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "field": "email",
-                "message": "Invalid email format",
-                "code": "INVALID_FORMAT"
-            }
-        }
+        json_schema_extra = {"example": {"field": "email", "message": "Invalid email format", "code": "INVALID_FORMAT"}}
 
 
 class ErrorResponse(BaseModel):
@@ -67,16 +62,10 @@ class ErrorResponse(BaseModel):
                 "success": False,
                 "error": "VALIDATION_ERROR",
                 "message": "Invalid input data",
-                "details": [
-                    {
-                        "field": "atom_id",
-                        "message": "Atom ID must be alphanumeric",
-                        "code": "INVALID_FORMAT"
-                    }
-                ],
+                "details": [{"field": "atom_id", "message": "Atom ID must be alphanumeric", "code": "INVALID_FORMAT"}],
                 "timestamp": "2025-12-25T10:30:00Z",
                 "path": "/api/atoms",
-                "request_id": "req_123abc"
+                "request_id": "req_123abc",
             }
         }
 
@@ -95,7 +84,7 @@ class SuccessResponse(BaseModel):
                 "success": True,
                 "data": {"id": "ATOM-001", "name": "Example Atom"},
                 "message": "Atom created successfully",
-                "timestamp": "2025-12-25T10:30:00Z"
+                "timestamp": "2025-12-25T10:30:00Z",
             }
         }
 
@@ -105,7 +94,7 @@ def create_error_response(
     message: str,
     details: Optional[List[ErrorDetail]] = None,
     path: Optional[str] = None,
-    request_id: Optional[str] = None
+    request_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Create a standardized error response.
@@ -127,20 +116,11 @@ def create_error_response(
         ...     path="/api/atoms/ATOM-123"
         ... )
     """
-    response = ErrorResponse(
-        error=error_code.value,
-        message=message,
-        details=details,
-        path=path,
-        request_id=request_id
-    )
+    response = ErrorResponse(error=error_code.value, message=message, details=details, path=path, request_id=request_id)
     return response.model_dump()
 
 
-def create_success_response(
-    data: Any,
-    message: Optional[str] = None
-) -> Dict[str, Any]:
+def create_success_response(data: Any, message: Optional[str] = None) -> Dict[str, Any]:
     """
     Create a standardized success response.
 
@@ -157,8 +137,5 @@ def create_success_response(
         ...     message="Retrieved 10 atoms"
         ... )
     """
-    response = SuccessResponse(
-        data=data,
-        message=message
-    )
+    response = SuccessResponse(data=data, message=message)
     return response.model_dump()

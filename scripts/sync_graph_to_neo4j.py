@@ -8,17 +8,18 @@ Implements RAG.md guidance for graph-based RAG:
 - Supports dual-index RAG architecture
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "api"))
 
 try:
     from neo4j import GraphDatabase
+
     HAS_NEO4J = True
 except ImportError:
     print("ERROR: neo4j driver not installed. Run: pip install neo4j")
@@ -36,7 +37,7 @@ class Neo4jGraphPopulator:
             "modules_created": 0,
             "phases_created": 0,
             "journeys_created": 0,
-            "relationships_created": 0
+            "relationships_created": 0,
         }
 
     def close(self):
@@ -78,16 +79,17 @@ class Neo4jGraphPopulator:
         """Create Atom node in Neo4j."""
         with self.driver.session() as session:
             # Extract content fields
-            content = atom.get('content', {})
+            content = atom.get("content", {})
             if isinstance(content, dict):
-                summary = content.get('summary', '')
-                description = content.get('description', '')
+                summary = content.get("summary", "")
+                description = content.get("description", "")
             else:
-                summary = ''
-                description = ''
+                summary = ""
+                description = ""
 
             # Create atom node with properties
-            session.run("""
+            session.run(
+                """
                 CREATE (a:Atom {
                     id: $id,
                     name: $name,
@@ -100,18 +102,20 @@ class Neo4jGraphPopulator:
                     steward: $steward,
                     compliance_score: $compliance_score
                 })
-            """, {
-                "id": atom.get("id", "unknown"),
-                "name": atom.get("name", "Unnamed"),
-                "type": atom.get("type", "unknown"),
-                "domain": atom.get("domain", atom.get("ontologyDomain", "unknown")),
-                "criticality": atom.get("criticality", "MEDIUM"),
-                "summary": summary,
-                "description": description,
-                "owner": atom.get("owner", ""),
-                "steward": atom.get("steward", ""),
-                "compliance_score": atom.get("compliance_score", 0.0)
-            })
+            """,
+                {
+                    "id": atom.get("id", "unknown"),
+                    "name": atom.get("name", "Unnamed"),
+                    "type": atom.get("type", "unknown"),
+                    "domain": atom.get("domain", atom.get("ontologyDomain", "unknown")),
+                    "criticality": atom.get("criticality", "MEDIUM"),
+                    "summary": summary,
+                    "description": description,
+                    "owner": atom.get("owner", ""),
+                    "steward": atom.get("steward", ""),
+                    "compliance_score": atom.get("compliance_score", 0.0),
+                },
+            )
 
             self.stats["atoms_created"] += 1
 
@@ -133,14 +137,14 @@ class Neo4jGraphPopulator:
 
                 # Create relationship (using edge type as relationship name)
                 try:
-                    session.run(f"""
+                    session.run(
+                        f"""
                         MATCH (source:Atom {{id: $source_id}})
                         MATCH (target:Atom {{id: $target_id}})
                         CREATE (source)-[r:{edge_type}]->(target)
-                    """, {
-                        "source_id": atom_id,
-                        "target_id": target_id
-                    })
+                    """,
+                        {"source_id": atom_id, "target_id": target_id},
+                    )
                     self.stats["relationships_created"] += 1
                 except Exception as e:
                     print(f"  Warning: Failed to create edge {atom_id} -> {target_id}: {e}")
@@ -148,19 +152,22 @@ class Neo4jGraphPopulator:
     def create_module_node(self, module: Dict[str, Any]):
         """Create Module node in Neo4j."""
         with self.driver.session() as session:
-            session.run("""
+            session.run(
+                """
                 CREATE (m:Module {
                     id: $id,
                     name: $name,
                     description: $description,
                     owner: $owner
                 })
-            """, {
-                "id": module.get("id", module.get("module_id", "unknown")),
-                "name": module.get("name", "Unnamed Module"),
-                "description": module.get("description", ""),
-                "owner": module.get("owner", module.get("metadata", {}).get("owner", ""))
-            })
+            """,
+                {
+                    "id": module.get("id", module.get("module_id", "unknown")),
+                    "name": module.get("name", "Unnamed Module"),
+                    "description": module.get("description", ""),
+                    "owner": module.get("owner", module.get("metadata", {}).get("owner", "")),
+                },
+            )
 
             self.stats["modules_created"] += 1
 
@@ -172,14 +179,14 @@ class Neo4jGraphPopulator:
         with self.driver.session() as session:
             for atom_id in atom_ids:
                 try:
-                    session.run("""
+                    session.run(
+                        """
                         MATCH (m:Module {id: $module_id})
                         MATCH (a:Atom {id: $atom_id})
                         CREATE (m)-[:CONTAINS]->(a)
-                    """, {
-                        "module_id": module_id,
-                        "atom_id": atom_id
-                    })
+                    """,
+                        {"module_id": module_id, "atom_id": atom_id},
+                    )
                     self.stats["relationships_created"] += 1
                 except Exception as e:
                     print(f"  Warning: Failed to link module {module_id} -> atom {atom_id}: {e}")
@@ -187,7 +194,8 @@ class Neo4jGraphPopulator:
     def create_phase_node(self, phase: Dict[str, Any]):
         """Create Phase node in Neo4j."""
         with self.driver.session() as session:
-            session.run("""
+            session.run(
+                """
                 CREATE (p:Phase {
                     id: $id,
                     name: $name,
@@ -195,13 +203,15 @@ class Neo4jGraphPopulator:
                     criticality: $criticality,
                     owner: $owner
                 })
-            """, {
-                "id": phase.get("id", "unknown"),
-                "name": phase.get("name", "Unnamed Phase"),
-                "sequence": phase.get("sequence", 0),
-                "criticality": phase.get("criticality", "MEDIUM"),
-                "owner": phase.get("owner", "")
-            })
+            """,
+                {
+                    "id": phase.get("id", "unknown"),
+                    "name": phase.get("name", "Unnamed Phase"),
+                    "sequence": phase.get("sequence", 0),
+                    "criticality": phase.get("criticality", "MEDIUM"),
+                    "owner": phase.get("owner", ""),
+                },
+            )
 
             self.stats["phases_created"] += 1
 
@@ -213,14 +223,14 @@ class Neo4jGraphPopulator:
         with self.driver.session() as session:
             for module_id in module_ids:
                 try:
-                    session.run("""
+                    session.run(
+                        """
                         MATCH (p:Phase {id: $phase_id})
                         MATCH (m:Module {id: $module_id})
                         CREATE (p)-[:INCLUDES]->(m)
-                    """, {
-                        "phase_id": phase_id,
-                        "module_id": module_id
-                    })
+                    """,
+                        {"phase_id": phase_id, "module_id": module_id},
+                    )
                     self.stats["relationships_created"] += 1
                 except Exception as e:
                     print(f"  Warning: Failed to link phase {phase_id} -> module {module_id}: {e}")
@@ -228,19 +238,22 @@ class Neo4jGraphPopulator:
     def create_journey_node(self, journey: Dict[str, Any]):
         """Create Journey node in Neo4j."""
         with self.driver.session() as session:
-            session.run("""
+            session.run(
+                """
                 CREATE (j:Journey {
                     id: $id,
                     name: $name,
                     description: $description,
                     owner: $owner
                 })
-            """, {
-                "id": journey.get("id", "unknown"),
-                "name": journey.get("name", "Unnamed Journey"),
-                "description": journey.get("description", ""),
-                "owner": journey.get("owner", "")
-            })
+            """,
+                {
+                    "id": journey.get("id", "unknown"),
+                    "name": journey.get("name", "Unnamed Journey"),
+                    "description": journey.get("description", ""),
+                    "owner": journey.get("owner", ""),
+                },
+            )
 
             self.stats["journeys_created"] += 1
 
@@ -252,15 +265,14 @@ class Neo4jGraphPopulator:
         with self.driver.session() as session:
             for seq, phase_id in enumerate(phase_ids):
                 try:
-                    session.run("""
+                    session.run(
+                        """
                         MATCH (j:Journey {id: $journey_id})
                         MATCH (p:Phase {id: $phase_id})
                         CREATE (j)-[:HAS_PHASE {sequence: $sequence}]->(p)
-                    """, {
-                        "journey_id": journey_id,
-                        "phase_id": phase_id,
-                        "sequence": seq + 1
-                    })
+                    """,
+                        {"journey_id": journey_id, "phase_id": phase_id, "sequence": seq + 1},
+                    )
                     self.stats["relationships_created"] += 1
                 except Exception as e:
                     print(f"  Warning: Failed to link journey {journey_id} -> phase {phase_id}: {e}")
@@ -321,10 +333,10 @@ def load_journeys_from_constants() -> List[Dict[str, Any]]:
 
 def main():
     """Main graph population workflow."""
-    print("="*60)
+    print("=" * 60)
     print("GNDP Neo4j Graph Population")
     print("Following RAG.md Dual-Index Architecture")
-    print("="*60)
+    print("=" * 60)
     print()
 
     # Get Neo4j credentials from environment
@@ -399,9 +411,9 @@ def main():
                 populator.link_journey_phases(journey)
 
         # Print statistics
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✓ Graph population complete!")
-        print("="*60)
+        print("=" * 60)
         print(f"\nStatistics:")
         print(f"  Atoms created:         {populator.stats['atoms_created']}")
         print(f"  Modules created:       {populator.stats['modules_created']}")

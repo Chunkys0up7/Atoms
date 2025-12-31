@@ -10,8 +10,9 @@ Tests cover:
 - Module-scoped graph queries
 """
 
+from typing import Dict, List, Optional, Set
+
 import pytest
-from typing import List, Set, Dict, Optional
 
 
 class TestGraphTraversal:
@@ -24,38 +25,26 @@ class TestGraphTraversal:
                 "id": "atom-cust-kyc",
                 "type": "process",
                 "title": "Customer KYC",
-                "relationships": {
-                    "upstream": [],
-                    "downstream": ["atom-cust-verify", "atom-bo-review"]
-                }
+                "relationships": {"upstream": [], "downstream": ["atom-cust-verify", "atom-bo-review"]},
             },
             "atom-cust-verify": {
                 "id": "atom-cust-verify",
                 "type": "process",
                 "title": "Customer Verification",
-                "relationships": {
-                    "upstream": ["atom-cust-kyc"],
-                    "downstream": ["atom-bo-decision"]
-                }
+                "relationships": {"upstream": ["atom-cust-kyc"], "downstream": ["atom-bo-decision"]},
             },
             "atom-bo-review": {
                 "id": "atom-bo-review",
                 "type": "process",
                 "title": "Back Office Review",
-                "relationships": {
-                    "upstream": ["atom-cust-kyc"],
-                    "downstream": ["atom-bo-decision"]
-                }
+                "relationships": {"upstream": ["atom-cust-kyc"], "downstream": ["atom-bo-decision"]},
             },
             "atom-bo-decision": {
                 "id": "atom-bo-decision",
                 "type": "process",
                 "title": "Decision Point",
-                "relationships": {
-                    "upstream": ["atom-cust-verify", "atom-bo-review"],
-                    "downstream": []
-                }
-            }
+                "relationships": {"upstream": ["atom-cust-verify", "atom-bo-review"], "downstream": []},
+            },
         }
 
     def test_find_downstream_dependencies(self):
@@ -94,18 +83,9 @@ class TestGraphTraversal:
         """Should detect circular dependencies in graph"""
         # Create a circular reference
         circular_atoms = {
-            "atom-a": {
-                "id": "atom-a",
-                "relationships": {"upstream": [], "downstream": ["atom-b"]}
-            },
-            "atom-b": {
-                "id": "atom-b",
-                "relationships": {"upstream": ["atom-a"], "downstream": ["atom-c"]}
-            },
-            "atom-c": {
-                "id": "atom-c",
-                "relationships": {"upstream": ["atom-b"], "downstream": ["atom-a"]}
-            }
+            "atom-a": {"id": "atom-a", "relationships": {"upstream": [], "downstream": ["atom-b"]}},
+            "atom-b": {"id": "atom-b", "relationships": {"upstream": ["atom-a"], "downstream": ["atom-c"]}},
+            "atom-c": {"id": "atom-c", "relationships": {"upstream": ["atom-b"], "downstream": ["atom-a"]}},
         }
 
         has_cycle = self._detect_cycle(circular_atoms, "atom-a")
@@ -129,12 +109,7 @@ class TestGraphTraversal:
     def test_no_path_between_unconnected_atoms(self):
         """Should return None for unconnected atoms"""
         # Add isolated atom
-        isolated_atom = {
-            "atom-isolated": {
-                "id": "atom-isolated",
-                "relationships": {"upstream": [], "downstream": []}
-            }
-        }
+        isolated_atom = {"atom-isolated": {"id": "atom-isolated", "relationships": {"upstream": [], "downstream": []}}}
         test_atoms = {**self.atoms, **isolated_atom}
 
         path = self._find_path(test_atoms, "atom-cust-kyc", "atom-isolated")
@@ -187,20 +162,14 @@ class TestGraphTraversal:
 
     def test_find_root_atoms(self):
         """Should identify atoms with no upstream dependencies"""
-        roots = [
-            atom_id for atom_id, atom in self.atoms.items()
-            if len(atom["relationships"]["upstream"]) == 0
-        ]
+        roots = [atom_id for atom_id, atom in self.atoms.items() if len(atom["relationships"]["upstream"]) == 0]
 
         assert len(roots) == 1
         assert "atom-cust-kyc" in roots
 
     def test_find_leaf_atoms(self):
         """Should identify atoms with no downstream dependencies"""
-        leaves = [
-            atom_id for atom_id, atom in self.atoms.items()
-            if len(atom["relationships"]["downstream"]) == 0
-        ]
+        leaves = [atom_id for atom_id, atom in self.atoms.items() if len(atom["relationships"]["downstream"]) == 0]
 
         assert len(leaves) == 1
         assert "atom-bo-decision" in leaves
@@ -293,10 +262,7 @@ class TestGraphTraversal:
         depths = {}
 
         # Find roots
-        roots = [
-            atom_id for atom_id, atom in atoms.items()
-            if len(atom["relationships"]["upstream"]) == 0
-        ]
+        roots = [atom_id for atom_id, atom in atoms.items() if len(atom["relationships"]["upstream"]) == 0]
 
         # BFS from each root
         for root_id in roots:
@@ -310,7 +276,7 @@ class TestGraphTraversal:
                     continue
 
                 visited.add(current_id)
-                depths[current_id] = min(depths.get(current_id, float('inf')), depth)
+                depths[current_id] = min(depths.get(current_id, float("inf")), depth)
 
                 if current_id in atoms:
                     for downstream_id in atoms[current_id]["relationships"]["downstream"]:
@@ -329,28 +295,25 @@ class TestModuleScopedGraph:
             "atom-cust-kyc": {
                 "id": "atom-cust-kyc",
                 "module_id": "mod-customer-onboarding",
-                "relationships": {"downstream": ["atom-cust-verify"]}
+                "relationships": {"downstream": ["atom-cust-verify"]},
             },
             "atom-cust-verify": {
                 "id": "atom-cust-verify",
                 "module_id": "mod-customer-onboarding",
-                "relationships": {"downstream": ["atom-bo-review"]}
+                "relationships": {"downstream": ["atom-bo-review"]},
             },
             "atom-bo-review": {
                 "id": "atom-bo-review",
                 "module_id": "mod-back-office",
-                "relationships": {"downstream": []}
-            }
+                "relationships": {"downstream": []},
+            },
         }
 
     def test_filter_atoms_by_module(self):
         """Should filter atoms belonging to specific module"""
         module_id = "mod-customer-onboarding"
 
-        filtered = {
-            atom_id: atom for atom_id, atom in self.atoms.items()
-            if atom.get("module_id") == module_id
-        }
+        filtered = {atom_id: atom for atom_id, atom in self.atoms.items() if atom.get("module_id") == module_id}
 
         assert len(filtered) == 2
         assert "atom-cust-kyc" in filtered
@@ -395,31 +358,17 @@ class TestGraphEdgeCases:
         atoms = {}
 
         # Should not crash
-        roots = [
-            atom_id for atom_id, atom in atoms.items()
-            if len(atom["relationships"]["upstream"]) == 0
-        ]
+        roots = [atom_id for atom_id, atom in atoms.items() if len(atom["relationships"]["upstream"]) == 0]
 
         assert len(roots) == 0
 
     def test_single_atom_graph(self):
         """Should handle graph with single isolated atom"""
-        atoms = {
-            "atom-solo": {
-                "id": "atom-solo",
-                "relationships": {"upstream": [], "downstream": []}
-            }
-        }
+        atoms = {"atom-solo": {"id": "atom-solo", "relationships": {"upstream": [], "downstream": []}}}
 
         # Should identify as both root and leaf
-        roots = [
-            atom_id for atom_id, atom in atoms.items()
-            if len(atom["relationships"]["upstream"]) == 0
-        ]
-        leaves = [
-            atom_id for atom_id, atom in atoms.items()
-            if len(atom["relationships"]["downstream"]) == 0
-        ]
+        roots = [atom_id for atom_id, atom in atoms.items() if len(atom["relationships"]["upstream"]) == 0]
+        leaves = [atom_id for atom_id, atom in atoms.items() if len(atom["relationships"]["downstream"]) == 0]
 
         assert len(roots) == 1
         assert len(leaves) == 1
@@ -431,10 +380,7 @@ class TestGraphEdgeCases:
         atoms = {
             "atom-self": {
                 "id": "atom-self",
-                "relationships": {
-                    "upstream": [],
-                    "downstream": ["atom-self"]  # Self-reference
-                }
+                "relationships": {"upstream": [], "downstream": ["atom-self"]},  # Self-reference
             }
         }
 
@@ -447,10 +393,7 @@ class TestGraphEdgeCases:
         atoms = {
             "atom-valid": {
                 "id": "atom-valid",
-                "relationships": {
-                    "upstream": [],
-                    "downstream": ["atom-missing"]  # References non-existent atom
-                }
+                "relationships": {"upstream": [], "downstream": ["atom-missing"]},  # References non-existent atom
             }
         }
 
@@ -466,23 +409,11 @@ class TestGraphEdgeCases:
             downstream = [f"atom-{i+1}"] if i < 99 else []
             upstream = [f"atom-{i-1}"] if i > 0 else []
 
-            atoms[atom_id] = {
-                "id": atom_id,
-                "relationships": {
-                    "upstream": upstream,
-                    "downstream": downstream
-                }
-            }
+            atoms[atom_id] = {"id": atom_id, "relationships": {"upstream": upstream, "downstream": downstream}}
 
         # Should have exactly 1 root and 1 leaf
-        roots = [
-            atom_id for atom_id, atom in atoms.items()
-            if len(atom["relationships"]["upstream"]) == 0
-        ]
-        leaves = [
-            atom_id for atom_id, atom in atoms.items()
-            if len(atom["relationships"]["downstream"]) == 0
-        ]
+        roots = [atom_id for atom_id, atom in atoms.items() if len(atom["relationships"]["upstream"]) == 0]
+        leaves = [atom_id for atom_id, atom in atoms.items() if len(atom["relationships"]["downstream"]) == 0]
 
         assert len(roots) == 1
         assert roots[0] == "atom-0"

@@ -4,16 +4,18 @@ Notifications API Routes
 Manages user notifications for collaboration events (changes, mentions, assignments).
 """
 
+import sys
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-from datetime import datetime
-import sys
 
 try:
     from ..neo4j_client import get_neo4j_client
 except ImportError:
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from neo4j_client import get_neo4j_client
 
@@ -23,6 +25,7 @@ router = APIRouter()
 
 class Notification(BaseModel):
     """Notification object"""
+
     id: str
     type: str  # change, mention, assignment, comment, system
     user_id: str
@@ -36,6 +39,7 @@ class Notification(BaseModel):
 
 class CreateNotificationRequest(BaseModel):
     """Request to create a notification"""
+
     type: str
     user_id: str
     title: str
@@ -46,18 +50,14 @@ class CreateNotificationRequest(BaseModel):
 
 class NotificationStats(BaseModel):
     """Notification statistics"""
+
     total: int
     unread: int
     by_type: Dict[str, int]
 
 
 @router.get("/api/notifications")
-def get_notifications(
-    user_id: str,
-    unread_only: bool = False,
-    limit: int = 50,
-    offset: int = 0
-) -> List[Notification]:
+def get_notifications(user_id: str, unread_only: bool = False, limit: int = 50, offset: int = 0) -> List[Notification]:
     """
     Get notifications for a user
 
@@ -74,10 +74,7 @@ def get_notifications(
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             # Build query
@@ -102,18 +99,20 @@ def get_notifications(
 
             notifications = []
             for record in result:
-                n = record['n']
-                notifications.append(Notification(
-                    id=n.get('id'),
-                    type=n.get('type'),
-                    user_id=n.get('user_id'),
-                    title=n.get('title'),
-                    message=n.get('message'),
-                    link=n.get('link'),
-                    read=n.get('read', False),
-                    created_at=n.get('created_at'),
-                    metadata=n.get('metadata', {})
-                ))
+                n = record["n"]
+                notifications.append(
+                    Notification(
+                        id=n.get("id"),
+                        type=n.get("type"),
+                        user_id=n.get("user_id"),
+                        title=n.get("title"),
+                        message=n.get("message"),
+                        link=n.get("link"),
+                        read=n.get("read", False),
+                        created_at=n.get("created_at"),
+                        metadata=n.get("metadata", {}),
+                    )
+                )
 
             return notifications
 
@@ -121,10 +120,7 @@ def get_notifications(
         raise
     except Exception as e:
         print(f"Error getting notifications: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get notifications: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get notifications: {str(e)}")
 
 
 @router.post("/api/notifications")
@@ -142,10 +138,7 @@ def create_notification(request: CreateNotificationRequest) -> Notification:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         # Generate notification ID
         notification_id = f"notif-{datetime.now().timestamp()}"
@@ -177,37 +170,31 @@ def create_notification(request: CreateNotificationRequest) -> Notification:
                 message=request.message,
                 link=request.link,
                 created_at=created_at,
-                metadata=request.metadata
+                metadata=request.metadata,
             )
 
             record = result.single()
             if not record:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Failed to create notification"
-                )
+                raise HTTPException(status_code=500, detail="Failed to create notification")
 
-            n = record['n']
+            n = record["n"]
             return Notification(
-                id=n.get('id'),
-                type=n.get('type'),
-                user_id=n.get('user_id'),
-                title=n.get('title'),
-                message=n.get('message'),
-                link=n.get('link'),
-                read=n.get('read', False),
-                created_at=n.get('created_at'),
-                metadata=n.get('metadata', {})
+                id=n.get("id"),
+                type=n.get("type"),
+                user_id=n.get("user_id"),
+                title=n.get("title"),
+                message=n.get("message"),
+                link=n.get("link"),
+                read=n.get("read", False),
+                created_at=n.get("created_at"),
+                metadata=n.get("metadata", {}),
             )
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error creating notification: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create notification: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to create notification: {str(e)}")
 
 
 @router.post("/api/notifications/{notification_id}/read")
@@ -225,10 +212,7 @@ def mark_notification_read(notification_id: str) -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             query = """
@@ -241,25 +225,15 @@ def mark_notification_read(notification_id: str) -> Dict[str, Any]:
             record = result.single()
 
             if not record:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Notification {notification_id} not found"
-                )
+                raise HTTPException(status_code=404, detail=f"Notification {notification_id} not found")
 
-            return {
-                "status": "ok",
-                "notification_id": notification_id,
-                "read": True
-            }
+            return {"status": "ok", "notification_id": notification_id, "read": True}
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error marking notification as read: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to mark notification as read: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to mark notification as read: {str(e)}")
 
 
 @router.post("/api/notifications/mark-all-read")
@@ -277,10 +251,7 @@ def mark_all_read(user_id: str) -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             query = """
@@ -292,22 +263,15 @@ def mark_all_read(user_id: str) -> Dict[str, Any]:
             result = session.run(query, user_id=user_id)
             record = result.single()
 
-            count = record['count'] if record else 0
+            count = record["count"] if record else 0
 
-            return {
-                "status": "ok",
-                "user_id": user_id,
-                "marked_read": count
-            }
+            return {"status": "ok", "user_id": user_id, "marked_read": count}
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error marking all notifications as read: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to mark all notifications as read: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to mark all notifications as read: {str(e)}")
 
 
 @router.delete("/api/notifications/{notification_id}")
@@ -325,10 +289,7 @@ def delete_notification(notification_id: str) -> Dict[str, Any]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             query = """
@@ -340,26 +301,16 @@ def delete_notification(notification_id: str) -> Dict[str, Any]:
             result = session.run(query, id=notification_id)
             record = result.single()
 
-            if not record or record['deleted'] == 0:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Notification {notification_id} not found"
-                )
+            if not record or record["deleted"] == 0:
+                raise HTTPException(status_code=404, detail=f"Notification {notification_id} not found")
 
-            return {
-                "status": "ok",
-                "notification_id": notification_id,
-                "deleted": True
-            }
+            return {"status": "ok", "notification_id": notification_id, "deleted": True}
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error deleting notification: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to delete notification: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to delete notification: {str(e)}")
 
 
 @router.get("/api/notifications/stats")
@@ -377,10 +328,7 @@ def get_notification_stats(user_id: str) -> NotificationStats:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             # Total count
@@ -390,7 +338,7 @@ def get_notification_stats(user_id: str) -> NotificationStats:
             """
             total_result = session.run(total_query, user_id=user_id)
             total_record = total_result.single()
-            total = total_record['count'] if total_record else 0
+            total = total_record["count"] if total_record else 0
 
             # Unread count
             unread_query = """
@@ -399,7 +347,7 @@ def get_notification_stats(user_id: str) -> NotificationStats:
             """
             unread_result = session.run(unread_query, user_id=user_id)
             unread_record = unread_result.single()
-            unread = unread_record['count'] if unread_record else 0
+            unread = unread_record["count"] if unread_record else 0
 
             # By type
             type_query = """
@@ -410,22 +358,15 @@ def get_notification_stats(user_id: str) -> NotificationStats:
 
             by_type = {}
             for record in type_result:
-                by_type[record['type']] = record['count']
+                by_type[record["type"]] = record["count"]
 
-            return NotificationStats(
-                total=total,
-                unread=unread,
-                by_type=by_type
-            )
+            return NotificationStats(total=total, unread=unread, by_type=by_type)
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error getting notification stats: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get notification stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get notification stats: {str(e)}")
 
 
 @router.get("/api/notifications/unread-count")
@@ -443,10 +384,7 @@ def get_unread_count(user_id: str) -> Dict[str, int]:
         neo4j_client = get_neo4j_client()
 
         if not neo4j_client.is_connected():
-            raise HTTPException(
-                status_code=503,
-                detail="Neo4j database not connected"
-            )
+            raise HTTPException(status_code=503, detail="Neo4j database not connected")
 
         with neo4j_client.driver.session() as session:
             query = """
@@ -457,7 +395,7 @@ def get_unread_count(user_id: str) -> Dict[str, int]:
             result = session.run(query, user_id=user_id)
             record = result.single()
 
-            count = record['count'] if record else 0
+            count = record["count"] if record else 0
 
             return {"unread_count": count}
 
@@ -465,7 +403,4 @@ def get_unread_count(user_id: str) -> Dict[str, int]:
         raise
     except Exception as e:
         print(f"Error getting unread count: {e}", file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get unread count: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get unread count: {str(e)}")
