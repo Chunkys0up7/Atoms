@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import psycopg2
 from psycopg2 import pool
-from psycopg2.extras import Json, RealDictCursor
+from psycopg2.extras import RealDictCursor
 
 logger = logging.getLogger(__name__)
 

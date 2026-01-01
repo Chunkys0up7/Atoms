@@ -119,7 +119,7 @@ class ClaudeClient:
 
     def _get_system_prompt(self, rag_mode: str) -> str:
         """Get system prompt based on RAG mode."""
-        base_prompt = """You are a knowledgeable assistant for the Graph-Native Documentation Platform (GNDP). 
+        base_prompt = """You are a knowledgeable assistant for the Graph-Native Documentation Platform (GNDP).
 Your role is to provide accurate, helpful answers based on the provided documentation atoms.
 
 CRITICAL RULES:

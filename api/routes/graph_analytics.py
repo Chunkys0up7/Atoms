@@ -10,7 +10,6 @@ Provides graph algorithm endpoints for deeper insights:
 """
 
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException

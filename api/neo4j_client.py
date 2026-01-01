@@ -17,7 +17,7 @@ except Exception:
     ConnectionError = ServiceUnavailable
     DatabaseError = Neo4jError
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
 class Neo4jClient:

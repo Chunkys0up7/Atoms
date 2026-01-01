@@ -9,7 +9,7 @@ Detects unusual patterns in the knowledge graph:
 """
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -76,7 +76,7 @@ def detect_structural_anomalies(neo4j_client) -> List[Anomaly]:
                     category="isolated_atom",
                     atom_id=record["atom_id"],
                     atom_name=record.get("atom_name", "Unknown"),
-                    description=f"Atom is completely isolated with no relationships",
+                    description="Atom is completely isolated with no relationships",
                     details={"atom_type": record.get("atom_type"), "connection_count": 0},
                     suggested_action="Add DEPENDS_ON, ENABLES, or RELATED_TO relationships",
                     confidence=1.0,
@@ -225,7 +225,10 @@ def detect_semantic_anomalies(neo4j_client) -> List[Anomaly]:
                     category="type_mismatch",
                     atom_id=record["atom_id"],
                     atom_name=record.get("atom_name", "Unknown"),
-                    description=f"Invalid edge type: {record['source_type']} -{record['edge_type']}-> {record['target_type']}",
+                    description=(
+                        f"Invalid edge type: {record['source_type']} "
+                        f"-{record['edge_type']}-> {record['target_type']}"
+                    ),
                     details={
                         "source_type": record["source_type"],
                         "edge_type": record["edge_type"],

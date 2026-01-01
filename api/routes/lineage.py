@@ -4,7 +4,6 @@ Extracts git history for atoms to show who created/modified documentation and wh
 """
 
 import os
-import re
 import subprocess
 from datetime import datetime
 from typing import List, Optional

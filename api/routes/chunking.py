@@ -9,18 +9,14 @@ Implements RAG.md Phase 2 guidance:
 """
 
 import re
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import numpy as np
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter()
 
 try:
-    import openai
-
     HAS_OPENAI = True
 except ImportError:
     HAS_OPENAI = False

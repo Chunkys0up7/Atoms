@@ -10,7 +10,7 @@ Handles approvals at multiple levels:
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import yaml
 from fastapi import APIRouter, HTTPException
@@ -155,7 +155,10 @@ def decide_atom_usage_approval(approval_id: str, decision: ApprovalDecision) -> 
     if decision.approver not in [approval_request["owner"], approval_request["steward"]]:
         raise HTTPException(
             status_code=403,
-            detail=f"Only the atom owner ({approval_request['owner']}) or steward ({approval_request['steward']}) can approve this request",
+            detail=(
+                f"Only the atom owner ({approval_request['owner']}) or steward "
+                f"({approval_request['steward']}) can approve this request"
+            ),
         )
 
     # Validate decision
@@ -275,7 +278,7 @@ def request_module_approval(request: ModuleApprovalRequest) -> Dict[str, Any]:
     if unapproved_atoms:
         return {
             "status": "pending_atom_approvals",
-            "message": f"Cannot approve module until all atoms are approved",
+            "message": "Cannot approve module until all atoms are approved",
             "unapproved_atoms": unapproved_atoms,
             "total_atoms": len(atom_ids),
             "approved_atoms": len(atom_ids) - len(unapproved_atoms),
