@@ -1,0 +1,8 @@
+id: phase-closing-purchase-fha
+name: Closing - FHA Purchase
+description: Closing with FHA disclosures and MI premium handling.
+modules:
+  - module-closing-preparation
+  - module-funding-recording
+journeyId: journey-purchase-fha
+targetDurationDays: 3

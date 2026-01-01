@@ -5,11 +5,12 @@ posts a comment to the PR with a short structured summary. It tolerates
 different shapes of model output and avoids posting sensitive content.
 """
 import argparse
+import json
 import os
 import sys
-import json
-import requests
 from typing import Any, Dict, Optional
+
+import requests
 
 GITHUB_API = "https://api.github.com"
 
@@ -44,6 +45,7 @@ def normalize_model_output(report: Dict[str, Any]) -> Dict[str, Any]:
 def redact_summary(s: str) -> str:
     # Basic redaction: remove emails and long numeric IDs
     import re
+
     s = re.sub(r"[\w\.-]+@[\w\.-]+", "[REDACTED_EMAIL]", s)
     s = re.sub(r"\b\d{9,}\b", "[REDACTED_ID]", s)
     return s

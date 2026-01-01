@@ -11,11 +11,12 @@ Tests the Neo4jClient class with comprehensive coverage of:
 - Connection lifecycle management
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch, call
-from neo4j.exceptions import ConnectionError, DatabaseError
+from unittest.mock import MagicMock, Mock, call, patch
 
-from api.neo4j_client import Neo4jClient, get_neo4j_client, close_neo4j_client
+import pytest
+from neo4j.exceptions import DatabaseError, Neo4jError, ServiceUnavailable
+
+from api.neo4j_client import Neo4jClient, close_neo4j_client, get_neo4j_client
 
 
 class TestNeo4jClientInitialization:
@@ -27,14 +28,10 @@ class TestNeo4jClientInitialization:
 
         Verifies that the client correctly stores provided URI, username, and password.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
-            client = Neo4jClient(
-                uri="neo4j://test-server:7687",
-                user="testuser",
-                password="testpass"
-            )
+            client = Neo4jClient(uri="neo4j://test-server:7687", user="testuser", password="testpass")
 
             assert client.uri == "neo4j://test-server:7687"
             assert client.user == "testuser"
@@ -48,7 +45,7 @@ class TestNeo4jClientInitialization:
         Verifies that the client reads connection parameters from environment when
         not explicitly provided.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
             client = Neo4jClient()
@@ -67,27 +64,19 @@ class TestNeo4jClientInitialization:
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
 
         with pytest.raises(ValueError, match="Neo4j password required"):
-            Neo4jClient(
-                uri="neo4j://localhost:7687",
-                user="neo4j",
-                password=None
-            )
+            Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password=None)
 
     def test_connection_error_on_failed_connect(self):
         """
-        Test that ConnectionError is raised when connection fails.
+        Test that ServiceUnavailable is raised when connection fails.
 
         Verifies proper error handling during the initial connection attempt.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.side_effect = Exception("Connection refused")
 
-            with pytest.raises(ConnectionError, match="Failed to connect to Neo4j"):
-                Neo4jClient(
-                    uri="neo4j://unreachable:7687",
-                    user="neo4j",
-                    password="password"
-                )
+            with pytest.raises(ServiceUnavailable, match="Failed to connect to Neo4j"):
+                Neo4jClient(uri="neo4j://unreachable:7687", user="neo4j", password="password")
 
     def test_driver_instantiation_with_correct_parameters(self):
         """
@@ -95,14 +84,10 @@ class TestNeo4jClientInitialization:
 
         Verifies that the Neo4j driver is initialized with proper auth and encryption settings.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver') as mock_driver:
+        with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
-            client = Neo4jClient(
-                uri="neo4j://localhost:7687",
-                user="neo4j",
-                password="password"
-            )
+            client = Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password="password")
 
             mock_driver.assert_called_once_with(
                 "neo4j://localhost:7687",
@@ -149,9 +134,12 @@ class TestConnectionManagement:
 
         Verifies that the driver is closed and set to None.
         """
+        # Save reference to driver before closing
+        driver = mock_neo4j_client.driver
+
         mock_neo4j_client.close()
 
-        mock_neo4j_client.driver.close.assert_called_once()
+        driver.close.assert_called_once()
         assert mock_neo4j_client.driver is None
 
     def test_close_is_idempotent(self, mock_neo4j_client):
@@ -171,16 +159,17 @@ class TestConnectionManagement:
 
         Verifies that __enter__ and __exit__ methods work correctly.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver'):
-            with patch.object(Neo4jClient, '_connect'):
+        with patch("api.neo4j_client.GraphDatabase.driver"):
+            with patch.object(Neo4jClient, "_connect"):
                 client = Neo4jClient.__new__(Neo4jClient)
-                client.driver = MagicMock()
+                driver_mock = MagicMock()
+                client.driver = driver_mock
 
                 with client as ctx:
                     assert ctx is client
 
                 # Driver should be closed on exit
-                client.driver.close.assert_called_once()
+                driver_mock.close.assert_called_once()
 
 
 class TestUpstreamDependencies:
@@ -219,7 +208,7 @@ class TestUpstreamDependencies:
         client = Neo4jClient.__new__(Neo4jClient)
         client.driver = None
 
-        with pytest.raises(ConnectionError, match="Not connected to Neo4j"):
+        with pytest.raises(ServiceUnavailable, match="Not connected to Neo4j"):
             client.find_upstream_dependencies("REQ-001")
 
     def test_find_upstream_dependencies_database_error_handling(self, mock_neo4j_client):
@@ -232,7 +221,7 @@ class TestUpstreamDependencies:
         session_mock.run.side_effect = DatabaseError("Query execution failed")
         mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
 
-        with pytest.raises(DatabaseError, match="Error finding upstream dependencies"):
+        with pytest.raises(Neo4jError, match="Error finding upstream dependencies"):
             mock_neo4j_client.find_upstream_dependencies("REQ-001")
 
     def test_find_upstream_dependencies_returns_serialized_records(self, mock_neo4j_client):
@@ -245,7 +234,7 @@ class TestUpstreamDependencies:
         result_record.items.return_value = [
             ("upstream", {"id": "DESIGN-001", "type": "design"}),
             ("rel_path", ["implements"]),
-            ("depth", 1)
+            ("depth", 1),
         ]
 
         session_mock = MagicMock()
@@ -291,7 +280,7 @@ class TestDownstreamImpacts:
         client = Neo4jClient.__new__(Neo4jClient)
         client.driver = None
 
-        with pytest.raises(ConnectionError, match="Not connected to Neo4j"):
+        with pytest.raises(ServiceUnavailable, match="Not connected to Neo4j"):
             client.find_downstream_impacts("REQ-001")
 
     def test_find_downstream_impacts_database_error_handling(self, mock_neo4j_client):
@@ -304,7 +293,7 @@ class TestDownstreamImpacts:
         session_mock.run.side_effect = DatabaseError("Query execution failed")
         mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
 
-        with pytest.raises(DatabaseError, match="Error finding downstream impacts"):
+        with pytest.raises(Neo4jError, match="Error finding downstream impacts"):
             mock_neo4j_client.find_downstream_impacts("REQ-001")
 
 
@@ -320,7 +309,7 @@ class TestFullContext:
         center_atom = {"id": "REQ-001", "type": "requirement", "title": "Test Requirement"}
         related_atoms = [
             {"id": "DESIGN-001", "type": "design", "title": "Test Design"},
-            {"id": "PROC-001", "type": "procedure", "title": "Test Procedure"}
+            {"id": "PROC-001", "type": "procedure", "title": "Test Procedure"},
         ]
 
         center_result = MagicMock()
@@ -328,10 +317,7 @@ class TestFullContext:
 
         related_result = MagicMock()
         related_result_record = MagicMock()
-        related_result_record.items.return_value = [
-            ("related", related_atoms[0]),
-            ("connection_count", 2)
-        ]
+        related_result_record.items.return_value = [("related", related_atoms[0]), ("connection_count", 2)]
         related_result.__iter__ = Mock(return_value=iter([related_result_record]))
 
         session_mock = MagicMock()
@@ -450,10 +436,7 @@ class TestFindByType:
 
         Verifies that the correct atoms are returned for a given type.
         """
-        requirements = [
-            {"id": "REQ-001", "type": "requirement"},
-            {"id": "REQ-002", "type": "requirement"}
-        ]
+        requirements = [{"id": "REQ-001", "type": "requirement"}, {"id": "REQ-002", "type": "requirement"}]
 
         result_record = MagicMock()
         result_record.items.return_value = [("a", requirements[0])]
@@ -519,10 +502,9 @@ class TestCountAtoms:
         type_result_record1.items.return_value = [("type", "requirement"), ("count", 2)]
         type_result_record2 = MagicMock()
         type_result_record2.items.return_value = [("type", "design"), ("count", 3)]
-        type_result.__iter__ = Mock(return_value=iter([
-            {"type": "requirement", "count": 2},
-            {"type": "design", "count": 3}
-        ]))
+        type_result.__iter__ = Mock(
+            return_value=iter([{"type": "requirement", "count": 2}, {"type": "design", "count": 3}])
+        )
 
         session_mock = MagicMock()
         session_mock.run.side_effect = [total_result, type_result]
@@ -647,16 +629,18 @@ class TestSingleton:
 
         Verifies singleton pattern implementation.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver'):
-            with patch.object(Neo4jClient, '_connect'):
-                # Clear global state
-                import api.neo4j_client
-                api.neo4j_client._neo4j_client = None
+        with patch("api.neo4j_client.GraphDatabase.driver"):
+            with patch.object(Neo4jClient, "_connect"):
+                with patch.object(Neo4jClient, "__init__", return_value=None):
+                    # Clear global state
+                    import api.neo4j_client
 
-                client1 = get_neo4j_client()
-                client2 = get_neo4j_client()
+                    api.neo4j_client._neo4j_client = None
 
-                assert client1 is client2
+                    client1 = get_neo4j_client()
+                    client2 = get_neo4j_client()
+
+                    assert client1 is client2
 
     def test_close_neo4j_client_clears_singleton(self):
         """
@@ -664,15 +648,18 @@ class TestSingleton:
 
         Verifies that global instance is properly cleaned up.
         """
-        with patch('api.neo4j_client.GraphDatabase.driver'):
-            with patch.object(Neo4jClient, '_connect'):
-                import api.neo4j_client
-                api.neo4j_client._neo4j_client = None
+        with patch("api.neo4j_client.GraphDatabase.driver"):
+            with patch.object(Neo4jClient, "_connect"):
+                with patch.object(Neo4jClient, "__init__", return_value=None):
+                    with patch.object(Neo4jClient, "close"):
+                        import api.neo4j_client
 
-                client = get_neo4j_client()
-                close_neo4j_client()
+                        api.neo4j_client._neo4j_client = None
 
-                assert api.neo4j_client._neo4j_client is None
+                        client = get_neo4j_client()
+                        close_neo4j_client()
+
+                        assert api.neo4j_client._neo4j_client is None
 
 
 class TestEdgeCases:
@@ -712,27 +699,16 @@ class TestEdgeCases:
         """
         Test handling of very large depth values.
 
-        Verifies that extreme depth values are handled safely.
+        Verifies that excessively large depth values raise ValueError.
         """
-        session_mock = MagicMock()
-        session_mock.run.return_value = []
-        mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
-
-        result = mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=100)
-
-        assert isinstance(result, list)
+        with pytest.raises(ValueError, match="max_depth must be an integer between 1 and 5"):
+            mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=100)
 
     def test_negative_depth_value(self, mock_neo4j_client):
         """
         Test handling of negative depth values.
 
-        Verifies that invalid depth values are handled.
+        Verifies that negative depth values raise ValueError.
         """
-        session_mock = MagicMock()
-        session_mock.run.return_value = []
-        mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
-
-        # Should handle gracefully or raise appropriate error
-        result = mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=-1)
-
-        assert isinstance(result, list)
+        with pytest.raises(ValueError, match="max_depth must be an integer between 1 and 5"):
+            mock_neo4j_client.find_upstream_dependencies("REQ-001", max_depth=-1)

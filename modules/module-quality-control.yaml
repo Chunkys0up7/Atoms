@@ -1,4 +1,6 @@
 id: module-quality-control
+version: 1.0.0
+workflow_type: BPM
 name: Quality Control
 description: Post-closing audit, document imaging, compliance review, and loan sale
   preparation

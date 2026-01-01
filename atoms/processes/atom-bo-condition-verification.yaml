@@ -32,3 +32,4 @@ metrics:
   avg_cycle_time_mins: 471
   error_rate: 0.016
   compliance_score: 0.92
+owning_team: Technology

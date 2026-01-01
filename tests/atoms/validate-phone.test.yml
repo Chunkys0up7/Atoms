@@ -1,0 +1,41 @@
+test_suite: validate-phone
+
+setup:
+  fixtures_file: test_data/fixtures/phone-fixtures.yml
+
+tests:
+  - name: E.164 Normalization
+    input:
+      phone_number: "+14155552671"
+    expected_output:
+      normalized: "+14155552671"
+      is_valid: true
+    assertion: "response.is_valid == true AND response.normalized == '+14155552671'"
+
+  - name: UK Mobile Format
+    input:
+      phone_number: "+447911123456"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Too Short Number
+    input:
+      phone_number: "12345"
+    expected_output:
+      is_valid: false
+      failure_reason: "too_short"
+    assertion: "response.is_valid == false AND response.reason == 'too_short'"
+
+  - name: Extension Parsing
+    input:
+      phone_number: "+44 7911 123456 ext 123"
+    expected_output:
+      is_valid: true
+      extension: "123"
+    assertion: "response.extension == '123'"
+
+performance_tests:
+  - name: Bulk Normalize Sample
+    input: "10 varied numbers"
+    expected: "complete in < 3 seconds"

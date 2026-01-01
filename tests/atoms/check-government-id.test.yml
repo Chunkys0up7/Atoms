@@ -1,0 +1,40 @@
+test_suite: check-government-id
+
+setup:
+  fixtures_file: test_data/fixtures/gov-id-fixtures.yml
+
+tests:
+  - name: Valid Passport MRZ Parse
+    input:
+      type: passport
+      country: US
+      number: "123456789"
+      mrz: "P<USASMITH<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    expected_output:
+      is_valid: true
+      mrz_parsed: true
+    assertion: "response.is_valid == true AND response.mrz_parsed == true"
+
+  - name: Expired Document
+    input:
+      type: passport
+      country: US
+      number: ""
+      expiry: "2000-01-01"
+    expected_output:
+      is_valid: false
+      failure_reason: "expired"
+    assertion: "response.is_valid == false AND response.reason == 'expired'"
+
+  - name: Non-Latin Name Handling
+    input:
+      type: passport
+      country: IN
+      number: "A1234567"
+      name: "नारायण, राज"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+notes: |
+  - Include MRZ parsing, expiry checks, format validation per country rules, and name-script handling.

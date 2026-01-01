@@ -1,0 +1,93 @@
+test_suite: verify-email-extended
+
+setup:
+  fixtures_file: test_data/fixtures/email-large-fixtures.yml
+
+# A broad set of unit tests exercising format, policy, dns, and edge cases
+tests:
+  - name: Simple Valid Corporate Email
+    input:
+      email_address: "alice@bank.com"
+      verification_method: "smtp"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Plus Addressing Accepted
+    input:
+      email_address: "oliver+sales@company.co.uk"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: International Unicode Local Part
+    input:
+      email_address: "maria.garcía@empresa.es"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Role Account Rejection
+    input:
+      email_address: "admin@company.com"
+    policy:
+      reject_role_accounts: true
+    expected_output:
+      is_valid: false
+      failure_reason: "role_address"
+    assertion: "response.is_valid == false AND response.reason == 'role_address'"
+
+  - name: Disposable Domain Rejection
+    input:
+      email_address: "temp@tempmail.test"
+    policy:
+      reject_disposable_domains: true
+    expected_output:
+      is_valid: false
+      failure_reason: "disposable_domain"
+    assertion: "response.is_valid == false AND response.reason == 'disposable_domain'"
+
+  - name: Missing @ Symbol
+    input:
+      email_address: "missing-at-sign.example.com"
+    expected_output:
+      is_valid: false
+    assertion: "response.is_valid == false"
+
+  - name: MX Lookup Failure
+    input:
+      email_address: "user@nonexistent-domain-xyz12345.test"
+    expected_output:
+      is_valid: false
+      failure_reason: "dns_lookup_failed"
+    assertion: "response.is_valid == false AND response.reason == 'dns_lookup_failed'"
+
+  - name: IPv4 Literal Local-part Handling
+    input:
+      email_address: "ipv4@[192.168.0.1]"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Internationalized Domain Name (IDN) Normalization
+    input:
+      email_address: "user@пример.рф"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: Very Long Local Part Rejection
+    input:
+      email_address: "local-part-too-long-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com"
+    expected_output:
+      is_valid: false
+      failure_reason: "local_part_too_long"
+    assertion: "response.is_valid == false AND response.reason == 'local_part_too_long'"
+
+performance_tests:
+  - name: Bulk Email Validation Sample
+    input: "50 mixed emails"
+    expected: "complete in < 10 seconds"
+
+notes: |
+  - Use this extended suite to stress-test format parsing, policy enforcement, and DNS handling.

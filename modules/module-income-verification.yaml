@@ -1,4 +1,6 @@
 id: module-income-verification
+version: 1.0.0
+workflow_type: BPM
 name: Income Verification
 description: W-2 review, pay stub analysis, tax return validation, and income calculation
 owner: Processing

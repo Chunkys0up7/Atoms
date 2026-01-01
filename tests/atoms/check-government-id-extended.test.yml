@@ -1,0 +1,54 @@
+test_suite: check-government-id-extended
+
+setup:
+  fixtures_file: test_data/fixtures/gov-id-large-fixtures.yml
+
+tests:
+  - name: MRZ Parse and Validate
+    input:
+      type: passport
+      country: US
+      number: "123456789"
+      mrz: "P<USASMITH<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    expected_output:
+      is_valid: true
+      mrz_parsed: true
+    assertion: "response.is_valid == true AND response.mrz_parsed == true"
+
+  - name: Expired Passport
+    input:
+      type: passport
+      country: US
+      number: ""
+      expiry: "2000-01-01"
+    expected_output:
+      is_valid: false
+      failure_reason: "expired"
+    assertion: "response.is_valid == false AND response.reason == 'expired'"
+
+  - name: Non-Latin Name Handling
+    input:
+      type: passport
+      country: IN
+      number: "A1234567"
+      name: "नारायण, राज"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+  - name: National ID Complex Format
+    input:
+      type: national_id
+      country: CN
+      number: "11010519491231002X"
+    expected_output:
+      is_valid: true
+    assertion: "response.is_valid == true"
+
+performance_tests:
+  - name: Bulk ID Validation Sample
+    input: "50 documents"
+    expected: "complete in < 20 seconds"
+
+notes: |
+  - Extended ID tests cover MRZ parsing, expiry checks, country-specific validation, and unicode names.

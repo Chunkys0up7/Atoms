@@ -1,5 +1,11 @@
-id: MOD-006
-type: Module
+id: module-mod-006
+version: 1.0.0
+workflow_type: BPM
+type: business
 name: Module 6
 description: Demo module 6
 owner: team-b
+atoms:
+- atom-sys-closing-disclosure
+- atom-bo-closing-doc-prep
+- atom-cust-closing-scheduling

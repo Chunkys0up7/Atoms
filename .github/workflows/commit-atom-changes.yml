@@ -1,0 +1,196 @@
+name: Commit Atom Changes (On-Demand)
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_message:
+        description: 'Custom commit message (optional)'
+        required: false
+        type: string
+
+jobs:
+  commit-atoms:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Analyze atom changes
+        id: analyze
+        run: |
+          python - <<'EOF'
+          import yaml
+          import subprocess
+          import sys
+          from pathlib import Path
+          from collections import defaultdict
+
+          def get_changed_files():
+              """Get list of modified/new atom files"""
+              result = subprocess.run(
+                  ['git', 'status', '--porcelain', 'atoms/', 'test_data/'],
+                  capture_output=True, text=True
+              )
+              files = []
+              for line in result.stdout.strip().split('\n'):
+                  if line and line.endswith('.yaml'):
+                      status = line[:2].strip()
+                      filepath = line[3:].strip()
+                      files.append((status, filepath))
+              return files
+
+          def analyze_atom_file(filepath):
+              """Extract key info from atom file"""
+              try:
+                  with open(filepath, 'r', encoding='utf-8') as f:
+                      data = yaml.safe_load(f)
+                  return {
+                      'id': data.get('id', 'unknown'),
+                      'name': data.get('name', 'Unnamed'),
+                      'type': data.get('type', 'unknown'),
+                      'category': data.get('category', 'unknown')
+                  }
+              except Exception as e:
+                  return None
+
+          # Get changed files
+          changed_files = get_changed_files()
+
+          if not changed_files:
+              print("::set-output name=has_changes::false")
+              print("No atom changes detected")
+              sys.exit(0)
+
+          # Analyze changes
+          stats = {
+              'new': 0,
+              'modified': 0,
+              'by_category': defaultdict(int),
+              'by_type': defaultdict(int),
+              'atoms': []
+          }
+
+          for status, filepath in changed_files:
+              atom_info = analyze_atom_file(filepath)
+              if atom_info:
+                  if status == 'M':
+                      stats['modified'] += 1
+                  elif status in ('A', '??'):
+                      stats['new'] += 1
+
+                  stats['by_category'][atom_info['category']] += 1
+                  stats['by_type'][atom_info['type']] += 1
+                  stats['atoms'].append(f"{atom_info['id']} ({atom_info['type']})")
+
+          # Output summary
+          print(f"::set-output name=has_changes::true")
+          print(f"::set-output name=total_changes::{stats['new'] + stats['modified']}")
+          print(f"::set-output name=new_atoms::{stats['new']}")
+          print(f"::set-output name=modified_atoms::{stats['modified']}")
+
+          # Generate commit summary
+          summary_parts = []
+          if stats['new'] > 0:
+              summary_parts.append(f"{stats['new']} new")
+          if stats['modified'] > 0:
+              summary_parts.append(f"{stats['modified']} modified")
+
+          summary = f"feat(atoms): {', '.join(summary_parts)} atom(s)"
+          print(f"::set-output name=commit_summary::{summary}")
+
+          # Category breakdown
+          category_summary = ', '.join([f"{count} {cat}" for cat, count in sorted(stats['by_category'].items())])
+          print(f"::set-output name=category_breakdown::{category_summary}")
+
+          # Detailed atom list (first 10)
+          atom_list = '\n'.join(stats['atoms'][:10])
+          if len(stats['atoms']) > 10:
+              atom_list += f"\n... and {len(stats['atoms']) - 10} more"
+
+          # Write to file for multi-line output
+          with open('atom_list.txt', 'w') as f:
+              f.write(atom_list)
+          EOF
+
+      - name: Read atom list
+        if: steps.analyze.outputs.has_changes == 'true'
+        id: atom_list
+        run: |
+          if [ -f atom_list.txt ]; then
+            echo "ATOM_LIST<<EOF" >> $GITHUB_OUTPUT
+            cat atom_list.txt >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Stage atom changes
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          git add atoms/**/*.yaml test_data/**/*.yaml 2>/dev/null || true
+
+      - name: Commit changes
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          # Use custom message if provided, otherwise generate
+          if [ -n "${{ inputs.commit_message }}" ]; then
+            COMMIT_MSG="${{ inputs.commit_message }}"
+          else
+            COMMIT_MSG="${{ steps.analyze.outputs.commit_summary }}
+
+          Changes: ${{ steps.analyze.outputs.category_breakdown }}
+          Timestamp: ${TIMESTAMP}
+
+          Affected atoms:
+          ${{ steps.atom_list.outputs.ATOM_LIST }}
+
+          🤖 Auto-committed by GitHub Actions"
+          fi
+
+          git commit -m "$COMMIT_MSG"
+
+      - name: Push changes
+        if: steps.analyze.outputs.has_changes == 'true'
+        run: |
+          git push origin ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create summary
+        run: |
+          if [ "${{ steps.analyze.outputs.has_changes }}" == "true" ]; then
+            echo "## ✅ Atom Changes Committed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Summary:** ${{ steps.analyze.outputs.commit_summary }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Total Changes:** ${{ steps.analyze.outputs.total_changes }}" >> $GITHUB_STEP_SUMMARY
+            echo "- New atoms: ${{ steps.analyze.outputs.new_atoms }}" >> $GITHUB_STEP_SUMMARY
+            echo "- Modified atoms: ${{ steps.analyze.outputs.modified_atoms }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Categories:** ${{ steps.analyze.outputs.category_breakdown }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ℹ️ No Atom Changes" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No uncommitted atom changes were found." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -8,10 +8,10 @@ directory for dry-run/testing.
 from __future__ import annotations
 
 import argparse
-import os
 import json
+import os
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 
 def gather_atoms(atoms_dir: str) -> List[Dict]:

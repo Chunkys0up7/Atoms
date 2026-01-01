@@ -1,0 +1,205 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://fullsytem.com/schemas/atom.schema.json",
+  "title": "Atom",
+  "description": "Schema for validating atom YAML files in the knowledge graph",
+  "type": "object",
+  "required": ["id", "category", "type", "name", "version", "status", "owning_team"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^atom-[a-z]+-[a-z0-9-]+$",
+      "description": "Unique identifier following pattern: atom-{category}-{name}"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "CUSTOMER_FACING",
+        "BACK_OFFICE",
+        "SYSTEM",
+        "COMPLIANCE",
+        "RISK"
+      ],
+      "description": "Atom category indicating organizational area"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "PROCESS",
+        "POLICY",
+        "CONTROL",
+        "DOCUMENT",
+        "DECISION",
+        "SYSTEM",
+        "ROLE",
+        "DATA"
+      ],
+      "description": "Atom type indicating what it represents"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "description": "Human-readable name for the atom"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (e.g., 1.0.0)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "DRAFT", "DEPRECATED", "ARCHIVED"],
+      "description": "Current lifecycle status of the atom"
+    },
+    "owning_team": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Team responsible for this atom"
+    },
+    "author": {
+      "type": "string",
+      "description": "Person who created this atom"
+    },
+    "steward": {
+      "type": "string",
+      "description": "Person responsible for maintaining this atom"
+    },
+    "ontologyDomain": {
+      "type": "string",
+      "description": "Domain classification for ontology organization"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+      "description": "Business criticality level"
+    },
+    "content": {
+      "type": "object",
+      "description": "Detailed content of the atom",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Brief summary of the atom's purpose"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordered steps for processes"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Why this atom exists"
+        },
+        "business_context": {
+          "type": "string",
+          "description": "Business context and importance"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required inputs"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Expected outputs"
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Requirements or prerequisites"
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Associated risks"
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["targetId", "type"],
+        "properties": {
+          "targetId": {
+            "type": "string",
+            "pattern": "^atom-[a-z]+-[a-z0-9-]+$",
+            "description": "Target atom ID"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "REQUIRES",
+              "ENABLES",
+              "INFLUENCES",
+              "DOCUMENTS",
+              "VALIDATES",
+              "IMPLEMENTS",
+              "DEPENDS_ON",
+              "TRIGGERS",
+              "DATA_FLOWS_TO",
+              "GOVERNED_BY",
+              "PERFORMED_BY",
+              "RELATED_TO",
+              "USES_COMPONENT"
+            ],
+            "description": "Type of relationship"
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional label for the relationship"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata for the edge"
+          }
+        }
+      },
+      "description": "Relationships to other atoms"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "properties": {
+        "created_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "last_modified": {
+          "type": "string",
+          "format": "date"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "compliance_frameworks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,31 @@
+action:
+  modification:
+    criticality: HIGH
+    reason: Credit score below threshold (620)
+  phase:
+    description: Enhanced review required due to credit risk
+    id: phase-manual-credit-review
+    modules:
+    - module-credit-analysis
+    - module-risk-assessment
+    name: Manual Credit Review
+    position: AFTER
+    reference_phase: phase-assessment
+    target_duration_days: 2
+  type: INSERT_PHASE
+active: true
+condition:
+  groups: null
+  rules:
+  - field: customer_data.credit_score
+    operator: LESS_THAN
+    value: 620
+  type: AND
+created_at: '2025-12-23T21:16:32.663319'
+created_by: system-migration
+description: Requires manual review for credit scores below 620
+name: Low Credit Score Manual Review
+priority: 9
+rule_id: rule-low-credit
+updated_at: '2025-12-23T21:16:32.663319'
+version: 1

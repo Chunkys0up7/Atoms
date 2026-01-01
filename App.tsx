@@ -1,28 +1,62 @@
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
 import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
 import AtomExplorer from './components/AtomExplorer';
 import ModuleExplorer from './components/ModuleExplorer';
 import EdgeExplorer from './components/EdgeExplorer';
 import ImpactAnalysisUI from './components/ImpactAnalysisUI';
-import AIAssistant from './components/AIAssistant';
+import AIAssistant from './components/AIAssistantEnhanced';
 import ValidationCenter from './components/ValidationCenter';
-import Publisher from './components/Publisher';
+import Publisher from './components/PublisherEnhanced';
 import IngestionEngine from './components/IngestionEngine';
-import OntologyView from './components/OntologyView';
+import OntologyBrowser from './components/OntologyBrowser';
+import DocumentLibrary from './components/DocumentLibrary';
+import MkDocsViewer from './components/MkDocsViewerEnhanced';
+import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
+import PhaseExplorer from './components/PhaseExplorer';
 import Glossary from './components/Glossary';
-import { API_ENDPOINTS, ATOM_COLORS } from './constants';
-import { Atom, Module, ViewType } from './types';
+import RuntimeSimulator from './components/RuntimeSimulator';
+import RuleManager from './components/RuleManager';
+import LineageViewer from './components/LineageViewer';
+import OptimizationDashboard from './components/OptimizationDashboard';
+import OwnershipDashboard from './components/OwnershipDashboard';
+import GraphAnalyticsDashboard from './components/GraphAnalyticsDashboard';
+import AnomalyDetectionDashboard from './components/AnomalyDetectionDashboard';
+import CollaborativeAtomEditor from './components/CollaborativeAtomEditor';
+import ProcessMonitoringDashboard from './components/ProcessMonitoringDashboard';
+import Dashboard from './components/Dashboard';
+import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
+import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
+import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
 import './styles.css';
 
+interface NavigationContext {
+  sourceView: ViewType;
+  targetView: ViewType;
+  context?: any;
+}
+
+interface NavigationHistory {
+  view: ViewType;
+  context?: any;
+  timestamp: number;
+}
+
 const App: React.FC = () => {
-  const [view, setView] = useState<ViewType>('explorer');
+  const [view, setView] = useState<ViewType>('dashboard');
   const [selectedAtom, setSelectedAtom] = useState<Atom | null>(null);
   const [atoms, setAtoms] = useState<Atom[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fullAtomData, setFullAtomData] = useState<Atom | null>(null);
+  const [graphContext, setGraphContext] = useState<GraphContext>({ mode: 'global' });
+  const [navigationHistory, setNavigationHistory] = useState<NavigationHistory[]>([]);
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
+  const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [showLineageViewer, setShowLineageViewer] = useState<boolean>(false);
 
   // Load data from API on mount
   useEffect(() => {
@@ -115,6 +149,67 @@ const App: React.FC = () => {
     setView('modules');
   };
 
+  // Navigation helper with history tracking
+  const navigateTo = (targetView: ViewType, context?: {
+    atomId?: string;
+    moduleId?: string;
+    phaseId?: string;
+    journeyId?: string;
+    graphContext?: GraphContext;
+  }) => {
+    // Add current view to history
+    setNavigationHistory(prev => [...prev, {
+      view,
+      context: {
+        selectedAtom: selectedAtom?.id,
+        selectedPhaseId,
+        selectedJourneyId,
+        selectedModuleId,
+        graphContext
+      },
+      timestamp: Date.now()
+    }]);
+
+    // Apply new context
+    if (context?.atomId) {
+      const atom = atoms.find(a => a.id === context.atomId);
+      if (atom) handleAtomSelect(atom);
+    }
+    if (context?.moduleId !== undefined) setSelectedModuleId(context.moduleId);
+    if (context?.phaseId !== undefined) setSelectedPhaseId(context.phaseId);
+    if (context?.journeyId !== undefined) setSelectedJourneyId(context.journeyId);
+    if (context?.graphContext) setGraphContext(context.graphContext);
+
+    // Clear phase/journey filters when navigating to modules without context
+    if (targetView === 'modules' && !context) {
+      setSelectedPhaseId(null);
+      setSelectedJourneyId(null);
+    }
+
+    // Navigate to target view
+    setView(targetView);
+  };
+
+  // Navigate back in history
+  const navigateBack = () => {
+    if (navigationHistory.length === 0) return;
+
+    const previous = navigationHistory[navigationHistory.length - 1];
+    setNavigationHistory(prev => prev.slice(0, -1));
+
+    // Restore previous state
+    if (previous.context?.selectedAtom) {
+      const atom = atoms.find(a => a.id === previous.context.selectedAtom);
+      if (atom) setSelectedAtom(atom);
+    }
+    if (previous.context?.selectedPhaseId) setSelectedPhaseId(previous.context.selectedPhaseId);
+    if (previous.context?.selectedJourneyId) setSelectedJourneyId(previous.context.selectedJourneyId);
+    if (previous.context?.selectedModuleId) setSelectedModuleId(previous.context.selectedModuleId);
+    if (previous.context?.graphContext) setGraphContext(previous.context.graphContext);
+
+    setView(previous.view);
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -136,28 +231,165 @@ const App: React.FC = () => {
     }
 
     switch (view) {
+      case 'dashboard':
+        return <Dashboard atoms={atoms} modules={modules} onNavigate={(targetView) => navigateTo(targetView as ViewType, {})} />;
       case 'ontology':
-        return <OntologyView />;
+        return <OntologyBrowser atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'glossary':
         return <Glossary />;
+      case 'workflow':
+        return <WorkflowBuilderEnhanced
+          atoms={atoms}
+          modules={modules}
+          onSelectAtom={(a) => { handleAtomSelect(a); }}
+          onNavigateToGraph={(journeyId) => navigateTo('graph', { journeyId, graphContext: { mode: 'journey', journeyId } })}
+          onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
+        />;
+      case 'phases':
+        return <PhaseExplorer
+          phases={MOCK_PHASES}
+          journeys={MOCK_JOURNEYS}
+          modules={modules}
+          atoms={atoms}
+          onPhaseSelect={(phase) => setSelectedPhaseId(phase.id)}
+          onNavigateToGraph={(phaseId) => navigateTo('graph', { phaseId, graphContext: { mode: 'phase', phaseId, showModuleBoundaries: true } })}
+          onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
+          selectedPhaseId={selectedPhaseId}
+        />;
       case 'explorer':
         return <AtomExplorer atoms={atoms} modules={modules} onSelect={(a) => { handleAtomSelect(a); }} />;
       case 'modules':
-        return <ModuleExplorer modules={modules} atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+        return <ModuleExplorer
+          modules={modules}
+          atoms={atoms}
+          onSelectAtom={(a) => { handleAtomSelect(a); }}
+          onNavigateToGraph={(moduleId) => navigateTo('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
+          onClearFilter={() => {
+            setSelectedPhaseId(null);
+            setSelectedJourneyId(null);
+          }}
+          selectedModuleId={selectedModuleId}
+          selectedPhaseId={selectedPhaseId}
+          selectedJourneyId={selectedJourneyId}
+        />;
       case 'graph':
-        return <GraphView atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
+        return (
+          <ErrorBoundary>
+            <GraphView
+              atoms={atoms}
+              modules={modules}
+              phases={MOCK_PHASES}
+              journeys={MOCK_JOURNEYS}
+              context={graphContext}
+              onSelectAtom={(a) => { handleAtomSelect(a); }}
+              onContextChange={(ctx) => setGraphContext(ctx)}
+              onNavigateToJourney={(journeyId) => navigateTo('workflow', { journeyId })}
+              onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
+              onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
+            />
+          </ErrorBoundary>
+        );
       case 'edges':
         return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
       case 'health':
-        return <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); setView('explorer'); }} />;
+        return (
+          <ErrorBoundary>
+            <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); setView('explorer'); }} />
+          </ErrorBoundary>
+        );
       case 'impact':
-        return <ImpactAnalysisUI atoms={atoms} />;
+        return (
+          <ErrorBoundary>
+            <ImpactAnalysisUI atoms={atoms} />
+          </ErrorBoundary>
+        );
       case 'publisher':
-        return <Publisher atoms={atoms} modules={modules} />;
+        return (
+          <ErrorBoundary>
+            <Publisher atoms={atoms} modules={modules} />
+          </ErrorBoundary>
+        );
+      case 'library':
+        return <DocumentLibrary />;
+      case 'docssite':
+        return <MkDocsViewer />;
       case 'assistant':
-        return <AIAssistant atoms={atoms} />;
+        return (
+          <ErrorBoundary>
+            <AIAssistant atoms={atoms} />
+          </ErrorBoundary>
+        );
       case 'ingestion':
-        return <IngestionEngine atoms={atoms} onIngest={handleIngest} />;
+        return (
+          <ErrorBoundary>
+            <IngestionEngine atoms={atoms} onIngest={handleIngest} />
+          </ErrorBoundary>
+        );
+      case 'runtime':
+        return <RuntimeSimulator />;
+      case 'rules':
+        return <RuleManager />;
+      case 'feedback':
+        return (
+          <ErrorBoundary>
+            <OptimizationDashboard />
+          </ErrorBoundary>
+        );
+      case 'ownership':
+        return <OwnershipDashboard />;
+      case 'analytics':
+        return (
+          <ErrorBoundary>
+            <GraphAnalyticsDashboard />
+          </ErrorBoundary>
+        );
+      case 'anomalies':
+        return (
+          <ErrorBoundary>
+            <AnomalyDetectionDashboard />
+          </ErrorBoundary>
+        );
+      case 'collaborate':
+        return selectedAtom ? (
+          <ErrorBoundary>
+            <CollaborativeAtomEditor
+              atom_id={selectedAtom.id}
+              user_id="user-demo"
+              user_name="Demo User"
+              onSave={async (atom) => {
+                // Update atom via API
+                const response = await fetch(`${API_ENDPOINTS.atoms}/${atom.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(atom)
+                });
+                if (!response.ok) {
+                  throw new Error('Failed to save atom');
+                }
+                // Reload data
+                await loadData();
+              }}
+              onConflict={(conflicts) => {
+                console.warn('Conflicts detected:', conflicts);
+              }}
+            />
+          </ErrorBoundary>
+        ) : (
+          <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ fontSize: '16px', color: 'var(--color-text-secondary)' }}>
+              Select an atom to collaborate on
+            </div>
+            <button onClick={() => setView('explorer')} className="btn btn-primary">
+              Go to Atom Explorer
+            </button>
+          </div>
+        );
+      case 'processes':
+        return (
+          <ErrorBoundary>
+            <ProcessMonitoringDashboard />
+          </ErrorBoundary>
+        );
       default:
         return <div className="content-area">Select a view from the sidebar</div>;
     }
@@ -175,8 +407,8 @@ const App: React.FC = () => {
         <Sidebar currentView={view} onViewChange={setView} />
       </aside>
 
-      <main className="main-content">
-        <header className="app-header">
+      <main className="main-content" role="main">
+        <header className="app-header" role="banner">
           <div className="header-title">
             <span className="header-breadcrumb">System Registry</span>
             <span style={{ color: 'var(--color-border-dark)', margin: '0 8px' }}>/</span>
@@ -186,17 +418,46 @@ const App: React.FC = () => {
           </div>
 
           <div className="header-actions">
-            <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', textAlign: 'right' }}>
+            <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', textAlign: 'right' }} aria-live="polite">
               <div style={{ fontWeight: '600', marginBottom: '2px' }}>Total Atoms: {atoms.length}</div>
               <div>Modules: {modules.length}</div>
             </div>
-            <button onClick={loadData} className="btn" title="Refresh data">
-              <svg style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button
+              onClick={loadData}
+              className="btn"
+              title="Refresh data"
+              aria-label="Refresh atom and module data"
+            >
+              <svg
+                style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
         </header>
+
+        <Breadcrumb
+          items={buildBreadcrumbs(
+            view,
+            {
+              selectedAtom,
+              selectedPhaseId,
+              selectedJourneyId,
+              selectedModuleId,
+              phases: MOCK_PHASES,
+              journeys: MOCK_JOURNEYS,
+              modules
+            },
+            navigateTo
+          )}
+          canGoBack={navigationHistory.length > 0}
+          onGoBack={navigateBack}
+        />
 
         <div className="content-area">
           {renderContent()}
@@ -477,8 +738,18 @@ const App: React.FC = () => {
 
               <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }}>
                 <button
-                  onClick={() => { setView('impact'); setSelectedAtom(null); setFullAtomData(null); }}
+                  onClick={() => setShowLineageViewer(true)}
                   className="btn btn-primary"
+                  style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
+                >
+                  <svg style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle', marginRight: '6px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  View History
+                </button>
+                <button
+                  onClick={() => { setView('impact'); setSelectedAtom(null); setFullAtomData(null); }}
+                  className="btn"
                   style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
                 >
                   View Impact Analysis
@@ -494,6 +765,14 @@ const App: React.FC = () => {
             </div>
           );
         })()}
+
+        {/* Lineage Viewer Modal */}
+        {showLineageViewer && selectedAtom && (
+          <LineageViewer
+            atomId={selectedAtom.id}
+            onClose={() => setShowLineageViewer(false)}
+          />
+        )}
       </main>
     </div>
   );

@@ -1,4 +1,6 @@
 id: module-closing-preparation
+version: 1.0.0
+workflow_type: BPM
 name: Closing Preparation
 description: Closing disclosure generation, document preparation, and closing scheduling
 owner: Closing
@@ -6,4 +8,11 @@ atoms:
 - atom-sys-closing-disclosure
 - atom-bo-closing-doc-prep
 - atom-cust-closing-scheduling
+- atom-bo-closing-disclosure-review
+- atom-bo-closing-package-assembly
+- atom-bo-notary-coordination
+- atom-sys-redisclosure-trigger
+- atom-bo-closing-cost-review
+- atom-bo-cash-to-close-calculation
+- atom-bo-closing-wire-instructions
 phaseId: phase-closing

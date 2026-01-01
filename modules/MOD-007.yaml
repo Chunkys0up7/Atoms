@@ -1,5 +1,11 @@
-id: MOD-007
-type: Module
+id: module-mod-007
+version: 1.0.0
+workflow_type: BPM
+type: business
 name: Module 7
 description: Demo module 7
 owner: platform
+atoms:
+- atom-sys-funding-wire
+- atom-sys-deed-recording
+- atom-bo-funding-verification

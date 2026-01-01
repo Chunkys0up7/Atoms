@@ -4,7 +4,7 @@ type: PROCESS
 name: Processor Reviews W-2 Forms
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
+owner: James Martinez
 team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -56,3 +56,5 @@ metrics:
   avg_cycle_time_mins: 300
   error_rate: 0.047
   compliance_score: 0.99
+steward: Sarah Chen
+owning_team: Processing

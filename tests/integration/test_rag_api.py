@@ -10,10 +10,11 @@ Tests the complete RAG API functionality including:
 - Edge cases and boundary conditions
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-from fastapi.testclient import TestClient
 import json
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+from fastapi.testclient import TestClient
 
 from api.server import app
 
@@ -33,24 +34,20 @@ class TestRAGQueryEndpoint:
 
         Verifies that entity mode returns semantic search results.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
                 mock_entity_rag.return_value = [
                     {
                         "id": "REQ-001",
                         "type": "requirement",
                         "title": "Test Requirement",
                         "content": "Test content",
-                        "distance": 0.95
+                        "distance": 0.95,
                     }
                 ]
 
                 response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "What is authentication?",
-                        "rag_mode": "entity"
-                    }
+                    "/api/rag/query", json={"query": "What is authentication?", "rag_mode": "entity"}
                 )
 
                 assert response.status_code == 200
@@ -65,22 +62,12 @@ class TestRAGQueryEndpoint:
 
         Verifies that path mode returns relationship-aware results.
         """
-        with patch('api.routes.rag.path_rag') as mock_path_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
-                mock_path_rag.return_value = [
-                    {
-                        "id": "REQ-001",
-                        "type": "requirement",
-                        "relationship": "implements"
-                    }
-                ]
+        with patch("api.routes.rag.path_rag") as mock_path_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
+                mock_path_rag.return_value = [{"id": "REQ-001", "type": "requirement", "relationship": "implements"}]
 
                 response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "How does authentication work?",
-                        "rag_mode": "path"
-                    }
+                    "/api/rag/query", json={"query": "How does authentication work?", "rag_mode": "path"}
                 )
 
                 assert response.status_code == 200
@@ -93,22 +80,13 @@ class TestRAGQueryEndpoint:
 
         Verifies that impact mode returns dependency chain.
         """
-        with patch('api.routes.rag.impact_rag') as mock_impact_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
-                mock_impact_rag.return_value = [
-                    {
-                        "id": "REQ-001",
-                        "type": "requirement",
-                        "impact_scope": "downstream"
-                    }
-                ]
+        with patch("api.routes.rag.impact_rag") as mock_impact_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
+                mock_impact_rag.return_value = [{"id": "REQ-001", "type": "requirement", "impact_scope": "downstream"}]
 
                 response = client.post(
                     "/api/rag/query",
-                    json={
-                        "query": "What would change if we modified authentication?",
-                        "rag_mode": "impact"
-                    }
+                    json={"query": "What would change if we modified authentication?", "rag_mode": "impact"},
                 )
 
                 assert response.status_code == 200
@@ -121,18 +99,11 @@ class TestRAGQueryEndpoint:
 
         Verifies that top_k parameter is respected.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=None):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=None):
                 mock_entity_rag.return_value = []
 
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "entity",
-                        "top_k": 10
-                    }
-                )
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity", "top_k": 10})
 
                 assert response.status_code == 200
 
@@ -142,17 +113,12 @@ class TestRAGQueryEndpoint:
 
         Verifies that atom_type filter is applied.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=None):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=None):
                 mock_entity_rag.return_value = []
 
                 response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "entity",
-                        "atom_type": "requirement"
-                    }
+                    "/api/rag/query", json={"query": "Test", "rag_mode": "entity", "atom_type": "requirement"}
                 )
 
                 assert response.status_code == 200
@@ -163,13 +129,7 @@ class TestRAGQueryEndpoint:
 
         Verifies that invalid modes are rejected.
         """
-        response = client.post(
-            "/api/rag/query",
-            json={
-                "query": "Test",
-                "rag_mode": "invalid_mode"
-            }
-        )
+        response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "invalid_mode"})
 
         assert response.status_code == 400
         assert "Unknown RAG mode" in response.json()["detail"]
@@ -180,14 +140,8 @@ class TestRAGQueryEndpoint:
 
         Verifies proper error message when RAG system unavailable.
         """
-        with patch('api.routes.rag.HAS_CHROMA', False):
-            response = client.post(
-                "/api/rag/query",
-                json={
-                    "query": "Test",
-                    "rag_mode": "entity"
-                }
-            )
+        with patch("api.routes.rag.HAS_CHROMA", False):
+            response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity"})
 
             assert response.status_code == 500
             assert "chromadb" in response.json()["detail"].lower()
@@ -198,23 +152,11 @@ class TestRAGQueryEndpoint:
 
         Verifies graceful degradation when Claude unavailable.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=None):
-                mock_entity_rag.return_value = [
-                    {
-                        "id": "REQ-001",
-                        "type": "requirement",
-                        "distance": 0.95
-                    }
-                ]
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=None):
+                mock_entity_rag.return_value = [{"id": "REQ-001", "type": "requirement", "distance": 0.95}]
 
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "entity"
-                    }
-                )
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity"})
 
                 assert response.status_code == 200
                 data = response.json()
@@ -228,16 +170,12 @@ class TestRAGQueryEndpoint:
 
         Verifies proper handling of empty results.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=None):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=None):
                 mock_entity_rag.return_value = []
 
                 response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Obscure query with no matches",
-                        "rag_mode": "entity"
-                    }
+                    "/api/rag/query", json={"query": "Obscure query with no matches", "rag_mode": "entity"}
                 )
 
                 assert response.status_code == 200
@@ -251,24 +189,13 @@ class TestRAGQueryEndpoint:
 
         Verifies all required fields are present.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=None):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=None):
                 mock_entity_rag.return_value = [
-                    {
-                        "id": "REQ-001",
-                        "type": "requirement",
-                        "distance": 0.95,
-                        "metadata": {"type": "requirement"}
-                    }
+                    {"id": "REQ-001", "type": "requirement", "distance": 0.95, "metadata": {"type": "requirement"}}
                 ]
 
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "entity"
-                    }
-                )
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity"})
 
                 assert response.status_code == 200
                 data = response.json()
@@ -288,22 +215,16 @@ class TestRAGQueryEndpoint:
 
         Parametrized test for all modes.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity:
-            with patch('api.routes.rag.path_rag') as mock_path:
-                with patch('api.routes.rag.impact_rag') as mock_impact:
-                    with patch('api.routes.rag.get_claude_client', return_value=None):
+        with patch("api.routes.rag.entity_rag") as mock_entity:
+            with patch("api.routes.rag.path_rag") as mock_path:
+                with patch("api.routes.rag.impact_rag") as mock_impact:
+                    with patch("api.routes.rag.get_claude_client", return_value=None):
                         # Setup mocks
                         mock_entity.return_value = []
                         mock_path.return_value = []
                         mock_impact.return_value = []
 
-                        response = client.post(
-                            "/api/rag/query",
-                            json={
-                                "query": "Test",
-                                "rag_mode": rag_mode
-                            }
-                        )
+                        response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": rag_mode})
 
                         assert response.status_code == 200
 
@@ -313,14 +234,11 @@ class TestRAGQueryEndpoint:
 
         Verifies defaults are applied correctly.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=None):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=None):
                 mock_entity_rag.return_value = []
 
-                response = client.post(
-                    "/api/rag/query",
-                    json={"query": "Test"}
-                )
+                response = client.post("/api/rag/query", json={"query": "Test"})
 
                 assert response.status_code == 200
                 # Should default to entity mode
@@ -351,8 +269,8 @@ class TestRAGHealthEndpoint:
 
         Verifies vector database status is reported.
         """
-        with patch('api.routes.rag.HAS_CHROMA', True):
-            with patch('api.routes.rag.init_chroma_client') as mock_init:
+        with patch("api.routes.rag.HAS_CHROMA", True):
+            with patch("api.routes.rag.init_chroma_client") as mock_init:
                 mock_collection = MagicMock()
                 mock_collection.count.return_value = 100
                 mock_client = MagicMock()
@@ -372,7 +290,7 @@ class TestRAGHealthEndpoint:
 
         Verifies proper reporting of missing dependency.
         """
-        with patch('api.routes.rag.HAS_CHROMA', False):
+        with patch("api.routes.rag.HAS_CHROMA", False):
             response = client.get("/api/rag/health")
 
             assert response.status_code == 200
@@ -389,10 +307,10 @@ class TestRAGHealthEndpoint:
             "connected": True,
             "status": "connected",
             "atom_count": 50,
-            "relationship_count": 100
+            "relationship_count": 100,
         }
 
-        with patch('api.routes.rag.get_neo4j_client', return_value=mock_neo4j_client):
+        with patch("api.routes.rag.get_neo4j_client", return_value=mock_neo4j_client):
             response = client.get("/api/rag/health")
 
             assert response.status_code == 200
@@ -404,7 +322,7 @@ class TestRAGHealthEndpoint:
 
         Verifies proper reporting of connection failure.
         """
-        with patch('api.routes.rag.get_neo4j_client', return_value=None):
+        with patch("api.routes.rag.get_neo4j_client", return_value=None):
             response = client.get("/api/rag/health")
 
             assert response.status_code == 200
@@ -417,7 +335,7 @@ class TestRAGHealthEndpoint:
 
         Verifies LLM status is reported.
         """
-        with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
+        with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
             response = client.get("/api/rag/health")
 
             assert response.status_code == 200
@@ -430,21 +348,18 @@ class TestRAGHealthEndpoint:
 
         Verifies full_rag_ready flag when all components available.
         """
-        mock_neo4j_client.health_check.return_value = {
-            "connected": True,
-            "status": "connected"
-        }
+        mock_neo4j_client.health_check.return_value = {"connected": True, "status": "connected"}
 
-        with patch('api.routes.rag.HAS_CHROMA', True):
-            with patch('api.routes.rag.init_chroma_client') as mock_chroma:
+        with patch("api.routes.rag.HAS_CHROMA", True):
+            with patch("api.routes.rag.init_chroma_client") as mock_chroma:
                 mock_collection = MagicMock()
                 mock_collection.count.return_value = 100
                 mock_client = MagicMock()
                 mock_client.get_collection.return_value = mock_collection
                 mock_chroma.return_value = mock_client
 
-                with patch('api.routes.rag.get_neo4j_client', return_value=mock_neo4j_client):
-                    with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
+                with patch("api.routes.rag.get_neo4j_client", return_value=mock_neo4j_client):
+                    with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
                         response = client.get("/api/rag/health")
 
                         assert response.status_code == 200
@@ -463,15 +378,9 @@ class TestRAGErrorHandling:
 
         Verifies graceful handling of RAG failures.
         """
-        with patch('api.routes.rag.entity_rag', side_effect=Exception("RAG error")):
-            with patch('api.routes.rag.get_claude_client', return_value=None):
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "entity"
-                    }
-                )
+        with patch("api.routes.rag.entity_rag", side_effect=Exception("RAG error")):
+            with patch("api.routes.rag.get_claude_client", return_value=None):
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity"})
 
                 # Should return empty results gracefully
                 assert response.status_code == 200
@@ -482,15 +391,9 @@ class TestRAGErrorHandling:
 
         Verifies graceful handling of Neo4j failures.
         """
-        with patch('api.routes.rag.path_rag', side_effect=Exception("Neo4j error")):
-            with patch('api.routes.rag.get_claude_client', return_value=None):
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "path"
-                    }
-                )
+        with patch("api.routes.rag.path_rag", side_effect=Exception("Neo4j error")):
+            with patch("api.routes.rag.get_claude_client", return_value=None):
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "path"})
 
                 assert response.status_code == 200
 
@@ -500,15 +403,9 @@ class TestRAGErrorHandling:
 
         Verifies graceful handling of impact analysis failures.
         """
-        with patch('api.routes.rag.impact_rag', side_effect=Exception("Impact error")):
-            with patch('api.routes.rag.get_claude_client', return_value=None):
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "impact"
-                    }
-                )
+        with patch("api.routes.rag.impact_rag", side_effect=Exception("Impact error")):
+            with patch("api.routes.rag.get_claude_client", return_value=None):
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "impact"})
 
                 assert response.status_code == 200
 
@@ -518,23 +415,15 @@ class TestRAGErrorHandling:
 
         Verifies fallback to non-Claude answer.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity:
-            with patch('api.routes.rag.get_claude_client') as mock_claude:
-                mock_entity.return_value = [
-                    {"id": "REQ-001", "type": "requirement"}
-                ]
+        with patch("api.routes.rag.entity_rag") as mock_entity:
+            with patch("api.routes.rag.get_claude_client") as mock_claude:
+                mock_entity.return_value = [{"id": "REQ-001", "type": "requirement"}]
 
                 mock_client = MagicMock()
                 mock_client.generate_rag_answer.side_effect = Exception("Claude error")
                 mock_claude.return_value = mock_client
 
-                response = client.post(
-                    "/api/rag/query",
-                    json={
-                        "query": "Test",
-                        "rag_mode": "entity"
-                    }
-                )
+                response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity"})
 
                 assert response.status_code == 200
                 # Should have fallback answer
@@ -551,32 +440,28 @@ class TestRAGIntegrationScenarios:
 
         Verifies end-to-end functionality.
         """
-        with patch('api.routes.rag.entity_rag') as mock_entity_rag:
-            with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
+        with patch("api.routes.rag.entity_rag") as mock_entity_rag:
+            with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
                 mock_entity_rag.return_value = [
                     {
                         "id": "REQ-001",
                         "type": "requirement",
                         "title": "Authentication System",
                         "content": "OAuth 2.0 based authentication",
-                        "distance": 0.95
+                        "distance": 0.95,
                     },
                     {
                         "id": "DESIGN-001",
                         "type": "design",
                         "title": "OAuth Design",
                         "content": "Design details",
-                        "distance": 0.92
-                    }
+                        "distance": 0.92,
+                    },
                 ]
 
                 response = client.post(
                     "/api/rag/query",
-                    json={
-                        "query": "How does our authentication work?",
-                        "rag_mode": "entity",
-                        "top_k": 5
-                    }
+                    json={"query": "How does our authentication work?", "rag_mode": "entity", "top_k": 5},
                 )
 
                 assert response.status_code == 200
@@ -590,20 +475,14 @@ class TestRAGIntegrationScenarios:
 
         Verifies consistency across modes with same data.
         """
-        query_data = {
-            "query": "What impacts authentication changes?",
-            "top_k": 5
-        }
+        query_data = {"query": "What impacts authentication changes?", "top_k": 5}
 
         for mode in ["entity", "path", "impact"]:
-            with patch(f'api.routes.rag.{mode}_rag') as mock_rag:
-                with patch('api.routes.rag.get_claude_client', return_value=None):
+            with patch(f"api.routes.rag.{mode}_rag") as mock_rag:
+                with patch("api.routes.rag.get_claude_client", return_value=None):
                     mock_rag.return_value = []
 
-                    response = client.post(
-                        "/api/rag/query",
-                        json={**query_data, "rag_mode": mode}
-                    )
+                    response = client.post("/api/rag/query", json={**query_data, "rag_mode": mode})
 
                     assert response.status_code == 200
 
@@ -613,8 +492,8 @@ class TestRAGIntegrationScenarios:
 
         Verifies health status matches query availability.
         """
-        with patch('api.routes.rag.HAS_CHROMA', True):
-            with patch('api.routes.rag.init_chroma_client') as mock_chroma:
+        with patch("api.routes.rag.HAS_CHROMA", True):
+            with patch("api.routes.rag.init_chroma_client") as mock_chroma:
                 mock_collection = MagicMock()
                 mock_collection.count.return_value = 50
                 mock_client = MagicMock()
@@ -627,13 +506,10 @@ class TestRAGIntegrationScenarios:
                 assert health_data["vector_db_exists"] is True
 
                 # Should be able to query
-                with patch('api.routes.rag.entity_rag') as mock_entity:
-                    with patch('api.routes.rag.get_claude_client', return_value=None):
+                with patch("api.routes.rag.entity_rag") as mock_entity:
+                    with patch("api.routes.rag.get_claude_client", return_value=None):
                         mock_entity.return_value = []
 
-                        query_response = client.post(
-                            "/api/rag/query",
-                            json={"query": "Test", "rag_mode": "entity"}
-                        )
+                        query_response = client.post("/api/rag/query", json={"query": "Test", "rag_mode": "entity"})
 
                         assert query_response.status_code == 200

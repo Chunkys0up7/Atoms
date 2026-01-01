@@ -1,0 +1,8 @@
+id: phase-application-intake-refinance-cash-out
+name: Application Intake - Refi Cash-Out
+description: Intake for cash-out refinance including lien position checks and payoff estimates.
+modules:
+  - module-application-intake
+  - module-title-insurance
+journeyId: journey-refinance-cash-out
+targetDurationDays: 4

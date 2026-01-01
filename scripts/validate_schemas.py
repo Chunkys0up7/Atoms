@@ -15,12 +15,12 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 try:
-    import yaml
     import jsonschema
-    from jsonschema import validate, ValidationError
+    import yaml
+    from jsonschema import ValidationError, validate
 except ImportError:
     print("Error: Required dependencies not installed.")
     print("Run: pip install pyyaml jsonschema")
@@ -45,7 +45,7 @@ class GNDPValidator:
             raise FileNotFoundError(f"Schemas directory not found: {schema_dir}")
 
         for schema_file in schema_dir.glob("*.json"):
-            with open(schema_file, 'r', encoding='utf-8') as f:
+            with open(schema_file, "r", encoding="utf-8") as f:
                 schema_name = schema_file.stem  # e.g., 'atom-schema'
                 schemas[schema_name] = json.load(f)
 
@@ -54,17 +54,17 @@ class GNDPValidator:
     def validate_atom(self, atom_path: Path) -> bool:
         """Validate a single atom file."""
         try:
-            with open(atom_path, 'r', encoding='utf-8') as f:
+            with open(atom_path, "r", encoding="utf-8") as f:
                 atom_data = yaml.safe_load(f)
 
             # Convert date objects to strings (YAML automatically parses dates)
-            if 'metadata' in atom_data:
-                for key in ['created', 'updated']:
-                    if key in atom_data['metadata']:
-                        atom_data['metadata'][key] = str(atom_data['metadata'][key])
+            if "metadata" in atom_data:
+                for key in ["created", "updated"]:
+                    if key in atom_data["metadata"]:
+                        atom_data["metadata"][key] = str(atom_data["metadata"][key])
 
             # Validate against schema
-            validate(instance=atom_data, schema=self.schemas['atom-schema'])
+            validate(instance=atom_data, schema=self.schemas["atom-schema"])
 
             # Additional business logic validations
             self._validate_atom_business_rules(atom_data, atom_path)
@@ -84,17 +84,17 @@ class GNDPValidator:
     def validate_module(self, module_path: Path) -> bool:
         """Validate a single module file."""
         try:
-            with open(module_path, 'r', encoding='utf-8') as f:
+            with open(module_path, "r", encoding="utf-8") as f:
                 module_data = yaml.safe_load(f)
 
             # Convert date objects to strings (YAML automatically parses dates)
-            if 'metadata' in module_data:
-                for key in ['created', 'updated']:
-                    if key in module_data['metadata']:
-                        module_data['metadata'][key] = str(module_data['metadata'][key])
+            if "metadata" in module_data:
+                for key in ["created", "updated"]:
+                    if key in module_data["metadata"]:
+                        module_data["metadata"][key] = str(module_data["metadata"][key])
 
             # Validate against schema
-            validate(instance=module_data, schema=self.schemas['module-schema'])
+            validate(instance=module_data, schema=self.schemas["module-schema"])
 
             # Additional business logic validations
             self._validate_module_business_rules(module_data, module_path)
@@ -113,82 +113,66 @@ class GNDPValidator:
 
     def _validate_atom_business_rules(self, atom: dict, path: Path):
         """Additional business logic validations for atoms."""
-        atom_id = atom.get('id', 'UNKNOWN')
+        atom_id = atom.get("id", "UNKNOWN")
 
         # 1. ID prefix must match type
         prefix_map = {
-            'requirement': 'REQ',
-            'design': 'DES',
-            'procedure': 'PROC',
-            'validation': 'VAL',
-            'policy': 'POL',
-            'risk': 'RISK'
+            "requirement": "REQ",
+            "design": "DES",
+            "procedure": "PROC",
+            "validation": "VAL",
+            "policy": "POL",
+            "risk": "RISK",
         }
-        expected_prefix = prefix_map.get(atom['type'])
+        expected_prefix = prefix_map.get(atom["type"])
         if expected_prefix and not atom_id.startswith(expected_prefix):
             self.errors.append(
                 f"{path}: Atom ID '{atom_id}' should start with '{expected_prefix}' for type '{atom['type']}'"
             )
 
         # 2. Created date should not be after updated date
-        created = atom.get('metadata', {}).get('created', '')
-        updated = atom.get('metadata', {}).get('updated', '')
+        created = atom.get("metadata", {}).get("created", "")
+        updated = atom.get("metadata", {}).get("updated", "")
         if created and updated and created > updated:
-            self.errors.append(
-                f"{path}: Created date ({created}) is after updated date ({updated})"
-            )
+            self.errors.append(f"{path}: Created date ({created}) is after updated date ({updated})")
 
         # 3. Self-references not allowed
-        upstream = atom.get('upstream_ids', [])
-        downstream = atom.get('downstream_ids', [])
+        upstream = atom.get("upstream_ids", [])
+        downstream = atom.get("downstream_ids", [])
         if atom_id in upstream or atom_id in downstream:
-            self.errors.append(
-                f"{path}: Atom {atom_id} references itself"
-            )
+            self.errors.append(f"{path}: Atom {atom_id} references itself")
 
         # 4. Warn if no relationships
         if not upstream and not downstream:
-            self.warnings.append(
-                f"{path}: Atom {atom_id} has no upstream or downstream relationships (orphaned)"
-            )
+            self.warnings.append(f"{path}: Atom {atom_id} has no upstream or downstream relationships (orphaned)")
 
         # 5. Compliance tags should match between requirement and policy
-        compliance_tags = atom.get('metadata', {}).get('compliance_tags', [])
-        if compliance_tags and atom['type'] not in ['requirement', 'policy', 'risk']:
-            self.warnings.append(
-                f"{path}: Compliance tags found on non-requirement/policy/risk atom"
-            )
+        compliance_tags = atom.get("metadata", {}).get("compliance_tags", [])
+        if compliance_tags and atom["type"] not in ["requirement", "policy", "risk"]:
+            self.warnings.append(f"{path}: Compliance tags found on non-requirement/policy/risk atom")
 
     def _validate_module_business_rules(self, module: dict, path: Path):
         """Additional business logic validations for modules."""
-        module_id = module.get('module_id', 'unknown')
+        module_id = module.get("module_id", "unknown")
 
         # 1. Module ID should be kebab-case
-        if not module_id.replace('-', '').isalnum() or module_id != module_id.lower():
-            self.errors.append(
-                f"{path}: Module ID '{module_id}' should be lowercase kebab-case"
-            )
+        if not module_id.replace("-", "").isalnum() or module_id != module_id.lower():
+            self.errors.append(f"{path}: Module ID '{module_id}' should be lowercase kebab-case")
 
         # 2. Check for duplicate atom IDs
-        atom_ids = module.get('atom_ids', [])
+        atom_ids = module.get("atom_ids", [])
         if len(atom_ids) != len(set(atom_ids)):
             duplicates = [aid for aid in atom_ids if atom_ids.count(aid) > 1]
-            self.errors.append(
-                f"{path}: Module contains duplicate atom IDs: {duplicates}"
-            )
+            self.errors.append(f"{path}: Module contains duplicate atom IDs: {duplicates}")
 
         # 3. Warn if module has very few atoms
         if len(atom_ids) < 2:
-            self.warnings.append(
-                f"{path}: Module '{module_id}' has fewer than 2 atoms"
-            )
+            self.warnings.append(f"{path}: Module '{module_id}' has fewer than 2 atoms")
 
         # 4. Warn if module has circular dependency on itself
-        dependencies = module.get('metadata', {}).get('dependencies', [])
+        dependencies = module.get("metadata", {}).get("dependencies", [])
         if module_id in dependencies:
-            self.errors.append(
-                f"{path}: Module '{module_id}' depends on itself"
-            )
+            self.errors.append(f"{path}: Module '{module_id}' depends on itself")
 
     def validate_all_atoms(self) -> Tuple[int, int]:
         """Validate all atom files. Returns (success_count, error_count)."""
@@ -239,24 +223,11 @@ class GNDPValidator:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate GNDP atom and module YAML files"
-    )
+    parser = argparse.ArgumentParser(description="Validate GNDP atom and module YAML files")
+    parser.add_argument("--file", type=Path, help="Validate a specific file")
+    parser.add_argument("--quiet", action="store_true", help="Minimal output (errors only)")
     parser.add_argument(
-        '--file',
-        type=Path,
-        help='Validate a specific file'
-    )
-    parser.add_argument(
-        '--quiet',
-        action='store_true',
-        help='Minimal output (errors only)'
-    )
-    parser.add_argument(
-        '--root',
-        type=Path,
-        default=Path(__file__).parent.parent,
-        help='Root directory of GNDP project'
+        "--root", type=Path, default=Path(__file__).parent.parent, help="Root directory of GNDP project"
     )
 
     args = parser.parse_args()
@@ -266,9 +237,9 @@ def main():
     try:
         if args.file:
             # Validate single file
-            if 'atoms' in str(args.file):
+            if "atoms" in str(args.file):
                 success = validator.validate_atom(args.file)
-            elif 'modules' in str(args.file):
+            elif "modules" in str(args.file):
                 success = validator.validate_module(args.file)
             else:
                 print(f"Error: Cannot determine file type for {args.file}")
@@ -300,9 +271,10 @@ def main():
     except Exception as e:
         print(f"Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

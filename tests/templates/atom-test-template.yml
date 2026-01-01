@@ -1,0 +1,19 @@
+# Reusable atom test template
+# Replace placeholders: <ATOM_ID>, <TEST_NAME>, <INPUT>, <EXPECTED>, <ASSERTION>
+
+test_suite: <ATOM_ID>-unit-tests
+
+setup:
+  fixtures_file: test_data/fixtures/<ATOM_ID>-fixtures.yml
+
+tests:
+  - name: <TEST_NAME>
+    input:
+<INPUT>
+    expected_output:
+<EXPECTED>
+    assertion: "<ASSERTION>"
+
+notes: |
+  - Copy this template to create atom-specific unit test YAMLs.
+  - Use `fixtures_file` to point to the expanded fixture set for each atom.

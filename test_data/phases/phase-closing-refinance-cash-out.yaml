@@ -1,0 +1,8 @@
+id: phase-closing-refinance-cash-out
+name: Closing - Refi Cash-Out
+description: Closing handling for cash disbursement, lien recording and payoff reconciliations.
+modules:
+  - module-closing-preparation
+  - module-funding-recording
+journeyId: journey-refinance-cash-out
+targetDurationDays: 3

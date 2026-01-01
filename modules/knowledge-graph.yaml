@@ -1,11 +1,14 @@
-module_id: knowledge-graph
+id: module-knowledge-graph
+version: 1.0.0
+workflow_type: CUSTOM
+module_id: module-knowledge-graph
 name: Knowledge Graph System
-description: Neo4j-based graph database for storing and querying atom relationships with automated synchronization
+description: Neo4j-based graph database for storing and querying atom relationships
+  with automated synchronization
 atom_ids:
-  - REQ-004
-  - DES-004
-  - PROC-004
-  - RISK-002
+- atom-sys-doc-management
+- atom-sys-los-platform
+- atom-sys-document-imaging
 metadata:
   owner: backend-team
   criticality: high
@@ -14,8 +17,10 @@ metadata:
   updated: 2025-12-18
   estimated_effort: 3 weeks
   dependencies:
-    - data-layer
+  - data-layer
 tags:
-  - neo4j
-  - graph-database
-  - knowledge-management
+- neo4j
+- graph-database
+- knowledge-management
+atoms:
+- atom-knowledge-graph

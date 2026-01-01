@@ -49,3 +49,4 @@ metrics:
   avg_cycle_time_mins: 31
   error_rate: 0.087
   compliance_score: 0.87
+owning_team: Underwriting

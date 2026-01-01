@@ -4,7 +4,7 @@ type: DOCUMENT
 name: Customer Receives Pre-Approval Letter
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
+owner: Sarah Chen
 team: Post-Closing
 ontologyDomain: Home Lending
 criticality: MEDIUM
@@ -37,3 +37,5 @@ metrics:
   avg_cycle_time_mins: 316
   error_rate: 0.068
   compliance_score: 0.97
+steward: Amanda White
+owning_team: Post-Closing

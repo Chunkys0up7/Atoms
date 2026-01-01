@@ -1,6 +1,6 @@
 id: atom-sys-application-validation
 category: SYSTEM
-type: VALIDATION
+type: PROCESS
 name: System Validates Application Completeness
 version: 1.0.0
 status: ACTIVE
@@ -46,3 +46,4 @@ metrics:
   avg_cycle_time_mins: 33
   error_rate: 0.068
   compliance_score: 0.86
+owning_team: Customer Experience

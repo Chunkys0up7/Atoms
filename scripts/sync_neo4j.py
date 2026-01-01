@@ -49,9 +49,7 @@ def upsert_to_neo4j(path: str, uri: str, user: str, password: str) -> None:
             nid = n.get("id")
             label = n.get("type") or "Atom"
             props = {k: v for k, v in n.items() if k not in ("id", "type")}
-            cypher = (
-                "MERGE (x:Atom {id:$id}) SET x.type=$type, x += $props, x.label = $label"
-            )
+            cypher = "MERGE (x:Atom {id:$id}) SET x.type=$type, x += $props, x.label = $label"
             session.run(cypher, id=nid, type=label, props=props, label=label)
 
         for e in edges:
@@ -59,9 +57,7 @@ def upsert_to_neo4j(path: str, uri: str, user: str, password: str) -> None:
             tgt = e.get("target")
             etype = sanitize_relation_type(e.get("type", "RELATED"))
             props = {k: v for k, v in e.items() if k not in ("source", "target", "type")}
-            cypher = (
-                f"MATCH (a:Atom {{id:$src}}), (b:Atom {{id:$tgt}}) MERGE (a)-[r:`{etype}`]->(b) SET r += $props"
-            )
+            cypher = f"MATCH (a:Atom {{id:$src}}), (b:Atom {{id:$tgt}}) MERGE (a)-[r:`{etype}`]->(b) SET r += $props"
             session.run(cypher, src=src, tgt=tgt, props=props)
 
 

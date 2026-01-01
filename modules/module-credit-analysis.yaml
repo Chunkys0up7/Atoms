@@ -1,4 +1,6 @@
 id: module-credit-analysis
+version: 1.0.0
+workflow_type: BPM
 name: Credit Analysis
 description: Credit report review, credit score analysis, trade line evaluation, and
   credit risk assessment

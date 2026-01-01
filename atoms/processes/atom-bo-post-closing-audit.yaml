@@ -4,7 +4,7 @@ type: PROCESS
 name: QC Auditor Performs Post-Closing Review
 version: 1.0.0
 status: ACTIVE
-owner: Michael Rodriguez
+owner: David Thompson
 team: Underwriting
 ontologyDomain: Home Lending
 criticality: MEDIUM
@@ -44,3 +44,5 @@ metrics:
   avg_cycle_time_mins: 36
   error_rate: 0.007
   compliance_score: 0.96
+steward: Lisa Anderson
+owning_team: Underwriting

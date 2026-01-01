@@ -51,3 +51,4 @@ metrics:
   avg_cycle_time_mins: 107
   error_rate: 0.039
   compliance_score: 0.92
+owning_team: Post-Closing

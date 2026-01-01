@@ -1,0 +1,8 @@
+id: phase-closing-refinance-rate-term
+name: Closing - Refi Rate & Term
+description: Final docs, closing disclosure review, funding and recording.
+modules:
+  - module-closing-preparation
+  - module-funding-recording
+journeyId: journey-refinance-rate-term
+targetDurationDays: 2

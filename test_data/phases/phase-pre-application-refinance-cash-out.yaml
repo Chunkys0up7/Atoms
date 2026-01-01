@@ -1,0 +1,7 @@
+id: phase-pre-application-refinance-cash-out
+name: Pre-Application - Refi Cash-Out
+description: Early engagement for cash-out refinance prospects and eligibility screening.
+modules:
+  - module-pre-qualification
+journeyId: journey-refinance-cash-out
+targetDurationDays: 2

@@ -1,0 +1,9 @@
+id: phase-processing-refinance-rate-term
+name: Processing - Refi Rate & Term
+description: Document collection, income/asset verification and title ordering for refinance.
+modules:
+  - module-income-verification
+  - module-credit-analysis
+  - module-property-appraisal
+journeyId: journey-refinance-rate-term
+targetDurationDays: 6

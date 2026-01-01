@@ -10,9 +10,9 @@ Run from repo root:
 """
 from __future__ import annotations
 
+import csv
 import json
 import os
-import csv
 from typing import Any, Dict
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")

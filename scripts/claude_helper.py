@@ -7,11 +7,12 @@ first, then falls back), and writes a JSON artifact with the parsed model
 output.
 """
 import argparse
+import json
 import os
 import sys
-import json
-import requests
 from typing import Optional
+
+import requests
 
 GITHUB_API = "https://api.github.com"
 ANTHROPIC_CHAT = "https://api.anthropic.com/v1/chat/completions"
@@ -100,11 +101,11 @@ def parse_json_or_fallback(text: str) -> dict:
         return json.loads(text)
     except Exception:
         # attempt heuristic: find first '{' and last '}'
-        start = text.find('{')
-        end = text.rfind('}')
+        start = text.find("{")
+        end = text.rfind("}")
         if start != -1 and end != -1 and end > start:
             try:
-                return json.loads(text[start:end+1])
+                return json.loads(text[start : end + 1])
             except Exception:
                 pass
     return {"summary": text}

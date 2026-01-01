@@ -1,5 +1,11 @@
-id: MOD-008
-type: Module
+id: module-mod-008
+version: 1.0.0
+workflow_type: BPM
+type: business
 name: Module 8
 description: Demo module 8
 owner: platform
+atoms:
+- atom-sys-title-order
+- atom-bo-title-review
+- atom-bo-title-issue-resolution

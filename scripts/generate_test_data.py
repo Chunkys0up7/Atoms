@@ -54,18 +54,34 @@ def ensure_dirs() -> None:
 
 # Home Lending Domain Data
 BANK_NAMES = [
-    "First National Bank", "Premier Mortgage Bank", "Heritage Lending Group",
-    "Trusted Home Finance", "Capital Residential Lending"
+    "First National Bank",
+    "Premier Mortgage Bank",
+    "Heritage Lending Group",
+    "Trusted Home Finance",
+    "Capital Residential Lending",
 ]
 
 TEAMS = [
-    "Loan Origination", "Underwriting", "Processing", "Closing", "Post-Closing",
-    "Compliance", "Risk Management", "Customer Experience", "Technology"
+    "Loan Origination",
+    "Underwriting",
+    "Processing",
+    "Closing",
+    "Post-Closing",
+    "Compliance",
+    "Risk Management",
+    "Customer Experience",
+    "Technology",
 ]
 
 OWNERS = [
-    "Sarah Chen", "Michael Rodriguez", "Jennifer Park", "David Thompson",
-    "Lisa Anderson", "Robert Kim", "Amanda White", "James Martinez"
+    "Sarah Chen",
+    "Michael Rodriguez",
+    "Jennifer Park",
+    "David Thompson",
+    "Lisa Anderson",
+    "Robert Kim",
+    "Amanda White",
+    "James Martinez",
 ]
 
 # Define Phases (Customer Journey Milestones)
@@ -75,43 +91,43 @@ PHASES = [
         "name": "Pre-Application",
         "description": "Initial customer engagement, pre-qualification, and rate shopping",
         "targetDurationDays": 7,
-        "journeyId": "journey-purchase-conventional"
+        "journeyId": "journey-purchase-conventional",
     },
     {
         "id": "phase-application-intake",
         "name": "Application Intake",
         "description": "Formal application submission, initial document collection, and completeness check",
         "targetDurationDays": 3,
-        "journeyId": "journey-purchase-conventional"
+        "journeyId": "journey-purchase-conventional",
     },
     {
         "id": "phase-processing",
         "name": "Processing",
         "description": "Document verification, income validation, credit analysis, and property appraisal",
         "targetDurationDays": 10,
-        "journeyId": "journey-purchase-conventional"
+        "journeyId": "journey-purchase-conventional",
     },
     {
         "id": "phase-underwriting",
         "name": "Underwriting",
         "description": "Risk assessment, loan decision, conditions management, and final approval",
         "targetDurationDays": 5,
-        "journeyId": "journey-purchase-conventional"
+        "journeyId": "journey-purchase-conventional",
     },
     {
         "id": "phase-closing",
         "name": "Closing",
         "description": "Document preparation, closing coordination, funding, and recording",
         "targetDurationDays": 7,
-        "journeyId": "journey-purchase-conventional"
+        "journeyId": "journey-purchase-conventional",
     },
     {
         "id": "phase-post-closing",
         "name": "Post-Closing",
         "description": "Quality control, document imaging, loan sale preparation, and servicing transfer",
         "targetDurationDays": 5,
-        "journeyId": "journey-purchase-conventional"
-    }
+        "journeyId": "journey-purchase-conventional",
+    },
 ]
 
 # Define Modules (Operational Workflows)
@@ -121,85 +137,85 @@ MODULES = [
         "name": "Pre-Qualification",
         "description": "Initial credit check, debt-to-income calculation, and pre-approval letter generation",
         "owner": "Loan Origination",
-        "phaseId": "phase-pre-application"
+        "phaseId": "phase-pre-application",
     },
     {
         "id": "module-application-intake",
         "name": "Application Intake",
         "description": "1003 form completion, initial document upload, and application completeness validation",
         "owner": "Loan Origination",
-        "phaseId": "phase-application-intake"
+        "phaseId": "phase-application-intake",
     },
     {
         "id": "module-income-verification",
         "name": "Income Verification",
         "description": "W-2 review, pay stub analysis, tax return validation, and income calculation",
         "owner": "Processing",
-        "phaseId": "phase-processing"
+        "phaseId": "phase-processing",
     },
     {
         "id": "module-asset-verification",
         "name": "Asset Verification",
         "description": "Bank statement review, asset source documentation, and reserve calculation",
         "owner": "Processing",
-        "phaseId": "phase-processing"
+        "phaseId": "phase-processing",
     },
     {
         "id": "module-credit-analysis",
         "name": "Credit Analysis",
         "description": "Credit report review, credit score analysis, trade line evaluation, and credit risk assessment",
         "owner": "Processing",
-        "phaseId": "phase-processing"
+        "phaseId": "phase-processing",
     },
     {
         "id": "module-property-appraisal",
         "name": "Property Appraisal",
         "description": "Appraisal ordering, property inspection, value determination, and appraisal review",
         "owner": "Processing",
-        "phaseId": "phase-processing"
+        "phaseId": "phase-processing",
     },
     {
         "id": "module-title-insurance",
         "name": "Title & Insurance",
         "description": "Title search, title insurance, hazard insurance verification, and flood determination",
         "owner": "Processing",
-        "phaseId": "phase-processing"
+        "phaseId": "phase-processing",
     },
     {
         "id": "module-underwriting-decision",
         "name": "Underwriting Decision",
         "description": "Automated underwriting system (AUS) submission, manual underwrite, and loan decision",
         "owner": "Underwriting",
-        "phaseId": "phase-underwriting"
+        "phaseId": "phase-underwriting",
     },
     {
         "id": "module-conditions-management",
         "name": "Conditions Management",
         "description": "Condition generation, condition fulfillment tracking, and condition clearance",
         "owner": "Underwriting",
-        "phaseId": "phase-underwriting"
+        "phaseId": "phase-underwriting",
     },
     {
         "id": "module-closing-preparation",
         "name": "Closing Preparation",
         "description": "Closing disclosure generation, document preparation, and closing scheduling",
         "owner": "Closing",
-        "phaseId": "phase-closing"
+        "phaseId": "phase-closing",
     },
     {
         "id": "module-funding-recording",
         "name": "Funding & Recording",
         "description": "Wire transfer, loan funding, deed recording, and post-closing document collection",
         "owner": "Closing",
-        "phaseId": "phase-closing"
+        "phaseId": "phase-closing",
     },
     {
         "id": "module-quality-control",
         "name": "Quality Control",
         "description": "Post-closing audit, document imaging, compliance review, and loan sale preparation",
         "owner": "Post-Closing",
-        "phaseId": "phase-post-closing"
-    }
+        "phaseId": "phase-post-closing",
+    },
 ]
 
 # Atom Templates - Home Lending Processes
@@ -221,7 +237,7 @@ ATOM_TEMPLATES = [
             "Customer consents to soft credit inquiry (does not impact credit score)",
             "System validates input data format and completeness",
             "System creates pre-qualification request record in LOS",
-            "Customer receives confirmation email with request ID"
+            "Customer receives confirmation email with request ID",
         ],
         "inputs": [
             "Customer name and contact information",
@@ -229,25 +245,25 @@ ATOM_TEMPLATES = [
             "Estimated monthly debt payments",
             "Desired loan amount",
             "Property type (purchase/refinance)",
-            "Customer consent for credit inquiry"
+            "Customer consent for credit inquiry",
         ],
         "outputs": [
             "Pre-qualification request record",
             "Request ID for tracking",
-            "Confirmation notification to customer"
+            "Confirmation notification to customer",
         ],
         "prerequisites": [
             "Customer must be 18 years or older",
             "Customer must provide valid contact information",
-            "Customer must consent to credit inquiry"
+            "Customer must consent to credit inquiry",
         ],
         "success_criteria": [
             "Request successfully created in system",
             "Customer receives confirmation within 5 minutes",
             "All required fields captured accurately",
-            "Request routed to appropriate loan officer within 1 hour"
+            "Request routed to appropriate loan officer within 1 hour",
         ],
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-sys-credit-pull",
@@ -267,13 +283,13 @@ ATOM_TEMPLATES = [
             "System parses and validates credit report response",
             "System stores credit data in LOS with inquiry type marked as 'soft'",
             "System flags if credit score is below minimum threshold",
-            "System makes credit data available for DTI calculation and pre-qualification decision"
+            "System makes credit data available for DTI calculation and pre-qualification decision",
         ],
         "inputs": [
             "Customer SSN (last 4 digits sufficient for some bureaus)",
             "Customer name and date of birth",
             "Customer address (for identity verification)",
-            "Consent for credit inquiry"
+            "Consent for credit inquiry",
         ],
         "outputs": [
             "Credit score (typically FICO score)",
@@ -281,35 +297,35 @@ ATOM_TEMPLATES = [
             "Credit history length",
             "Number of open accounts",
             "Payment history indicators",
-            "Derogatory items (if any)"
+            "Derogatory items (if any)",
         ],
         "prerequisites": [
             "Valid customer SSN",
             "Customer consent for credit inquiry",
             "Credit bureau API connectivity",
-            "Valid API credentials and service agreement"
+            "Valid API credentials and service agreement",
         ],
         "success_criteria": [
             "Credit report successfully retrieved within 30 seconds",
             "Credit data accurately stored in LOS",
             "Soft inquiry properly marked (does not affect credit score)",
-            "System handles API failures gracefully with retry logic"
+            "System handles API failures gracefully with retry logic",
         ],
         "exceptions": [
             {
                 "condition": "Credit bureau API unavailable",
-                "action": "Retry up to 3 times with exponential backoff, then queue for manual processing"
+                "action": "Retry up to 3 times with exponential backoff, then queue for manual processing",
             },
             {
                 "condition": "Customer SSN not found in credit bureau",
-                "action": "Flag for manual review - may indicate identity verification needed"
+                "action": "Flag for manual review - may indicate identity verification needed",
             },
             {
                 "condition": "Credit score below 620 (minimum threshold)",
-                "action": "Still complete pre-qualification but flag for loan officer review and alternative program consideration"
-            }
+                "action": "Still complete pre-qualification but flag for loan officer review and alternative program consideration",
+            },
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-dti-calculation",
@@ -322,9 +338,9 @@ ATOM_TEMPLATES = [
             "Retrieve customer income information",
             "Retrieve customer debt obligations",
             "Calculate monthly DTI ratio",
-            "Compare against program guidelines"
+            "Compare against program guidelines",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-cust-pre-approval-letter",
@@ -336,11 +352,10 @@ ATOM_TEMPLATES = [
         "steps": [
             "System generates pre-approval letter",
             "Email letter to customer",
-            "Customer downloads letter from portal"
+            "Customer downloads letter from portal",
         ],
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
-    
     # Application Intake Phase
     {
         "id_prefix": "atom-cust-application-submit",
@@ -368,7 +383,7 @@ ATOM_TEMPLATES = [
             "System creates application record in LOS",
             "System generates application confirmation number",
             "System triggers Loan Estimate generation (must be sent within 3 business days per TRID)",
-            "Customer receives confirmation email with application number and next steps"
+            "Customer receives confirmation email with application number and next steps",
         ],
         "inputs": [
             "Borrower personal information (name, SSN, DOB, contact info)",
@@ -378,44 +393,44 @@ ATOM_TEMPLATES = [
             "Liability information (credit cards, loans, alimony, child support)",
             "Property information (address, purchase price, property type)",
             "Loan information (loan amount, down payment, loan purpose)",
-            "Customer signature and consent"
+            "Customer signature and consent",
         ],
         "outputs": [
             "Completed Uniform Residential Loan Application (1003)",
             "Application record in LOS",
             "Application confirmation number",
             "Trigger for Loan Estimate generation",
-            "Application submission timestamp"
+            "Application submission timestamp",
         ],
         "prerequisites": [
             "Customer must be 18 years or older",
             "Customer must have valid SSN",
             "Customer must provide accurate information",
-            "Customer must consent to credit inquiry"
+            "Customer must consent to credit inquiry",
         ],
         "success_criteria": [
             "All required fields completed accurately",
             "Application successfully submitted and stored",
             "Customer receives confirmation within 5 minutes",
             "Loan Estimate triggered for generation",
-            "Application assigned to loan officer/processor"
+            "Application assigned to loan officer/processor",
         ],
         "exceptions": [
             {
                 "condition": "Customer abandons application partway through",
-                "action": "Save progress and send reminder email. Allow customer to resume where they left off."
+                "action": "Save progress and send reminder email. Allow customer to resume where they left off.",
             },
             {
                 "condition": "Required fields missing or invalid format",
-                "action": "Display inline validation errors and prevent submission until corrected"
+                "action": "Display inline validation errors and prevent submission until corrected",
             },
             {
                 "condition": "Duplicate application detected (same SSN and property)",
-                "action": "Alert customer and link to existing application or allow them to proceed if intentional"
-            }
+                "action": "Alert customer and link to existing application or allow them to proceed if intentional",
+            },
         ],
         "regulatory_context": "The Uniform Residential Loan Application (1003) is required by Fannie Mae, Freddie Mac, and FHA/VA guidelines. Submission triggers TRID requirements including mandatory Loan Estimate delivery within 3 business days. All information must be collected in compliance with fair lending laws and cannot discriminate based on protected characteristics.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-application-validation",
@@ -428,9 +443,9 @@ ATOM_TEMPLATES = [
             "Check all required fields are populated",
             "Validate data formats (SSN, dates, amounts)",
             "Check for duplicate applications",
-            "Generate completeness report"
+            "Generate completeness report",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-cust-initial-doc-upload",
@@ -443,9 +458,9 @@ ATOM_TEMPLATES = [
             "Customer accesses document upload portal",
             "Customer selects document type",
             "Customer uploads document file",
-            "System confirms successful upload"
+            "System confirms successful upload",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-completeness-review",
@@ -459,11 +474,10 @@ ATOM_TEMPLATES = [
             "Review all application sections",
             "Check uploaded documents",
             "Identify missing items",
-            "Generate initial document request if needed"
+            "Generate initial document request if needed",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Income Verification Module
     {
         "id_prefix": "atom-cust-w2-upload",
@@ -488,52 +502,52 @@ ATOM_TEMPLATES = [
             "System stores document in secure document management system",
             "System updates loan file status to show W-2 received",
             "Customer receives confirmation that document was successfully uploaded",
-            "System notifies processor that new document is available for review"
+            "System notifies processor that new document is available for review",
         ],
         "inputs": [
             "W-2 form file (PDF, JPG, or PNG format)",
             "Tax year for the W-2",
-            "Customer authentication (logged into portal)"
+            "Customer authentication (logged into portal)",
         ],
         "outputs": [
             "Stored W-2 document in document management system",
             "Document status update in LOS",
             "Confirmation notification to customer",
-            "Notification to processor of new document"
+            "Notification to processor of new document",
         ],
         "prerequisites": [
             "Customer must have active loan application",
             "Customer must have received document request",
             "Customer must have W-2 forms available",
-            "Customer must have access to loan portal"
+            "Customer must have access to loan portal",
         ],
         "success_criteria": [
             "Document successfully uploaded and stored",
             "Document is readable and not corrupted",
             "Customer receives confirmation within 30 seconds",
             "Processor is notified within 5 minutes",
-            "Document is properly indexed and searchable"
+            "Document is properly indexed and searchable",
         ],
         "exceptions": [
             {
                 "condition": "File format not supported",
-                "action": "Display error message with supported formats and allow customer to retry"
+                "action": "Display error message with supported formats and allow customer to retry",
             },
             {
                 "condition": "File size exceeds 10MB limit",
-                "action": "Display error message requesting customer to compress or split file"
+                "action": "Display error message requesting customer to compress or split file",
             },
             {
                 "condition": "Document appears blurry or unreadable",
-                "action": "Accept upload but flag for processor review - processor may request new upload"
+                "action": "Accept upload but flag for processor review - processor may request new upload",
             },
             {
                 "condition": "Customer uploads wrong document type",
-                "action": "Accept upload but flag for processor to review and request correct document"
-            }
+                "action": "Accept upload but flag for processor to review and request correct document",
+            },
         ],
         "regulatory_context": "W-2 forms contain sensitive tax information protected under IRS regulations and privacy laws. The bank must ensure secure storage, proper access controls, and retention policies compliant with IRS requirements. Documents must be retained for the required period (typically 7 years) and securely destroyed when no longer needed.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-w2-review",
@@ -547,13 +561,13 @@ ATOM_TEMPLATES = [
             "Verify W-2 matches application income",
             "Check for multiple employers",
             "Verify tax year consistency",
-            "Flag any discrepancies"
+            "Flag any discrepancies",
         ],
         "criticality": "HIGH",
         "exceptions": [
             {"condition": "Blurry or unreadable W-2", "action": "Request new W-2 upload"},
-            {"condition": "W-2 income doesn't match application", "action": "Escalate to underwriter"}
-        ]
+            {"condition": "W-2 income doesn't match application", "action": "Escalate to underwriter"},
+        ],
     },
     {
         "id_prefix": "atom-cust-tax-return-upload",
@@ -565,9 +579,9 @@ ATOM_TEMPLATES = [
         "steps": [
             "Customer receives tax return request",
             "Customer uploads signed 1040 forms",
-            "System confirms receipt"
+            "System confirms receipt",
         ],
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-tax-return-analysis",
@@ -581,9 +595,9 @@ ATOM_TEMPLATES = [
             "Calculate average income over 2 years",
             "Identify write-offs and deductions",
             "Calculate qualifying income",
-            "Document analysis in LOS"
+            "Document analysis in LOS",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-sys-income-calculation",
@@ -597,9 +611,9 @@ ATOM_TEMPLATES = [
             "Apply income calculation rules",
             "Calculate base income",
             "Apply stability factors",
-            "Generate income worksheet"
+            "Generate income worksheet",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-voi-verification",
@@ -613,11 +627,10 @@ ATOM_TEMPLATES = [
             "Send to employer via fax/email",
             "Receive completed VOI",
             "Compare VOI to pay stubs and W-2",
-            "Resolve any discrepancies"
+            "Resolve any discrepancies",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Asset Verification Module
     {
         "id_prefix": "atom-cust-bank-statement-upload",
@@ -630,9 +643,9 @@ ATOM_TEMPLATES = [
             "Customer receives bank statement request",
             "Customer downloads statements from bank",
             "Customer uploads statements",
-            "System confirms receipt"
+            "System confirms receipt",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-asset-source-review",
@@ -646,13 +659,13 @@ ATOM_TEMPLATES = [
             "Identify large deposits (>25% of monthly income)",
             "Request source of funds documentation",
             "Verify sufficient reserves",
-            "Document findings"
+            "Document findings",
         ],
         "criticality": "HIGH",
         "exceptions": [
             {"condition": "Large unexplained deposit", "action": "Request gift letter or explanation"},
-            {"condition": "Insufficient reserves", "action": "Request additional asset documentation"}
-        ]
+            {"condition": "Insufficient reserves", "action": "Request additional asset documentation"},
+        ],
     },
     {
         "id_prefix": "atom-sys-reserve-calculation",
@@ -666,11 +679,10 @@ ATOM_TEMPLATES = [
             "Apply program reserve requirements",
             "Calculate months of reserves",
             "Compare to requirements",
-            "Generate reserve worksheet"
+            "Generate reserve worksheet",
         ],
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
-    
     # Credit Analysis Module
     {
         "id_prefix": "atom-sys-credit-report-pull",
@@ -684,9 +696,9 @@ ATOM_TEMPLATES = [
             "Retrieve Experian, Equifax, and TransUnion reports",
             "Merge reports into tri-merge",
             "Calculate middle credit score",
-            "Store credit report in LOS"
+            "Store credit report in LOS",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-credit-analysis",
@@ -701,13 +713,13 @@ ATOM_TEMPLATES = [
             "Review trade lines and balances",
             "Identify derogatory items",
             "Calculate total monthly debt payments",
-            "Document credit analysis"
+            "Document credit analysis",
         ],
         "criticality": "CRITICAL",
         "exceptions": [
             {"condition": "Credit score below minimum", "action": "Route to manual underwriting"},
-            {"condition": "Recent bankruptcy or foreclosure", "action": "Require explanation letter"}
-        ]
+            {"condition": "Recent bankruptcy or foreclosure", "action": "Require explanation letter"},
+        ],
     },
     {
         "id_prefix": "atom-bo-derogatory-review",
@@ -721,11 +733,10 @@ ATOM_TEMPLATES = [
             "Request explanation letter from borrower",
             "Review explanation for reasonableness",
             "Document in credit analysis",
-            "Flag for underwriter review if significant"
+            "Flag for underwriter review if significant",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Property Appraisal Module
     {
         "id_prefix": "atom-bo-appraisal-order",
@@ -739,9 +750,9 @@ ATOM_TEMPLATES = [
             "Generate appraisal order",
             "Send order to appraiser",
             "Schedule property inspection",
-            "Track appraisal status"
+            "Track appraisal status",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-sys-appraisal-received",
@@ -754,9 +765,9 @@ ATOM_TEMPLATES = [
             "Appraiser uploads completed appraisal",
             "System receives and stores appraisal",
             "Notify processor of receipt",
-            "Extract key data (value, condition, comps)"
+            "Extract key data (value, condition, comps)",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-appraisal-review",
@@ -771,15 +782,14 @@ ATOM_TEMPLATES = [
             "Check value reasonableness",
             "Review property condition",
             "Verify compliance with guidelines",
-            "Flag any issues for underwriter"
+            "Flag any issues for underwriter",
         ],
         "criticality": "CRITICAL",
         "exceptions": [
             {"condition": "Appraised value below purchase price", "action": "Route to underwriter for LTV adjustment"},
-            {"condition": "Property condition issues", "action": "Request repairs or value adjustment"}
-        ]
+            {"condition": "Property condition issues", "action": "Request repairs or value adjustment"},
+        ],
     },
-    
     # Title & Insurance Module
     {
         "id_prefix": "atom-sys-title-order",
@@ -792,9 +802,9 @@ ATOM_TEMPLATES = [
             "System generates title order",
             "Send to selected title company",
             "Track title search status",
-            "Receive preliminary title report"
+            "Receive preliminary title report",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-title-review",
@@ -808,13 +818,13 @@ ATOM_TEMPLATES = [
             "Check for existing liens",
             "Verify seller has clear title",
             "Identify any title issues",
-            "Request title insurance commitment"
+            "Request title insurance commitment",
         ],
         "criticality": "CRITICAL",
         "exceptions": [
             {"condition": "Existing liens on property", "action": "Require lien payoff at closing"},
-            {"condition": "Title defects", "action": "Require title curative work"}
-        ]
+            {"condition": "Title defects", "action": "Require title curative work"},
+        ],
     },
     {
         "id_prefix": "atom-sys-flood-determination",
@@ -827,9 +837,9 @@ ATOM_TEMPLATES = [
             "Submit property address to flood determination service",
             "Receive flood zone designation",
             "Store flood determination certificate",
-            "Flag if flood insurance required"
+            "Flag if flood insurance required",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-cust-insurance-verification",
@@ -842,11 +852,10 @@ ATOM_TEMPLATES = [
             "Customer receives insurance request",
             "Customer contacts insurance agent",
             "Customer uploads insurance declaration page",
-            "System confirms receipt"
+            "System confirms receipt",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Underwriting Decision Module
     {
         "id_prefix": "atom-sys-aus-submission",
@@ -860,9 +869,9 @@ ATOM_TEMPLATES = [
             "Submit to Fannie Mae DU or Freddie Mac LP",
             "Receive AUS findings",
             "Store findings in LOS",
-            "Route based on findings (Approve/Eligible/Refer)"
+            "Route based on findings (Approve/Eligible/Refer)",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-manual-underwrite",
@@ -877,9 +886,9 @@ ATOM_TEMPLATES = [
             "Apply manual underwriting guidelines",
             "Calculate risk factors",
             "Make loan decision",
-            "Document decision rationale"
+            "Document decision rationale",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-dec-loan-decision",
@@ -893,11 +902,10 @@ ATOM_TEMPLATES = [
             "Apply program guidelines",
             "Make approve/deny/suspend decision",
             "Generate decision letter",
-            "Notify customer and loan officer"
+            "Notify customer and loan officer",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
-    
     # Conditions Management Module
     {
         "id_prefix": "atom-sys-condition-generation",
@@ -911,9 +919,9 @@ ATOM_TEMPLATES = [
             "Generate standard conditions",
             "Generate specific conditions based on findings",
             "Assign conditions to appropriate parties",
-            "Notify processor of conditions"
+            "Notify processor of conditions",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-condition-tracking",
@@ -927,9 +935,9 @@ ATOM_TEMPLATES = [
             "Request documents from customer",
             "Receive condition fulfillment",
             "Update condition status",
-            "Notify underwriter when conditions cleared"
+            "Notify underwriter when conditions cleared",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-condition-clearance",
@@ -943,11 +951,10 @@ ATOM_TEMPLATES = [
             "Verify condition is satisfied",
             "Clear condition in LOS",
             "Check if all conditions cleared",
-            "Proceed to final approval if complete"
+            "Proceed to final approval if complete",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
-    
     # Closing Preparation Module
     {
         "id_prefix": "atom-sys-closing-disclosure",
@@ -961,9 +968,9 @@ ATOM_TEMPLATES = [
             "Populate CD with loan terms",
             "Generate initial CD",
             "Send to customer (3 days before closing)",
-            "Generate final CD if changes occur"
+            "Generate final CD if changes occur",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-closing-doc-prep",
@@ -977,9 +984,9 @@ ATOM_TEMPLATES = [
             "Generate mortgage/deed of trust",
             "Prepare all required disclosures",
             "Prepare settlement statement",
-            "Package documents for closing"
+            "Package documents for closing",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-cust-closing-scheduling",
@@ -993,11 +1000,10 @@ ATOM_TEMPLATES = [
             "Customer selects preferred closing date",
             "Coordinate with title company",
             "Confirm all parties available",
-            "Schedule closing appointment"
+            "Schedule closing appointment",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Funding & Recording Module
     {
         "id_prefix": "atom-cust-closing-signing",
@@ -1012,9 +1018,9 @@ ATOM_TEMPLATES = [
             "Sign promissory note",
             "Sign mortgage/deed of trust",
             "Sign all required disclosures",
-            "Receive keys (if purchase)"
+            "Receive keys (if purchase)",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-funding-wire",
@@ -1028,9 +1034,9 @@ ATOM_TEMPLATES = [
             "Calculate final funding amount",
             "Initiate wire transfer",
             "Confirm wire receipt",
-            "Update loan status to funded"
+            "Update loan status to funded",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-deed-recording",
@@ -1044,11 +1050,10 @@ ATOM_TEMPLATES = [
             "Title company records deed",
             "Receive recorded copy",
             "Store in document management system",
-            "Update loan status"
+            "Update loan status",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Quality Control Module
     {
         "id_prefix": "atom-bo-post-closing-audit",
@@ -1063,9 +1068,9 @@ ATOM_TEMPLATES = [
             "Verify compliance with guidelines",
             "Check for documentation errors",
             "Document findings",
-            "Resolve any issues found"
+            "Resolve any issues found",
         ],
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-sys-document-imaging",
@@ -1079,9 +1084,9 @@ ATOM_TEMPLATES = [
             "Index documents by type",
             "Store in document management system",
             "Verify image quality",
-            "Archive original documents"
+            "Archive original documents",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-loan-sale-prep",
@@ -1095,11 +1100,10 @@ ATOM_TEMPLATES = [
             "Prepare loan data file",
             "Submit to loan delivery system",
             "Resolve any delivery errors",
-            "Confirm loan purchase"
+            "Confirm loan purchase",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Regulatory & Policy Atoms
     {
         "id_prefix": "atom-pol-trid-compliance",
@@ -1112,9 +1116,9 @@ ATOM_TEMPLATES = [
             "Provide Loan Estimate within 3 business days",
             "Provide Closing Disclosure 3 business days before closing",
             "Monitor for changes requiring redisclosure",
-            "Maintain compliance documentation"
+            "Maintain compliance documentation",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-pol-fair-lending",
@@ -1127,9 +1131,9 @@ ATOM_TEMPLATES = [
             "Ensure non-discriminatory lending practices",
             "Monitor for disparate impact",
             "Maintain fair lending documentation",
-            "Conduct regular fair lending training"
+            "Conduct regular fair lending training",
         ],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-ctrl-credit-policy",
@@ -1142,11 +1146,10 @@ ATOM_TEMPLATES = [
             "Verify minimum credit score met",
             "Review credit history length",
             "Check for recent credit issues",
-            "Apply credit policy exceptions if needed"
+            "Apply credit policy exceptions if needed",
         ],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # System & Role Atoms
     {
         "id_prefix": "atom-sys-los-platform",
@@ -1156,7 +1159,7 @@ ATOM_TEMPLATES = [
         "moduleId": None,
         "summary": "Primary loan origination system for managing loan applications",
         "steps": [],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-doc-management",
@@ -1166,7 +1169,7 @@ ATOM_TEMPLATES = [
         "moduleId": None,
         "summary": "System for storing and managing loan documents",
         "steps": [],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-role-loan-officer",
@@ -1176,7 +1179,7 @@ ATOM_TEMPLATES = [
         "moduleId": None,
         "summary": "Primary customer contact and loan originator",
         "steps": [],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-role-processor",
@@ -1186,7 +1189,7 @@ ATOM_TEMPLATES = [
         "moduleId": None,
         "summary": "Processes loan applications and collects documentation",
         "steps": [],
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-role-underwriter",
@@ -1196,9 +1199,8 @@ ATOM_TEMPLATES = [
         "moduleId": None,
         "summary": "Makes loan decisions and manages underwriting conditions",
         "steps": [],
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
-    
     # Additional Granular Atoms - Income Verification Details
     {
         "id_prefix": "atom-cust-pay-stub-upload",
@@ -1208,7 +1210,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Customer uploads most recent pay stubs (typically 2 months) to verify current income",
         "description": "Pay stubs provide current income verification and are required alongside W-2 forms to verify ongoing employment and current income levels. Customers upload pay stubs through the secure portal, and the system validates the format and extracts key information.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-pay-stub-review",
@@ -1218,7 +1220,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor reviews pay stubs to verify current income, employment status, and YTD earnings",
         "description": "Pay stub review ensures the customer's current income matches what was stated on the application and verifies they are still employed. Processor checks pay frequency, gross pay, deductions, and year-to-date totals.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-income-stability-check",
@@ -1228,7 +1230,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor analyzes income history to determine if income is stable, increasing, or decreasing",
         "description": "Income stability is a key underwriting factor. Processor reviews income over the past 2 years to identify trends and ensure income is likely to continue. Declining income may require additional documentation or explanation.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-bonus-overtime-calculation",
@@ -1238,9 +1240,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor calculates qualifying bonus and overtime income based on 2-year average",
         "description": "Bonus and overtime income can only be used if it's consistent over 2 years. Processor calculates the 2-year average and applies it to qualifying income calculations.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
-    
     # Asset Verification Details
     {
         "id_prefix": "atom-cust-asset-statement-upload",
@@ -1250,7 +1251,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-asset-verification",
         "summary": "Customer uploads investment account statements, retirement accounts, and other asset documentation",
         "description": "Asset statements verify the customer has sufficient funds for down payment and reserves. Customers upload statements from various account types including checking, savings, investment, and retirement accounts.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-gift-letter-review",
@@ -1260,7 +1261,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-asset-verification",
         "summary": "Processor reviews gift letter when customer receives funds from family member for down payment",
         "description": "Gift letters are required when down payment funds come from a gift rather than the borrower's own assets. Processor verifies the gift letter meets requirements and that gift funds are properly sourced.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-large-deposit-review",
@@ -1270,9 +1271,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-asset-verification",
         "summary": "Processor identifies and reviews large deposits (typically >25% of monthly income) to verify source of funds",
         "description": "Large deposits require explanation to ensure funds are legitimate and not borrowed. Processor flags large deposits and requests documentation of the source.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Credit Analysis Details
     {
         "id_prefix": "atom-bo-credit-score-analysis",
@@ -1282,7 +1282,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor reviews credit scores from all three bureaus and determines middle score",
         "description": "Credit scores from Experian, Equifax, and TransUnion are compared, and the middle score is used for underwriting. Processor verifies scores meet minimum requirements.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-payment-history-review",
@@ -1292,7 +1292,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor reviews 24-month payment history for all trade lines to identify late payments",
         "description": "Payment history is critical for credit assessment. Processor reviews all accounts for late payments, defaults, or collections and documents findings.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-debt-ratio-calculation",
@@ -1302,7 +1302,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor calculates front-end and back-end debt-to-income ratios using verified income and debts",
         "description": "Debt ratios are key underwriting metrics. Front-end ratio is housing payment divided by income. Back-end ratio includes all debts. Both must meet program guidelines.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-collection-account-review",
@@ -1312,9 +1312,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor reviews collection accounts and determines if they must be paid off before closing",
         "description": "Collection accounts may need to be paid off depending on amount and program guidelines. Processor reviews each collection and determines requirements.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
-    
     # Property Appraisal Details
     {
         "id_prefix": "atom-bo-appraisal-scheduling",
@@ -1324,7 +1323,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-property-appraisal",
         "summary": "Processor coordinates with appraiser to schedule property inspection date and time",
         "description": "Appraisal scheduling requires coordination between appraiser, property owner, and real estate agent. Processor ensures all parties are available and property is accessible.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-comparable-sales-review",
@@ -1334,7 +1333,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-property-appraisal",
         "summary": "Processor reviews comparable sales used in appraisal to verify they are appropriate",
         "description": "Comparable sales must be similar properties sold recently in the same area. Processor verifies comparables are appropriate and supports the appraised value.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-property-condition-review",
@@ -1344,9 +1343,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-property-appraisal",
         "summary": "Processor reviews appraisal property condition notes and identifies any required repairs",
         "description": "Property condition issues may require repairs before closing. Processor reviews condition notes and determines if repairs are required or if value adjustments are needed.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Title & Insurance Details
     {
         "id_prefix": "atom-bo-title-issue-resolution",
@@ -1356,7 +1354,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-title-insurance",
         "summary": "Processor works with title company to resolve any liens, judgments, or other title defects",
         "description": "Title issues must be resolved before closing. Processor coordinates with title company and customer to clear any liens, judgments, or other defects that could prevent clear title transfer.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-flood-insurance-verification",
@@ -1366,7 +1364,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-title-insurance",
         "summary": "Processor verifies flood insurance is obtained when property is in flood zone",
         "description": "Properties in flood zones require flood insurance. Processor verifies the property's flood zone status and ensures flood insurance is obtained and meets requirements.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-homeowners-insurance-review",
@@ -1376,9 +1374,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-title-insurance",
         "summary": "Processor reviews homeowners insurance policy to ensure coverage meets lender requirements",
         "description": "Homeowners insurance must meet lender requirements for coverage amount and include lender as loss payee. Processor verifies policy details before closing.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Underwriting Details
     {
         "id_prefix": "atom-bo-risk-assessment",
@@ -1388,7 +1385,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriter evaluates overall loan risk by analyzing credit, income, assets, and property",
         "description": "Risk assessment is a comprehensive evaluation of all loan factors. Underwriter weighs credit risk, income stability, asset sufficiency, and property value to determine overall loan risk.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-program-eligibility-check",
@@ -1398,7 +1395,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriter verifies loan meets all program guidelines (Fannie Mae, Freddie Mac, FHA, VA, etc.)",
         "description": "Each loan program has specific eligibility requirements. Underwriter verifies the loan meets all guidelines for the selected program including loan amount limits, credit requirements, and property type restrictions.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-compensating-factors-analysis",
@@ -1408,9 +1405,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriter identifies compensating factors that offset risk when loan is borderline",
         "description": "Compensating factors like large down payment, significant reserves, or excellent credit history can offset other risk factors. Underwriter documents these factors to support approval decision.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
-    
     # Conditions Management Details
     {
         "id_prefix": "atom-bo-prior-to-doc-conditions",
@@ -1420,7 +1416,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-conditions-management",
         "summary": "Processor tracks conditions that must be cleared before loan documents can be prepared",
         "description": "Prior-to-doc conditions are critical items that must be resolved before closing documents can be generated. Processor monitors these conditions closely to avoid closing delays.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-prior-to-funding-conditions",
@@ -1430,7 +1426,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-conditions-management",
         "summary": "Processor tracks conditions that must be cleared before loan can be funded",
         "description": "Prior-to-funding conditions are items that must be resolved before wire transfer can be initiated. These are typically less critical but still required for funding.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-condition-aging-review",
@@ -1440,9 +1436,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-conditions-management",
         "summary": "Processor monitors how long conditions have been outstanding and escalates if needed",
         "description": "Conditions that remain outstanding too long can delay closing. Processor reviews condition aging and escalates to underwriter or supervisor if conditions are not being resolved timely.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
-    
     # Closing Details
     {
         "id_prefix": "atom-bo-closing-disclosure-review",
@@ -1452,7 +1447,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "Customer reviews Closing Disclosure to verify all costs and loan terms are correct",
         "description": "TRID requires customers receive Closing Disclosure 3 days before closing. Customer reviews all costs, loan terms, and cash to close to ensure accuracy before signing.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-closing-package-assembly",
@@ -1462,7 +1457,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "Closing coordinator assembles all required documents into closing package for signing",
         "description": "Closing package includes promissory note, mortgage/deed of trust, all disclosures, settlement statement, and other required documents. Coordinator ensures all documents are included and properly executed.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-notary-coordination",
@@ -1472,9 +1467,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "Closing coordinator arranges for notary to witness document signing at closing",
         "description": "Many loan documents require notarization. Coordinator arranges for qualified notary to be present at closing to witness signatures and notarize documents.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Funding Details
     {
         "id_prefix": "atom-bo-funding-verification",
@@ -1484,7 +1478,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-funding-recording",
         "summary": "Processor verifies all funding requirements are met before initiating wire transfer",
         "description": "Before funding, processor verifies all conditions are cleared, documents are signed, and title is clear. This prevents funding loans that don't meet requirements.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-wire-verification",
@@ -1494,7 +1488,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-funding-recording",
         "summary": "System verifies wire transfer was successfully received by title company",
         "description": "After initiating wire transfer, system monitors for confirmation that funds were received. Title company confirms receipt before closing can proceed.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-funding-reconciliation",
@@ -1504,9 +1498,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-funding-recording",
         "summary": "Processor reconciles actual funding amount with loan amount and verifies accuracy",
         "description": "Funding amount must match loan amount exactly. Processor reconciles wire transfer amount with loan documents to ensure accuracy before and after funding.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Post-Closing Details
     {
         "id_prefix": "atom-bo-document-audit",
@@ -1516,7 +1509,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "QC auditor reviews all loan documents for completeness and accuracy",
         "description": "Document audit ensures all required documents are present, properly executed, and accurate. Auditor checks signatures, dates, and document completeness.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-data-accuracy-review",
@@ -1526,7 +1519,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "QC auditor verifies loan data accuracy by comparing documents to LOS data",
         "description": "Data accuracy review ensures information in LOS matches loan documents. Auditor compares key fields like loan amount, interest rate, and borrower information.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-loan-delivery-prep",
@@ -1536,7 +1529,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "Processor prepares loan file for sale to Fannie Mae, Freddie Mac, or other investors",
         "description": "Loan delivery requires specific file formats and data requirements. Processor ensures loan meets investor requirements and prepares delivery file with all required data and documents.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-sys-loan-delivery-submission",
@@ -1546,9 +1539,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "System submits loan file to Fannie Mae or Freddie Mac loan delivery system",
         "description": "Automated submission to secondary market requires proper file formatting and data validation. System submits loan and receives confirmation of purchase or identifies any errors requiring correction.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Additional System Processes
     {
         "id_prefix": "atom-sys-loan-estimate-generation",
@@ -1558,7 +1550,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-application-intake",
         "summary": "System automatically generates TRID-compliant Loan Estimate within 3 business days of application",
         "description": "Loan Estimate is required by TRID within 3 business days of application submission. System calculates all costs and generates compliant form with loan terms and estimated closing costs.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-redisclosure-trigger",
@@ -1568,7 +1560,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "System monitors for changes requiring Loan Estimate or Closing Disclosure redisclosure",
         "description": "TRID requires redisclosure if certain changes occur (rate lock, APR change, etc.). System monitors for these changes and triggers redisclosure process when needed.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-sys-rate-lock-processing",
@@ -1578,9 +1570,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "System processes customer's rate lock request and locks interest rate for specified period",
         "description": "Rate locks protect customers from rate increases during processing. System processes lock request, calculates lock fee, and secures rate for the lock period (typically 30-60 days).",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
-    
     # Additional Validation and Verification Atoms
     {
         "id_prefix": "atom-sys-identity-verification",
@@ -1590,7 +1581,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-application-intake",
         "summary": "System verifies customer identity using SSN, address, and other data points",
         "description": "Identity verification prevents fraud by confirming the applicant is who they claim to be. System uses multiple data sources to verify identity.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-employment-verification",
@@ -1600,7 +1591,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor contacts employer to verify employment status, job title, and income",
         "description": "Employment verification confirms the customer is currently employed and verifies income information. Processor calls employer or sends verification form.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-rental-history-verification",
@@ -1610,7 +1601,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor verifies rental payment history for first-time homebuyers",
         "description": "Rental history demonstrates payment responsibility. Processor contacts landlords to verify payment history and rental amount.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-alimony-child-support-verification",
@@ -1620,7 +1611,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor verifies alimony and child support payments when used as income",
         "description": "Alimony and child support can be used as income if properly documented. Processor verifies court orders and payment history.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-retirement-income-verification",
@@ -1630,7 +1621,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor verifies retirement income from pensions, 401k, or Social Security",
         "description": "Retirement income requires different verification than employment income. Processor reviews retirement account statements and benefit letters.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-self-employment-verification",
@@ -1640,7 +1631,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor verifies self-employment income using tax returns and profit/loss statements",
         "description": "Self-employment income requires detailed analysis of tax returns and business financials. Processor calculates qualifying income after business expenses.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-rental-income-verification",
@@ -1650,7 +1641,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-income-verification",
         "summary": "Processor verifies rental income from investment properties",
         "description": "Rental income can be used if properly documented. Processor reviews lease agreements and tax returns showing rental income.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-asset-verification-letter",
@@ -1660,7 +1651,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-asset-verification",
         "summary": "Processor requests verification letter from financial institution confirming account balances",
         "description": "Asset verification letters provide official confirmation of account balances. Processor requests these when statements are unclear or additional verification is needed.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-down-payment-verification",
@@ -1670,7 +1661,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-asset-verification",
         "summary": "Processor verifies source of down payment funds to ensure they are not borrowed",
         "description": "Down payment must come from borrower's own funds or acceptable gift. Processor traces funds back to source to ensure they are not borrowed.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-reserves-verification",
@@ -1680,7 +1671,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-asset-verification",
         "summary": "Processor verifies borrower has required reserves after closing",
         "description": "Reserves are liquid assets remaining after closing. Processor verifies borrower has sufficient reserves per program requirements.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-credit-inquiry-review",
@@ -1690,7 +1681,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor reviews recent credit inquiries to identify other loan applications",
         "description": "Multiple credit inquiries may indicate borrower is shopping for loans or has other applications. Processor reviews inquiries and may request explanation.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-credit-dispute-review",
@@ -1700,7 +1691,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor reviews credit report for disputed items and determines impact",
         "description": "Disputed items on credit report may need to be resolved before closing. Processor reviews disputes and determines if resolution is required.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-liability-verification",
@@ -1710,7 +1701,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-credit-analysis",
         "summary": "Processor verifies all debts listed on credit report and application match",
         "description": "All liabilities must be included in debt calculations. Processor verifies credit report debts match application and identifies any missing debts.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-property-type-verification",
@@ -1720,7 +1711,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-property-appraisal",
         "summary": "Processor verifies property type (single-family, condo, townhouse, etc.) matches program eligibility",
         "description": "Different property types have different program requirements. Processor verifies property type is eligible for the selected loan program.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-occupancy-verification",
@@ -1730,7 +1721,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-property-appraisal",
         "summary": "Processor verifies borrower intends to occupy property as primary residence",
         "description": "Primary residence loans have better terms than investment property loans. Processor verifies occupancy intent through application and documentation.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-hazard-insurance-binder",
@@ -1740,7 +1731,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-title-insurance",
         "summary": "Processor obtains insurance binder showing coverage is in place before closing",
         "description": "Hazard insurance binder confirms coverage is active. Processor obtains binder from insurance agent and verifies it meets lender requirements.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-title-commitment-review",
@@ -1750,7 +1741,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-title-insurance",
         "summary": "Processor reviews title commitment to identify any exceptions or requirements",
         "description": "Title commitment shows what will be covered by title insurance and any exceptions. Processor reviews commitment and ensures all requirements are met.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-survey-review",
@@ -1760,7 +1751,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-title-insurance",
         "summary": "Processor reviews property survey to identify any encroachments or boundary issues",
         "description": "Property survey shows property boundaries and any structures. Processor reviews survey for encroachments or boundary issues that could affect title.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-underwriting-exception-request",
@@ -1770,7 +1761,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriter requests exception approval when loan doesn't meet standard guidelines",
         "description": "Exceptions allow loans that don't meet standard guidelines but have compensating factors. Underwriter documents exception request and justification.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-exception-approval",
@@ -1780,7 +1771,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriting manager reviews and approves or denies exception requests",
         "description": "Exception approvals require manager review. Manager evaluates compensating factors and risk before approving exceptions.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-loan-modification-review",
@@ -1790,7 +1781,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriter reviews any changes to loan terms after initial approval",
         "description": "Loan modifications require re-underwriting. Underwriter reviews changes and determines if re-approval is needed.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-condition-verification",
@@ -1800,7 +1791,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-conditions-management",
         "summary": "Processor verifies that conditions have been properly fulfilled before clearing",
         "description": "Condition verification ensures all requirements are met. Processor reviews condition fulfillment documents and verifies they satisfy the condition.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-expired-condition-review",
@@ -1810,7 +1801,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-conditions-management",
         "summary": "Processor reviews conditions that have expired and determines if still needed",
         "description": "Some conditions expire if not fulfilled timely. Processor reviews expired conditions and determines if they are still required or can be waived.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-closing-cost-review",
@@ -1820,7 +1811,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "Processor reviews all closing costs for accuracy and reasonableness",
         "description": "Closing costs must be accurate and reasonable. Processor reviews all fees and charges to ensure they match estimates and are justified.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-cash-to-close-calculation",
@@ -1830,7 +1821,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "Processor calculates total cash required from borrower at closing",
         "description": "Cash to close includes down payment, closing costs, prepaids, and credits. Processor calculates final amount borrower must bring to closing.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-closing-wire-instructions",
@@ -1840,7 +1831,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-closing-preparation",
         "summary": "Processor provides wire transfer instructions for closing funds",
         "description": "Closing funds are typically wired to title company. Processor provides secure wire instructions to borrower for closing funds transfer.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-funding-package-review",
@@ -1850,7 +1841,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-funding-recording",
         "summary": "Processor reviews all documents in funding package before releasing funds",
         "description": "Funding package must be complete and accurate before funds are released. Processor reviews all documents to ensure they are properly executed and complete.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-funding-hold-review",
@@ -1860,7 +1851,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-funding-recording",
         "summary": "Processor reviews any funding holds and determines when they can be released",
         "description": "Funding holds prevent funds from being released until certain requirements are met. Processor reviews holds and releases them when conditions are satisfied.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-servicing-transfer-prep",
@@ -1870,7 +1861,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "Processor prepares loan file for transfer to loan servicing department or servicer",
         "description": "After closing, loans are transferred to servicing. Processor ensures all required data and documents are prepared for servicing transfer.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-investor-reporting",
@@ -1880,7 +1871,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "Processor completes required reporting to loan investor (Fannie Mae, Freddie Mac, etc.)",
         "description": "Investors require regular reporting on loan performance and status. Processor completes required reports and submits to investor.",
-        "criticality": "MEDIUM"
+        "criticality": "MEDIUM",
     },
     {
         "id_prefix": "atom-bo-compliance-audit",
@@ -1890,7 +1881,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-quality-control",
         "summary": "QC auditor reviews loan for compliance with all regulations and guidelines",
         "description": "Compliance audit ensures loan meets all regulatory requirements. Auditor reviews loan against compliance checklist and documents any issues.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-fraud-detection",
@@ -1900,7 +1891,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-application-intake",
         "summary": "System runs fraud detection algorithms to identify suspicious applications",
         "description": "Fraud detection uses data analytics to identify potentially fraudulent applications. System flags suspicious patterns for manual review.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-fraud-review",
@@ -1910,7 +1901,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-application-intake",
         "summary": "Fraud analyst reviews applications flagged by fraud detection system",
         "description": "Flagged applications require manual fraud review. Analyst investigates suspicious patterns and determines if application is legitimate.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-sys-aus-findings-review",
@@ -1920,7 +1911,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Processor reviews automated underwriting system findings and conditions",
         "description": "AUS findings provide initial underwriting decision and list required conditions. Processor reviews findings and determines next steps.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-manual-review-trigger",
@@ -1930,7 +1921,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "System automatically routes loans to manual underwriting when AUS cannot approve",
         "description": "Loans that don't receive AUS approval are routed to manual underwriting. System identifies these loans and assigns to underwriter.",
-        "criticality": "HIGH"
+        "criticality": "HIGH",
     },
     {
         "id_prefix": "atom-bo-loan-denial-documentation",
@@ -1940,7 +1931,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriter documents reason for loan denial in compliance with fair lending laws",
         "description": "Loan denials must be properly documented with specific reasons. Underwriter documents denial reason to ensure compliance with fair lending requirements.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-adverse-action-letter",
@@ -1950,7 +1941,7 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "System generates adverse action letter when loan is denied or terms are less favorable",
         "description": "Adverse action letters are required by law when loan is denied or terms are less favorable than requested. System generates compliant letter with specific denial reasons.",
-        "criticality": "CRITICAL"
+        "criticality": "CRITICAL",
     },
     {
         "id_prefix": "atom-bo-appeal-review",
@@ -1960,8 +1951,8 @@ ATOM_TEMPLATES = [
         "moduleId": "module-underwriting-decision",
         "summary": "Underwriting manager reviews borrower appeal of loan denial",
         "description": "Borrowers can appeal loan denials. Manager reviews appeal, re-evaluates loan, and makes final decision.",
-        "criticality": "MEDIUM"
-    }
+        "criticality": "MEDIUM",
+    },
 ]
 
 
@@ -1970,35 +1961,39 @@ def enhance_atom_template(template: Dict) -> Dict:
     # Add description if missing (use summary as base)
     if "description" not in template:
         template["description"] = template.get("summary", "")
-    
+
     # Add purpose if missing
     if "purpose" not in template:
-        template["purpose"] = f"This process enables {template.get('name', 'the workflow')} to be completed efficiently and accurately."
-    
+        template["purpose"] = (
+            f"This process enables {template.get('name', 'the workflow')} to be completed efficiently and accurately."
+        )
+
     # Add business_context if missing
     if "business_context" not in template:
-        template["business_context"] = f"This is a critical component of the home lending process that ensures compliance, accuracy, and customer satisfaction."
-    
+        template["business_context"] = (
+            f"This is a critical component of the home lending process that ensures compliance, accuracy, and customer satisfaction."
+        )
+
     # Add inputs if missing
     if "inputs" not in template and template.get("steps"):
         template["inputs"] = ["Required data and documents as specified in the process steps"]
-    
+
     # Add outputs if missing
     if "outputs" not in template and template.get("steps"):
         template["outputs"] = ["Processed data and status updates as specified in the process steps"]
-    
+
     # Add prerequisites if missing
     if "prerequisites" not in template:
         template["prerequisites"] = ["All required upstream processes must be completed"]
-    
+
     # Add success_criteria if missing
     if "success_criteria" not in template:
         template["success_criteria"] = [
             "Process completed successfully",
             "All required outputs generated",
-            "Status updated in system"
+            "Status updated in system",
         ]
-    
+
     return template
 
 
@@ -2007,7 +2002,7 @@ def make_atom(template: Dict, index: Optional[int] = None) -> Dict:
     atom_id = template["id_prefix"]
     if index is not None:
         atom_id = f"{template['id_prefix']}-{index:03d}"
-    
+
     # Determine phaseId from moduleId
     phase_id = None
     if template.get("moduleId"):
@@ -2015,15 +2010,15 @@ def make_atom(template: Dict, index: Optional[int] = None) -> Dict:
             if module["id"] == template["moduleId"]:
                 phase_id = module.get("phaseId")
                 break
-    
+
     # Generate metrics
     metrics = {
         "automation_level": round(random.uniform(0.0, 1.0), 2),
         "avg_cycle_time_mins": random.randint(15, 1440),  # 15 mins to 24 hours
         "error_rate": round(random.uniform(0.0, 0.1), 3),
-        "compliance_score": round(random.uniform(0.85, 1.0), 2)
+        "compliance_score": round(random.uniform(0.85, 1.0), 2),
     }
-    
+
     # Adjust metrics based on type
     if template["category"] == "SYSTEM":
         metrics["automation_level"] = round(random.uniform(0.7, 1.0), 2)
@@ -2034,14 +2029,14 @@ def make_atom(template: Dict, index: Optional[int] = None) -> Dict:
     else:  # BACK_OFFICE
         metrics["automation_level"] = round(random.uniform(0.0, 0.5), 2)
         metrics["avg_cycle_time_mins"] = random.randint(30, 480)  # 30 mins to 8 hours
-    
+
     # Build comprehensive content
     content = {
         "summary": template["summary"],
         "description": template.get("description", template["summary"]),
-        "steps": template.get("steps", [])
+        "steps": template.get("steps", []),
     }
-    
+
     # Add detailed fields if present
     if template.get("purpose"):
         content["purpose"] = template["purpose"]
@@ -2059,7 +2054,7 @@ def make_atom(template: Dict, index: Optional[int] = None) -> Dict:
         content["regulatory_context"] = template["regulatory_context"]
     if template.get("exceptions"):
         content["exceptions"] = template["exceptions"]
-    
+
     atom = {
         "id": atom_id,
         "category": template["category"],
@@ -2075,9 +2070,9 @@ def make_atom(template: Dict, index: Optional[int] = None) -> Dict:
         "moduleId": template.get("moduleId"),
         "content": content,
         "edges": [],
-        "metrics": metrics
+        "metrics": metrics,
     }
-    
+
     return atom
 
 
@@ -2085,7 +2080,7 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
     """Create meaningful edges between atoms."""
     edges = []
     atom_dict = {atom["id"]: atom for atom in atoms}
-    
+
     # Define edge patterns based on relationships (using full atom IDs)
     edge_patterns = [
         # Customer actions enable back-office processes
@@ -2100,7 +2095,6 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-cust-insurance-verification", "atom-bo-closing-doc-prep", "ENABLES"),
         ("atom-cust-closing-scheduling", "atom-bo-closing-doc-prep", "ENABLES"),
         ("atom-cust-closing-signing", "atom-sys-funding-wire", "ENABLES"),
-        
         # System processes enable back-office processes
         ("atom-sys-credit-pull", "atom-bo-dti-calculation", "ENABLES"),
         ("atom-sys-application-validation", "atom-bo-completeness-review", "ENABLES"),
@@ -2113,7 +2107,6 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-sys-closing-disclosure", "atom-bo-closing-doc-prep", "ENABLES"),
         ("atom-sys-funding-wire", "atom-sys-deed-recording", "ENABLES"),
         ("atom-sys-deed-recording", "atom-sys-document-imaging", "ENABLES"),
-        
         # Back-office processes enable other processes
         ("atom-bo-w2-review", "atom-sys-income-calculation", "ENABLES"),
         ("atom-bo-tax-return-analysis", "atom-sys-income-calculation", "ENABLES"),
@@ -2127,14 +2120,12 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-closing-doc-prep", "atom-cust-closing-signing", "ENABLES"),
         ("atom-bo-post-closing-audit", "atom-sys-document-imaging", "ENABLES"),
         ("atom-sys-document-imaging", "atom-bo-loan-sale-prep", "ENABLES"),
-        
         # Processes depend on systems
         ("atom-sys-credit-pull", "atom-sys-los-platform", "USES_COMPONENT"),
         ("atom-sys-application-validation", "atom-sys-los-platform", "USES_COMPONENT"),
         ("atom-sys-income-calculation", "atom-sys-los-platform", "USES_COMPONENT"),
         ("atom-sys-aus-submission", "atom-sys-los-platform", "USES_COMPONENT"),
         ("atom-sys-document-imaging", "atom-sys-doc-management", "USES_COMPONENT"),
-        
         # Processes performed by roles
         ("atom-bo-dti-calculation", "atom-role-loan-officer", "PERFORMED_BY"),
         ("atom-bo-completeness-review", "atom-role-processor", "PERFORMED_BY"),
@@ -2145,19 +2136,16 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-manual-underwrite", "atom-role-underwriter", "PERFORMED_BY"),
         ("atom-dec-loan-decision", "atom-role-underwriter", "PERFORMED_BY"),
         ("atom-bo-condition-clearance", "atom-role-underwriter", "PERFORMED_BY"),
-        
         # Processes governed by policies
         ("atom-sys-closing-disclosure", "atom-pol-trid-compliance", "GOVERNED_BY"),
         ("atom-bo-manual-underwrite", "atom-pol-fair-lending", "GOVERNED_BY"),
         ("atom-bo-credit-analysis", "atom-ctrl-credit-policy", "GOVERNED_BY"),
         ("atom-dec-loan-decision", "atom-ctrl-credit-policy", "GOVERNED_BY"),
-        
         # Data flows
         ("atom-sys-credit-pull", "atom-bo-credit-analysis", "DATA_FLOWS_TO"),
         ("atom-sys-income-calculation", "atom-sys-aus-submission", "DATA_FLOWS_TO"),
         ("atom-sys-reserve-calculation", "atom-sys-aus-submission", "DATA_FLOWS_TO"),
         ("atom-bo-appraisal-review", "atom-sys-aus-submission", "DATA_FLOWS_TO"),
-        
         # Income Verification Additional Edges
         ("atom-cust-pay-stub-upload", "atom-bo-pay-stub-review", "ENABLES"),
         ("atom-bo-pay-stub-review", "atom-sys-income-calculation", "ENABLES"),
@@ -2165,13 +2153,11 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-income-stability-check", "atom-sys-income-calculation", "ENABLES"),
         ("atom-bo-pay-stub-review", "atom-bo-bonus-overtime-calculation", "ENABLES"),
         ("atom-bo-bonus-overtime-calculation", "atom-sys-income-calculation", "ENABLES"),
-        
         # Asset Verification Additional Edges
         ("atom-cust-asset-statement-upload", "atom-bo-asset-source-review", "ENABLES"),
         ("atom-bo-asset-source-review", "atom-bo-gift-letter-review", "ENABLES"),
         ("atom-bo-asset-source-review", "atom-bo-large-deposit-review", "ENABLES"),
         ("atom-bo-large-deposit-review", "atom-sys-reserve-calculation", "ENABLES"),
-        
         # Credit Analysis Additional Edges
         ("atom-sys-credit-report-pull", "atom-bo-credit-score-analysis", "ENABLES"),
         ("atom-bo-credit-score-analysis", "atom-bo-credit-analysis", "ENABLES"),
@@ -2181,14 +2167,12 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-debt-ratio-calculation", "atom-sys-aus-submission", "ENABLES"),
         ("atom-sys-credit-report-pull", "atom-bo-collection-account-review", "ENABLES"),
         ("atom-bo-collection-account-review", "atom-bo-condition-tracking", "ENABLES"),
-        
         # Property Appraisal Additional Edges
         ("atom-bo-appraisal-order", "atom-bo-appraisal-scheduling", "ENABLES"),
         ("atom-sys-appraisal-received", "atom-bo-comparable-sales-review", "ENABLES"),
         ("atom-bo-comparable-sales-review", "atom-bo-appraisal-review", "ENABLES"),
         ("atom-sys-appraisal-received", "atom-bo-property-condition-review", "ENABLES"),
         ("atom-bo-property-condition-review", "atom-bo-condition-tracking", "ENABLES"),
-        
         # Title & Insurance Additional Edges
         ("atom-sys-title-order", "atom-bo-title-review", "ENABLES"),
         ("atom-bo-title-review", "atom-bo-title-issue-resolution", "ENABLES"),
@@ -2197,7 +2181,6 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-flood-insurance-verification", "atom-bo-closing-doc-prep", "ENABLES"),
         ("atom-cust-insurance-verification", "atom-bo-homeowners-insurance-review", "ENABLES"),
         ("atom-bo-homeowners-insurance-review", "atom-bo-closing-doc-prep", "ENABLES"),
-        
         # Underwriting Additional Edges
         ("atom-sys-aus-submission", "atom-bo-risk-assessment", "ENABLES"),
         ("atom-bo-risk-assessment", "atom-bo-manual-underwrite", "ENABLES"),
@@ -2205,7 +2188,6 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-program-eligibility-check", "atom-dec-loan-decision", "ENABLES"),
         ("atom-bo-risk-assessment", "atom-bo-compensating-factors-analysis", "ENABLES"),
         ("atom-bo-compensating-factors-analysis", "atom-bo-manual-underwrite", "ENABLES"),
-        
         # Conditions Management Additional Edges
         ("atom-sys-condition-generation", "atom-bo-prior-to-doc-conditions", "ENABLES"),
         ("atom-bo-prior-to-doc-conditions", "atom-bo-condition-tracking", "ENABLES"),
@@ -2213,36 +2195,30 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-bo-prior-to-funding-conditions", "atom-bo-condition-tracking", "ENABLES"),
         ("atom-bo-condition-tracking", "atom-bo-condition-aging-review", "ENABLES"),
         ("atom-bo-condition-aging-review", "atom-bo-condition-clearance", "ENABLES"),
-        
         # Closing Additional Edges
         ("atom-sys-closing-disclosure", "atom-bo-closing-disclosure-review", "ENABLES"),
         ("atom-bo-closing-disclosure-review", "atom-bo-closing-doc-prep", "ENABLES"),
         ("atom-bo-closing-doc-prep", "atom-bo-closing-package-assembly", "ENABLES"),
         ("atom-bo-closing-package-assembly", "atom-bo-notary-coordination", "ENABLES"),
         ("atom-bo-notary-coordination", "atom-cust-closing-signing", "ENABLES"),
-        
         # Funding Additional Edges
         ("atom-cust-closing-signing", "atom-bo-funding-verification", "ENABLES"),
         ("atom-bo-funding-verification", "atom-sys-funding-wire", "ENABLES"),
         ("atom-sys-funding-wire", "atom-sys-wire-verification", "ENABLES"),
         ("atom-sys-wire-verification", "atom-bo-funding-reconciliation", "ENABLES"),
         ("atom-bo-funding-reconciliation", "atom-sys-deed-recording", "ENABLES"),
-        
         # Post-Closing Additional Edges
         ("atom-sys-deed-recording", "atom-bo-document-audit", "ENABLES"),
         ("atom-bo-document-audit", "atom-bo-post-closing-audit", "ENABLES"),
         ("atom-bo-post-closing-audit", "atom-bo-data-accuracy-review", "ENABLES"),
         ("atom-bo-data-accuracy-review", "atom-bo-loan-delivery-prep", "ENABLES"),
         ("atom-bo-loan-delivery-prep", "atom-sys-loan-delivery-submission", "ENABLES"),
-        
         # Application Intake Additional Edges
         ("atom-cust-application-submit", "atom-sys-loan-estimate-generation", "ENABLES"),
         ("atom-sys-loan-estimate-generation", "atom-cust-pre-approval-letter", "ENABLES"),
-        
         # Closing Preparation Additional Edges
         ("atom-sys-rate-lock-processing", "atom-sys-redisclosure-trigger", "ENABLES"),
         ("atom-sys-redisclosure-trigger", "atom-sys-closing-disclosure", "ENABLES"),
-        
         # System Dependencies
         ("atom-sys-loan-estimate-generation", "atom-sys-los-platform", "USES_COMPONENT"),
         ("atom-sys-redisclosure-trigger", "atom-sys-los-platform", "USES_COMPONENT"),
@@ -2250,7 +2226,7 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
         ("atom-sys-loan-delivery-submission", "atom-sys-los-platform", "USES_COMPONENT"),
         ("atom-sys-wire-verification", "atom-sys-los-platform", "USES_COMPONENT"),
     ]
-    
+
     # Create edges based on patterns
     for source_prefix, target_prefix, edge_type in edge_patterns:
         # Find atoms matching these prefixes (exact match on prefix)
@@ -2260,26 +2236,19 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
                     if target["id"] == target_prefix or target["id"].startswith(target_prefix + "-"):
                         # Check if edge already exists in atom's edges
                         existing_edge_in_atom = any(
-                            e.get("targetId") == target["id"] and e.get("type") == edge_type 
+                            e.get("targetId") == target["id"] and e.get("type") == edge_type
                             for e in source.get("edges", [])
                         )
-                        
+
                         if not existing_edge_in_atom:
                             # Add to source atom's edges
-                            source["edges"].append({
-                                "type": edge_type,
-                                "targetId": target["id"]
-                            })
-                            
+                            source["edges"].append({"type": edge_type, "targetId": target["id"]})
+
                             # Add to edges list for graph.json
-                            edge = {
-                                "source": source["id"],
-                                "target": target["id"],
-                                "type": edge_type
-                            }
+                            edge = {"source": source["id"], "target": target["id"], "type": edge_type}
                             if edge not in edges:
                                 edges.append(edge)
-    
+
     # Also create edges based on module relationships - atoms in same module are related
     module_atoms = {}
     for atom in atoms:
@@ -2288,34 +2257,27 @@ def create_edges(atoms: List[Dict]) -> List[Dict]:
             if module_id not in module_atoms:
                 module_atoms[module_id] = []
             module_atoms[module_id].append(atom)
-    
+
     # Create RELATED_TO edges between atoms in the same module
     for module_id, module_atom_list in module_atoms.items():
         for i, atom1 in enumerate(module_atom_list):
-            for atom2 in module_atom_list[i+1:]:
+            for atom2 in module_atom_list[i + 1 :]:
                 # Only add if they don't already have a direct edge
                 has_direct_edge = any(
                     e.get("targetId") == atom2["id"] or e.get("targetId") == atom1["id"]
                     for e in atom1.get("edges", []) + atom2.get("edges", [])
                 )
                 if not has_direct_edge and random.random() < 0.3:  # 30% chance to add RELATED_TO
-                    atom1["edges"].append({
-                        "type": "RELATED_TO",
-                        "targetId": atom2["id"]
-                    })
-                    edges.append({
-                        "source": atom1["id"],
-                        "target": atom2["id"],
-                        "type": "RELATED_TO"
-                    })
-    
+                    atom1["edges"].append({"type": "RELATED_TO", "targetId": atom2["id"]})
+                    edges.append({"source": atom1["id"], "target": atom2["id"], "type": "RELATED_TO"})
+
     return edges
 
 
 def write_atom(atom: Dict) -> None:
     """Write atom to YAML file in appropriate category subdirectory."""
     fname = f"{atom['id']}.yaml"
-    
+
     # Determine subdirectory based on atom type
     atom_type = atom.get("type", "").upper()
     if atom_type == "PROCESS":
@@ -2334,7 +2296,7 @@ def write_atom(atom: Dict) -> None:
         subdir = "documents"
     else:
         subdir = "processes"  # default
-    
+
     path = os.path.join(ATOMS_BASE, subdir, fname)
     if yaml:
         with open(path, "w", encoding="utf-8") as fh:
@@ -2371,24 +2333,24 @@ def write_phase(phase: Dict) -> None:
 def generate(count: int = 200) -> None:
     """Generate test data."""
     import shutil
-    
+
     print("Generating home lending test data...")
     print("WARNING: This will write to atoms/ and modules/ directories (used by API)")
     print("Old test data in these directories will be cleaned.")
-    
+
     # Clean old test data directories
     old_dirs = [
         os.path.join(ATOMS_BASE, "requirements"),
         os.path.join(ATOMS_BASE, "designs"),
         os.path.join(ATOMS_BASE, "procedures"),
         os.path.join(ATOMS_BASE, "validations"),
-        os.path.join(ATOMS_BASE, "risks")
+        os.path.join(ATOMS_BASE, "risks"),
     ]
     for old_dir in old_dirs:
         if os.path.exists(old_dir):
             shutil.rmtree(old_dir)
             print(f"Cleaned {old_dir}")
-    
+
     # Clean old policy files (POL-*.yaml) but keep new ones (atom-pol-*.yaml)
     policies_dir = os.path.join(ATOMS_BASE, "policies")
     if os.path.exists(policies_dir):
@@ -2396,9 +2358,9 @@ def generate(count: int = 200) -> None:
             if file.startswith("POL-") and file.endswith(".yaml"):
                 os.remove(os.path.join(policies_dir, file))
                 print(f"Cleaned old policy file: {file}")
-    
+
     ensure_dirs()
-    
+
     # Create atoms from templates
     atoms = []
     for template in ATOM_TEMPLATES:
@@ -2406,17 +2368,17 @@ def generate(count: int = 200) -> None:
         enhanced_template = enhance_atom_template(template.copy())
         atom = make_atom(enhanced_template)
         atoms.append(atom)
-    
+
     print(f"Created {len(atoms)} atoms")
-    
+
     # Create edges (this also populates edges in atoms)
     edges = create_edges(atoms)
     print(f"Created {len(edges)} edges")
-    
+
     # Write atoms (now with edges populated)
     for atom in atoms:
         write_atom(atom)
-    
+
     # Create modules with their atoms
     modules = []
     for module_template in MODULES:
@@ -2426,13 +2388,13 @@ def generate(count: int = 200) -> None:
             "description": module_template["description"],
             "owner": module_template["owner"],
             "atoms": [atom["id"] for atom in atoms if atom.get("moduleId") == module_template["id"]],
-            "phaseId": module_template.get("phaseId")
+            "phaseId": module_template.get("phaseId"),
         }
         modules.append(module)
         write_module(module)
-    
+
     print(f"Created {len(modules)} modules")
-    
+
     # Create phases with their modules
     phases = []
     for phase_template in PHASES:
@@ -2442,57 +2404,44 @@ def generate(count: int = 200) -> None:
             "description": phase_template["description"],
             "modules": [module["id"] for module in modules if module.get("phaseId") == phase_template["id"]],
             "journeyId": phase_template.get("journeyId"),
-            "targetDurationDays": phase_template.get("targetDurationDays", 0)
+            "targetDurationDays": phase_template.get("targetDurationDays", 0),
         }
         phases.append(phase)
         write_phase(phase)
-    
+
     print(f"Created {len(phases)} phases")
-    
+
     # Create graph.json
     nodes = []
     for atom in atoms:
-        nodes.append({
-            "id": atom["id"],
-            "type": atom["type"],
-            "category": atom["category"]
-        })
-    
+        nodes.append({"id": atom["id"], "type": atom["type"], "category": atom["category"]})
+
     for module in modules:
-        nodes.append({
-            "id": module["id"],
-            "type": "Module"
-        })
-    
+        nodes.append({"id": module["id"], "type": "Module"})
+
     for phase in phases:
-        nodes.append({
-            "id": phase["id"],
-            "type": "Phase"
-        })
-    
-    graph = {
-        "nodes": nodes,
-        "edges": edges
-    }
-    
+        nodes.append({"id": phase["id"], "type": "Phase"})
+
+    graph = {"nodes": nodes, "edges": edges}
+
     graph_path = os.path.join(OUT, "graph.json")
     with open(graph_path, "w", encoding="utf-8") as fh:
         json.dump(graph, fh, indent=2)
-    
+
     print(f"Created graph.json with {len(nodes)} nodes and {len(edges)} edges")
-    
+
     # Create example documents
     doc_templates = [
         "Loan Application - Uniform Residential Loan Application (1003)\n\nBorrower Information:\n- Name: [Customer Name]\n- SSN: [SSN]\n- Employment: [Employer]\n- Income: $[Amount]\n\nProperty Information:\n- Address: [Property Address]\n- Purchase Price: $[Amount]\n- Loan Amount: $[Amount]\n\nGenerated: {timestamp}",
         "Income Verification Worksheet\n\nBase Income Calculation:\n- W-2 Income: $[Amount]\n- Tax Return Income: $[Amount]\n- Other Income: $[Amount]\n\nQualifying Income: $[Amount]\nDTI Ratio: [Ratio]%\n\nGenerated: {timestamp}",
-        "Credit Analysis Report\n\nCredit Scores:\n- Experian: [Score]\n- Equifax: [Score]\n- TransUnion: [Score]\n- Middle Score: [Score]\n\nTrade Lines: [Count]\nMonthly Debt: $[Amount]\n\nGenerated: {timestamp}"
+        "Credit Analysis Report\n\nCredit Scores:\n- Experian: [Score]\n- Equifax: [Score]\n- TransUnion: [Score]\n- Middle Score: [Score]\n\nTrade Lines: [Count]\nMonthly Debt: $[Amount]\n\nGenerated: {timestamp}",
     ]
-    
+
     for i, template in enumerate(doc_templates, 1):
         doc_path = os.path.join(DOCS, f"doc-{i}.txt")
         with open(doc_path, "w", encoding="utf-8") as fh:
             fh.write(template.format(timestamp=datetime.now(timezone.utc).isoformat()))
-    
+
     print(f"Created {len(doc_templates)} example documents")
     print(f"\nTest data generation complete!")
     print(f"Output directory: {OUT}")
@@ -2504,7 +2453,9 @@ def generate(count: int = 200) -> None:
 
 def cli():
     parser = argparse.ArgumentParser(description="Generate home lending test data")
-    parser.add_argument("--count", type=int, default=200, help="Number of data points (currently unused, generates full set)")
+    parser.add_argument(
+        "--count", type=int, default=200, help="Number of data points (currently unused, generates full set)"
+    )
     args = parser.parse_args()
     generate(args.count)
 

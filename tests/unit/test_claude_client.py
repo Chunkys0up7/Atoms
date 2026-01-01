@@ -11,9 +11,10 @@ Tests the ClaudeClient class with comprehensive coverage of:
 - Response formatting and source attribution
 """
 
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, MagicMock, patch
-from typing import Dict, Any, List
 
 from api.claude_client import (
     ClaudeClient,
@@ -30,7 +31,7 @@ class TestClaudeClientInitialization:
 
         Verifies that the client correctly stores and uses provided API key.
         """
-        with patch('api.claude_client.Anthropic') as mock_anthropic:
+        with patch("api.claude_client.Anthropic") as mock_anthropic:
             client = ClaudeClient(api_key="sk-test-key-12345")
 
             assert client.api_key == "sk-test-key-12345"
@@ -42,7 +43,7 @@ class TestClaudeClientInitialization:
 
         Verifies that the client reads API key from environment when not provided.
         """
-        with patch('api.claude_client.Anthropic') as mock_anthropic:
+        with patch("api.claude_client.Anthropic") as mock_anthropic:
             client = ClaudeClient()
 
             assert client.api_key == "sk-test-key-12345"
@@ -65,7 +66,7 @@ class TestClaudeClientInitialization:
 
         Verifies the model is set to the expected version.
         """
-        with patch('api.claude_client.Anthropic'):
+        with patch("api.claude_client.Anthropic"):
             client = ClaudeClient(api_key="sk-test-key")
 
             assert client.model == "claude-sonnet-4-20250514"
@@ -76,7 +77,7 @@ class TestClaudeClientInitialization:
 
         Verifies proper error handling for missing dependency.
         """
-        with patch('api.claude_client.HAS_ANTHROPIC', False):
+        with patch("api.claude_client.HAS_ANTHROPIC", False):
             with pytest.raises(ImportError, match="anthropic package not installed"):
                 ClaudeClient(api_key="sk-test-key")
 
@@ -91,9 +92,7 @@ class TestGenerateRAGAnswer:
         Verifies that entity mode generates contextually appropriate answers.
         """
         response = mock_claude_client.generate_rag_answer(
-            query="What is the authentication system?",
-            context_atoms=sample_atoms[:2],
-            rag_mode="entity"
+            query="What is the authentication system?", context_atoms=sample_atoms[:2], rag_mode="entity"
         )
 
         assert "answer" in response
@@ -109,9 +108,7 @@ class TestGenerateRAGAnswer:
         Verifies that path mode considers relationship information.
         """
         response = mock_claude_client.generate_rag_answer(
-            query="How does authentication flow?",
-            context_atoms=sample_atoms[:3],
-            rag_mode="path"
+            query="How does authentication flow?", context_atoms=sample_atoms[:3], rag_mode="path"
         )
 
         assert "answer" in response
@@ -124,9 +121,7 @@ class TestGenerateRAGAnswer:
         Verifies that impact mode focuses on downstream effects.
         """
         response = mock_claude_client.generate_rag_answer(
-            query="What would happen if we changed authentication?",
-            context_atoms=sample_atoms[:2],
-            rag_mode="impact"
+            query="What would happen if we changed authentication?", context_atoms=sample_atoms[:2], rag_mode="impact"
         )
 
         assert "answer" in response
@@ -139,9 +134,7 @@ class TestGenerateRAGAnswer:
         Verifies that max_tokens parameter is passed to API.
         """
         response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=sample_atoms[:1],
-            max_tokens=512
+            query="Test query", context_atoms=sample_atoms[:1], max_tokens=512
         )
 
         assert "answer" in response
@@ -154,11 +147,7 @@ class TestGenerateRAGAnswer:
 
         Verifies graceful handling of no context atoms.
         """
-        response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=[],
-            rag_mode="entity"
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test query", context_atoms=[], rag_mode="entity")
 
         assert "answer" in response
         assert "sources" in response
@@ -169,19 +158,9 @@ class TestGenerateRAGAnswer:
 
         Verifies that sources are properly extracted and returned.
         """
-        test_atoms = [
-            {
-                "id": "REQ-001",
-                "type": "requirement",
-                "title": "Test Requirement",
-                "distance": 0.95
-            }
-        ]
+        test_atoms = [{"id": "REQ-001", "type": "requirement", "title": "Test Requirement", "distance": 0.95}]
 
-        response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=test_atoms
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test query", context_atoms=test_atoms)
 
         assert "sources" in response
         assert len(response["sources"]) >= 1
@@ -194,10 +173,7 @@ class TestGenerateRAGAnswer:
 
         Verifies that token counts are properly reported.
         """
-        response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=sample_atoms[:1]
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test query", context_atoms=sample_atoms[:1])
 
         assert "tokens_used" in response
         assert "input" in response["tokens_used"]
@@ -210,19 +186,9 @@ class TestGenerateRAGAnswer:
 
         Verifies that overly long source lists are truncated.
         """
-        many_atoms = [
-            {
-                "id": f"REQ-{i:03d}",
-                "type": "requirement",
-                "title": f"Requirement {i}"
-            }
-            for i in range(20)
-        ]
+        many_atoms = [{"id": f"REQ-{i:03d}", "type": "requirement", "title": f"Requirement {i}"} for i in range(20)]
 
-        response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=many_atoms
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test query", context_atoms=many_atoms)
 
         assert len(response["sources"]) <= 10
 
@@ -234,10 +200,7 @@ class TestGenerateRAGAnswer:
         """
         mock_claude_client.client.messages.create.side_effect = Exception("API Error")
 
-        response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=sample_atoms[:1]
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test query", context_atoms=sample_atoms[:1])
 
         assert "error" in response or "answer" in response
         # Should return gracefully even on error
@@ -267,7 +230,7 @@ class TestBuildContext:
                 "id": "REQ-001",
                 "type": "requirement",
                 "title": "Test Requirement",
-                "content": "This is a test requirement"
+                "content": "This is a test requirement",
             }
         ]
 
@@ -284,18 +247,8 @@ class TestBuildContext:
         Verifies proper formatting and separation of multiple atoms.
         """
         atoms = [
-            {
-                "id": "REQ-001",
-                "type": "requirement",
-                "title": "Requirement 1",
-                "content": "Content 1"
-            },
-            {
-                "id": "DESIGN-001",
-                "type": "design",
-                "title": "Design 1",
-                "content": "Content 2"
-            }
+            {"id": "REQ-001", "type": "requirement", "title": "Requirement 1", "content": "Content 1"},
+            {"id": "DESIGN-001", "type": "design", "title": "Design 1", "content": "Content 2"},
         ]
 
         context = mock_claude_client._build_context(atoms, rag_mode="entity")
@@ -311,12 +264,7 @@ class TestBuildContext:
         Verifies that overly long atom lists are truncated.
         """
         atoms = [
-            {
-                "id": f"REQ-{i:03d}",
-                "type": "requirement",
-                "title": f"Requirement {i}",
-                "content": f"Content {i}"
-            }
+            {"id": f"REQ-{i:03d}", "type": "requirement", "title": f"Requirement {i}", "content": f"Content {i}"}
             for i in range(15)
         ]
 
@@ -339,7 +287,7 @@ class TestBuildContext:
                 "type": "requirement",
                 "title": "Requirement",
                 "content": "Content",
-                "relationship": "implements"
+                "relationship": "implements",
             }
         ]
 
@@ -359,7 +307,7 @@ class TestBuildContext:
                 "type": "requirement",
                 "title": "Requirement",
                 "content": "Content",
-                "relationship_path": ["requires", "implements", "validates"]
+                "relationship_path": ["requires", "implements", "validates"],
             }
         ]
 
@@ -500,10 +448,11 @@ class TestSingletonPattern:
 
         Verifies singleton pattern implementation.
         """
-        with patch('api.claude_client.Anthropic'):
-            with patch('api.claude_client.HAS_ANTHROPIC', True):
+        with patch("api.claude_client.Anthropic"):
+            with patch("api.claude_client.HAS_ANTHROPIC", True):
                 # Clear global state
                 import api.claude_client
+
                 api.claude_client._claude_client = None
 
                 client1 = get_claude_client()
@@ -518,8 +467,9 @@ class TestSingletonPattern:
 
         Verifies graceful handling of missing dependency.
         """
-        with patch('api.claude_client.HAS_ANTHROPIC', False):
+        with patch("api.claude_client.HAS_ANTHROPIC", False):
             import api.claude_client
+
             api.claude_client._claude_client = None
 
             client = get_claude_client()
@@ -532,9 +482,10 @@ class TestSingletonPattern:
 
         Verifies graceful error handling.
         """
-        with patch('api.claude_client.Anthropic', side_effect=Exception("Init failed")):
-            with patch('api.claude_client.HAS_ANTHROPIC', True):
+        with patch("api.claude_client.Anthropic", side_effect=Exception("Init failed")):
+            with patch("api.claude_client.HAS_ANTHROPIC", True):
                 import api.claude_client
+
                 api.claude_client._claude_client = None
 
                 client = get_claude_client()
@@ -551,10 +502,7 @@ class TestResponseFormatting:
 
         Verifies response structure is complete.
         """
-        response = mock_claude_client.generate_rag_answer(
-            query="Test",
-            context_atoms=sample_atoms[:1]
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test", context_atoms=sample_atoms[:1])
 
         assert "answer" in response
         assert "model" in response
@@ -567,19 +515,9 @@ class TestResponseFormatting:
 
         Verifies source structure is complete.
         """
-        atoms = [
-            {
-                "id": "REQ-001",
-                "type": "requirement",
-                "title": "Test Requirement",
-                "distance": 0.95
-            }
-        ]
+        atoms = [{"id": "REQ-001", "type": "requirement", "title": "Test Requirement", "distance": 0.95}]
 
-        response = mock_claude_client.generate_rag_answer(
-            query="Test",
-            context_atoms=atoms
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test", context_atoms=atoms)
 
         assert len(response["sources"]) > 0
         source = response["sources"][0]
@@ -598,9 +536,7 @@ class TestIntegrationWithRAGModes:
         Verifies each mode produces proper output.
         """
         response = mock_claude_client.generate_rag_answer(
-            query="Test query",
-            context_atoms=sample_atoms[:2],
-            rag_mode=rag_mode
+            query="Test query", context_atoms=sample_atoms[:2], rag_mode=rag_mode
         )
 
         assert "answer" in response
@@ -617,9 +553,7 @@ class TestIntegrationWithRAGModes:
 
         for mode in modes:
             response = mock_claude_client.generate_rag_answer(
-                query="Test",
-                context_atoms=sample_atoms[:1],
-                rag_mode=mode
+                query="Test", context_atoms=sample_atoms[:1], rag_mode=mode
             )
             responses.append(response)
 
@@ -638,18 +572,10 @@ class TestErrorScenarios:
 
         Verifies graceful handling of incomplete atom data.
         """
-        bad_atoms = [
-            None,
-            {},
-            {"id": "TEST", "content": None}
-        ]
+        bad_atoms = [None, {}, {"id": "TEST", "content": None}]
 
         # Should not raise exception
-        response = mock_claude_client.generate_rag_answer(
-            query="Test",
-            context_atoms=[bad_atoms[0]],
-            rag_mode="entity"
-        )
+        response = mock_claude_client.generate_rag_answer(query="Test", context_atoms=[bad_atoms[0]], rag_mode="entity")
 
         assert "answer" in response or "error" in response
 
@@ -661,11 +587,7 @@ class TestErrorScenarios:
         """
         long_query = "What is " + ("very " * 100) + "important?"
 
-        response = mock_claude_client.generate_rag_answer(
-            query=long_query,
-            context_atoms=[],
-            rag_mode="entity"
-        )
+        response = mock_claude_client.generate_rag_answer(query=long_query, context_atoms=[], rag_mode="entity")
 
         assert "answer" in response
 
@@ -677,10 +599,6 @@ class TestErrorScenarios:
         """
         special_query = "What about <tag> and [bracket] & symbols?"
 
-        response = mock_claude_client.generate_rag_answer(
-            query=special_query,
-            context_atoms=[],
-            rag_mode="entity"
-        )
+        response = mock_claude_client.generate_rag_answer(query=special_query, context_atoms=[], rag_mode="entity")
 
         assert "answer" in response

@@ -4,7 +4,7 @@ type: PROCESS
 name: System Pulls Soft Credit
 version: 1.0.0
 status: DEPRECATED
-owner: James Martinez
+owner: Michael Rodriguez
 team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -83,3 +83,5 @@ metrics:
   avg_cycle_time_mins: 22
   error_rate: 0.072
   compliance_score: 0.89
+steward: Sarah Chen
+owning_team: Customer Experience

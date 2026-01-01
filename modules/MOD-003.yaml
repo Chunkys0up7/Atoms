@@ -1,5 +1,11 @@
-id: MOD-003
-type: Module
+id: module-mod-003
+version: 1.0.0
+workflow_type: BPM
+type: business
 name: Module 3
 description: Demo module 3
 owner: team-a
+atoms:
+- atom-sys-credit-report-pull
+- atom-bo-credit-analysis
+- atom-sys-income-calculation

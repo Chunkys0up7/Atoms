@@ -1,12 +1,14 @@
-module_id: data-layer
+id: module-data-layer
+version: 1.0.0
+workflow_type: CUSTOM
+module_id: module-data-layer
 name: Data Persistence Layer
-description: Database and caching infrastructure including PostgreSQL, Redis, and backup systems
+description: Database and caching infrastructure including PostgreSQL, Redis, and
+  backup systems
 atom_ids:
-  - REQ-002
-  - DES-002
-  - PROC-002
-  - VAL-002
-  - RISK-002
+- atom-sys-reserve-calculation
+- atom-bo-data-accuracy-review
+- atom-sys-credit-report-pull
 metadata:
   owner: infrastructure-team
   criticality: critical
@@ -16,7 +18,9 @@ metadata:
   estimated_effort: 2 weeks
   dependencies: []
 tags:
-  - database
-  - postgresql
-  - redis
-  - infrastructure
+- database
+- postgresql
+- redis
+- infrastructure
+atoms:
+- atom-data-layer

@@ -1,5 +1,11 @@
-id: MOD-012
-type: Module
+id: module-mod-012
+version: 1.0.0
+workflow_type: BPM
+type: business
 name: Module 12
 description: Demo module 12
 owner: platform
+atoms:
+- atom-sys-los-platform
+- atom-sys-reserve-calculation
+- atom-bo-asset-source-review

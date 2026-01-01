@@ -1,4 +1,6 @@
 id: module-income-verification
+version: 1.0.0
+workflow_type: BPM
 name: Income Verification
 description: W-2 review, pay stub analysis, tax return validation, and income calculation
 owner: Processing
@@ -9,4 +11,13 @@ atoms:
 - atom-bo-tax-return-analysis
 - atom-sys-income-calculation
 - atom-bo-voi-verification
+- atom-cust-pay-stub-upload
+- atom-bo-pay-stub-review
+- atom-bo-income-stability-check
+- atom-bo-bonus-overtime-calculation
+- atom-bo-employment-verification
+- atom-bo-alimony-child-support-verification
+- atom-bo-retirement-income-verification
+- atom-bo-self-employment-verification
+- atom-bo-rental-income-verification
 phaseId: phase-processing

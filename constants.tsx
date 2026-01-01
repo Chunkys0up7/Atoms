@@ -123,6 +123,31 @@ export const MOCK_PHASES: Phase[] = [
     journeyId: 'journey-purchase-conventional',
     targetDurationDays: 5
   }
+  ,
+  {
+    id: 'phase-pre-application-refinance-rate-term',
+    name: 'Pre-Application - Refi Rate & Term',
+    description: 'Pre-application checks and lead qualification for rate-and-term refinance.',
+    modules: ['module-pre-qualification'],
+    journeyId: 'journey-refinance-rate-term',
+    targetDurationDays: 2
+  },
+  {
+    id: 'phase-application-intake-refinance-rate-term',
+    name: 'Application Intake - Refi Rate & Term',
+    description: 'Refinance application intake and document collection.',
+    modules: ['module-application-intake'],
+    journeyId: 'journey-refinance-rate-term',
+    targetDurationDays: 3
+  },
+  {
+    id: 'phase-processing-refinance-rate-term',
+    name: 'Processing - Refi Rate & Term',
+    description: 'Refinance-specific processing including payoff and title checks.',
+    modules: ['module-income-verification','module-credit-analysis','module-property-appraisal'],
+    journeyId: 'journey-refinance-rate-term',
+    targetDurationDays: 6
+  }
 ];
 
 export const MOCK_JOURNEYS: Journey[] = [
@@ -131,5 +156,24 @@ export const MOCK_JOURNEYS: Journey[] = [
     name: 'Purchase Loan Journey',
     description: 'Complete end-to-end process from application to funding.',
     phases: ['phase-processing']
+  }
+  ,
+  {
+    id: 'journey-refinance-rate-term',
+    name: 'Refinance — Rate & Term',
+    description: 'Refinance journey focused on lowering rate or adjusting term.',
+    phases: ['phase-pre-application-refinance-rate-term','phase-application-intake-refinance-rate-term','phase-processing-refinance-rate-term']
+  },
+  {
+    id: 'journey-purchase-fha',
+    name: 'Purchase — FHA Loan',
+    description: 'Purchase flow for FHA insured loans.',
+    phases: ['phase-pre-application-purchase-fha','phase-application-intake-purchase-fha','phase-processing-purchase-fha']
+  },
+  {
+    id: 'journey-refinance-cash-out',
+    name: 'Refinance — Cash-Out',
+    description: 'Cash-out refinance workflow with payoff/disbursement handling.',
+    phases: ['phase-pre-application-refinance-cash-out','phase-application-intake-refinance-cash-out','phase-processing-refinance-cash-out']
   }
 ];

@@ -9,11 +9,12 @@ This module provides comprehensive fixtures for:
 - Async test support
 """
 
-import pytest
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, MagicMock, AsyncMock, patch
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -32,11 +33,7 @@ SAMPLE_ATOMS = [
         "priority": "high",
         "created_date": "2025-01-01",
         "last_modified": "2025-01-15",
-        "metadata": {
-            "module": "auth",
-            "tags": ["security", "user-management"],
-            "owner": "platform-team"
-        }
+        "metadata": {"module": "auth", "tags": ["security", "user-management"], "owner": "platform-team"},
     },
     {
         "id": "DESIGN-001",
@@ -48,11 +45,7 @@ SAMPLE_ATOMS = [
         "priority": "high",
         "created_date": "2025-01-02",
         "last_modified": "2025-01-15",
-        "metadata": {
-            "module": "auth",
-            "tags": ["security", "design"],
-            "owner": "platform-team"
-        }
+        "metadata": {"module": "auth", "tags": ["security", "design"], "owner": "platform-team"},
     },
     {
         "id": "PROC-001",
@@ -64,11 +57,7 @@ SAMPLE_ATOMS = [
         "priority": "high",
         "created_date": "2025-01-05",
         "last_modified": "2025-01-15",
-        "metadata": {
-            "module": "auth",
-            "tags": ["procedure", "implementation"],
-            "owner": "platform-team"
-        }
+        "metadata": {"module": "auth", "tags": ["procedure", "implementation"], "owner": "platform-team"},
     },
     {
         "id": "VAL-001",
@@ -80,11 +69,7 @@ SAMPLE_ATOMS = [
         "priority": "high",
         "created_date": "2025-01-10",
         "last_modified": "2025-01-15",
-        "metadata": {
-            "module": "auth",
-            "tags": ["testing", "validation"],
-            "owner": "qa-team"
-        }
+        "metadata": {"module": "auth", "tags": ["testing", "validation"], "owner": "qa-team"},
     },
     {
         "id": "RISK-001",
@@ -96,31 +81,25 @@ SAMPLE_ATOMS = [
         "impact_level": "medium",
         "created_date": "2025-01-12",
         "last_modified": "2025-01-15",
-        "metadata": {
-            "module": "auth",
-            "tags": ["risk", "security"],
-            "mitigation": "Implement refresh token mechanism"
-        }
-    }
+        "metadata": {"module": "auth", "tags": ["risk", "security"], "mitigation": "Implement refresh token mechanism"},
+    },
 ]
 
 
 SAMPLE_GRAPH_DATA = {
-    "nodes": [
-        {"id": node["id"], "type": node["type"], "label": node["title"]}
-        for node in SAMPLE_ATOMS
-    ],
+    "nodes": [{"id": node["id"], "type": node["type"], "label": node["title"]} for node in SAMPLE_ATOMS],
     "edges": [
         {"source": "REQ-001", "target": "DESIGN-001", "type": "implements"},
         {"source": "DESIGN-001", "target": "PROC-001", "type": "implements"},
         {"source": "PROC-001", "target": "VAL-001", "type": "validated_by"},
         {"source": "VAL-001", "target": "REQ-001", "type": "validates"},
         {"source": "RISK-001", "target": "REQ-001", "type": "affects"},
-    ]
+    ],
 }
 
 
 # ==================== Neo4j Fixtures ====================
+
 
 @pytest.fixture
 def mock_neo4j_driver():
@@ -157,14 +136,10 @@ def mock_neo4j_client(mock_neo4j_driver):
     Returns:
         Mock: Configured Neo4j client mock
     """
-    with patch('api.neo4j_client.GraphDatabase.driver', return_value=mock_neo4j_driver):
+    with patch("api.neo4j_client.GraphDatabase.driver", return_value=mock_neo4j_driver):
         from api.neo4j_client import Neo4jClient
 
-        client = Neo4jClient(
-            uri="neo4j://localhost:7687",
-            user="neo4j",
-            password="password"
-        )
+        client = Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password="password")
 
         # Configure default mock responses
         client.driver = mock_neo4j_driver
@@ -207,9 +182,7 @@ def neo4j_client_with_data(mock_neo4j_client):
         if "requires|depends_on|affects" in query and "<-" in query:
             if kwargs.get("atom_id") == "REQ-001":
                 # Return downstream dependencies
-                result_mock.data.return_value = [
-                    {"downstream": SAMPLE_ATOMS[1], "depth": 1}
-                ]
+                result_mock.data.return_value = [{"downstream": SAMPLE_ATOMS[1], "depth": 1}]
             result_mock.__iter__ = Mock(return_value=iter([]))
             return result_mock
 
@@ -235,6 +208,7 @@ def neo4j_client_with_data(mock_neo4j_client):
 
 # ==================== Claude Client Fixtures ====================
 
+
 @pytest.fixture
 def mock_anthropic_client():
     """
@@ -249,11 +223,7 @@ def mock_anthropic_client():
     mock_client = MagicMock()
     mock_client.messages.create.return_value = MagicMock(
         content=[MagicMock(text="This is a test answer with relevant information.")],
-        usage=MagicMock(
-            input_tokens=100,
-            output_tokens=50,
-            total_tokens=150
-        )
+        usage=MagicMock(input_tokens=100, output_tokens=50, total_tokens=150),
     )
     return mock_client
 
@@ -272,7 +242,7 @@ def mock_claude_client(mock_anthropic_client):
     Returns:
         Mock: Configured Claude client
     """
-    with patch('api.claude_client.Anthropic', return_value=mock_anthropic_client):
+    with patch("api.claude_client.Anthropic", return_value=mock_anthropic_client):
         from api.claude_client import ClaudeClient
 
         client = ClaudeClient(api_key="sk-test-key-12345")
@@ -300,16 +270,12 @@ def claude_client_with_responses(mock_claude_client):
         responses = {
             "entity": "The authentication system uses OAuth 2.0 protocol for secure user login.",
             "path": "REQ-001 requires DESIGN-001, which implements PROC-001, which is validated by VAL-001.",
-            "impact": "Changes to REQ-001 would impact DESIGN-001, PROC-001, and VAL-001."
+            "impact": "Changes to REQ-001 would impact DESIGN-001, PROC-001, and VAL-001.",
         }
 
         return MagicMock(
             content=[MagicMock(text=responses.get(mode, "Answer based on context."))],
-            usage=MagicMock(
-                input_tokens=100,
-                output_tokens=50,
-                total_tokens=150
-            )
+            usage=MagicMock(input_tokens=100, output_tokens=50, total_tokens=150),
         )
 
     # Store original for mode detection
@@ -331,6 +297,7 @@ def claude_client_with_responses(mock_claude_client):
 
 
 # ==================== Test Data Fixtures ====================
+
 
 @pytest.fixture
 def sample_atoms() -> List[Dict[str, Any]]:
@@ -377,6 +344,7 @@ def sample_atom_by_type(sample_atoms) -> Dict[str, Dict[str, Any]]:
 
 # ==================== API Client Fixtures ====================
 
+
 @pytest.fixture
 def test_client():
     """
@@ -389,6 +357,7 @@ def test_client():
         TestClient: FastAPI test client
     """
     from fastapi.testclient import TestClient
+
     from api.server import app
 
     return TestClient(app)
@@ -409,12 +378,13 @@ def test_client_with_mocks(test_client, mock_neo4j_client, mock_claude_client):
     Returns:
         TestClient: Test client with mocked dependencies
     """
-    with patch('api.routes.rag.get_neo4j_client', return_value=mock_neo4j_client):
-        with patch('api.routes.rag.get_claude_client', return_value=mock_claude_client):
+    with patch("api.routes.rag.get_neo4j_client", return_value=mock_neo4j_client):
+        with patch("api.routes.rag.get_claude_client", return_value=mock_claude_client):
             yield test_client
 
 
 # ==================== Configuration Fixtures ====================
+
 
 @pytest.fixture
 def mock_env_vars(monkeypatch):
@@ -435,7 +405,7 @@ def mock_env_vars(monkeypatch):
         "NEO4J_PASSWORD": "password",
         "ANTHROPIC_API_KEY": "sk-test-key-12345",
         "API_ADMIN_TOKEN": "test-admin-token-12345",
-        "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:5173"
+        "ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:5173",
     }
 
     for key, value in env_vars.items():
@@ -446,6 +416,7 @@ def mock_env_vars(monkeypatch):
 
 # ==================== Async Test Support ====================
 
+
 @pytest.fixture
 def event_loop():
     """
@@ -455,12 +426,14 @@ def event_loop():
         asyncio.AbstractEventLoop: Event loop for async operations
     """
     import asyncio
+
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
 
 
 # ==================== Parametrization Fixtures ====================
+
 
 @pytest.fixture(
     params=[
@@ -481,9 +454,7 @@ def atom_id_and_type(request):
     return request.param
 
 
-@pytest.fixture(
-    params=["entity", "path", "impact"]
-)
+@pytest.fixture(params=["entity", "path", "impact"])
 def rag_modes(request):
     """
     Parametrized fixture providing RAG modes.
@@ -494,9 +465,7 @@ def rag_modes(request):
     return request.param
 
 
-@pytest.fixture(
-    params=[1, 2, 3, 5, 10]
-)
+@pytest.fixture(params=[1, 2, 3, 5, 10])
 def depth_values(request):
     """
     Parametrized fixture providing graph traversal depth values.
@@ -509,6 +478,7 @@ def depth_values(request):
 
 # ==================== Cleanup Fixtures ====================
 
+
 @pytest.fixture
 def cleanup_neo4j_client():
     """
@@ -520,6 +490,7 @@ def cleanup_neo4j_client():
     yield
 
     from api.neo4j_client import close_neo4j_client
+
     close_neo4j_client()
 
 
@@ -537,27 +508,17 @@ def cleanup_mocks():
 
 # ==================== Pytest Configuration ====================
 
+
 def pytest_configure(config):
     """Configure pytest markers."""
-    config.addinivalue_line(
-        "markers",
-        "unit: mark test as a unit test"
-    )
-    config.addinivalue_line(
-        "markers",
-        "integration: mark test as an integration test"
-    )
-    config.addinivalue_line(
-        "markers",
-        "slow: mark test as slow running"
-    )
-    config.addinivalue_line(
-        "markers",
-        "async: mark test as async"
-    )
+    config.addinivalue_line("markers", "unit: mark test as a unit test")
+    config.addinivalue_line("markers", "integration: mark test as an integration test")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
+    config.addinivalue_line("markers", "async: mark test as async")
 
 
 # ==================== Collection Hooks ====================
+
 
 def pytest_collection_modifyitems(config, items):
     """
@@ -576,4 +537,4 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
 
         if "async" in item.name.lower():
-            item.add_marker(pytest.mark.async)
+            item.add_marker(pytest.mark.asyncio)

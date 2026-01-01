@@ -55,3 +55,5 @@ metrics:
   avg_cycle_time_mins: 41
   error_rate: 0.072
   compliance_score: 0.95
+steward: Robert Kim
+owning_team: Loan Origination

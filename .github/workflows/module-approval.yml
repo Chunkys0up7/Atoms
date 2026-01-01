@@ -1,0 +1,200 @@
+name: Module Approval Workflow
+
+on:
+  # Trigger when event files are created
+  push:
+    paths:
+      - '.github/events/approval_*.json'
+      - 'modules/**/*.yaml'
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      event_type:
+        description: 'Event type'
+        required: true
+        type: choice
+        options:
+          - approval_submitted
+          - approval_approved
+          - approval_rejected
+          - approval_changes_requested
+      module_id:
+        description: 'Module ID'
+        required: true
+        type: string
+
+jobs:
+  process-approval-event:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Find latest event file
+        id: find_event
+        run: |
+          # Find the most recent approval event file
+          LATEST_EVENT=$(ls -t .github/events/approval_*.json 2>/dev/null | head -n 1 || echo "")
+
+          if [ -z "$LATEST_EVENT" ]; then
+            echo "No event files found"
+            echo "has_event=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found event file: $LATEST_EVENT"
+            echo "has_event=true" >> $GITHUB_OUTPUT
+            echo "event_file=$LATEST_EVENT" >> $GITHUB_OUTPUT
+
+            # Extract event details
+            EVENT_TYPE=$(jq -r '.event_type' "$LATEST_EVENT")
+            MODULE_ID=$(jq -r '.module_id' "$LATEST_EVENT")
+            TIMESTAMP=$(jq -r '.timestamp' "$LATEST_EVENT")
+
+            echo "event_type=$EVENT_TYPE" >> $GITHUB_OUTPUT
+            echo "module_id=$MODULE_ID" >> $GITHUB_OUTPUT
+            echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+            echo "Event: $EVENT_TYPE for module $MODULE_ID at $TIMESTAMP"
+          fi
+
+      - name: Process approval submitted event
+        if: steps.find_event.outputs.has_event == 'true' && steps.find_event.outputs.event_type == 'approval_submitted'
+        run: |
+          MODULE_ID="${{ steps.find_event.outputs.module_id }}"
+          EVENT_FILE="${{ steps.find_event.outputs.event_file }}"
+
+          FROM_STAGE=$(jq -r '.payload.from_stage' "$EVENT_FILE")
+          TO_STAGE=$(jq -r '.payload.to_stage' "$EVENT_FILE")
+          SUBMITTED_BY=$(jq -r '.payload.submitted_by' "$EVENT_FILE")
+
+          echo "📤 Module $MODULE_ID submitted from $FROM_STAGE to $TO_STAGE by $SUBMITTED_BY"
+
+          # Create notification (could send to Slack, email, etc.)
+          echo "Module approval submitted - awaiting review" >> $GITHUB_STEP_SUMMARY
+
+      - name: Process approval approved event
+        if: steps.find_event.outputs.has_event == 'true' && steps.find_event.outputs.event_type == 'approval_approved'
+        run: |
+          MODULE_ID="${{ steps.find_event.outputs.module_id }}"
+          EVENT_FILE="${{ steps.find_event.outputs.event_file }}"
+
+          STAGE=$(jq -r '.payload.stage' "$EVENT_FILE")
+          APPROVED_BY=$(jq -r '.payload.approved_by' "$EVENT_FILE")
+          REVIEWER_ROLE=$(jq -r '.payload.reviewer_role' "$EVENT_FILE")
+
+          echo "✅ Module $MODULE_ID stage '$STAGE' approved by $APPROVED_BY ($REVIEWER_ROLE)"
+
+          # Add approval summary
+          echo "### ✅ Approval Granted" >> $GITHUB_STEP_SUMMARY
+          echo "**Module:** $MODULE_ID" >> $GITHUB_STEP_SUMMARY
+          echo "**Stage:** $STAGE" >> $GITHUB_STEP_SUMMARY
+          echo "**Approved by:** $APPROVED_BY" >> $GITHUB_STEP_SUMMARY
+          echo "**Role:** $REVIEWER_ROLE" >> $GITHUB_STEP_SUMMARY
+
+      - name: Process approval rejected event
+        if: steps.find_event.outputs.has_event == 'true' && steps.find_event.outputs.event_type == 'approval_rejected'
+        run: |
+          MODULE_ID="${{ steps.find_event.outputs.module_id }}"
+          EVENT_FILE="${{ steps.find_event.outputs.event_file }}"
+
+          STAGE=$(jq -r '.payload.stage' "$EVENT_FILE")
+          REJECTED_BY=$(jq -r '.payload.rejected_by' "$EVENT_FILE")
+          REASON=$(jq -r '.payload.reason' "$EVENT_FILE")
+
+          echo "❌ Module $MODULE_ID rejected at stage '$STAGE' by $REJECTED_BY"
+          echo "Reason: $REASON"
+
+          # Add rejection summary
+          echo "### ❌ Approval Rejected" >> $GITHUB_STEP_SUMMARY
+          echo "**Module:** $MODULE_ID" >> $GITHUB_STEP_SUMMARY
+          echo "**Stage:** $STAGE" >> $GITHUB_STEP_SUMMARY
+          echo "**Rejected by:** $REJECTED_BY" >> $GITHUB_STEP_SUMMARY
+          echo "**Reason:** $REASON" >> $GITHUB_STEP_SUMMARY
+
+      - name: Process changes requested event
+        if: steps.find_event.outputs.has_event == 'true' && steps.find_event.outputs.event_type == 'approval_changes_requested'
+        run: |
+          MODULE_ID="${{ steps.find_event.outputs.module_id }}"
+          EVENT_FILE="${{ steps.find_event.outputs.event_file }}"
+
+          STAGE=$(jq -r '.payload.stage' "$EVENT_FILE")
+          REQUESTED_BY=$(jq -r '.payload.requested_by' "$EVENT_FILE")
+          CHANGES=$(jq -r '.payload.changes' "$EVENT_FILE")
+
+          echo "🔄 Changes requested for module $MODULE_ID at stage '$STAGE' by $REQUESTED_BY"
+          echo "Requested changes: $CHANGES"
+
+          # Add changes summary
+          echo "### 🔄 Changes Requested" >> $GITHUB_STEP_SUMMARY
+          echo "**Module:** $MODULE_ID" >> $GITHUB_STEP_SUMMARY
+          echo "**Stage:** $STAGE" >> $GITHUB_STEP_SUMMARY
+          echo "**Requested by:** $REQUESTED_BY" >> $GITHUB_STEP_SUMMARY
+          echo "**Changes:** $CHANGES" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit module changes
+        if: steps.find_event.outputs.has_event == 'true'
+        run: |
+          # Add module changes
+          git add modules/**/*.yaml 2>/dev/null || true
+
+          # Check if there are changes to commit
+          if ! git diff --cached --quiet; then
+            MODULE_ID="${{ steps.find_event.outputs.module_id }}"
+            EVENT_TYPE="${{ steps.find_event.outputs.event_type }}"
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+            # Create commit message
+            git commit -m "chore(approval): $EVENT_TYPE for $MODULE_ID
+
+            Automated commit for approval workflow event at $TIMESTAMP
+
+            Event type: $EVENT_TYPE
+            Module: $MODULE_ID
+
+            🤖 Generated by GitHub Actions"
+            echo "✅ Module changes committed"
+          else
+            echo "ℹ️ No module changes to commit"
+          fi
+
+      - name: Archive processed event
+        if: steps.find_event.outputs.has_event == 'true'
+        run: |
+          EVENT_FILE="${{ steps.find_event.outputs.event_file }}"
+
+          # Create archive directory
+          mkdir -p .github/events/archive
+
+          # Move processed event to archive
+          ARCHIVE_FILE=".github/events/archive/$(basename $EVENT_FILE)"
+          mv "$EVENT_FILE" "$ARCHIVE_FILE"
+
+          git add .github/events/
+          git commit -m "chore: archive processed event $(basename $EVENT_FILE)" || echo "No event changes to commit"
+
+      - name: Push changes
+        if: steps.find_event.outputs.has_event == 'true'
+        run: |
+          git push origin ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.find_event.outputs.has_event }}" == "true" ]; then
+            echo "✅ Approval event processed successfully"
+          else
+            echo "ℹ️ No approval events to process"
+          fi

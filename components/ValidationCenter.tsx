@@ -63,7 +63,7 @@ const ValidationCenter: React.FC<ValidationCenterProps> = ({ atoms, modules, onF
                      <span style={{ fontSize: '10px', fontWeight: '600', padding: '4px 8px', borderRadius: '4px', backgroundColor: issue.severity === 'ERROR' ? '#dc2626' : '#f59e0b', color: '#ffffff' }}>{issue.severity}</span>
                      <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>{issue.category}</span>
                    </div>
-                   <span style={{ fontFamily: 'monospace', fontSize: '10px', color: 'var(--color-text-tertiary)' }}>{issue.id}</span>
+                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)' }}>{issue.id}</span>
                 </div>
                 <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-sm)' }}>{issue.message}</p>
                 <div style={{ backgroundColor: '#f8fafc', padding: 'var(--spacing-sm)', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '12px', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>

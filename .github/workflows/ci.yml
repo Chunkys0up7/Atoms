@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   lint-and-validate:
     name: Lint and Schema Validation
@@ -42,12 +46,13 @@ jobs:
         run: |
           python -c "
           import os
+          import json
           import yaml
           from jsonschema import validate, ValidationError
 
           # Load schema
-          with open('schemas/atom.schema.yaml', 'r') as f:
-              schema = yaml.safe_load(f)
+          with open('schemas/atom.schema.json', 'r') as f:
+              schema = json.load(f)
 
           # Validate all atoms
           atoms_dir = 'atoms'
@@ -78,12 +83,13 @@ jobs:
         run: |
           python -c "
           import os
+          import json
           import yaml
           from jsonschema import validate, ValidationError
 
           # Load schema
-          with open('schemas/module.schema.yaml', 'r') as f:
-              schema = yaml.safe_load(f)
+          with open('schemas/module.schema.json', 'r') as f:
+              schema = json.load(f)
 
           # Validate all modules
           modules_dir = 'modules'
@@ -295,7 +301,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'

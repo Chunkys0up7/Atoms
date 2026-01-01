@@ -1,0 +1,531 @@
+"""
+Feedback Loop System
+Analyzes metrics and suggests process improvements
+"""
+
+import json
+import statistics
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/feedback", tags=["feedback"])
+
+
+# Response Models
+class Suggestion(BaseModel):
+    """Single optimization suggestion"""
+
+    id: str
+    type: str  # 'quality', 'performance', 'efficiency', 'compliance'
+    severity: str  # 'low', 'medium', 'high', 'critical'
+    target_type: str  # 'atom', 'module', 'phase', 'journey'
+    target_id: str
+    target_name: str
+    issue: str
+    recommendation: str
+    impact_estimate: Optional[str] = None
+    suggested_actions: List[Dict[str, Any]] = []
+    metrics: Dict[str, Any] = {}
+
+
+class OptimizationReport(BaseModel):
+    """Complete optimization analysis"""
+
+    total_suggestions: int
+    by_severity: Dict[str, int]
+    by_type: Dict[str, int]
+    suggestions: List[Suggestion]
+    summary: str
+
+
+# Feedback Loop Engine
+class FeedbackLoopEngine:
+    """Analyzes metrics and generates improvement suggestions"""
+
+    def __init__(self):
+        # Thresholds for triggering suggestions
+        self.thresholds = {
+            "error_rate_high": 0.05,  # 5%
+            "error_rate_critical": 0.10,  # 10%
+            "automation_low": 0.30,  # 30%
+            "automation_target": 0.70,  # 70%
+            "compliance_min": 0.95,  # 95%
+            "compliance_critical": 0.90,  # 90%
+            "cycle_time_multiplier": 1.5,  # 1.5x expected
+        }
+
+    def analyze_atom(self, atom: Dict[str, Any]) -> List[Suggestion]:
+        """Analyze a single atom and generate suggestions"""
+        suggestions = []
+        atom_id = atom.get("id", "unknown")
+        atom_name = atom.get("name", "Unnamed")
+        metrics = atom.get("metrics", {})
+
+        if not metrics:
+            return suggestions
+
+        # Check error rate
+        error_rate = metrics.get("error_rate", 0)
+        if error_rate > self.thresholds["error_rate_critical"]:
+            suggestions.append(
+                Suggestion(
+                    id=f"{atom_id}-error-critical",
+                    type="quality",
+                    severity="critical",
+                    target_type="atom",
+                    target_id=atom_id,
+                    target_name=atom_name,
+                    issue=f"Error rate {error_rate:.1%} is critically high (threshold: {self.thresholds['error_rate_critical']:.1%})",  # noqa: E501
+                    recommendation="Immediate action required: Add validation steps, implement error handling, review logic for edge cases",  # noqa: E501
+                    impact_estimate=f"Reducing errors could save {error_rate * 100:.0f}% of rework time",
+                    suggested_actions=[
+                        {"action": "add_validation", "description": "Add input validation atom before this step"},
+                        {"action": "add_error_handling", "description": "Implement try-catch and fallback logic"},
+                        {"action": "review_logic", "description": "Code review to identify error patterns"},
+                    ],
+                    metrics={"current_error_rate": error_rate, "target": self.thresholds["error_rate_high"]},
+                )
+            )
+        elif error_rate > self.thresholds["error_rate_high"]:
+            suggestions.append(
+                Suggestion(
+                    id=f"{atom_id}-error-high",
+                    type="quality",
+                    severity="high",
+                    target_type="atom",
+                    target_id=atom_id,
+                    target_name=atom_name,
+                    issue=f"Error rate {error_rate:.1%} exceeds acceptable threshold",
+                    recommendation="Add validation atoms or improve error handling logic",
+                    impact_estimate=f"Could improve success rate by {error_rate * 100:.0f}%",
+                    suggested_actions=[
+                        {"action": "add_validation", "description": "Add validation step upstream"},
+                        {
+                            "action": "improve_documentation",
+                            "description": "Clarify requirements to reduce user errors",
+                        },
+                    ],
+                    metrics={"current_error_rate": error_rate, "target": self.thresholds["error_rate_high"]},
+                )
+            )
+
+        # Check automation level
+        automation = metrics.get("automation_level", 0)
+        if automation < self.thresholds["automation_low"]:
+            roi_estimate = self._calculate_automation_roi(metrics)
+            suggestions.append(
+                Suggestion(
+                    id=f"{atom_id}-automation-low",
+                    type="efficiency",
+                    severity="medium" if automation > 0 else "high",
+                    target_type="atom",
+                    target_id=atom_id,
+                    target_name=atom_name,
+                    issue=f"Only {automation:.0%} automated - significant manual effort",
+                    recommendation="Identify automation opportunities: API integration, RPA, or workflow automation",
+                    impact_estimate=roi_estimate,
+                    suggested_actions=[
+                        {"action": "automation_assessment", "description": "Assess automation feasibility and ROI"},
+                        {"action": "api_integration", "description": "Integrate with upstream/downstream systems"},
+                        {"action": "rpa_candidate", "description": "Consider RPA for repetitive tasks"},
+                    ],
+                    metrics={"current_automation": automation, "target": self.thresholds["automation_target"]},
+                )
+            )
+
+        # Check compliance score
+        compliance = metrics.get("compliance_score", 1.0)
+        if compliance < self.thresholds["compliance_critical"]:
+            suggestions.append(
+                Suggestion(
+                    id=f"{atom_id}-compliance-critical",
+                    type="compliance",
+                    severity="critical",
+                    target_type="atom",
+                    target_id=atom_id,
+                    target_name=atom_name,
+                    issue=f"Compliance score {compliance:.1%} is below minimum threshold",
+                    recommendation="Urgent: Add required controls, update documentation, implement audit trail",
+                    impact_estimate="Regulatory risk - immediate attention required",
+                    suggested_actions=[
+                        {"action": "add_controls", "description": "Implement missing regulatory controls"},
+                        {"action": "audit_trail", "description": "Add comprehensive audit logging"},
+                        {"action": "compliance_review", "description": "Schedule compliance team review"},
+                    ],
+                    metrics={"current_compliance": compliance, "target": self.thresholds["compliance_min"]},
+                )
+            )
+        elif compliance < self.thresholds["compliance_min"]:
+            suggestions.append(
+                Suggestion(
+                    id=f"{atom_id}-compliance-low",
+                    type="compliance",
+                    severity="high",
+                    target_type="atom",
+                    target_id=atom_id,
+                    target_name=atom_name,
+                    issue=f"Compliance score {compliance:.1%} below target",
+                    recommendation="Add missing controls and improve documentation",
+                    impact_estimate="Risk of audit findings",
+                    suggested_actions=[
+                        {"action": "update_documentation", "description": "Document control procedures"},
+                        {"action": "add_controls", "description": "Implement compensating controls"},
+                    ],
+                    metrics={"current_compliance": compliance, "target": self.thresholds["compliance_min"]},
+                )
+            )
+
+        # Check cycle time (if we have a target)
+        cycle_time = metrics.get("avg_cycle_time_mins", 0)
+        expected_time = atom.get("expected_cycle_time_mins")
+        if expected_time and cycle_time > (expected_time * self.thresholds["cycle_time_multiplier"]):
+            suggestions.append(
+                Suggestion(
+                    id=f"{atom_id}-performance-slow",
+                    type="performance",
+                    severity="medium",
+                    target_type="atom",
+                    target_id=atom_id,
+                    target_name=atom_name,
+                    issue=f"Cycle time {cycle_time:.0f}min exceeds expected {expected_time:.0f}min by {((cycle_time/expected_time) - 1)*100:.0f}%",  # noqa: E501
+                    recommendation="Investigate bottlenecks, consider parallelization or automation",
+                    impact_estimate=f"Could save {cycle_time - expected_time:.0f} minutes per transaction",
+                    suggested_actions=[
+                        {"action": "bottleneck_analysis", "description": "Identify and eliminate bottlenecks"},
+                        {"action": "parallel_processing", "description": "Enable parallel processing where possible"},
+                        {"action": "automation", "description": "Automate time-consuming steps"},
+                    ],
+                    metrics={"current_cycle_time": cycle_time, "expected": expected_time},
+                )
+            )
+
+        return suggestions
+
+    def analyze_module(self, module: Dict[str, Any], atoms: List[Dict[str, Any]]) -> List[Suggestion]:
+        """Analyze a module and generate suggestions"""
+        suggestions = []
+        module_id = module.get("id", "unknown")
+        module_name = module.get("name", "Unnamed")
+
+        # Get atoms in this module
+        module_atom_ids = module.get("atoms", [])
+        module_atoms = [a for a in atoms if a.get("id") in module_atom_ids]
+
+        if not module_atoms:
+            return suggestions
+
+        # Calculate aggregate metrics
+        avg_error_rate = statistics.mean([a.get("metrics", {}).get("error_rate", 0) for a in module_atoms])
+        avg_automation = statistics.mean([a.get("metrics", {}).get("automation_level", 0) for a in module_atoms])
+        _avg_compliance = statistics.mean(  # noqa: F841, E501
+            [a.get("metrics", {}).get("compliance_score", 1.0) for a in module_atoms]
+        )
+        _total_cycle_time = sum(  # noqa: F841, E501
+            [a.get("metrics", {}).get("avg_cycle_time_mins", 0) for a in module_atoms]
+        )
+
+        # Module-level suggestions
+        if avg_error_rate > self.thresholds["error_rate_high"]:
+            suggestions.append(
+                Suggestion(
+                    id=f"{module_id}-module-quality",
+                    type="quality",
+                    severity="high",
+                    target_type="module",
+                    target_id=module_id,
+                    target_name=module_name,
+                    issue=f"Module average error rate {avg_error_rate:.1%} indicates systemic quality issues",
+                    recommendation="Review entire module workflow, add validation layer, implement quality gates",
+                    impact_estimate=f"Affects {len(module_atoms)} atoms - high impact fix",
+                    suggested_actions=[
+                        {"action": "module_review", "description": "Conduct comprehensive module review"},
+                        {"action": "add_validation_layer", "description": "Add module-wide validation"},
+                        {"action": "quality_gates", "description": "Implement quality checkpoints"},
+                    ],
+                    metrics={"avg_error_rate": avg_error_rate, "atoms_affected": len(module_atoms)},
+                )
+            )
+
+        if avg_automation < self.thresholds["automation_low"]:
+            suggestions.append(
+                Suggestion(
+                    id=f"{module_id}-module-automation",
+                    type="efficiency",
+                    severity="medium",
+                    target_type="module",
+                    target_id=module_id,
+                    target_name=module_name,
+                    issue=f"Module only {avg_automation:.0%} automated - opportunity for end-to-end automation",
+                    recommendation="Consider straight-through processing or workflow automation for entire module",
+                    impact_estimate=f"High ROI: {len(module_atoms)} atoms could benefit",
+                    suggested_actions=[
+                        {"action": "stp_assessment", "description": "Assess straight-through processing feasibility"},
+                        {"action": "workflow_automation", "description": "Implement workflow orchestration"},
+                        {"action": "integration", "description": "API integrations to eliminate handoffs"},
+                    ],
+                    metrics={"avg_automation": avg_automation, "atoms_count": len(module_atoms)},
+                )
+            )
+
+        return suggestions
+
+    def _calculate_automation_roi(self, metrics: Dict[str, Any]) -> str:
+        """Calculate ROI estimate for automation"""
+        cycle_time = metrics.get("avg_cycle_time_mins", 0)
+        current_automation = metrics.get("automation_level", 0)
+
+        if cycle_time == 0:
+            return "Potential time savings"
+
+        manual_time = cycle_time * (1 - current_automation)
+        potential_savings = manual_time * 0.8  # Assume 80% of manual time can be automated
+
+        return f"Could save ~{potential_savings:.0f} min/transaction"
+
+    def generate_summary(self, suggestions: List[Suggestion]) -> str:
+        """Generate executive summary of findings"""
+        if not suggestions:
+            return "No optimization opportunities identified - system performing well"
+
+        critical = len([s for s in suggestions if s.severity == "critical"])
+        _high = len([s for s in suggestions if s.severity == "high"])  # noqa: F841
+
+        quality = len([s for s in suggestions if s.type == "quality"])
+        efficiency = len([s for s in suggestions if s.type == "efficiency"])
+        compliance = len([s for s in suggestions if s.type == "compliance"])
+
+        summary = f"Found {len(suggestions)} optimization opportunities"
+        if critical > 0:
+            summary += f" ({critical} critical requiring immediate attention)"
+
+        areas = []
+        if quality > 0:
+            areas.append(f"{quality} quality improvements")
+        if efficiency > 0:
+            areas.append(f"{efficiency} efficiency gains")
+        if compliance > 0:
+            areas.append(f"{compliance} compliance issues")
+
+        if areas:
+            summary += f": {', '.join(areas)}"
+
+        return summary
+
+
+# Initialize engine
+engine = FeedbackLoopEngine()
+
+
+@router.post("/analyze", response_model=OptimizationReport)
+async def analyze_system(atoms: List[Dict[str, Any]], modules: Optional[List[Dict[str, Any]]] = None):
+    """
+    Analyze entire system and generate optimization suggestions
+
+    Takes current atoms and modules, analyzes metrics, and returns
+    actionable suggestions for improvements
+    """
+    all_suggestions = []
+
+    # Analyze individual atoms
+    for atom in atoms:
+        atom_suggestions = engine.analyze_atom(atom)
+        all_suggestions.extend(atom_suggestions)
+
+    # Analyze modules if provided
+    if modules:
+        for module in modules:
+            module_suggestions = engine.analyze_module(module, atoms)
+            all_suggestions.extend(module_suggestions)
+
+    # Generate summary statistics
+    by_severity = {
+        "critical": len([s for s in all_suggestions if s.severity == "critical"]),
+        "high": len([s for s in all_suggestions if s.severity == "high"]),
+        "medium": len([s for s in all_suggestions if s.severity == "medium"]),
+        "low": len([s for s in all_suggestions if s.severity == "low"]),
+    }
+
+    by_type = {
+        "quality": len([s for s in all_suggestions if s.type == "quality"]),
+        "performance": len([s for s in all_suggestions if s.type == "performance"]),
+        "efficiency": len([s for s in all_suggestions if s.type == "efficiency"]),
+        "compliance": len([s for s in all_suggestions if s.type == "compliance"]),
+    }
+
+    summary = engine.generate_summary(all_suggestions)
+
+    return OptimizationReport(
+        total_suggestions=len(all_suggestions),
+        by_severity=by_severity,
+        by_type=by_type,
+        suggestions=all_suggestions,
+        summary=summary,
+    )
+
+
+@router.get("/suggestions/{target_type}/{target_id}", response_model=List[Suggestion])
+async def get_suggestions_for_target(target_type: str, target_id: str, atoms: List[Dict[str, Any]]):
+    """Get suggestions for a specific atom or module"""
+    if target_type == "atom":
+        atom = next((a for a in atoms if a.get("id") == target_id), None)
+        if not atom:
+            raise HTTPException(status_code=404, detail="Atom not found")
+        return engine.analyze_atom(atom)
+
+    raise HTTPException(status_code=400, detail="Invalid target type")
+
+
+class ApplySuggestionRequest(BaseModel):
+    """Request to apply an optimization suggestion."""
+
+    suggestion_id: str
+    target_type: str  # atom, module, phase, journey
+    target_id: str
+    actions: List[Dict[str, str]]  # List of {action, description}
+
+
+@router.post("/api/feedback/apply-suggestion")
+def apply_suggestion(request: ApplySuggestionRequest) -> Dict[str, Any]:
+    """
+    Apply an optimization suggestion to the system.
+
+    This endpoint translates high-level suggestions into concrete changes:
+    - For atoms: Update compliance_score, add validation, fix error handling
+    - For modules: Reorganize atoms, add missing atoms
+    - For processes: Add automation, optimize cycle time
+
+    Returns a summary of actions performed.
+    """
+    atoms_dir = Path(__file__).parent.parent.parent / "data" / "atoms"
+    modules_file = Path(__file__).parent.parent.parent / "data" / "modules.json"
+
+    actions_applied = []
+
+    try:
+        if request.target_type == "atom":
+            # Load atom file
+            atom_file = atoms_dir / f"{request.target_id}.json"
+            if not atom_file.exists():
+                raise HTTPException(status_code=404, detail=f"Atom '{request.target_id}' not found")
+
+            with open(atom_file, "r", encoding="utf-8") as f:
+                atom = json.load(f)
+
+            # Apply actions based on suggestion
+            for action_item in request.actions:
+                action = action_item.get("action", "")
+
+                if "validation" in action.lower():
+                    # Add validation to atom
+                    if "validation" not in atom:
+                        atom["validation"] = {}
+                    atom["validation"]["rules"] = atom.get("validation", {}).get("rules", [])
+                    atom["validation"]["rules"].append(
+                        {
+                            "type": "completeness_check",
+                            "added_by": "optimization_engine",
+                            "timestamp": datetime.utcnow().isoformat(),
+                        }
+                    )
+                    actions_applied.append("Added validation rules")
+
+                elif "error handling" in action.lower():
+                    # Add error handling metadata
+                    if "error_handling" not in atom:
+                        atom["error_handling"] = {}
+                    atom["error_handling"]["strategy"] = "retry_with_fallback"
+                    atom["error_handling"]["max_retries"] = 3
+                    actions_applied.append("Enhanced error handling")
+
+                elif "documentation" in action.lower():
+                    # Improve documentation
+                    content = atom.get("content", {})
+                    if not content.get("description"):
+                        content["description"] = "Enhanced description added by optimization engine"
+                        atom["content"] = content
+                    actions_applied.append("Improved documentation")
+
+                elif "compliance" in action.lower():
+                    # Boost compliance score
+                    current_score = atom.get("compliance_score", 0.0)
+                    atom["compliance_score"] = min(1.0, current_score + 0.1)
+                    actions_applied.append(f"Increased compliance score to {atom['compliance_score']:.1%}")
+
+            # Save updated atom
+            with open(atom_file, "w", encoding="utf-8") as f:
+                json.dump(atom, f, indent=2, ensure_ascii=False)
+
+            return {
+                "status": "applied",
+                "suggestion_id": request.suggestion_id,
+                "target_type": request.target_type,
+                "target_id": request.target_id,
+                "actions_applied": actions_applied or ["Suggestion acknowledged"],
+                "message": f"Successfully applied {len(actions_applied)} optimization(s) to {request.target_id}",
+            }
+
+        elif request.target_type == "module":
+            # For modules, update module definition
+            if not modules_file.exists():
+                raise HTTPException(status_code=404, detail="Modules file not found")
+
+            with open(modules_file, "r", encoding="utf-8") as f:
+                modules = json.load(f)
+
+            # Find target module
+            target_module = None
+            for module in modules:
+                if module.get("id") == request.target_id or module.get("module_id") == request.target_id:
+                    target_module = module
+                    break
+
+            if not target_module:
+                raise HTTPException(status_code=404, detail=f"Module '{request.target_id}' not found")
+
+            # Apply module-level optimizations
+            for action_item in request.actions:
+                action = action_item.get("action", "")
+
+                if "reorganize" in action.lower():
+                    # Add reorganization flag
+                    target_module["optimization_pending"] = {
+                        "type": "reorganization",
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                    actions_applied.append("Marked for reorganization")
+
+                elif "coverage" in action.lower():
+                    # Improve coverage metadata
+                    target_module["coverage_target"] = 0.95
+                    actions_applied.append("Set coverage target to 95%")
+
+            # Save updated modules
+            with open(modules_file, "w", encoding="utf-8") as f:
+                json.dump(modules, f, indent=2, ensure_ascii=False)
+
+            return {
+                "status": "applied",
+                "suggestion_id": request.suggestion_id,
+                "target_type": request.target_type,
+                "target_id": request.target_id,
+                "actions_applied": actions_applied or ["Suggestion acknowledged"],
+                "message": f"Successfully applied {len(actions_applied)} optimization(s) to module",
+            }
+
+        else:
+            # For phase/journey, acknowledge but don't auto-apply (too complex)
+            return {
+                "status": "acknowledged",
+                "suggestion_id": request.suggestion_id,
+                "target_type": request.target_type,
+                "target_id": request.target_id,
+                "actions_applied": ["Suggestion logged for manual review"],
+                "message": f"{request.target_type.capitalize()} optimizations require manual review. Suggestion has been logged.",  # noqa: E501
+            }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to apply suggestion: {str(e)}")

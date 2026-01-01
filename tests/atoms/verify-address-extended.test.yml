@@ -1,0 +1,52 @@
+test_suite: verify-address-extended
+
+setup:
+  fixtures_file: test_data/fixtures/address-large-fixtures.yml
+
+tests:
+  - name: US Deliverability
+    input:
+      country: US
+      street: "4326 Cedar Lane"
+      city: "Rivertown"
+      state: "CA"
+      postal_code: "90210"
+    expected_output:
+      is_deliverable: true
+    assertion: "response.is_deliverable == true"
+
+  - name: Missing Required Fields
+    input:
+      country: US
+      street: ""
+      city: ""
+      postal_code: ""
+    expected_output:
+      is_deliverable: false
+      failure_reason: "missing_fields"
+    assertion: "response.is_deliverable == false"
+
+  - name: International - Japan
+    input:
+      country: JP
+      street: "1-2-3 Chiyoda"
+      city: "Tokyo"
+      postal_code: "100-0001"
+    expected_output:
+      is_deliverable: true
+    assertion: "response.is_deliverable == true"
+
+  - name: Non-Latin Script Handling
+    input:
+      country: RU
+      street: "ул. Ленина, д. 1"
+      city: "Москва"
+      postal_code: "101000"
+    expected_output:
+      is_deliverable: true
+    assertion: "response.is_deliverable == true"
+
+performance_tests:
+  - name: Bulk Address Validation Sample
+    input: "50 addresses"
+    expected: "complete in < 15 seconds"

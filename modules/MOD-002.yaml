@@ -1,5 +1,11 @@
-id: MOD-002
-type: Module
+id: module-mod-002
+version: 1.0.0
+workflow_type: BPM
+type: business
 name: Module 2
 description: Demo module 2
 owner: team-a
+atoms:
+- atom-cust-pre-qual-request
+- atom-ctrl-credit-policy
+- atom-pol-fair-lending

@@ -1,0 +1,65 @@
+---
+# YAML Linting Configuration for Atom Files
+# Ensures consistent YAML formatting and catches syntax errors
+
+extends: default
+
+rules:
+  # Line length - be more lenient for documentation
+  line-length:
+    max: 120
+    level: warning
+
+  # Indentation - 2 spaces
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Allow inline mappings (compact syntax)
+  braces:
+    max-spaces-inside: 1
+    level: warning
+
+  # Allow inline sequences
+  brackets:
+    max-spaces-inside: 1
+    level: warning
+
+  # Comments should have space after #
+  comments:
+    min-spaces-from-content: 2
+
+  # Document start (---) is optional
+  document-start:
+    present: false
+
+  # Empty lines
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 0
+
+  # Trailing spaces not allowed
+  trailing-spaces: enable
+
+  # Key duplicates are errors
+  key-duplicates: enable
+
+  # Truthy values - allow yes/no/on/off
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+    check-keys: false
+
+  # New lines at end of file
+  new-line-at-end-of-file: enable
+
+# Ignore certain files/directories
+ignore: |
+  venv/
+  node_modules/
+  .git/
+  __pycache__/
+  *.pyc
+  .vscode/
+  .idea/

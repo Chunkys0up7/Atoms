@@ -4,7 +4,7 @@ type: PROCESS
 name: Customer Uploads Bank Statements
 version: 1.0.0
 status: ACTIVE
-owner: Robert Kim
+owner: Jennifer Park
 team: Risk Management
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -44,3 +44,5 @@ metrics:
   avg_cycle_time_mins: 2815
   error_rate: 0.053
   compliance_score: 0.86
+steward: Sarah Chen
+owning_team: Risk Management

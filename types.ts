@@ -64,10 +64,15 @@ export interface Atom {
   category: AtomCategory;
   type: AtomType;
   name: string;
+  title?: string; // Alternative display name (fallback to name if not provided)
+  summary?: string; // Short description (fallback to content.summary if not provided)
   version: string;
   status: 'ACTIVE' | 'DRAFT' | 'DEPRECATED';
-  owner: string;
-  team: string;
+  owning_team: string; // Team responsible for this atom (was 'owner')
+  author?: string; // Person who created/authored this atom
+  team: string; // Legacy field - will be migrated to owning_team
+  owner?: string; // Legacy field - will be migrated to author
+  steward?: string; // Data steward for governance
   ontologyDomain: string;
   criticality: Criticality;
   phaseId?: string;
@@ -115,7 +120,7 @@ export interface Journey {
 
 export type NodeLevel = 'ATOM' | 'MODULE' | 'PHASE' | 'JOURNEY';
 
-export type ViewType = 'explorer' | 'modules' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary';
+export type ViewType = 'dashboard' | 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite' | 'analytics' | 'anomalies' | 'collaborate' | 'processes';
 
 export interface ValidationIssue {
   type: string;
@@ -136,3 +141,12 @@ export interface LintIssue {
 }
 
 export type DocTemplateType = 'SOP' | 'TECHNICAL_DESIGN' | 'EXECUTIVE_SUMMARY' | 'COMPLIANCE_AUDIT';
+
+// Graph Context Modes for Enhanced Visualization
+export type GraphContext =
+  | { mode: 'global'; filters?: { types?: AtomType[]; criticality?: Criticality[] } }
+  | { mode: 'journey'; journeyId: string; highlightPath?: boolean }
+  | { mode: 'phase'; phaseId: string; showModuleBoundaries?: boolean }
+  | { mode: 'module'; moduleId: string; expandDependencies?: boolean }
+  | { mode: 'impact'; atomId: string; depth: number; direction: 'upstream' | 'downstream' | 'both' }
+  | { mode: 'risk'; minCriticality?: Criticality; showControls?: boolean };

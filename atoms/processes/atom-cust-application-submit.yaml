@@ -110,3 +110,5 @@ metrics:
   avg_cycle_time_mins: 1016
   error_rate: 0.025
   compliance_score: 0.88
+steward: Amanda White
+owning_team: Closing

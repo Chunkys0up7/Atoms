@@ -1,0 +1,7 @@
+id: phase-pre-application-purchase-fha
+name: Pre-Application - FHA Purchase
+description: Pre-qual and initial FHA-specific disclosures and counseling scheduling.
+modules:
+  - module-pre-qualification
+journeyId: journey-purchase-fha
+targetDurationDays: 2

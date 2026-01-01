@@ -32,8 +32,8 @@
   --color-info: #0369a1;
 
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-  --font-mono: 'Courier New', Courier, monospace;
+  --font-sans: 'Helvetica Neue', Arial, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -56,6 +56,11 @@ body {
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure root elements inherit the professional font stack */
+html, #root {
+  font-family: var(--font-sans);
 }
 
 /* Professional Layout */
@@ -423,6 +428,18 @@ body {
 }
 
 /* Utility Classes */
+
+/* Typography Scale - Professional Banking */
+.text-xs { font-size: 11px; line-height: 1.4; }      /* Badges, fine print */
+.text-sm { font-size: 13px; line-height: 1.5; }      /* Body, tables */
+.text-base { font-size: 14px; line-height: 1.5; }    /* Default body */
+.text-lg { font-size: 16px; line-height: 1.5; }      /* Subsection headers */
+.text-xl { font-size: 18px; line-height: 1.4; }      /* Card headers */
+.text-2xl { font-size: 24px; line-height: 1.3; }     /* Section headers */
+.text-3xl { font-size: 32px; line-height: 1.2; }     /* Large stats */
+.text-4xl { font-size: 36px; line-height: 1.2; }     /* Page titles */
+
+/* Color Utilities */
 .text-primary { color: var(--color-primary); }
 .text-secondary { color: var(--color-text-secondary); }
 .text-tertiary { color: var(--color-text-tertiary); }
@@ -435,13 +452,45 @@ body {
 .bg-tertiary { background-color: var(--color-bg-tertiary); }
 
 .font-mono { font-family: var(--font-mono); }
+/* Legacy class compatibility */
+.mono { font-family: var(--font-mono); }
+.sans { font-family: var(--font-sans); }
 .font-bold { font-weight: 600; }
 .font-semibold { font-weight: 500; }
 
+/* Spacing Utilities - Using CSS Variables */
+.m-xs { margin: var(--spacing-xs); }
+.m-sm { margin: var(--spacing-sm); }
+.m-md { margin: var(--spacing-md); }
+.m-lg { margin: var(--spacing-lg); }
+.m-xl { margin: var(--spacing-xl); }
+
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
 .mb-sm { margin-bottom: var(--spacing-sm); }
 .mb-md { margin-bottom: var(--spacing-md); }
 .mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
 
+.p-xs { padding: var(--spacing-xs); }
 .p-sm { padding: var(--spacing-sm); }
 .p-md { padding: var(--spacing-md); }
 .p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }
+
+.pt-xs { padding-top: var(--spacing-xs); }
+.pt-sm { padding-top: var(--spacing-sm); }
+.pt-md { padding-top: var(--spacing-md); }
+.pt-lg { padding-top: var(--spacing-lg); }
+.pt-xl { padding-top: var(--spacing-xl); }
+
+.pb-xs { padding-bottom: var(--spacing-xs); }
+.pb-sm { padding-bottom: var(--spacing-sm); }
+.pb-md { padding-bottom: var(--spacing-md); }
+.pb-lg { padding-bottom: var(--spacing-lg); }
+.pb-xl { padding-bottom: var(--spacing-xl); }

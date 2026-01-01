@@ -30,3 +30,5 @@ metrics:
   avg_cycle_time_mins: 1
   error_rate: 0.068
   compliance_score: 1.0
+steward: David Thompson
+owning_team: Risk Management

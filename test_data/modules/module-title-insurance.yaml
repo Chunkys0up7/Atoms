@@ -1,4 +1,6 @@
 id: module-title-insurance
+version: 1.0.0
+workflow_type: BPM
 name: Title & Insurance
 description: Title search, title insurance, hazard insurance verification, and flood
   determination
@@ -8,4 +10,10 @@ atoms:
 - atom-bo-title-review
 - atom-sys-flood-determination
 - atom-cust-insurance-verification
+- atom-bo-title-issue-resolution
+- atom-bo-flood-insurance-verification
+- atom-bo-homeowners-insurance-review
+- atom-bo-hazard-insurance-binder
+- atom-bo-title-commitment-review
+- atom-bo-survey-review
 phaseId: phase-processing

@@ -1,0 +1,8 @@
+id: phase-underwriting-purchase-fha
+name: Underwriting - FHA Purchase
+description: Underwriter checks FHA-specific eligibility and MI requirements.
+modules:
+  - module-underwriting-decision
+  - module-conditions-management
+journeyId: journey-purchase-fha
+targetDurationDays: 5

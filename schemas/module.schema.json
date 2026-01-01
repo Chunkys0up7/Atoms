@@ -1,0 +1,381 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gndp.io/schemas/module.schema.json",
+  "title": "GNDP Module Schema",
+  "description": "Comprehensive schema for Graph-Native Documentation Platform modules",
+  "type": "object",
+  "required": ["id", "name", "version", "workflow_type", "atoms"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^module-[a-z0-9-]+$",
+      "description": "Unique module identifier (e.g., module-credit-analysis)"
+    },
+    "module_id": {
+      "type": "string",
+      "pattern": "^module-[a-z0-9-]+$",
+      "description": "Alias for id field for backwards compatibility"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Human-readable module name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Detailed description of the module's purpose and scope"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "default": "1.0.0",
+      "description": "Semantic version (major.minor.patch)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "DEPRECATED", "ARCHIVED"],
+      "default": "DRAFT",
+      "description": "Current lifecycle status of the module"
+    },
+    "workflow_type": {
+      "type": "string",
+      "enum": ["BPM", "SOP", "CUSTOMER_JOURNEY", "CUSTOM"],
+      "description": "Classification of workflow type: BPM (Business Process Model), SOP (Standard Operating Procedure), CUSTOMER_JOURNEY, or CUSTOM"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      "description": "Business criticality level for risk assessment and approval routing"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Primary team or department responsible for the module"
+    },
+    "steward": {
+      "type": "string",
+      "description": "Individual responsible for module maintenance and updates"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["business", "technical", "compliance", "operational"],
+      "default": "business",
+      "description": "Module category for filtering and organization"
+    },
+    "phaseId": {
+      "type": "string",
+      "pattern": "^phase-[a-z0-9-]+$",
+      "description": "Reference to parent phase (e.g., phase-underwriting)"
+    },
+    "atoms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^atom-[a-z0-9-]+$"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "List of atom IDs that compose this module"
+    },
+    "atom_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^atom-[a-z0-9-]+$"
+      },
+      "uniqueItems": true,
+      "description": "Alias for atoms field for backwards compatibility"
+    },
+    "entry_points": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^atom-[a-z0-9-]+$"
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Atoms that serve as entry points for workflow execution"
+    },
+    "exit_points": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "^atom-[a-z0-9-]+$"
+          },
+          {
+            "type": "object",
+            "required": ["atom", "condition"],
+            "properties": {
+              "atom": {
+                "type": "string",
+                "pattern": "^atom-[a-z0-9-]+$"
+              },
+              "condition": {
+                "type": "string",
+                "description": "Exit condition or scenario (e.g., 'approved', 'rejected', 'escalated')"
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1,
+      "description": "Atoms or scenarios that represent workflow completion points"
+    },
+    "external_dependencies": {
+      "type": "object",
+      "properties": {
+        "systems": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(SYS-|atom-sys-)[a-z0-9-]+$"
+          },
+          "uniqueItems": true,
+          "description": "External systems required by this module"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^module-[a-z0-9-]+$"
+          },
+          "uniqueItems": true,
+          "description": "Other modules this module depends on"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(ROLE-|atom-role-)[a-z0-9-]+$"
+          },
+          "uniqueItems": true,
+          "description": "Roles required to execute this module"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(DOC-|atom-doc-)[a-z0-9-]+$"
+          },
+          "uniqueItems": true,
+          "description": "Document types required or produced by this module"
+        }
+      },
+      "description": "External dependencies required for module execution"
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether approval workflow is required for this module"
+        },
+        "threshold_risk_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Risk score threshold that triggers approval requirements"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "assigned_to"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": ["draft", "technical_review", "compliance_review", "security_review", "executive_review", "approved"],
+                "description": "Stage identifier"
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-readable stage name"
+              },
+              "assigned_to": {
+                "type": "string",
+                "description": "Team or role responsible for this stage"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of what this stage entails"
+              },
+              "max_response_hours": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Maximum hours allowed for stage completion (SLA)"
+              },
+              "required_if": {
+                "type": "string",
+                "description": "Condition that makes this stage required (e.g., 'criticality >= HIGH')"
+              },
+              "escalation_to": {
+                "type": "string",
+                "description": "Role to escalate to if SLA is breached"
+              }
+            }
+          },
+          "description": "Custom approval stages (overrides default workflow)"
+        },
+        "approvers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role"],
+            "properties": {
+              "role": {
+                "type": "string",
+                "description": "Role required for approval (e.g., 'process-owner', 'compliance-officer')"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Specific email address for approval notifications"
+              },
+              "max_response_hours": {
+                "type": "number",
+                "minimum": 1,
+                "description": "SLA for approval response"
+              },
+              "required_if": {
+                "type": "string",
+                "description": "Conditional requirement (e.g., 'criticality == CRITICAL')"
+              }
+            }
+          },
+          "description": "List of approvers and their requirements"
+        }
+      },
+      "description": "Approval workflow configuration"
+    },
+    "sla": {
+      "type": "object",
+      "properties": {
+        "target_completion_minutes": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Target time to complete the entire module workflow (in minutes)"
+        },
+        "warning_threshold_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80,
+          "description": "Percentage of SLA elapsed before warning is triggered"
+        },
+        "escalation_minutes": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Time before escalation if module is not progressing"
+        }
+      },
+      "description": "Service Level Agreement parameters for module execution"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Searchable tags for module categorization"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of module creation"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of last update"
+        },
+        "created_by": {
+          "type": "string",
+          "description": "User or system that created the module"
+        },
+        "created_via": {
+          "type": "string",
+          "enum": ["ui", "api", "import", "migration"],
+          "description": "Method used to create the module"
+        },
+        "estimated_effort_hours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated effort to implement this module"
+        },
+        "last_review_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of last review or audit"
+        },
+        "next_review_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Scheduled date for next review"
+        },
+        "approval_workflow": {
+          "type": "object",
+          "properties": {
+            "current_stage": {
+              "type": "string",
+              "description": "Current approval stage"
+            },
+            "stages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Stage name"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["pending", "in_progress", "completed", "rejected", "changes_requested"],
+                    "description": "Current status of this stage"
+                  },
+                  "started_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "completed_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "submitted_by": {
+                    "type": "string"
+                  },
+                  "completed_by": {
+                    "type": "string"
+                  },
+                  "reviewer_role": {
+                    "type": "string"
+                  },
+                  "comments": {
+                    "type": "string"
+                  },
+                  "rejection_reason": {
+                    "type": "string"
+                  },
+                  "requested_changes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "History of approval stages"
+            }
+          },
+          "description": "Runtime approval workflow state"
+        }
+      },
+      "description": "Module metadata and runtime state"
+    }
+  },
+  "additionalProperties": false
+}

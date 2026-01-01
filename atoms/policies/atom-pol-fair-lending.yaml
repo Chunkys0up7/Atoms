@@ -4,7 +4,7 @@ type: POLICY
 name: Fair Lending Policy
 version: 1.0.0
 status: ACTIVE
-owner: Lisa Anderson
+owner: Robert Kim
 team: Compliance
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -38,3 +38,5 @@ metrics:
   avg_cycle_time_mins: 423
   error_rate: 0.099
   compliance_score: 0.97
+steward: Jennifer Park
+owning_team: Compliance
