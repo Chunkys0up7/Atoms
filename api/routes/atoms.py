@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from cache import atomic_write, get_atom_cache
+from cache import atomic_write, get_atom_cache  # noqa: E402
 
 router = APIRouter()
 cache = get_atom_cache()

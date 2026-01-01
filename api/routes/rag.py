@@ -87,7 +87,7 @@ def entity_rag(query: str, top_k: int = 5, atom_type: Optional[str] = None) -> L
                 atoms.append(atom)
 
         return atoms
-    except Exception as e:
+    except Exception as e:  # noqa: F841
         # SECURITY: Log exception without exposing sensitive details
         logger.exception("Entity RAG query failed")
         raise HTTPException(status_code=503, detail="Search service temporarily unavailable")
@@ -134,7 +134,7 @@ def path_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
                                 "relationship": "connected",
                             }
                         )
-            except Exception as e:
+            except Exception as e:  # noqa: F841
                 logger.exception(f"Neo4j traversal failed for atom {atom_id}")
                 continue
 
@@ -216,7 +216,7 @@ def impact_rag(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: F841
                 logger.exception(f"Neo4j impact analysis failed for atom {atom_id}")
                 # Fallback: return target with no impact data
                 impact_chain.append({**target_atom, "impact_scope": "unknown", "affected_count": 0, "error": str(e)})
@@ -281,7 +281,7 @@ async def query_rag(request: RAGQuery):
             context_ids = [s["id"] for s in sources if s.get("id")]
 
             return RAGResponse(answer=answer, sources=sources, context_atoms=context_ids)
-        except Exception as e:
+        except Exception as e:  # noqa: F841
             logger.exception("Claude API request failed")
             # Fall through to fallback answer
 
@@ -336,7 +336,7 @@ def rag_health():
             try:
                 doc_collection = client.get_collection(name="gndp_documents")
                 status["document_collection_count"] = doc_collection.count()
-            except:
+            except Exception:
                 status["document_collection_count"] = 0
         except Exception as e:
             status["chroma_error"] = str(e)
@@ -408,7 +408,7 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
         # Get or create documents collection
         try:
             collection = client.get_collection(name="gndp_documents")
-        except:
+        except Exception:
             # Create collection if it doesn't exist
             openai_api_key = os.environ.get("OPENAI_API_KEY")
             if not openai_api_key:
@@ -472,7 +472,7 @@ def index_document(request: IndexDocumentRequest) -> Dict[str, Any]:
                         "chunks_indexed": len(chunks),
                         "message": f"Document chunked into {len(chunks)} semantic segments and indexed",
                     }
-            except Exception as e:
+            except Exception as e:  # noqa: F841
                 # Fallback to full document indexing if chunking fails
                 print(f"Chunking failed, indexing full document: {e}")
 
@@ -542,7 +542,7 @@ def get_rag_metrics() -> Dict[str, Any]:
                     atom_collection = client.get_collection(name="gndp_atoms")
                     metrics["index_health"]["atoms_indexed"] = atom_collection.count()
                     metrics["index_health"]["atom_collection_exists"] = True
-                except:
+                except Exception:
                     metrics["index_health"]["atoms_indexed"] = 0
                     metrics["index_health"]["atom_collection_exists"] = False
 
@@ -551,7 +551,7 @@ def get_rag_metrics() -> Dict[str, Any]:
                     doc_collection = client.get_collection(name="gndp_documents")
                     metrics["index_health"]["documents_indexed"] = doc_collection.count()
                     metrics["index_health"]["document_collection_exists"] = True
-                except:
+                except Exception:
                     metrics["index_health"]["documents_indexed"] = 0
                     metrics["index_health"]["document_collection_exists"] = False
 

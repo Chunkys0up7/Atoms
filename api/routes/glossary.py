@@ -75,7 +75,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="atom",
             term="Atom",
-            definition="The smallest unit of business logic in the GNDP system. Atoms represent discrete processes, decisions, documents, or controls that can be composed into modules.",
+            definition="The smallest unit of business logic in the GNDP system. Atoms represent discrete processes, decisions, documents, or controls that can be composed into modules.",  # noqa: E501
             category="System",
             synonyms=["Business Atom", "Process Atom"],
             related_terms=["Module", "Edge", "Graph"],
@@ -84,7 +84,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="module",
             term="Module",
-            definition="A collection of related atoms that work together to accomplish a specific business function or workflow.",
+            definition="A collection of related atoms that work together to accomplish a specific business function or workflow.",  # noqa: E501
             category="System",
             synonyms=["Workflow Module", "Process Module"],
             related_terms=["Atom", "Phase", "Journey"],
@@ -93,7 +93,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="phase",
             term="Phase",
-            definition="A major stage in a customer journey that groups related modules. Phases have entry/exit criteria and duration targets.",
+            definition="A major stage in a customer journey that groups related modules. Phases have entry/exit criteria and duration targets.",  # noqa: E501
             category="System",
             synonyms=["Journey Phase", "Process Phase"],
             related_terms=["Journey", "Module"],
@@ -111,7 +111,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="edge",
             term="Edge",
-            definition="A directed relationship between two atoms representing dependencies, data flow, or logical connections.",
+            definition="A directed relationship between two atoms representing dependencies, data flow, or logical connections.",  # noqa: E501
             category="System",
             synonyms=["Relationship", "Connection"],
             related_terms=["Atom", "Graph"],
@@ -120,7 +120,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="criticality",
             term="Criticality",
-            definition="A measure of how important an atom or module is to business operations. Values: LOW, MEDIUM, HIGH, CRITICAL.",
+            definition="A measure of how important an atom or module is to business operations. Values: LOW, MEDIUM, HIGH, CRITICAL.",  # noqa: E501
             category="Governance",
             related_terms=["SLA", "Risk"],
             created_at=now,
@@ -163,7 +163,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="trid",
             term="TRID",
-            definition="TILA-RESPA Integrated Disclosure rule requiring specific disclosure forms and timing for mortgage loans.",
+            definition="TILA-RESPA Integrated Disclosure rule requiring specific disclosure forms and timing for mortgage loans.",  # noqa: E501
             category="Compliance",
             synonyms=["TILA-RESPA"],
             related_terms=["Closing Disclosure", "Loan Estimate"],
@@ -172,7 +172,7 @@ def get_default_glossary() -> List[GlossaryTerm]:
         GlossaryTerm(
             id="aus",
             term="AUS (Automated Underwriting System)",
-            definition="Computer-based system that evaluates borrower creditworthiness and loan eligibility automatically.",
+            definition="Computer-based system that evaluates borrower creditworthiness and loan eligibility automatically.",  # noqa: E501
             category="Technology",
             synonyms=["Automated Underwriting"],
             related_terms=["Underwriting", "Credit Analysis"],

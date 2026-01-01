@@ -79,8 +79,8 @@ class FeedbackLoopEngine:
                     target_type="atom",
                     target_id=atom_id,
                     target_name=atom_name,
-                    issue=f"Error rate {error_rate:.1%} is critically high (threshold: {self.thresholds['error_rate_critical']:.1%})",
-                    recommendation="Immediate action required: Add validation steps, implement error handling, review logic for edge cases",
+                    issue=f"Error rate {error_rate:.1%} is critically high (threshold: {self.thresholds['error_rate_critical']:.1%})",  # noqa: E501
+                    recommendation="Immediate action required: Add validation steps, implement error handling, review logic for edge cases",  # noqa: E501
                     impact_estimate=f"Reducing errors could save {error_rate * 100:.0f}% of rework time",
                     suggested_actions=[
                         {"action": "add_validation", "description": "Add input validation atom before this step"},
@@ -191,7 +191,7 @@ class FeedbackLoopEngine:
                     target_type="atom",
                     target_id=atom_id,
                     target_name=atom_name,
-                    issue=f"Cycle time {cycle_time:.0f}min exceeds expected {expected_time:.0f}min by {((cycle_time/expected_time) - 1)*100:.0f}%",
+                    issue=f"Cycle time {cycle_time:.0f}min exceeds expected {expected_time:.0f}min by {((cycle_time/expected_time) - 1)*100:.0f}%",  # noqa: E501
                     recommendation="Investigate bottlenecks, consider parallelization or automation",
                     impact_estimate=f"Could save {cycle_time - expected_time:.0f} minutes per transaction",
                     suggested_actions=[
@@ -221,8 +221,12 @@ class FeedbackLoopEngine:
         # Calculate aggregate metrics
         avg_error_rate = statistics.mean([a.get("metrics", {}).get("error_rate", 0) for a in module_atoms])
         avg_automation = statistics.mean([a.get("metrics", {}).get("automation_level", 0) for a in module_atoms])
-        _avg_compliance = statistics.mean([a.get("metrics", {}).get("compliance_score", 1.0) for a in module_atoms])
-        _total_cycle_time = sum([a.get("metrics", {}).get("avg_cycle_time_mins", 0) for a in module_atoms])
+        _avg_compliance = statistics.mean(  # noqa: F841, E501
+            [a.get("metrics", {}).get("compliance_score", 1.0) for a in module_atoms]
+        )
+        _total_cycle_time = sum(  # noqa: F841, E501
+            [a.get("metrics", {}).get("avg_cycle_time_mins", 0) for a in module_atoms]
+        )
 
         # Module-level suggestions
         if avg_error_rate > self.thresholds["error_rate_high"]:
@@ -288,7 +292,7 @@ class FeedbackLoopEngine:
             return "No optimization opportunities identified - system performing well"
 
         critical = len([s for s in suggestions if s.severity == "critical"])
-        _high = len([s for s in suggestions if s.severity == "high"])
+        _high = len([s for s in suggestions if s.severity == "high"])  # noqa: F841
 
         quality = len([s for s in suggestions if s.type == "quality"])
         efficiency = len([s for s in suggestions if s.type == "efficiency"])
@@ -520,7 +524,7 @@ def apply_suggestion(request: ApplySuggestionRequest) -> Dict[str, Any]:
                 "target_type": request.target_type,
                 "target_id": request.target_id,
                 "actions_applied": ["Suggestion logged for manual review"],
-                "message": f"{request.target_type.capitalize()} optimizations require manual review. Suggestion has been logged.",
+                "message": f"{request.target_type.capitalize()} optimizations require manual review. Suggestion has been logged.",  # noqa: E501
             }
 
     except Exception as e:

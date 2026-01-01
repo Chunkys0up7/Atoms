@@ -204,7 +204,7 @@ class FraudRiskRule(ProcessRewriteRule):
         fraud_phase = {
             "id": "phase-fraud-investigation",
             "name": "Fraud Investigation",
-            "description": f"Triggered by: {', '.join([f for f in context.risk_flags if f in ['suspicious_activity', 'identity_mismatch', 'velocity_check_failed']])}",
+            "description": f"Triggered by: {', '.join([f for f in context.risk_flags if f in ['suspicious_activity', 'identity_mismatch', 'velocity_check_failed']])}",  # noqa: E501
             "modules": ["module-fraud-screening", "module-identity-verification"],
             "targetDurationDays": 2,
             "criticality": "CRITICAL",
@@ -286,7 +286,7 @@ class HighDebtToIncomeRule(ProcessRewriteRule):
         dti_phase = {
             "id": "phase-dti-review",
             "name": "DTI Review & Counseling",
-            "description": f"High DTI ratio ({context.customer_data.get('debt_to_income_ratio', 0):.1%}) requires review",
+            "description": f"High DTI ratio ({context.customer_data.get('debt_to_income_ratio', 0):.1%}) requires review",  # noqa: E501
             "modules": ["module-debt-analysis", "module-underwriting-exception"],
             "targetDurationDays": 2,
             "criticality": "HIGH",
@@ -427,7 +427,7 @@ class CashOutRefinanceRule(ProcessRewriteRule):
         modification = PhaseModification(
             action="insert",
             phase_id=equity_phase["id"],
-            reason=f"Cash-out refinance with ${context.transaction_data.get('cash_out_amount', 0):,.0f} requires equity review",
+            reason=f"Cash-out refinance with ${context.transaction_data.get('cash_out_amount', 0):,.0f} requires equity review",  # noqa: E501
             criticality="MEDIUM",
         )
 
@@ -687,7 +687,7 @@ class ProcessRewriteEngine:
         reference_phase = phase.get("reference_phase")
 
         # Build phase object
-        _phase_obj = {
+        _phase_obj = {  # noqa: F841
             "id": phase_id,
             "name": phase.get("name"),
             "description": phase.get("description"),

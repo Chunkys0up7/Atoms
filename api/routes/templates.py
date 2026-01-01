@@ -91,7 +91,7 @@ def load_builtin_templates() -> List[Dict[str, Any]]:
                     "description": "Related documents and regulations",
                 },
             ],
-            "style_instructions": "Follow a formal, procedural tone. Use numbered steps for procedures. Include clear role assignments. Cite specific policies and regulations.",
+            "style_instructions": "Follow a formal, procedural tone. Use numbered steps for procedures. Include clear role assignments. Cite specific policies and regulations.",  # noqa: E501
             "builtin": True,
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -130,7 +130,7 @@ def load_builtin_templates() -> List[Dict[str, Any]]:
                     "description": "External dependencies and libraries",
                 },
             ],
-            "style_instructions": "Use technical language appropriate for engineering teams. Include diagrams using mermaid syntax where applicable. Be specific about technologies and versions.",
+            "style_instructions": "Use technical language appropriate for engineering teams. Include diagrams using mermaid syntax where applicable. Be specific about technologies and versions.",  # noqa: E501
             "builtin": True,
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -153,7 +153,7 @@ def load_builtin_templates() -> List[Dict[str, Any]]:
                 {"name": "Recommendations", "required": True, "order": 5, "description": "Strategic recommendations"},
                 {"name": "Next Steps and Timeline", "required": True, "order": 6, "description": "Action plan"},
             ],
-            "style_instructions": "Use business-friendly language avoiding technical jargon. Focus on outcomes, ROI, and strategic value. Keep it concise - executives have limited time.",
+            "style_instructions": "Use business-friendly language avoiding technical jargon. Focus on outcomes, ROI, and strategic value. Keep it concise - executives have limited time.",  # noqa: E501
             "builtin": True,
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -172,7 +172,7 @@ def load_builtin_templates() -> List[Dict[str, Any]]:
                 {"name": "Remediation Plan", "required": True, "order": 6, "description": "How to fix gaps"},
                 {"name": "Sign-off and Approval", "required": True, "order": 7, "description": "Approval authority"},
             ],
-            "style_instructions": "Use formal, audit-ready language. Cite specific regulation sections (e.g., 'TRID §1026.19'). Include evidence trails. Be objective and factual.",
+            "style_instructions": "Use formal, audit-ready language. Cite specific regulation sections (e.g., 'TRID §1026.19'). Include evidence trails. Be objective and factual.",  # noqa: E501
             "builtin": True,
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -257,7 +257,7 @@ def create_template(request: CreateTemplateRequest) -> Dict[str, Any]:
     if request.definition.template_id in builtin_ids:
         raise HTTPException(
             status_code=400,
-            detail=f"Template ID '{request.definition.template_id}' conflicts with built-in template. Choose a different ID.",
+            detail=f"Template ID '{request.definition.template_id}' conflicts with built-in template. Choose a different ID.",  # noqa: E501
         )
 
     # Check if template already exists

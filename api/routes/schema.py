@@ -328,7 +328,7 @@ def validate_atom(atom_data: Dict[str, Any]) -> AtomValidationResult:
     edges = atom_data.get("edges", [])
     for edge in edges:
         edge_type = edge.get("type", "")
-        _target_id = edge.get("target", "")
+        _target_id = edge.get("target", "")  # noqa: F841
 
         # Check if this edge type is allowed for this source type
         valid_constraint = False
@@ -601,7 +601,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
         {
             "id": "financial-services",
             "name": "Financial Services Standard",
-            "description": "Schema template for financial services organizations with compliance, risk, and lending domains",
+            "description": "Schema template for financial services organizations with compliance, risk, and lending domains",  # noqa: E501
             "domains": [
                 {
                     "id": "lending-operations",
@@ -638,7 +638,7 @@ def get_schema_templates() -> List[Dict[str, Any]]:
         {
             "id": "healthcare",
             "name": "Healthcare & Medical",
-            "description": "Schema for healthcare organizations with patient care, clinical, and administrative domains",
+            "description": "Schema for healthcare organizations with patient care, clinical, and administrative domains",  # noqa: E501
             "domains": [
                 {
                     "id": "clinical-care",
@@ -933,14 +933,14 @@ def generate_html_docs(config: SchemaConfig) -> str:
     html.append("  <title>Schema Documentation</title>")
     html.append("  <style>")
     html.append(
-        "    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }"
+        "    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }"  # noqa: E501
     )
     html.append("    h1 { color: #1e293b; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }")
     html.append("    h2 { color: #334155; margin-top: 30px; }")
     html.append("    h3 { color: #475569; }")
     html.append("    .domain { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin: 15px 0; }")
     html.append(
-        "    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 2px; }"
+        "    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 2px; }"  # noqa: E501
     )
     html.append("    table { width: 100%; border-collapse: collapse; margin: 20px 0; }")
     html.append("    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }")
@@ -950,37 +950,37 @@ def generate_html_docs(config: SchemaConfig) -> str:
     html.append("</head>")
     html.append("<body>")
 
-    html.append(f"  <h1>Schema Documentation</h1>")
+    html.append("  <h1>Schema Documentation</h1>")
     html.append(
         f"  <p><strong>Version:</strong> {config.version} | <strong>Last Updated:</strong> {config.updated_at}</p>"
     )
 
     html.append(f"  <h2>Domains ({len(config.domains)})</h2>")
     for domain in config.domains:
-        html.append(f"  <div class='domain'>")
+        html.append("  <div class='domain'>")
         html.append(f"    <h3>{domain.name}</h3>")
         html.append(f"    <p><code>{domain.id}</code></p>")
         html.append(f"    <p>{domain.description}</p>")
 
         if domain.allowed_types:
-            html.append(f"    <p><strong>Allowed Types:</strong> ")
+            html.append("    <p><strong>Allowed Types:</strong> ")
             for atype in domain.allowed_types:
                 html.append(f"<span class='badge'>{atype}</span> ")
-            html.append(f"</p>")
+            html.append("</p>")
 
         if domain.required_attributes:
             html.append(
-                f"    <p><strong>Required Attributes:</strong> {', '.join([f'<code>{a}</code>' for a in domain.required_attributes])}</p>"
+                f"    <p><strong>Required Attributes:</strong> {', '.join([f'<code>{a}</code>' for a in domain.required_attributes])}</p>"  # noqa: E501
             )
 
-        html.append(f"  </div>")
+        html.append("  </div>")
 
     html.append(f"  <h2>Edge Constraints ({len(config.constraints)})</h2>")
-    html.append(f"  <table>")
+    html.append("  <table>")
     html.append(
-        f"    <thead><tr><th>Edge Type</th><th>Source</th><th>Target</th><th>Description</th><th>Required</th></tr></thead>"
+        "    <thead><tr><th>Edge Type</th><th>Source</th><th>Target</th><th>Description</th><th>Required</th></tr></thead>"  # noqa: E501
     )
-    html.append(f"    <tbody>")
+    html.append("    <tbody>")
 
     for constraint in config.constraints:
         req = "✓" if constraint.is_required else ""
@@ -994,8 +994,8 @@ def generate_html_docs(config: SchemaConfig) -> str:
             f"</tr>"
         )
 
-    html.append(f"    </tbody>")
-    html.append(f"  </table>")
+    html.append("    </tbody>")
+    html.append("  </table>")
 
     html.append("</body>")
     html.append("</html>")

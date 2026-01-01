@@ -388,7 +388,7 @@ def export_document_html(doc_id: str) -> str:
     <title>{title}</title>
     <style>
         body {{
-            font-family: 'Helvetica Neue', Arial, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica', sans-serif;
+            font-family: 'Helvetica Neue', Arial, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica', sans-serif;  # noqa: E501
             line-height: 1.6;
             max-width: 900px;
             margin: 40px auto;

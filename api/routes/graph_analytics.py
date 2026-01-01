@@ -359,7 +359,7 @@ def validate_integrity() -> Dict[str, Any]:
                         issue_type="circular_dependency",
                         severity="error",
                         description=f"Circular dependency detected (cycle length: {record['cycle_length']})",
-                        suggested_fix="Break dependency cycle by restructuring relationships or adding intermediary atoms",
+                        suggested_fix="Break dependency cycle by restructuring relationships or adding intermediary atoms",  # noqa: E501
                     )
                 )
 
@@ -530,7 +530,7 @@ def suggest_relationships(limit: int = 20) -> List[RelationshipSuggestion]:
                         target_atom_id=record["target_id"],
                         suggested_edge_type=record["edge_type"],
                         confidence=round(confidence, 2),
-                        reason=f"Found {record['path_count']} transitive paths with {record['edge_type']} relationships",
+                        reason=f"Found {record['path_count']} transitive paths with {record['edge_type']} relationships",  # noqa: E501
                     )
                 )
 
