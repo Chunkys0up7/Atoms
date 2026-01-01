@@ -687,7 +687,7 @@ class ProcessRewriteEngine:
         reference_phase = phase.get("reference_phase")
 
         # Build phase object
-        phase_obj = {
+        _phase_obj = {
             "id": phase_id,
             "name": phase.get("name"),
             "description": phase.get("description"),

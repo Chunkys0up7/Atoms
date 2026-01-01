@@ -219,7 +219,7 @@ def create_constraint(constraint_name: str) -> ConstraintResult:
     except Exception as e:
         print(f"Error creating constraint: {e}", file=sys.stderr)
         return ConstraintResult(
-            constraint_name=constraint_name, status="error", message=f"Failed to create constraint", error=str(e)
+            constraint_name=constraint_name, status="error", message="Failed to create constraint", error=str(e)
         )
 
 
@@ -293,7 +293,7 @@ def drop_constraint(constraint_name: str) -> ConstraintResult:
 
             except Exception as e:
                 return ConstraintResult(
-                    constraint_name=constraint_name, status="error", message=f"Failed to drop constraint", error=str(e)
+                    constraint_name=constraint_name, status="error", message="Failed to drop constraint", error=str(e)
                 )
 
     except HTTPException:
@@ -301,7 +301,7 @@ def drop_constraint(constraint_name: str) -> ConstraintResult:
     except Exception as e:
         print(f"Error dropping constraint: {e}", file=sys.stderr)
         return ConstraintResult(
-            constraint_name=constraint_name, status="error", message=f"Failed to drop constraint", error=str(e)
+            constraint_name=constraint_name, status="error", message="Failed to drop constraint", error=str(e)
         )
 
 

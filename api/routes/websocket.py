@@ -4,7 +4,6 @@ WebSocket Routes
 Handles WebSocket connections for real-time collaboration features.
 """
 
-import asyncio
 import json
 from datetime import datetime
 from typing import Optional

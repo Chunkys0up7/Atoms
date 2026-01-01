@@ -453,7 +453,7 @@ def get_inference_stats() -> Dict[str, Any]:
 
         # Check Claude
         try:
-            claude = get_claude_client()
+            _claude = get_claude_client()
             stats["claude_available"] = True
         except Exception:
             pass

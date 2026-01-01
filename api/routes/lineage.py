@@ -125,7 +125,7 @@ def get_file_commits(file_path: str) -> List[CommitInfo]:
             changes_summary = None
             if stats_result.returncode == 0:
                 # Parse stats output (e.g., "1 file changed, 5 insertions(+), 2 deletions(-)")
-                stats_lines = [l for l in stats_result.stdout.strip().split("\n") if l]
+                stats_lines = [line for line in stats_result.stdout.strip().split("\n") if line]
                 if stats_lines:
                     changes_summary = stats_lines[-1].strip()
 

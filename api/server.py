@@ -1,7 +1,7 @@
 import os
 import secrets
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routes import (

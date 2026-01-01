@@ -4,9 +4,8 @@ Conflict Resolution Service
 Handles merge conflicts for collaborative editing using three-way merge algorithm.
 """
 
-import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
 class ConflictType:

@@ -4,7 +4,6 @@ Ownership Analytics API
 Provides bulk reporting and analysis of ownership assignments across the knowledge graph.
 """
 
-import json
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional

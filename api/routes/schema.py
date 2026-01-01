@@ -328,7 +328,7 @@ def validate_atom(atom_data: Dict[str, Any]) -> AtomValidationResult:
     edges = atom_data.get("edges", [])
     for edge in edges:
         edge_type = edge.get("type", "")
-        target_id = edge.get("target", "")
+        _target_id = edge.get("target", "")
 
         # Check if this edge type is allowed for this source type
         valid_constraint = False
@@ -494,7 +494,6 @@ async def analyze_constraint_impact(constraint_change: Dict[str, Any]) -> Dict[s
     """
     from pathlib import Path
 
-    import httpx
     import yaml
 
     action = constraint_change.get("action")
@@ -850,13 +849,11 @@ def generate_schema_documentation(format: str = "markdown") -> Dict[str, Any]:
 
 def generate_markdown_docs(config: SchemaConfig) -> str:
     """Generate Markdown documentation from schema."""
-    from datetime import datetime
-
     md = []
-    md.append(f"# Schema Documentation\n")
+    md.append("# Schema Documentation\n")
     md.append(f"**Version:** {config.version}  ")
     md.append(f"**Last Updated:** {config.updated_at}\n")
-    md.append(f"---\n")
+    md.append("---\n")
 
     # Table of Contents
     md.append("## Table of Contents\n")
@@ -870,7 +867,7 @@ def generate_markdown_docs(config: SchemaConfig) -> str:
     md.append(
         f"This schema defines **{len(config.domains)} domains** and **{len(config.constraints)} edge constraints** "
     )
-    md.append(f"for the Graph-Native Documentation Platform.\n")
+    md.append("for the Graph-Native Documentation Platform.\n")
 
     # Domains
     md.append("## Domains\n")
@@ -880,19 +877,19 @@ def generate_markdown_docs(config: SchemaConfig) -> str:
         md.append(f"**Description:** {domain.description}\n")
 
         if domain.allowed_types:
-            md.append(f"**Allowed Types:**")
+            md.append("**Allowed Types:**")
             for atype in domain.allowed_types:
                 md.append(f"- `{atype}`")
             md.append("")
 
         if domain.required_attributes:
-            md.append(f"**Required Attributes:**")
+            md.append("**Required Attributes:**")
             for attr in domain.required_attributes:
                 md.append(f"- `{attr}`")
             md.append("")
 
         if domain.validation_rules:
-            md.append(f"**Validation Rules:**")
+            md.append("**Validation Rules:**")
             for rule in domain.validation_rules:
                 md.append(f"- {rule}")
             md.append("")

@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 import psutil
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -727,8 +726,7 @@ async def export_document_to_pdf(filename: str):
         from reportlab.lib.enums import TA_CENTER, TA_LEFT
         from reportlab.lib.pagesizes import letter
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-        from reportlab.lib.units import inch
-        from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
         published_dir = get_published_docs_dir()
         doc_path = published_dir / filename
@@ -839,7 +837,6 @@ async def export_document_to_docx(filename: str):
         from bs4 import BeautifulSoup
         from docx import Document
         from docx.enum.text import WD_ALIGN_PARAGRAPH
-        from docx.shared import Inches, Pt, RGBColor
 
         published_dir = get_published_docs_dir()
         doc_path = published_dir / filename

@@ -5,7 +5,6 @@ Manages WebSocket connections, presence tracking, and message broadcasting
 for real-time collaboration features.
 """
 
-import asyncio
 import json
 from collections import defaultdict
 from datetime import datetime

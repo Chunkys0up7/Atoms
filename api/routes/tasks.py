@@ -248,7 +248,7 @@ def assign_task(task_id: str, request: AssignTaskRequest) -> Dict[str, Any]:
             )
         else:
             # Use TaskRouter for intelligent assignment
-            assigned_to = task_router.assign_task(task_id, method, team=request.team)
+            _assigned_to = task_router.assign_task(task_id, method, team=request.team)
 
             task = db.execute_query("SELECT * FROM tasks WHERE id = %s", (task_id,), fetch="one")
 

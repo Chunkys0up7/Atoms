@@ -9,10 +9,9 @@ from pydantic import BaseModel
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from claude_client import get_claude_client
-from logging_config import get_logger
-from neo4j_client import get_neo4j_client
+from claude_client import get_claude_client  # noqa: E402
+from logging_config import get_logger  # noqa: E402
+from neo4j_client import get_neo4j_client  # noqa: E402
 
 router = APIRouter()
 logger = get_logger(__name__)

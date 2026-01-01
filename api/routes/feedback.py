@@ -221,8 +221,8 @@ class FeedbackLoopEngine:
         # Calculate aggregate metrics
         avg_error_rate = statistics.mean([a.get("metrics", {}).get("error_rate", 0) for a in module_atoms])
         avg_automation = statistics.mean([a.get("metrics", {}).get("automation_level", 0) for a in module_atoms])
-        avg_compliance = statistics.mean([a.get("metrics", {}).get("compliance_score", 1.0) for a in module_atoms])
-        total_cycle_time = sum([a.get("metrics", {}).get("avg_cycle_time_mins", 0) for a in module_atoms])
+        _avg_compliance = statistics.mean([a.get("metrics", {}).get("compliance_score", 1.0) for a in module_atoms])
+        _total_cycle_time = sum([a.get("metrics", {}).get("avg_cycle_time_mins", 0) for a in module_atoms])
 
         # Module-level suggestions
         if avg_error_rate > self.thresholds["error_rate_high"]:
@@ -288,7 +288,7 @@ class FeedbackLoopEngine:
             return "No optimization opportunities identified - system performing well"
 
         critical = len([s for s in suggestions if s.severity == "critical"])
-        high = len([s for s in suggestions if s.severity == "high"])
+        _high = len([s for s in suggestions if s.severity == "high"])
 
         quality = len([s for s in suggestions if s.type == "quality"])
         efficiency = len([s for s in suggestions if s.type == "efficiency"])

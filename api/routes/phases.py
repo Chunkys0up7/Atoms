@@ -10,7 +10,6 @@ Provides endpoints for managing phases and customer journeys:
 
 import json
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 

@@ -5,7 +5,6 @@ REST API for managing workflow process instances.
 """
 
 import sys
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
