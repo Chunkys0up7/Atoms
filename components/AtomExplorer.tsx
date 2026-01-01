@@ -826,7 +826,7 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, modules, onSelect })
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                             <div>
                               <div style={{ fontWeight: '600', fontSize: '14px', color: '#991b1b' }}>{atom.name}</div>
-                              <div style={{ fontSize: '11px', color: '#7f1d1d', fontFamily: 'monospace', marginTop: '2px' }}>{atom.id}</div>
+                              <div style={{ fontSize: '11px', color: '#7f1d1d', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>{atom.id}</div>
                             </div>
                             <div style={{ display: 'flex', gap: '4px' }}>
                               <span className="badge" style={{ fontSize: '9px', backgroundColor: ATOM_COLORS[atom.type] }}>{atom.type}</span>
@@ -1061,7 +1061,7 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, modules, onSelect })
                   <div style={{ backgroundColor: '#f9fafb', padding: 'var(--spacing-md)', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 'var(--spacing-sm)', fontSize: '13px' }}>
                       <div style={{ fontWeight: '600', color: '#6b7280' }}>Atom ID:</div>
-                      <div style={{ fontFamily: 'monospace', color: '#3b82f6', fontWeight: '600' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', color: '#3b82f6', fontWeight: '600' }}>
                         {generateAtomId(newAtom.category, newAtom.name)}
                       </div>
 
@@ -1126,7 +1126,7 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, modules, onSelect })
                         <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '13px', alignItems: 'center' }}>
                           <span style={{ fontWeight: '600', color: '#3b82f6', minWidth: '120px' }}>{edge.type}</span>
                           <span style={{ color: '#6b7280' }}>→</span>
-                          <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>{edge.targetId}</span>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>{edge.targetId}</span>
                         </div>
                       ))}
                     </div>
@@ -1451,7 +1451,7 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, modules, onSelect })
                 return (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px', backgroundColor: '#ffffff', borderRadius: '4px', marginBottom: '4px', border: '1px solid #e0e7ff' }}>
                     <span className="badge" style={{ fontSize: '9px', backgroundColor: '#3b82f6' }}>{edge.type}</span>
-                    <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: '600' }}>{edge.targetId}</span>
+                    <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: '600' }}>{edge.targetId}</span>
                     {targetAtom && <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)' }}>→ {targetAtom.name}</span>}
                     <button
                       onClick={() => {

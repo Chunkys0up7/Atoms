@@ -100,7 +100,7 @@ const EdgeExplorer: React.FC<EdgeExplorerProps> = ({ atoms, onSelectAtom }) => {
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: ATOM_COLORS[edge.source.type] }} />
                       <div>
                         <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-primary)' }}>{sourceTitle}</div>
-                        <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--color-text-tertiary)' }}>{edge.source.id}</div>
+                        <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>{edge.source.id}</div>
                       </div>
                     </div>
                   </td>
@@ -127,13 +127,13 @@ const EdgeExplorer: React.FC<EdgeExplorerProps> = ({ atoms, onSelectAtom }) => {
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: ATOM_COLORS[targetAtom.type] }} />
                         <div>
                           <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-primary)' }}>{targetTitle}</div>
-                          <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--color-text-tertiary)' }}>{targetAtom.id}</div>
+                          <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>{targetAtom.id}</div>
                         </div>
                       </div>
                     ) : (
                       <span style={{
                         color: '#ef4444',
-                        fontFamily: 'monospace',
+                        fontFamily: 'var(--font-mono)',
                         fontSize: '10px',
                         textTransform: 'uppercase',
                         fontWeight: '600',

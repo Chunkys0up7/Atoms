@@ -421,7 +421,7 @@ export default function OptimizationDashboard() {
                       backgroundColor: '#f8fafc',
                       borderRadius: '6px',
                       fontSize: '12px',
-                      fontFamily: 'monospace'
+                      fontFamily: 'var(--font-mono)'
                     }}>
                       {JSON.stringify(suggestion.metrics, null, 2)}
                     </div>

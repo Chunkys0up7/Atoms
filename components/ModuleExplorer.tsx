@@ -702,7 +702,7 @@ const ModuleExplorer: React.FC<ModuleExplorerProps> = ({
                   {selectedAtoms.map(atom => (
                     <div key={atom.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', backgroundColor: '#ffffff', borderRadius: '4px', marginBottom: '4px', border: '1px solid var(--color-border)' }}>
                       <div>
-                        <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: '600', marginRight: '8px' }}>{atom.id}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: '600', marginRight: '8px' }}>{atom.id}</span>
                         <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{atom.name}</span>
                       </div>
                       <button onClick={() => toggleAtomInModule(atom.id)} style={{ fontSize: '10px', padding: '2px 6px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Remove</button>
@@ -745,7 +745,7 @@ const ModuleExplorer: React.FC<ModuleExplorerProps> = ({
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: '600', color: 'var(--color-primary)' }}>{atom.id}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: '600', color: 'var(--color-primary)' }}>{atom.id}</span>
                         <span className="badge badge-info" style={{ fontSize: '9px', padding: '2px 6px' }}>{atom.type}</span>
                         <span className="badge badge-secondary" style={{ fontSize: '9px', padding: '2px 6px' }}>{atom.category}</span>
                       </div>

@@ -289,7 +289,7 @@ export default function LineageViewer({ atomId, onClose }: LineageViewerProps) {
                           </div>
                           <div style={{
                             fontSize: '10px',
-                            fontFamily: 'monospace',
+                            fontFamily: 'var(--font-mono)',
                             color: 'var(--color-text-tertiary)',
                             padding: '2px 6px',
                             backgroundColor: 'var(--color-bg-tertiary)',
@@ -333,7 +333,7 @@ export default function LineageViewer({ atomId, onClose }: LineageViewerProps) {
                       padding: 'var(--spacing-md)',
                       borderRadius: '6px',
                       fontSize: '11px',
-                      fontFamily: 'monospace',
+                      fontFamily: 'var(--font-mono)',
                       lineHeight: '1.6',
                       overflow: 'auto',
                       whiteSpace: 'pre-wrap',
