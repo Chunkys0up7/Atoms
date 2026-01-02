@@ -57,43 +57,39 @@ const ModuleExplorer: React.FC<ModuleExplorerProps> = ({
 
   // Fetch git status for all modules
   useEffect(() => {
+    let hasLoggedError = false;
+
     const fetchGitStatuses = async () => {
       try {
-        console.log('[ModuleExplorer] Fetching git statuses...');
         const response = await fetch('http://localhost:8000/api/git/modules/status', {
-          signal: AbortSignal.timeout(10000),
+          signal: AbortSignal.timeout(5000), // Reduced timeout from 10s to 5s
         });
-        console.log('[ModuleExplorer] Git status response status:', response.status);
+
         if (response.ok) {
           const statuses: ModuleGitStatus[] = await response.json();
-          console.log('[ModuleExplorer] Received git statuses:', statuses.length, 'modules');
           if (statuses && statuses.length > 0) {
             const statusMap = new Map(statuses.map(s => [s.module_id, s]));
-            console.log('[ModuleExplorer] Status map size:', statusMap.size);
-            console.log('[ModuleExplorer] Sample statuses:', Array.from(statusMap.entries()).slice(0, 3));
             setGitStatuses(statusMap);
           }
-        } else {
-          console.warn('[ModuleExplorer] Git status fetch failed with status:', response.status);
         }
       } catch (error) {
-        console.error('[ModuleExplorer] Failed to fetch git statuses:', error);
+        // Only log the first error to avoid console spam
+        if (!hasLoggedError) {
+          console.warn('[ModuleExplorer] Git status API unavailable (this is normal if backend is not running)');
+          hasLoggedError = true;
+        }
       }
     };
 
     fetchGitStatuses();
-    const interval = setInterval(fetchGitStatuses, 30000);
+    // Only retry every 60 seconds instead of 30 to reduce network load
+    const interval = setInterval(fetchGitStatuses, 60000);
     return () => clearInterval(interval);
   }, []);
 
   // Render git status badge
   const renderGitStatusBadge = (moduleId: string) => {
     const gitStatus = gitStatuses.get(moduleId);
-
-    // Debug logging
-    if (!gitStatus) {
-      console.log('[ModuleExplorer] No git status found for module:', moduleId, 'Available keys:', Array.from(gitStatuses.keys()).slice(0, 5));
-    }
 
     if (!gitStatus) {
       return (
