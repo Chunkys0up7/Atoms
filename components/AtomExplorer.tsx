@@ -46,40 +46,33 @@ const AtomExplorer: React.FC<AtomExplorerProps> = ({ atoms, modules, onSelect })
 
   // Fetch git status for all atoms
   useEffect(() => {
+    let hasLoggedError = false;
+
     const fetchGitStatuses = async () => {
       try {
-        console.log('[AtomExplorer] Fetching git statuses...');
         const response = await fetch('http://localhost:8000/api/git/atoms/status', {
-          // Add timeout and retry logic
-          signal: AbortSignal.timeout(10000), // 10 second timeout
+          signal: AbortSignal.timeout(5000), // Reduced timeout from 10s to 5s
         });
-        console.log('[AtomExplorer] Git status response:', response.ok, response.status);
+
         if (response.ok) {
           const statuses: AtomGitStatus[] = await response.json();
-          console.log('[AtomExplorer] Received git statuses:', statuses.length, 'atoms');
-          console.log('[AtomExplorer] Sample status:', statuses[0]);
-
-          // Only update if we received valid data
           if (statuses && statuses.length > 0) {
             const statusMap = new Map(statuses.map(s => [s.atom_id, s]));
             setGitStatuses(statusMap);
-            console.log('[AtomExplorer] Git status map size:', statusMap.size);
-          } else {
-            console.warn('[AtomExplorer] Received empty git status array, keeping existing state');
           }
-        } else {
-          console.error('[AtomExplorer] Failed to fetch git statuses:', response.status, response.statusText);
-          // Don't clear existing state on failure
         }
       } catch (error) {
-        console.error('[AtomExplorer] Failed to fetch git statuses:', error);
-        // Don't clear existing state on error - keep showing last known good state
+        // Only log the first error to avoid console spam
+        if (!hasLoggedError) {
+          console.warn('[AtomExplorer] Git status API unavailable (this is normal if backend is not running)');
+          hasLoggedError = true;
+        }
       }
     };
 
     fetchGitStatuses();
-    // Refresh git status every 30 seconds
-    const interval = setInterval(fetchGitStatuses, 30000);
+    // Only retry every 60 seconds instead of 30 to reduce network load
+    const interval = setInterval(fetchGitStatuses, 60000);
     return () => clearInterval(interval);
   }, []);
 
