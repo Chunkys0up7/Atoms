@@ -21,7 +21,7 @@ jobs:
           NEO4J_BOLT_URI: ${{ secrets.NEO4J_BOLT_URI }}
           NEO4J_USER: ${{ secrets.NEO4J_USER }}
           NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
-        run: python scripts/sync_neo4j.py --graph docs/api/graph/full.json --dry-run
+        run: python scripts/sync_neo4j.py --graph docs/generated/api/graph/full.json --dry-run
 
   embeddings:
     runs-on: ubuntu-latest
