@@ -20,7 +20,8 @@ The GNDP system currently contains:
 
 async function loadGraph() {
     try {
-        const response = await fetch('/generated/api/graph/full.json');
+        // Use relative path for MkDocs static serving
+        const response = await fetch('../generated/api/graph/full.json');
         const graphData = await response.json();
 
         // TODO: Render graph using D3.js or vis.js
@@ -45,8 +46,15 @@ async function loadGraph() {
         console.error('Failed to load graph:', error);
         document.getElementById('gndp-graph-container').innerHTML = `
             <div style="padding: 20px; text-align: center; color: #999;">
-                <p>Graph visualization unavailable</p>
-                <p><small>${error.message}</small></p>
+                <h3>Graph Visualization Unavailable</h3>
+                <p>Could not load graph data from <code>generated/api/graph/full.json</code></p>
+                <p><small>Error: ${error.message}</small></p>
+                <p style="margin-top: 20px;">
+                    <strong>Possible solutions:</strong><br>
+                    1. Run <code>python docs/build_docs.py --source . --output docs/generated</code> to generate the graph<br>
+                    2. Ensure MkDocs is serving the <code>docs/generated</code> directory<br>
+                    3. Check browser console for CORS or network errors
+                </p>
             </div>
         `;
     }
