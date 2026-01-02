@@ -251,8 +251,8 @@ Write-Host ""
 Write-Host "Starting FastAPI server..." -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location $PSScriptRoot\..
-$python = Join-Path $PSScriptRoot "..\venv\Scripts\python.exe"
+Set-Location $PSScriptRoot
+$python = Join-Path $PSScriptRoot "venv\Scripts\python.exe"
 & $python -m uvicorn api.server:app --host 127.0.0.1 --port 8000 --log-level info
 '@ | Out-File -FilePath ".\scripts\start-backend.ps1" -Encoding UTF8
 
@@ -311,7 +311,7 @@ Write-Host ""
 Write-Host "Starting Vite dev server..." -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location $PSScriptRoot\..
+Set-Location $PSScriptRoot
 npm run dev
 '@ | Out-File -FilePath ".\scripts\start-frontend.ps1" -Encoding UTF8
 
