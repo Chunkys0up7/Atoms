@@ -28,6 +28,10 @@ def client():
 @pytest.fixture
 def temp_atoms_dir(monkeypatch):
     """Create temporary atoms directory for testing."""
+    # Clear cache BEFORE test runs
+    cache = get_atom_cache()
+    cache.clear()
+
     temp_dir = tempfile.mkdtemp()
     atoms_dir = Path(temp_dir) / "atoms"
     atoms_dir.mkdir()
@@ -41,8 +45,7 @@ def temp_atoms_dir(monkeypatch):
     # Cleanup
     shutil.rmtree(temp_dir, ignore_errors=True)
 
-    # Clear cache
-    cache = get_atom_cache()
+    # Clear cache after test
     cache.clear()
 
 
