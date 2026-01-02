@@ -165,7 +165,7 @@ def neo4j_client_with_data(mock_neo4j_client):
     mock_neo4j_client.driver.session.return_value.__enter__.return_value = session_mock
 
     # Default responses
-    atom_id_responses = {atom["id"]: atom for atom in SAMPLE_ATOMS}
+    atom_id_responses = {atom["id"]: atom for atom in SAMPLE_ATOMS}  # noqa: F841
 
     def run_side_effect(query, **kwargs):
         """Handle different query types."""
@@ -279,7 +279,7 @@ def claude_client_with_responses(mock_claude_client):
         )
 
     # Store original for mode detection
-    original_create = mock_claude_client.client.messages.create
+    original_create = mock_claude_client.client.messages.create  # noqa: F841
 
     def messages_create_side_effect(model, max_tokens, system, messages):
         """Determine RAG mode from system prompt."""

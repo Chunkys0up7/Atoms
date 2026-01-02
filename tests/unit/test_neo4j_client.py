@@ -87,7 +87,7 @@ class TestNeo4jClientInitialization:
         with patch("api.neo4j_client.GraphDatabase.driver") as mock_driver:
             mock_driver.return_value.session.return_value.__enter__.return_value.run.return_value = None
 
-            client = Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password="password")
+            client = Neo4jClient(uri="neo4j://localhost:7687", user="neo4j", password="password")  # noqa: F841
 
             mock_driver.assert_called_once_with(
                 "neo4j://localhost:7687",
@@ -193,7 +193,7 @@ class TestUpstreamDependencies:
 
         Verifies that the max_depth parameter is respected.
         """
-        result = neo4j_client_with_data.find_upstream_dependencies("REQ-001", max_depth=5)
+        result = neo4j_client_with_data.find_upstream_dependencies("REQ-001", max_depth=5)  # noqa: F841
 
         # Verify the query was called
         session_mock = neo4j_client_with_data.driver.session.return_value.__enter__.return_value

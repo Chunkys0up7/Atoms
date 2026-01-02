@@ -7,9 +7,9 @@ Write-Host "API Server: http://127.0.0.1:8000" -ForegroundColor Green
 Write-Host "API Docs:   http://127.0.0.1:8000/docs" -ForegroundColor Green
 Write-Host "Health:     http://127.0.0.1:8000/health" -ForegroundColor Green
 Write-Host ""
-Write-Host "Starting FastAPI server using venv Python..." -ForegroundColor Yellow
+Write-Host "Starting FastAPI server..." -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location $PSScriptRoot\..
-$python = Join-Path $PSScriptRoot "..\venv\Scripts\python.exe"
+Set-Location "F:\Projects\FullSytem"
+$python = "F:\Projects\FullSytem\venv\Scripts\python.exe"
 & $python -m uvicorn api.server:app --host 127.0.0.1 --port 8000 --log-level info

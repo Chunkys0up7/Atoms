@@ -43,7 +43,7 @@ def verify_rules_api():
 
                 # Show action type
                 if rule.get("action"):
-                    action = rule["action"].get("action", {})
+                    action = rule["action"].get("action", {})  # noqa: F841
                     action_type = rule["action"].get("type", "UNKNOWN")
                     print(f"   Action: {action_type}")
 

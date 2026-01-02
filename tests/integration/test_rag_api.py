@@ -314,7 +314,7 @@ class TestRAGHealthEndpoint:
             response = client.get("/api/rag/health")
 
             assert response.status_code == 200
-            data = response.json()
+            data = response.json()  # noqa: F841
 
     def test_health_check_neo4j_disconnected(self, client):
         """

@@ -9,5 +9,5 @@ Write-Host ""
 Write-Host "Starting Vite dev server..." -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location $PSScriptRoot\..
+Set-Location "F:\Projects\FullSytem"
 npm run dev

@@ -107,13 +107,13 @@ class TestAtomsEndpoint:
 
         assert len(missing_fields) > 0
         expected_status = 400
-        expected_error = {"error": "Missing required fields", "missing": missing_fields}
+        expected_error = {"error": "Missing required fields", "missing": missing_fields}  # noqa: F841
 
         assert expected_status == 400
 
     def test_update_atom(self):
         """PUT /api/atoms/:id should update existing atom"""
-        atom_id = "atom-cust-kyc"
+        atom_id = "atom-cust-kyc"  # noqa: F841
         updates = {"title": "Updated Customer KYC", "summary": "Updated summary"}
 
         # Validate update payload
@@ -217,14 +217,14 @@ class TestRulesEndpoint:
 
     def test_update_rule(self):
         """PUT /api/rules/:id should update rule"""
-        rule_id = "rule-001"
+        rule_id = "rule-001"  # noqa: F841
         updates = {"severity": "error", "message": "Updated message"}
 
         assert isinstance(updates, dict)
 
     def test_delete_rule(self):
         """DELETE /api/rules/:id should delete rule"""
-        rule_id = "rule-001"
+        rule_id = "rule-001"  # noqa: F841
         expected_status = 200
 
         assert expected_status == 200
@@ -235,7 +235,7 @@ class TestRuntimeEndpoint:
 
     def test_validate_atom(self):
         """POST /api/runtime/validate should validate atom"""
-        atom_to_validate = {"id": "atom-test", "type": "process", "title": "Test Atom", "summary": "Test summary"}
+        atom_to_validate = {"id": "atom-test", "type": "process", "title": "Test Atom", "summary": "Test summary"}  # noqa: F841
 
         expected_response = {"valid": True, "errors": [], "warnings": []}
 
@@ -244,7 +244,7 @@ class TestRuntimeEndpoint:
 
     def test_validate_invalid_atom(self):
         """POST /api/runtime/validate with invalid atom should return errors"""
-        invalid_atom = {"id": "INVALID-ID", "type": "invalid_type", "title": ""}  # Uppercase not allowed  # Empty title
+        invalid_atom = {"id": "INVALID-ID", "type": "invalid_type", "title": ""}  # Uppercase not allowed  # Empty title  # noqa: F841
 
         expected_response = {
             "valid": False,
@@ -345,7 +345,7 @@ class TestOptimizationEndpoint:
 
     def test_apply_suggestion(self):
         """POST /api/optimization/apply should apply suggestion"""
-        request = {"suggestion_id": "opt-001", "auto_fix": True}
+        request = {"suggestion_id": "opt-001", "auto_fix": True}  # noqa: F841
 
         expected_response = {"status": "applied", "suggestion_id": "opt-001", "changes_made": ["Updated summary field"]}
 
@@ -395,35 +395,35 @@ class TestErrorHandling:
     def test_malformed_json_request(self):
         """Should return 400 for malformed JSON"""
         expected_status = 400
-        expected_error = {"error": "Invalid JSON in request body"}
+        expected_error = {"error": "Invalid JSON in request body"}  # noqa: F841
 
         assert expected_status == 400
 
     def test_missing_content_type_header(self):
         """Should return 415 for missing Content-Type"""
         expected_status = 415
-        expected_error = {"error": "Content-Type must be application/json"}
+        expected_error = {"error": "Content-Type must be application/json"}  # noqa: F841
 
         assert expected_status == 415
 
     def test_unauthorized_request(self):
         """Should return 401 for unauthorized requests"""
         expected_status = 401
-        expected_error = {"error": "Authentication required"}
+        expected_error = {"error": "Authentication required"}  # noqa: F841
 
         assert expected_status == 401
 
     def test_rate_limit_exceeded(self):
         """Should return 429 when rate limit exceeded"""
         expected_status = 429
-        expected_error = {"error": "Rate limit exceeded", "retry_after": 60}
+        expected_error = {"error": "Rate limit exceeded", "retry_after": 60}  # noqa: F841
 
         assert expected_status == 429
 
     def test_internal_server_error(self):
         """Should return 500 for server errors"""
         expected_status = 500
-        expected_error = {"error": "Internal server error", "request_id": "req-12345"}
+        expected_error = {"error": "Internal server error", "request_id": "req-12345"}  # noqa: F841
 
         assert expected_status == 500
 

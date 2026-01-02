@@ -2079,7 +2079,7 @@ def make_atom(template: Dict, index: Optional[int] = None) -> Dict:
 def create_edges(atoms: List[Dict]) -> List[Dict]:
     """Create meaningful edges between atoms."""
     edges = []
-    atom_dict = {atom["id"]: atom for atom in atoms}
+    atom_dict = {atom["id"]: atom for atom in atoms}  # noqa: F841
 
     # Define edge patterns based on relationships (using full atom IDs)
     edge_patterns = [
