@@ -389,6 +389,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop triggers if they exist to allow idempotent schema initialization
+DROP TRIGGER IF EXISTS update_process_instances_updated_at ON process_instances;
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks;
+DROP TRIGGER IF EXISTS update_sla_metrics_updated_at ON sla_metrics;
+
 CREATE TRIGGER update_process_instances_updated_at BEFORE UPDATE ON process_instances
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
