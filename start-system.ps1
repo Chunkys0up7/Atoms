@@ -5,7 +5,7 @@ param(
     [switch]$SkipNeo4j,      # Skip Neo4j startup (for development without graph features)
     [switch]$Quick,          # Skip optional health checks for faster startup
     [switch]$Verbose,        # Enable detailed logging
-    [int]$Timeout = 60       # Health check timeout in seconds
+    [int]$Timeout = 120      # Health check timeout in seconds (default 2 minutes)
 )
 
 # Configure logging
@@ -237,9 +237,12 @@ Write-Host ""
 # ============================================================
 Write-Step "[5/6] Starting backend service..."
 
+# Get absolute path to project root
+$ProjectRoot = (Get-Location).Path
+
 # Create backend startup script
-@'
-$host.UI.RawUI.WindowTitle = "GNDP Backend"
+@"
+`$host.UI.RawUI.WindowTitle = "GNDP Backend"
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "GNDP Backend Service" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
@@ -251,10 +254,10 @@ Write-Host ""
 Write-Host "Starting FastAPI server..." -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location $PSScriptRoot
-$python = Join-Path $PSScriptRoot "venv\Scripts\python.exe"
-& $python -m uvicorn api.server:app --host 127.0.0.1 --port 8000 --log-level info
-'@ | Out-File -FilePath ".\scripts\start-backend.ps1" -Encoding UTF8
+Set-Location "$ProjectRoot"
+`$python = "$ProjectRoot\venv\Scripts\python.exe"
+& `$python -m uvicorn api.server:app --host 127.0.0.1 --port 8000 --log-level info
+"@ | Out-File -FilePath ".\scripts\start-backend.ps1" -Encoding UTF8
 
 # Start backend in new window
 Start-Process powershell -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\start-backend.ps1"
@@ -299,8 +302,8 @@ Write-Host ""
 Write-Step "[6/6] Starting frontend service..."
 
 # Create frontend startup script
-@'
-$host.UI.RawUI.WindowTitle = "GNDP Frontend"
+@"
+`$host.UI.RawUI.WindowTitle = "GNDP Frontend"
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "GNDP Frontend Service" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
@@ -311,9 +314,9 @@ Write-Host ""
 Write-Host "Starting Vite dev server..." -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location $PSScriptRoot
+Set-Location "$ProjectRoot"
 npm run dev
-'@ | Out-File -FilePath ".\scripts\start-frontend.ps1" -Encoding UTF8
+"@ | Out-File -FilePath ".\scripts\start-frontend.ps1" -Encoding UTF8
 
 # Start frontend in new window
 Start-Process powershell -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", ".\scripts\start-frontend.ps1"
