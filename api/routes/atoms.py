@@ -265,11 +265,11 @@ async def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
 
     # Determine file path (use category if available, otherwise root)
     if atom.category:
-        category_dir = base / atom.category.lower()
+        category_dir = ATOMS_DIR / atom.category.lower()
         category_dir.mkdir(exist_ok=True)
         file_path = category_dir / f"{atom.id}.yaml"
     else:
-        file_path = base / f"{atom.id}.yaml"
+        file_path = ATOMS_DIR / f"{atom.id}.yaml"
 
     # Write to YAML file atomically (temp + rename pattern prevents data loss)
     try:
