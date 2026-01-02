@@ -12,6 +12,9 @@ from cache import atomic_write, get_atom_cache  # noqa: E402
 router = APIRouter()
 cache = get_atom_cache()
 
+# Atoms directory - can be overridden in tests
+ATOMS_DIR = Path(__file__).parent.parent.parent / "atoms"
+
 
 class CreateAtomRequest(BaseModel):
     id: str
@@ -47,7 +50,7 @@ def _load_all_atoms() -> List[Dict[str, Any]]:
         List of all atom dictionaries with normalized fields
     """
     atoms = []
-    base = Path(__file__).parent.parent.parent / "atoms"
+    base = ATOMS_DIR
 
     if not base.exists():
         return atoms
@@ -127,8 +130,7 @@ def list_atoms(
 
     if not all_atoms:
         # Check if atoms directory exists
-        base = Path(__file__).parent.parent.parent / "atoms"
-        if not base.exists():
+        if not ATOMS_DIR.exists():
             raise HTTPException(status_code=404, detail="atoms directory not found")
 
     # Limit to reasonable bounds
@@ -198,13 +200,11 @@ async def create_atom(atom: CreateAtomRequest) -> Dict[str, Any]:
     """Create a new atom with schema validation."""
     import httpx
 
-    base = Path(__file__).parent.parent.parent / "atoms"
-
-    if not base.exists():
-        base.mkdir(parents=True, exist_ok=True)
+    if not ATOMS_DIR.exists():
+        ATOMS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Check if atom ID already exists
-    for yaml_file in base.rglob("*.yaml"):
+    for yaml_file in ATOMS_DIR.rglob("*.yaml"):
         try:
             with open(yaml_file, "r", encoding="utf-8") as fh:
                 data = yaml.safe_load(fh)

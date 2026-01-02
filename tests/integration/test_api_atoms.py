@@ -32,10 +32,9 @@ def temp_atoms_dir(monkeypatch):
     atoms_dir = Path(temp_dir) / "atoms"
     atoms_dir.mkdir()
 
-    # Monkeypatch the atoms directory in atoms.py
-    monkeypatch.setattr(
-        "routes.atoms.Path.__truediv__", lambda self, other: atoms_dir if other == "atoms" else self / other
-    )
+    # Monkeypatch the ATOMS_DIR constant directly in routes.atoms
+    import api.routes.atoms as atoms_module
+    monkeypatch.setattr(atoms_module, "ATOMS_DIR", atoms_dir)
 
     yield atoms_dir
 
