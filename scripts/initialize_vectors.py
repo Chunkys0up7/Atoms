@@ -50,20 +50,34 @@ def init_chroma_client(persist_dir: str = "rag-index"):
     return chromadb.PersistentClient(path=persist_dir)
 
 
+try:
+    import yaml
+except ImportError:
+    print("ERROR: PyYAML not installed. Run: pip install PyYAML")
+    # Don't exit yet, might be standard lib in some envs (unlikely but safe)
+    # Actually, it is required.
+    pass
+
 def load_atoms_from_disk() -> List[Dict[str, Any]]:
-    """Load all atom JSON files from data/atoms/ directory."""
-    atoms_dir = Path(__file__).parent.parent / "data" / "atoms"
+    """Load all atom YAML files from atoms/ directory (recursive)."""
+    # Fix path: parent.parent is project root
+    atoms_dir = Path(__file__).parent.parent / "atoms"
 
     if not atoms_dir.exists():
         print(f"ERROR: Atoms directory not found at {atoms_dir}")
         sys.exit(1)
 
+    print(f"Scanning {atoms_dir} for atom definitions...")
     atoms = []
-    for file_path in sorted(atoms_dir.glob("atom-*.json")):
+    # Recursively find all .yaml files
+    for file_path in sorted(atoms_dir.rglob("*.yaml")):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                atom = json.load(f)
-                atoms.append(atom)
+                atom = yaml.safe_load(f)
+                if atom:
+                    # Inject file path for metadata
+                    atom["file_path"] = str(file_path)
+                    atoms.append(atom)
         except Exception as e:
             print(f"WARNING: Failed to load {file_path.name}: {e}")
             continue
@@ -265,7 +279,8 @@ def main():
     persist_dir = Path(__file__).parent.parent / "rag-index"
     persist_dir.mkdir(exist_ok=True)
 
-    use_openai = HAS_OPENAI and os.environ.get("OPENAI_API_KEY")
+    # Force disable OpenAI due to quota limits
+    use_openai = False # HAS_OPENAI and os.environ.get("OPENAI_API_KEY")
     collection = initialize_chroma_collection(persist_dir=str(persist_dir), use_openai=bool(use_openai))
 
     # Step 4: Index atoms

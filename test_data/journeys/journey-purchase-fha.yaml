@@ -1,0 +1,9 @@
+id: journey-purchase-fha
+name: Purchase — FHA Loan
+description: Home purchase workflow using FHA financing with specific appraisal and insurance steps.
+phases:
+  - phase-pre-application-purchase-fha
+  - phase-application-intake-purchase-fha
+  - phase-processing-purchase-fha
+  - phase-underwriting-purchase-fha
+  - phase-closing-purchase-fha

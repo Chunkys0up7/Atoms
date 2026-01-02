@@ -34,6 +34,7 @@ from .routes import (
     templates,
     websocket,
 )
+from .database import get_postgres_client
 
 
 def get_admin_token():
@@ -45,9 +46,21 @@ def get_admin_token():
 
 app = FastAPI(title="GNDP API", description="Graph-Native Documentation Platform API", version="0.1.0")
 
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database schema on startup"""
+    try:
+        db = get_postgres_client()
+        # Ensure schema is initialized (tables created)
+        db.initialize_schema()
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
+
+
 # CORS configuration - restrict in production
 allowed_origins = os.environ.get(
-    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8000"
+    "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:8000,http://127.0.0.1:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:8000"
 ).split(",")
 
 app.add_middleware(

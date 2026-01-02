@@ -1,0 +1,21 @@
+{
+  "journey": {
+    "id": "journey-loan-origination",
+    "name": "Standard Loan Origination",
+    "phases": ["phase-application", "phase-assessment", "phase-approval"]
+  },
+  "context": {
+    "customer_data": {
+      "credit_score": 580,
+      "first_time_borrower": false,
+      "debt_to_income_ratio": 0.35
+    },
+    "transaction_data": {
+      "amount": 500000,
+      "loan_purpose": "PURCHASE",
+      "property_type": "SINGLE_FAMILY"
+    },
+    "risk_flags": [],
+    "compliance_requirements": []
+  }
+}

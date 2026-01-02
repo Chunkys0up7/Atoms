@@ -1,0 +1,59 @@
+# {{ atom.id }} - {{ atom.name }}
+
+**Type**: `{{ atom.type }}` | **Domain**: `{{ atom.domain }}` | **Criticality**: `{{ atom.criticality }}`
+
+{% if atom.summary %}
+## Summary
+{{ atom.summary }}
+{% endif %}
+
+{% if atom.description %}
+## Description
+{{ atom.description }}
+{% endif %}
+
+## Metadata
+- **Owner**: {{ atom.owner }}
+- **Status**: {{ atom.status }}
+- **Version**: {{ atom.version }}
+{% if atom.compliance_score %}
+- **Compliance Score**: {{ atom.compliance_score }}
+{% endif %}
+
+## Relationships
+{% if atom.edges %}
+| Type | Target |
+|------|--------|
+{% for edge in atom.edges %}
+| `{{ edge.type }}` | [`{{ edge.targetId }}`](../{{ edge.targetId }}.md) |
+{% endfor %}
+{% else %}
+*No relationships defined.*
+{% endif %}
+
+## Content
+{% if atom.content.steps %}
+### Steps
+{% for step in atom.content.steps %}
+1. {{ step }}
+{% endfor %}
+{% endif %}
+
+{% if atom.content.inputs %}
+### Inputs
+{% for input in atom.content.inputs %}
+- {{ input }}
+{% endfor %}
+{% endif %}
+
+{% if atom.content.outputs %}
+### Outputs
+{% for output in atom.content.outputs %}
+- {{ output }}
+{% endfor %}
+{% endif %}
+
+{% if atom.content.regulatory_context %}
+### Regulatory Context
+{{ atom.content.regulatory_context }}
+{% endif %}

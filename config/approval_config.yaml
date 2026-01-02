@@ -1,0 +1,206 @@
+# GNDP Approval Workflow Configuration
+# Defines approval stages, roles, and SLA parameters for module approval workflows
+
+# Default approval workflow stages
+default_stages:
+  - name: draft
+    label: Draft
+    description: Module is being created and edited
+    assigned_to: Author
+    max_response_hours: null  # No SLA for draft stage
+
+  - name: technical_review
+    label: Technical Review
+    description: Engineering team reviews module composition and technical accuracy
+    assigned_to: Engineering Team
+    max_response_hours: 48
+    escalation_to: VP Engineering
+
+  - name: compliance_review
+    label: Compliance Review
+    description: Compliance team validates regulatory requirements
+    assigned_to: Compliance Team
+    max_response_hours: 24
+    escalation_to: Chief Compliance Officer
+
+  - name: approved
+    label: Approved
+    description: Module is approved for use in production
+    assigned_to: VP Engineering
+    max_response_hours: null  # Final stage
+
+# Criticality-based workflow variants
+workflows_by_criticality:
+  LOW:
+    stages:
+      - draft
+      - technical_review
+      - approved
+    auto_approve_threshold_hours: 72  # Auto-approve if no response in 72 hours
+
+  MEDIUM:
+    stages:
+      - draft
+      - technical_review
+      - compliance_review
+      - approved
+    auto_approve_threshold_hours: null  # No auto-approval
+
+  HIGH:
+    stages:
+      - draft
+      - technical_review
+      - compliance_review
+      - approved
+    required_approvers: 2  # Minimum 2 approvers required
+
+  CRITICAL:
+    stages:
+      - draft
+      - technical_review
+      - compliance_review
+      - security_review
+      - executive_review
+      - approved
+    required_approvers: 3  # Minimum 3 approvers required
+    executive_approval_required: true
+
+# Additional approval stages for high-criticality modules
+additional_stages:
+  security_review:
+    label: Security Review
+    description: Security team reviews for vulnerabilities and compliance
+    assigned_to: Security Team
+    max_response_hours: 24
+    escalation_to: Chief Information Security Officer
+
+  executive_review:
+    label: Executive Review
+    description: Executive leadership approves critical changes
+    assigned_to: Executive Team
+    max_response_hours: 48
+    escalation_to: Chief Executive Officer
+
+# Role definitions for approval workflow
+roles:
+  author:
+    name: Module Author
+    can_submit: true
+    can_approve: false
+    can_reject: false
+
+  technical_reviewer:
+    name: Technical Reviewer
+    can_submit: false
+    can_approve: true
+    can_reject: true
+    can_request_changes: true
+    stages: [technical_review]
+
+  compliance_officer:
+    name: Compliance Officer
+    can_submit: false
+    can_approve: true
+    can_reject: true
+    can_request_changes: true
+    stages: [compliance_review]
+
+  security_analyst:
+    name: Security Analyst
+    can_submit: false
+    can_approve: true
+    can_reject: true
+    can_request_changes: true
+    stages: [security_review]
+
+  vp_engineering:
+    name: VP Engineering
+    can_submit: false
+    can_approve: true
+    can_reject: true
+    can_request_changes: true
+    stages: [technical_review, approved]
+    can_override: true
+
+  executive:
+    name: Executive Approver
+    can_submit: false
+    can_approve: true
+    can_reject: true
+    can_request_changes: false
+    stages: [executive_review]
+    can_override: true
+
+# Workflow type specific configurations
+workflow_type_config:
+  BPM:
+    description: Business Process Model workflows
+    default_criticality: MEDIUM
+    requires_compliance_review: true
+    requires_technical_review: true
+
+  SOP:
+    description: Standard Operating Procedure workflows
+    default_criticality: HIGH
+    requires_compliance_review: true
+    requires_technical_review: true
+    requires_security_review: false
+
+  CUSTOMER_JOURNEY:
+    description: Customer-facing journey workflows
+    default_criticality: HIGH
+    requires_compliance_review: true
+    requires_technical_review: true
+    requires_security_review: true
+
+  CUSTOM:
+    description: Custom workflows
+    default_criticality: MEDIUM
+    requires_compliance_review: false
+    requires_technical_review: true
+
+# SLA configurations
+sla_defaults:
+  warning_threshold_percent: 80
+  escalation_enabled: true
+  notification_intervals_hours: [24, 12, 4, 1]  # Send notifications at these intervals before SLA breach
+
+# Notification templates
+notifications:
+  approval_submitted:
+    subject: "Module {module_id} submitted for {stage} review"
+    recipients: [stage_assigned_to]
+
+  approval_approved:
+    subject: "Module {module_id} approved at {stage} stage"
+    recipients: [module_author, stage_assigned_to]
+
+  approval_rejected:
+    subject: "Module {module_id} rejected at {stage} stage"
+    recipients: [module_author]
+
+  changes_requested:
+    subject: "Changes requested for module {module_id}"
+    recipients: [module_author]
+
+  sla_warning:
+    subject: "SLA warning: Module {module_id} at {stage} stage"
+    recipients: [stage_assigned_to]
+
+  sla_breach:
+    subject: "SLA BREACHED: Module {module_id} at {stage} stage"
+    recipients: [stage_assigned_to, escalation_to]
+
+# Audit configuration
+audit:
+  log_all_actions: true
+  retention_days: 730  # Keep audit logs for 2 years
+  required_fields: [reviewer_email, reviewer_role, timestamp]
+
+# GitHub integration
+github:
+  create_event_files: true
+  event_directory: .github/events
+  archive_directory: .github/events/archive
+  commit_module_changes: true
+  auto_commit_message: "chore(approval): {event_type} for {module_id}"

@@ -1,0 +1,37 @@
+# Expanded fixtures for verify-email testing
+valid_emails:
+  - alice@bank.com
+  - bob.jones@enterprise.org
+  - maria.garcía@empresa.es
+  - oliver+sales@company.co.uk
+  - support@mail.company.io
+  - unicode_local_тест@пример.рф
+  - longlocalpart_abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz@longlocal.test
+  - subdomain.user@sub.mail.example.com
+  - disposable@tempmail.test  # intentionally disposable-like domain for negative tests
+  - quoted+name@weird-example.com
+invalid_emails:
+  - "missing-at-sign.example.com"
+  - "@no-local-part.com"
+  - "bad-characters-in-local-part!#$%\"()=+@example.com"
+  - "double@@sign.com"
+  - "trailing-dot.@example.com"
+  - "local-part-too-long-" + "a"*200 + "@example.com"  # intentionally long local-part placeholder
+dns_failures:
+  - nonexistent-domain-xyz12345.test
+  - no-mx-record.example.test
+role_addresses:
+  - admin@company.com
+  - support@company.com
+  - postmaster@company.com
+  - webmaster@company.com
+edge_cases:
+  - email_with_underscore@sub_domain.example.com
+  - emoji_in_local_🙂@example.com
+  - international_domain@пример.рф
+notes: |
+  - Use `valid_emails` for positive unit tests (format, MX lookup pass).
+  - Use `invalid_emails` for format validation negative tests.
+  - `dns_failures` are used to simulate MX/DNS lookup failures.
+  - `role_addresses` are tested when policy forbids role-based accounts.
+  - `edge_cases` include Unicode and uncommon, but valid, possibilities.

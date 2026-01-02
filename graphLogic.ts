@@ -1,28 +1,36 @@
 
 import { Atom, ValidationIssue, EdgeType, LintIssue, Module, AtomType } from './types';
 
+import { SemanticQueryBuilder } from './lib/graph/index';
+
 export const runEnterpriseLinter = (atoms: Atom[], modules: Module[]): LintIssue[] => {
   const issues: LintIssue[] = [];
+  const query = new SemanticQueryBuilder(atoms);
 
-  atoms.forEach(atom => {
-    // Rule: Every Process atom MUST have a PERFORMED_BY edge to a ROLE
-    // Fix: Use AtomType enum for type-safe comparison and correct EdgeType property
-    if (atom.type === AtomType.PROCESS) {
-      const hasRole = atom.edges.some(e => e.type === EdgeType.PERFORMED_BY);
-      if (!hasRole) {
-        issues.push({
-          id: `LINT-001-${atom.id}`,
-          atomId: atom.id,
-          severity: 'ERROR',
-          category: 'COMPLIANCE',
-          message: `Process '${atom.id}' has no assigned Role.`,
-          suggestion: `Add a PERFORMED_BY edge linking to a ROLE atom.`
-        });
-      }
+  // Rule: Every Process atom MUST have a PERFORMED_BY edge to a ROLE
+  const processes = query.where('type', 'equals', AtomType.PROCESS).execute().matches;
+  processes.forEach(atom => {
+    const hasRole = atom.edges.some(e => e.type === EdgeType.PERFORMED_BY);
+    if (!hasRole) {
+      issues.push({
+        id: `LINT-001-${atom.id}`,
+        atomId: atom.id,
+        severity: 'ERROR',
+        category: 'COMPLIANCE',
+        message: `Process '${atom.id}' has no assigned Role.`,
+        suggestion: `Add a PERFORMED_BY edge linking to a ROLE atom.`
+      });
     }
+  });
 
-    // Rule: Critical atoms must have a high automation_level or a detailed exception map
-    if (atom.criticality === 'CRITICAL' && (!atom.content.exceptions || atom.content.exceptions.length === 0)) {
+  // Rule: Critical atoms must have a high automation_level or a detailed exception map
+  // We can query for CRITICAL atoms directly
+  const criticalAtoms = new SemanticQueryBuilder(atoms)
+    .where('criticality', 'equals', 'CRITICAL')
+    .execute().matches;
+
+  criticalAtoms.forEach(atom => {
+    if (!atom.content.exceptions || atom.content.exceptions.length === 0) {
       issues.push({
         id: `LINT-002-${atom.id}`,
         atomId: atom.id,
@@ -32,8 +40,10 @@ export const runEnterpriseLinter = (atoms: Atom[], modules: Module[]): LintIssue
         suggestion: `Define 'exceptions' in the atom content to mitigate high-risk failure modes.`
       });
     }
+  });
 
-    // Rule: Descriptive naming
+  // Rule: Descriptive naming (Check all atoms)
+  atoms.forEach(atom => {
     if (atom.name.length < 5) {
       issues.push({
         id: `LINT-003-${atom.id}`,

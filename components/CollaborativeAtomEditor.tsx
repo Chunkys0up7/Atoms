@@ -11,15 +11,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useWebSocket, WebSocketMessage } from '../hooks/useWebSocket';
 
-interface Atom {
-  id: string;
-  name: string;
-  type: string;
-  description: string;
-  category?: string;
-  tags?: string[];
-  metadata?: Record<string, any>;
-}
+import { Atom } from '../types';
 
 interface UserPresence {
   user_id: string;
@@ -477,10 +469,10 @@ export default function CollaborativeAtomEditor({
             Description {getFieldIndicator('description')}
           </label>
           <textarea
-            value={atom.description}
-            onChange={(e) => handleFieldChange('description', e.target.value)}
-            onFocus={() => handleFieldFocus('description')}
-            onBlur={() => handleFieldBlur('description')}
+            value={atom.content?.description || ''}
+            onChange={(e) => handleFieldChange('content', { ...atom.content, description: e.target.value })}
+            onFocus={() => handleFieldFocus('content.description')}
+            onBlur={() => handleFieldBlur('content.description')}
             rows={6}
             style={{
               width: '100%',
@@ -490,7 +482,7 @@ export default function CollaborativeAtomEditor({
               fontSize: '14px',
               fontFamily: 'inherit',
               resize: 'vertical',
-              outline: editingField === 'description' ? '2px solid #3b82f6' : 'none'
+              outline: editingField === 'content.description' ? '2px solid #3b82f6' : 'none'
             }}
           />
         </div>

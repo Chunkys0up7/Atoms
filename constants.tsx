@@ -14,6 +14,13 @@ export const API_ENDPOINTS = {
   graphByType: (type: string) => `${API_BASE_URL}/api/graph/type/${type}`,
   graphByModule: (moduleId: string) => `${API_BASE_URL}/api/graph/module/${moduleId}`,
   triggerSync: `${API_BASE_URL}/api/trigger/sync`,
+  rules: `${API_BASE_URL}/api/rules`,
+  mkdocs: `${API_BASE_URL}/api/mkdocs`,
+  rag: {
+    health: `${API_BASE_URL}/api/rag/health`,
+    metrics: `${API_BASE_URL}/api/rag/metrics`,
+    query: `${API_BASE_URL}/api/rag/query`,
+  },
 };
 
 export const ATOM_COLORS: Record<AtomType, string> = {
@@ -28,6 +35,10 @@ export const ATOM_COLORS: Record<AtomType, string> = {
   [AtomType.RISK]: '#ef4444',
   [AtomType.POLICY]: '#f472b6',
   [AtomType.CONTROL]: '#2dd4bf',
+  [AtomType.API]: '#64748b',
+  [AtomType.CAPABILITY]: '#d946ef',
+  [AtomType.AGENT]: '#8b5cf6',
+  [AtomType.VERSION]: '#94a3b8',
 };
 
 export const MOCK_ATOMS: Atom[] = [
@@ -39,6 +50,7 @@ export const MOCK_ATOMS: Atom[] = [
     version: '1.0.0',
     status: 'ACTIVE',
     owner: 'Customer',
+    owning_team: 'Borrower Experience',
     team: 'Borrower Experience',
     ontologyDomain: 'Loan Origination',
     criticality: 'MEDIUM',
@@ -93,6 +105,7 @@ export const MOCK_ATOMS: Atom[] = [
     version: '2.1.0',
     status: 'ACTIVE',
     owner: 'System',
+    owning_team: 'Core Engineering',
     team: 'Core Engineering',
     ontologyDomain: 'Calculations & Algorithms',
     criticality: 'CRITICAL',
@@ -144,7 +157,7 @@ export const MOCK_PHASES: Phase[] = [
     id: 'phase-processing-refinance-rate-term',
     name: 'Processing - Refi Rate & Term',
     description: 'Refinance-specific processing including payoff and title checks.',
-    modules: ['module-income-verification','module-credit-analysis','module-property-appraisal'],
+    modules: ['module-income-verification', 'module-credit-analysis', 'module-property-appraisal'],
     journeyId: 'journey-refinance-rate-term',
     targetDurationDays: 6
   }
@@ -162,18 +175,18 @@ export const MOCK_JOURNEYS: Journey[] = [
     id: 'journey-refinance-rate-term',
     name: 'Refinance — Rate & Term',
     description: 'Refinance journey focused on lowering rate or adjusting term.',
-    phases: ['phase-pre-application-refinance-rate-term','phase-application-intake-refinance-rate-term','phase-processing-refinance-rate-term']
+    phases: ['phase-pre-application-refinance-rate-term', 'phase-application-intake-refinance-rate-term', 'phase-processing-refinance-rate-term']
   },
   {
     id: 'journey-purchase-fha',
     name: 'Purchase — FHA Loan',
     description: 'Purchase flow for FHA insured loans.',
-    phases: ['phase-pre-application-purchase-fha','phase-application-intake-purchase-fha','phase-processing-purchase-fha']
+    phases: ['phase-pre-application-purchase-fha', 'phase-application-intake-purchase-fha', 'phase-processing-purchase-fha']
   },
   {
     id: 'journey-refinance-cash-out',
     name: 'Refinance — Cash-Out',
     description: 'Cash-out refinance workflow with payoff/disbursement handling.',
-    phases: ['phase-pre-application-refinance-cash-out','phase-application-intake-refinance-cash-out','phase-processing-refinance-cash-out']
+    phases: ['phase-pre-application-refinance-cash-out', 'phase-application-intake-refinance-cash-out', 'phase-processing-refinance-cash-out']
   }
 ];

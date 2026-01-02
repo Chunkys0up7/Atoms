@@ -1,0 +1,63 @@
+# Larger address fixtures including international coverage
+valid_addresses:
+  - country: US
+    street: "4326 Cedar Lane"
+    city: "Rivertown"
+    state: "CA"
+    postal_code: "90210"
+  - country: UK
+    street: "Flat 3, 12 High Street"
+    city: "London"
+    postal_code: "SW1A 1AA"
+  - country: DE
+    street: "Bahnhofstrasse 5"
+    city: "Berlin"
+    postal_code: "10115"
+  - country: JP
+    street: "1-2-3 Chiyoda"
+    city: "Tokyo"
+    postal_code: "100-0001"
+  - country: BR
+    street: "Avenida Paulista, 1000"
+    city: "Sao Paulo"
+    postal_code: "01310-100"
+  - country: IN
+    street: "No 5 MG Road"
+    city: "Bengaluru"
+    postal_code: "560001"
+  - country: FR
+    street: "10 Rue de Rivoli"
+    city: "Paris"
+    postal_code: "75001"
+
+invalid_addresses:
+  - country: US
+    street: ""
+    city: ""
+    state: ""
+    postal_code: ""
+  - country: Unknown
+    street: "Somewhere"
+    city: "Nowhere"
+    postal_code: "ABCDE"
+  - country: US
+    street: "123 Long Rd " + "a"*300
+    city: "Overflow"
+    postal_code: "00000"
+
+edge_cases:
+  - country: US
+    street: "PO Box 123"
+    city: "Rivertown"
+    postal_code: "90210"
+  - country: UK
+    street: "Unit 5, Industrial Estate"
+    city: "Belfast"
+    postal_code: "BT1 1AA"
+  - country: RU
+    street: "ул. Ленина, д. 1"
+    city: "Москва"
+    postal_code: "101000"
+
+notes: |
+  - Use geocoding where appropriate; validate postal code formats per country.

@@ -1,0 +1,26 @@
+#  - Processor Verifies Rental Income
+
+**Type**: `` | **Domain**: `` | **Criticality**: ``
+
+
+
+
+
+## Metadata
+- **Owner**: 
+- **Status**: ACTIVE
+- **Version**: 1.0.0
+
+
+## Relationships
+
+*No relationships defined.*
+
+
+## Content
+
+
+
+
+
+

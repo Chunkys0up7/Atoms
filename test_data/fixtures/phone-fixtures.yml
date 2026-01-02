@@ -1,0 +1,32 @@
+# Expanded phone number fixtures for validate-phone atom
+valid_numbers:
+  - +14155552671        # US E.164
+  - +447911123456       # UK mobile
+  - +4915123456789      # DE mobile
+  - +919876543210       # IN mobile
+  - +5511999998888      # BR mobile
+  - +33123456789        # FR fixed
+  - +632912345678       # PH mobile
+  - +1-800-555-0199     # toll-free formatting
+  - (415) 555-2671      # formatted with parentheses
+  - 011441234567890     # international dial prefix style
+
+invalid_numbers:
+  - 12345               # too short
+  - +99abc12345         # contains letters
+  - 00441234            # ambiguous/incomplete
+  - +1 0000000000000000 # excessively long
+  - ""                 # empty string
+  - +0000000000         # invalid country code
+
+edge_cases:
+  - +44 7911 123456 ext 123   # extension
+  - 555-0199                   # local without country
+  - +81-90-1234-5678           # Japan mobile formatting
+  - +49(0)15123456789          # parentheses zero present
+  - +1·415·555·2671            # unicode punctuation
+
+notes: |
+  - Use `valid_numbers` for positive validation + normalization.
+  - Use `invalid_numbers` for format/length rejection tests.
+  - `edge_cases` check parsing, extension extraction, and normalization to E.164.

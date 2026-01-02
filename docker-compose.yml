@@ -23,6 +23,26 @@ services:
     networks:
       - gndp-network
 
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: gndp-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=workflow_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gndp-network
+
   # FastAPI Backend
   api:
     build:
@@ -47,6 +67,8 @@ services:
       - ./docs:/app/docs
     depends_on:
       neo4j:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
@@ -78,6 +100,7 @@ volumes:
   neo4j_data:
   neo4j_logs:
   neo4j_import:
+  postgres_data:
 
 networks:
   gndp-network:

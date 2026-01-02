@@ -1,0 +1,36 @@
+{
+  "nodes": [
+    {
+      "id": "atom-dec-loan-decision",
+      "type": "DECISION",
+      "label": "Loan Decision (Approve/Deny/Suspend)"
+    }
+  ],
+  "edges": [
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "",
+      "type": "RELATED_TO"
+    }
+  ]
+}

@@ -1,0 +1,1901 @@
+{
+  "nodes": [
+    {
+      "id": "atom-bo-credit-inquiry-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Credit Inquiries"
+    },
+    {
+      "id": "atom-bo-credit-score-analysis",
+      "type": "PROCESS",
+      "label": "Processor Analyzes Credit Scores"
+    },
+    {
+      "id": "atom-bo-data-accuracy-review",
+      "type": "PROCESS",
+      "label": "QC Auditor Reviews Data Accuracy"
+    },
+    {
+      "id": "atom-bo-debt-ratio-calculation",
+      "type": "PROCESS",
+      "label": "Processor Calculates Total Debt Ratios"
+    },
+    {
+      "id": "atom-bo-derogatory-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Derogatory Items"
+    },
+    {
+      "id": "atom-bo-document-audit",
+      "type": "PROCESS",
+      "label": "QC Auditor Performs Document Audit"
+    },
+    {
+      "id": "atom-bo-down-payment-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Down Payment Source"
+    },
+    {
+      "id": "atom-bo-dti-calculation",
+      "type": "PROCESS",
+      "label": "Loan Officer Calculates DTI"
+    },
+    {
+      "id": "atom-bo-employment-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Employment"
+    },
+    {
+      "id": "atom-bo-exception-approval",
+      "type": "PROCESS",
+      "label": "Underwriting Manager Approves Exception"
+    },
+    {
+      "id": "atom-bo-expired-condition-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Expired Conditions"
+    },
+    {
+      "id": "atom-bo-flood-insurance-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Flood Insurance"
+    },
+    {
+      "id": "atom-bo-fraud-detection",
+      "type": "PROCESS",
+      "label": "System Performs Fraud Detection"
+    },
+    {
+      "id": "atom-bo-funding-hold-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Funding Holds"
+    },
+    {
+      "id": "atom-bo-funding-package-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Funding Package"
+    },
+    {
+      "id": "atom-bo-funding-reconciliation",
+      "type": "PROCESS",
+      "label": "Processor Reconciles Funding Amount"
+    },
+    {
+      "id": "atom-bo-funding-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Funding Requirements"
+    },
+    {
+      "id": "atom-bo-gift-letter-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Gift Letter"
+    },
+    {
+      "id": "atom-bo-hazard-insurance-binder",
+      "type": "PROCESS",
+      "label": "Processor Obtains Hazard Insurance Binder"
+    },
+    {
+      "id": "atom-bo-homeowners-insurance-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Homeowners Insurance"
+    },
+    {
+      "id": "atom-bo-income-stability-check",
+      "type": "PROCESS",
+      "label": "Processor Checks Income Stability"
+    },
+    {
+      "id": "atom-bo-investor-reporting",
+      "type": "PROCESS",
+      "label": "Processor Completes Investor Reporting"
+    },
+    {
+      "id": "atom-bo-large-deposit-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Large Deposits"
+    },
+    {
+      "id": "atom-bo-liability-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies All Liabilities"
+    },
+    {
+      "id": "atom-bo-loan-delivery-prep",
+      "type": "PROCESS",
+      "label": "Processor Prepares Loan for Secondary Market Delivery"
+    },
+    {
+      "id": "atom-bo-loan-denial-documentation",
+      "type": "PROCESS",
+      "label": "Underwriter Documents Loan Denial"
+    },
+    {
+      "id": "atom-bo-loan-modification-review",
+      "type": "PROCESS",
+      "label": "Underwriter Reviews Loan Modifications"
+    },
+    {
+      "id": "atom-bo-loan-sale-prep",
+      "type": "PROCESS",
+      "label": "Processor Prepares Loan for Sale"
+    },
+    {
+      "id": "atom-bo-manual-review-trigger",
+      "type": "PROCESS",
+      "label": "System Triggers Manual Underwriting Review"
+    },
+    {
+      "id": "atom-bo-manual-underwrite",
+      "type": "PROCESS",
+      "label": "Underwriter Performs Manual Underwrite"
+    },
+    {
+      "id": "atom-bo-notary-coordination",
+      "type": "PROCESS",
+      "label": "Closing Coordinator Coordinates Notary"
+    },
+    {
+      "id": "atom-bo-occupancy-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Occupancy Intent"
+    },
+    {
+      "id": "atom-bo-pay-stub-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Pay Stubs"
+    },
+    {
+      "id": "atom-bo-payment-history-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Payment History"
+    },
+    {
+      "id": "atom-bo-post-closing-audit",
+      "type": "PROCESS",
+      "label": "QC Auditor Performs Post-Closing Review"
+    },
+    {
+      "id": "atom-bo-prior-to-doc-conditions",
+      "type": "PROCESS",
+      "label": "Processor Tracks Prior-to-Doc Conditions"
+    },
+    {
+      "id": "atom-bo-prior-to-funding-conditions",
+      "type": "PROCESS",
+      "label": "Processor Tracks Prior-to-Funding Conditions"
+    },
+    {
+      "id": "atom-bo-program-eligibility-check",
+      "type": "PROCESS",
+      "label": "Underwriter Verifies Program Eligibility"
+    },
+    {
+      "id": "atom-bo-property-condition-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Property Condition"
+    },
+    {
+      "id": "atom-bo-property-type-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Property Type"
+    },
+    {
+      "id": "atom-bo-rental-history-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Rental History"
+    },
+    {
+      "id": "atom-bo-rental-income-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Rental Income"
+    },
+    {
+      "id": "atom-bo-reserves-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Reserves"
+    },
+    {
+      "id": "atom-bo-retirement-income-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Retirement Income"
+    },
+    {
+      "id": "atom-bo-risk-assessment",
+      "type": "PROCESS",
+      "label": "Underwriter Performs Risk Assessment"
+    },
+    {
+      "id": "atom-bo-self-employment-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Self-Employment Income"
+    },
+    {
+      "id": "atom-bo-servicing-transfer-prep",
+      "type": "PROCESS",
+      "label": "Processor Prepares Loan for Servicing Transfer"
+    },
+    {
+      "id": "atom-bo-survey-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Property Survey"
+    },
+    {
+      "id": "atom-bo-tax-return-analysis",
+      "type": "PROCESS",
+      "label": "Processor Analyzes Tax Returns"
+    },
+    {
+      "id": "atom-bo-title-commitment-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Title Commitment"
+    },
+    {
+      "id": "atom-bo-title-issue-resolution",
+      "type": "PROCESS",
+      "label": "Processor Resolves Title Issues"
+    },
+    {
+      "id": "atom-bo-title-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Title Report"
+    },
+    {
+      "id": "atom-bo-underwriting-exception-request",
+      "type": "PROCESS",
+      "label": "Underwriter Requests Exception"
+    },
+    {
+      "id": "atom-bo-voi-verification",
+      "type": "PROCESS",
+      "label": "Processor Performs VOI (Verification of Income)"
+    },
+    {
+      "id": "atom-bo-w2-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews W-2 Forms"
+    },
+    {
+      "id": "atom-cust-application-submit",
+      "type": "PROCESS",
+      "label": "Customer Submits Loan Application"
+    },
+    {
+      "id": "atom-cust-asset-statement-upload",
+      "type": "PROCESS",
+      "label": "Customer Uploads Asset Statements"
+    },
+    {
+      "id": "atom-cust-bank-statement-upload",
+      "type": "PROCESS",
+      "label": "Customer Uploads Bank Statements"
+    },
+    {
+      "id": "atom-cust-closing-scheduling",
+      "type": "PROCESS",
+      "label": "Customer Schedules Closing"
+    },
+    {
+      "id": "atom-cust-closing-signing",
+      "type": "PROCESS",
+      "label": "Customer Signs Closing Documents"
+    },
+    {
+      "id": "atom-cust-initial-doc-upload",
+      "type": "PROCESS",
+      "label": "Customer Uploads Initial Documents"
+    },
+    {
+      "id": "atom-cust-insurance-verification",
+      "type": "PROCESS",
+      "label": "Customer Provides Hazard Insurance"
+    },
+    {
+      "id": "atom-cust-pay-stub-upload",
+      "type": "PROCESS",
+      "label": "Customer Uploads Pay Stubs"
+    },
+    {
+      "id": "atom-cust-pre-qual-request",
+      "type": "PROCESS",
+      "label": "Customer Requests Pre-Qualification"
+    },
+    {
+      "id": "atom-cust-tax-return-upload",
+      "type": "PROCESS",
+      "label": "Customer Uploads Tax Returns"
+    },
+    {
+      "id": "atom-cust-w2-upload",
+      "type": "PROCESS",
+      "label": "Customer Uploads W-2 Forms"
+    },
+    {
+      "id": "atom-sys-application-validation",
+      "type": "PROCESS",
+      "label": "System Validates Application Completeness"
+    },
+    {
+      "id": "atom-sys-appraisal-received",
+      "type": "PROCESS",
+      "label": "System Receives Appraisal Report"
+    },
+    {
+      "id": "atom-sys-aus-findings-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews AUS Findings"
+    },
+    {
+      "id": "atom-sys-aus-submission",
+      "type": "PROCESS",
+      "label": "System Submits to AUS (DU/LP)"
+    },
+    {
+      "id": "atom-sys-condition-generation",
+      "type": "PROCESS",
+      "label": "System Generates Conditions"
+    },
+    {
+      "id": "atom-sys-credit-pull",
+      "type": "PROCESS",
+      "label": "System Pulls Soft Credit"
+    },
+    {
+      "id": "atom-sys-credit-report-pull",
+      "type": "PROCESS",
+      "label": "System Pulls Full Credit Report"
+    },
+    {
+      "id": "atom-sys-deed-recording",
+      "type": "PROCESS",
+      "label": "System Records Deed"
+    },
+    {
+      "id": "atom-sys-document-imaging",
+      "type": "PROCESS",
+      "label": "System Images Loan Documents"
+    },
+    {
+      "id": "atom-sys-flood-determination",
+      "type": "PROCESS",
+      "label": "System Performs Flood Determination"
+    },
+    {
+      "id": "atom-sys-funding-wire",
+      "type": "PROCESS",
+      "label": "System Initiates Funding Wire"
+    },
+    {
+      "id": "atom-sys-identity-verification",
+      "type": "PROCESS",
+      "label": "System Performs Identity Verification"
+    },
+    {
+      "id": "atom-sys-income-calculation",
+      "type": "PROCESS",
+      "label": "System Calculates Qualifying Income"
+    },
+    {
+      "id": "atom-sys-loan-delivery-submission",
+      "type": "PROCESS",
+      "label": "System Submits Loan to Secondary Market"
+    },
+    {
+      "id": "atom-sys-loan-estimate-generation",
+      "type": "PROCESS",
+      "label": "System Generates Loan Estimate"
+    },
+    {
+      "id": "atom-sys-rate-lock-processing",
+      "type": "PROCESS",
+      "label": "System Processes Rate Lock"
+    },
+    {
+      "id": "atom-sys-redisclosure-trigger",
+      "type": "PROCESS",
+      "label": "System Triggers Redisclosure Requirements"
+    },
+    {
+      "id": "atom-sys-reserve-calculation",
+      "type": "PROCESS",
+      "label": "System Calculates Reserves"
+    },
+    {
+      "id": "atom-sys-title-order",
+      "type": "PROCESS",
+      "label": "System Orders Title Search"
+    },
+    {
+      "id": "atom-sys-wire-verification",
+      "type": "PROCESS",
+      "label": "System Verifies Wire Transfer"
+    },
+    {
+      "id": "atom-bo-adverse-action-letter",
+      "type": "PROCESS",
+      "label": "System Generates Adverse Action Letter"
+    },
+    {
+      "id": "atom-bo-alimony-child-support-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Alimony and Child Support"
+    },
+    {
+      "id": "atom-bo-appeal-review",
+      "type": "PROCESS",
+      "label": "Underwriting Manager Reviews Appeal"
+    },
+    {
+      "id": "atom-bo-appraisal-order",
+      "type": "PROCESS",
+      "label": "Processor Orders Property Appraisal"
+    },
+    {
+      "id": "atom-bo-appraisal-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Appraisal"
+    },
+    {
+      "id": "atom-bo-appraisal-scheduling",
+      "type": "PROCESS",
+      "label": "Processor Schedules Property Appraisal"
+    },
+    {
+      "id": "atom-bo-asset-source-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Asset Source"
+    },
+    {
+      "id": "atom-bo-asset-verification-letter",
+      "type": "PROCESS",
+      "label": "Processor Requests Asset Verification Letter"
+    },
+    {
+      "id": "atom-bo-bonus-overtime-calculation",
+      "type": "PROCESS",
+      "label": "Processor Calculates Bonus and Overtime Income"
+    },
+    {
+      "id": "atom-bo-cash-to-close-calculation",
+      "type": "PROCESS",
+      "label": "Processor Calculates Cash to Close"
+    },
+    {
+      "id": "atom-bo-closing-cost-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Closing Costs"
+    },
+    {
+      "id": "atom-bo-closing-disclosure-review",
+      "type": "PROCESS",
+      "label": "Customer Reviews Closing Disclosure"
+    },
+    {
+      "id": "atom-bo-closing-doc-prep",
+      "type": "PROCESS",
+      "label": "Closing Coordinator Prepares Documents"
+    },
+    {
+      "id": "atom-bo-closing-package-assembly",
+      "type": "PROCESS",
+      "label": "Closing Coordinator Assembles Closing Package"
+    },
+    {
+      "id": "atom-bo-closing-wire-instructions",
+      "type": "PROCESS",
+      "label": "Processor Provides Wire Instructions"
+    },
+    {
+      "id": "atom-bo-collection-account-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Collection Accounts"
+    },
+    {
+      "id": "atom-bo-comparable-sales-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Comparable Sales"
+    },
+    {
+      "id": "atom-bo-compensating-factors-analysis",
+      "type": "PROCESS",
+      "label": "Underwriter Analyzes Compensating Factors"
+    },
+    {
+      "id": "atom-bo-completeness-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Application Completeness"
+    },
+    {
+      "id": "atom-bo-compliance-audit",
+      "type": "PROCESS",
+      "label": "QC Auditor Performs Compliance Audit"
+    },
+    {
+      "id": "atom-bo-condition-aging-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Condition Aging"
+    },
+    {
+      "id": "atom-bo-condition-clearance",
+      "type": "PROCESS",
+      "label": "Underwriter Clears Conditions"
+    },
+    {
+      "id": "atom-bo-condition-tracking",
+      "type": "PROCESS",
+      "label": "Processor Tracks Condition Fulfillment"
+    },
+    {
+      "id": "atom-bo-condition-verification",
+      "type": "PROCESS",
+      "label": "Processor Verifies Condition Fulfillment"
+    },
+    {
+      "id": "atom-bo-credit-analysis",
+      "type": "PROCESS",
+      "label": "Processor Analyzes Credit Report"
+    },
+    {
+      "id": "atom-bo-credit-dispute-review",
+      "type": "PROCESS",
+      "label": "Processor Reviews Credit Disputes"
+    },
+    {
+      "id": "atom-bo-fraud-review",
+      "type": "PROCESS",
+      "label": "Fraud Analyst Reviews Flagged Applications"
+    }
+  ],
+  "edges": [
+    {
+      "source": "atom-bo-credit-score-analysis",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-credit-score-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-credit-score-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-data-accuracy-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-data-accuracy-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-data-accuracy-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-data-accuracy-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-debt-ratio-calculation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-debt-ratio-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-debt-ratio-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-derogatory-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-derogatory-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-document-audit",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-document-audit",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-dti-calculation",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-exception-approval",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-exception-approval",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-flood-insurance-verification",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-funding-package-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-funding-reconciliation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-funding-reconciliation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-funding-verification",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-gift-letter-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-gift-letter-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-gift-letter-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-hazard-insurance-binder",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-homeowners-insurance-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-homeowners-insurance-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-homeowners-insurance-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-income-stability-check",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-income-stability-check",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-income-stability-check",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-large-deposit-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-large-deposit-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-delivery-prep",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-loan-delivery-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-delivery-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-modification-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-modification-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-sale-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-sale-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-sale-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-review-trigger",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-notary-coordination",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-notary-coordination",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-notary-coordination",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-pay-stub-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-pay-stub-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-pay-stub-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-payment-history-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-post-closing-audit",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-post-closing-audit",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-prior-to-doc-conditions",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-prior-to-doc-conditions",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-prior-to-doc-conditions",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-prior-to-funding-conditions",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-property-condition-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-property-type-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-rental-history-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-retirement-income-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-servicing-transfer-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-tax-return-analysis",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-tax-return-analysis",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-tax-return-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-tax-return-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-tax-return-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-tax-return-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-title-issue-resolution",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-title-issue-resolution",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-title-issue-resolution",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-title-issue-resolution",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-title-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-title-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-underwriting-exception-request",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-voi-verification",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-voi-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-voi-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-voi-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-w2-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-w2-review",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-w2-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-w2-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-w2-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-w2-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-application-submit",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-application-submit",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-application-submit",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-application-submit",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-asset-statement-upload",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-bank-statement-upload",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-bank-statement-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-bank-statement-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-closing-scheduling",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-closing-scheduling",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-closing-signing",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-closing-signing",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-closing-signing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-closing-signing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-closing-signing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-initial-doc-upload",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-initial-doc-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-insurance-verification",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-insurance-verification",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-insurance-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-pay-stub-upload",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-pre-qual-request",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-pre-qual-request",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-tax-return-upload",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-tax-return-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-w2-upload",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-cust-w2-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-w2-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-w2-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-w2-upload",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-application-validation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-application-validation",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-application-validation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-application-validation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-appraisal-received",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-appraisal-received",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-appraisal-received",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-aus-submission",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-condition-generation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-condition-generation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-condition-generation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-condition-generation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-credit-pull",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-credit-pull",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-credit-pull",
+      "target": "",
+      "type": "DATA_FLOWS_TO"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-credit-report-pull",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-deed-recording",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-deed-recording",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-deed-recording",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-flood-determination",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-flood-determination",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-funding-wire",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-funding-wire",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-identity-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "DATA_FLOWS_TO"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-income-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-loan-delivery-submission",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-loan-delivery-submission",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-loan-estimate-generation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-loan-estimate-generation",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-loan-estimate-generation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-rate-lock-processing",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-redisclosure-trigger",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-redisclosure-trigger",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-sys-redisclosure-trigger",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-reserve-calculation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-reserve-calculation",
+      "target": "",
+      "type": "DATA_FLOWS_TO"
+    },
+    {
+      "source": "atom-sys-reserve-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-reserve-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-reserve-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-title-order",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-title-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-title-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-title-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-title-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-wire-verification",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-wire-verification",
+      "target": "",
+      "type": "USES_COMPONENT"
+    },
+    {
+      "source": "atom-bo-alimony-child-support-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-alimony-child-support-verification",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-order",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-appraisal-review",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-appraisal-review",
+      "target": "",
+      "type": "DATA_FLOWS_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-scheduling",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-scheduling",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-scheduling",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-asset-source-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-asset-source-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-asset-source-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-asset-source-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-asset-source-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-bonus-overtime-calculation",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-bonus-overtime-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-bonus-overtime-calculation",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-cost-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-disclosure-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-closing-disclosure-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-disclosure-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-disclosure-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-doc-prep",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-closing-doc-prep",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-closing-doc-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-doc-prep",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-closing-package-assembly",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-closing-package-assembly",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-collection-account-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-comparable-sales-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-compensating-factors-analysis",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-compensating-factors-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-compensating-factors-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-completeness-review",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-completeness-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-completeness-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-completeness-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-condition-aging-review",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-condition-aging-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-condition-aging-review",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-condition-clearance",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-condition-clearance",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-condition-clearance",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-condition-tracking",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-credit-analysis",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-credit-analysis",
+      "target": "",
+      "type": "PERFORMED_BY"
+    },
+    {
+      "source": "atom-bo-credit-analysis",
+      "target": "",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "source": "atom-bo-credit-analysis",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-bo-credit-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-credit-analysis",
+      "target": "",
+      "type": "RELATED_TO"
+    }
+  ]
+}

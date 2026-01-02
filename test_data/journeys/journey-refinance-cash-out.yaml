@@ -1,0 +1,9 @@
+id: journey-refinance-cash-out
+name: Refinance — Cash-Out
+description: Cash-out refinance journey for borrowers taking equity out of the property.
+phases:
+  - phase-pre-application-refinance-cash-out
+  - phase-application-intake-refinance-cash-out
+  - phase-processing-refinance-cash-out
+  - phase-underwriting-refinance-cash-out
+  - phase-closing-refinance-cash-out

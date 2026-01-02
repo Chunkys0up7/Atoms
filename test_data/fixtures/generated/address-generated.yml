@@ -1,0 +1,1199 @@
+generated_at: '2025-12-23T23:22:28.365169'
+valid_addresses:
+- country: RU
+  street: 6039 Oak Ave
+  city: Bengaluru
+  postal_code: '12847'
+- country: BR
+  street: 4739 Pine Rd
+  city: Rivertown
+  postal_code: '94940'
+- country: DE
+  street: 9386 Cedar Lane
+  city: Berlin
+  postal_code: '90471'
+- country: UK
+  street: 4553 High Street
+  city: Springfield
+  postal_code: '94440'
+- country: DE
+  street: 9696 Pine Rd
+  city: Bengaluru
+  postal_code: '52437'
+- country: US
+  street: 5618 Oak Ave
+  city: Springfield
+  postal_code: '92766'
+- country: RU
+  street: 2741 Maple St
+  city: Tokyo
+  postal_code: '04102'
+- country: RU
+  street: 4938 MG Road
+  city: Paris
+  postal_code: '36674'
+- country: IN
+  street: 7075 High Street
+  city: Tokyo
+  postal_code: '44149'
+- country: JP
+  street: 9646 Maple St
+  city: Paris
+  postal_code: '52580'
+- country: UK
+  street: 196 Avenida Paulista
+  city: Lakeview
+  postal_code: '81753'
+- country: UK
+  street: 1966 Oak Ave
+  city: Springfield
+  postal_code: '69212'
+- country: RU
+  street: 1241 MG Road
+  city: Berlin
+  postal_code: '65421'
+- country: US
+  street: 6272 Avenida Paulista
+  city: Tokyo
+  postal_code: '04427'
+- country: JP
+  street: 6433 Pine Rd
+  city: Bengaluru
+  postal_code: '12863'
+- country: UK
+  street: 7235 High Street
+  city: Lakeview
+  postal_code: 01194
+- country: US
+  street: 8445 MG Road
+  city: Bengaluru
+  postal_code: '66183'
+- country: RU
+  street: 1986 Rue de Rivoli
+  city: Tokyo
+  postal_code: '54601'
+- country: IN
+  street: 1319 MG Road
+  city: Berlin
+  postal_code: '32806'
+- country: BR
+  street: 6392 Oak Ave
+  city: Tokyo
+  postal_code: '71732'
+- country: US
+  street: 9715 Maple St
+  city: Bengaluru
+  postal_code: '61847'
+- country: RU
+  street: 269 Cedar Lane
+  city: Tokyo
+  postal_code: '05061'
+- country: RU
+  street: 8792 Pine Rd
+  city: London
+  postal_code: '10270'
+- country: US
+  street: 3977 Pine Rd
+  city: Rivertown
+  postal_code: '20417'
+- country: UK
+  street: 1743 Oak Ave
+  city: Bengaluru
+  postal_code: '99313'
+- country: FR
+  street: 5313 Oak Ave
+  city: Paris
+  postal_code: '25309'
+- country: UK
+  street: 1979 High Street
+  city: Springfield
+  postal_code: '62582'
+- country: US
+  street: 2186 Oak Ave
+  city: Sao Paulo
+  postal_code: '20710'
+- country: UK
+  street: 9728 High Street
+  city: Sao Paulo
+  postal_code: '72324'
+- country: FR
+  street: 3920 Pine Rd
+  city: Rivertown
+  postal_code: '92791'
+- country: IN
+  street: 8843 Rue de Rivoli
+  city: London
+  postal_code: '73403'
+- country: DE
+  street: 7773 MG Road
+  city: Springfield
+  postal_code: '20054'
+- country: BR
+  street: 5478 MG Road
+  city: Rivertown
+  postal_code: '10822'
+- country: RU
+  street: 8437 Oak Ave
+  city: Lakeview
+  postal_code: '37995'
+- country: IN
+  street: 3770 Oak Ave
+  city: Tokyo
+  postal_code: '31363'
+- country: JP
+  street: 1205 MG Road
+  city: Bengaluru
+  postal_code: 06239
+- country: FR
+  street: 6120 Pine Rd
+  city: Bengaluru
+  postal_code: '35435'
+- country: US
+  street: 4598 Pine Rd
+  city: Lakeview
+  postal_code: '77625'
+- country: BR
+  street: 9890 Pine Rd
+  city: Springfield
+  postal_code: '98316'
+- country: RU
+  street: 3547 MG Road
+  city: Bengaluru
+  postal_code: '40633'
+- country: JP
+  street: 9696 Pine Rd
+  city: Rivertown
+  postal_code: '60078'
+- country: FR
+  street: 7853 Oak Ave
+  city: Bengaluru
+  postal_code: '73180'
+- country: FR
+  street: 3572 Pine Rd
+  city: Tokyo
+  postal_code: '43107'
+- country: DE
+  street: 7525 Cedar Lane
+  city: Bengaluru
+  postal_code: '72625'
+- country: US
+  street: 1159 Avenida Paulista
+  city: Tokyo
+  postal_code: '80464'
+- country: JP
+  street: 1327 Bahnhofstrasse
+  city: Rivertown
+  postal_code: '85016'
+- country: JP
+  street: 8842 Oak Ave
+  city: Bengaluru
+  postal_code: '93355'
+- country: FR
+  street: 4541 Cedar Lane
+  city: Lakeview
+  postal_code: '55778'
+- country: UK
+  street: 7704 Rue de Rivoli
+  city: Paris
+  postal_code: '47951'
+- country: RU
+  street: 1431 Oak Ave
+  city: Sao Paulo
+  postal_code: '24112'
+- country: RU
+  street: 5681 Avenida Paulista
+  city: Bengaluru
+  postal_code: '04310'
+- country: JP
+  street: 8514 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '95579'
+- country: RU
+  street: 7504 High Street
+  city: Springfield
+  postal_code: '42437'
+- country: BR
+  street: 776 Pine Rd
+  city: Tokyo
+  postal_code: '47292'
+- country: BR
+  street: 2987 Pine Rd
+  city: Springfield
+  postal_code: '23105'
+- country: RU
+  street: 4267 Bahnhofstrasse
+  city: Springfield
+  postal_code: '38055'
+- country: RU
+  street: 8846 Pine Rd
+  city: Paris
+  postal_code: '41067'
+- country: RU
+  street: 5247 Pine Rd
+  city: Rivertown
+  postal_code: '88547'
+- country: DE
+  street: 9261 MG Road
+  city: Tokyo
+  postal_code: '17028'
+- country: US
+  street: 6581 Maple St
+  city: Bengaluru
+  postal_code: '51509'
+- country: JP
+  street: 4554 Maple St
+  city: Rivertown
+  postal_code: '18718'
+- country: RU
+  street: 5207 Rue de Rivoli
+  city: Rivertown
+  postal_code: '56265'
+- country: US
+  street: 4664 Bahnhofstrasse
+  city: Tokyo
+  postal_code: '47813'
+- country: RU
+  street: 6810 MG Road
+  city: Berlin
+  postal_code: '26629'
+- country: DE
+  street: 3405 High Street
+  city: Bengaluru
+  postal_code: '85196'
+- country: FR
+  street: 4479 Avenida Paulista
+  city: Springfield
+  postal_code: '87923'
+- country: FR
+  street: 4743 Rue de Rivoli
+  city: Bengaluru
+  postal_code: 04947
+- country: RU
+  street: 3679 Cedar Lane
+  city: Rivertown
+  postal_code: '24471'
+- country: UK
+  street: 9813 Bahnhofstrasse
+  city: Bengaluru
+  postal_code: '96471'
+- country: US
+  street: 4253 Pine Rd
+  city: Rivertown
+  postal_code: '25725'
+- country: BR
+  street: 5918 Avenida Paulista
+  city: Tokyo
+  postal_code: 04481
+- country: DE
+  street: 1549 Pine Rd
+  city: Paris
+  postal_code: '55445'
+- country: IN
+  street: 2355 Cedar Lane
+  city: Springfield
+  postal_code: '84576'
+- country: DE
+  street: 1679 Maple St
+  city: Springfield
+  postal_code: '83389'
+- country: UK
+  street: 6838 MG Road
+  city: Lakeview
+  postal_code: '12075'
+- country: IN
+  street: 2278 MG Road
+  city: Paris
+  postal_code: '52401'
+- country: DE
+  street: 3713 High Street
+  city: Springfield
+  postal_code: '32161'
+- country: RU
+  street: 7066 Cedar Lane
+  city: London
+  postal_code: '10890'
+- country: BR
+  street: 710 Oak Ave
+  city: Berlin
+  postal_code: 01193
+- country: JP
+  street: 3028 Bahnhofstrasse
+  city: Rivertown
+  postal_code: '12495'
+- country: DE
+  street: 8801 Cedar Lane
+  city: Lakeview
+  postal_code: '38759'
+- country: UK
+  street: 2964 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '63836'
+- country: IN
+  street: 2026 MG Road
+  city: Lakeview
+  postal_code: '82754'
+- country: US
+  street: 1348 Bahnhofstrasse
+  city: Bengaluru
+  postal_code: '16479'
+- country: IN
+  street: 2938 Cedar Lane
+  city: Bengaluru
+  postal_code: '16781'
+- country: FR
+  street: 6564 Oak Ave
+  city: Springfield
+  postal_code: '15353'
+- country: FR
+  street: 2012 Maple St
+  city: Sao Paulo
+  postal_code: '74994'
+- country: FR
+  street: 5835 MG Road
+  city: Sao Paulo
+  postal_code: '78427'
+- country: BR
+  street: 8018 MG Road
+  city: London
+  postal_code: '20101'
+- country: US
+  street: 2935 Avenida Paulista
+  city: Tokyo
+  postal_code: '24991'
+- country: RU
+  street: 7636 Maple St
+  city: Berlin
+  postal_code: '77848'
+- country: US
+  street: 518 Avenida Paulista
+  city: Lakeview
+  postal_code: '67567'
+- country: US
+  street: 2898 Rue de Rivoli
+  city: Berlin
+  postal_code: '27624'
+- country: RU
+  street: 1793 MG Road
+  city: Paris
+  postal_code: '89778'
+- country: US
+  street: 6413 High Street
+  city: Bengaluru
+  postal_code: '96954'
+- country: US
+  street: 9675 Cedar Lane
+  city: Springfield
+  postal_code: '55905'
+- country: FR
+  street: 5655 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '50333'
+- country: UK
+  street: 1074 High Street
+  city: Lakeview
+  postal_code: '52085'
+- country: FR
+  street: 9345 Avenida Paulista
+  city: Tokyo
+  postal_code: '91713'
+- country: IN
+  street: 2731 High Street
+  city: Tokyo
+  postal_code: '63718'
+- country: BR
+  street: 779 High Street
+  city: Sao Paulo
+  postal_code: '39191'
+- country: BR
+  street: 1103 Rue de Rivoli
+  city: Bengaluru
+  postal_code: '63514'
+- country: BR
+  street: 7093 Rue de Rivoli
+  city: Tokyo
+  postal_code: '36649'
+- country: FR
+  street: 9276 Cedar Lane
+  city: Paris
+  postal_code: '35723'
+- country: BR
+  street: 7134 Avenida Paulista
+  city: Tokyo
+  postal_code: '13644'
+- country: BR
+  street: 9851 Maple St
+  city: Sao Paulo
+  postal_code: '31230'
+- country: BR
+  street: 7605 MG Road
+  city: Paris
+  postal_code: '66032'
+- country: US
+  street: 4234 High Street
+  city: Paris
+  postal_code: '20700'
+- country: UK
+  street: 5144 High Street
+  city: Lakeview
+  postal_code: '65162'
+- country: UK
+  street: 8552 Rue de Rivoli
+  city: Berlin
+  postal_code: '71391'
+- country: IN
+  street: 5396 Avenida Paulista
+  city: London
+  postal_code: '63212'
+- country: BR
+  street: 7201 Avenida Paulista
+  city: Berlin
+  postal_code: '90785'
+- country: UK
+  street: 5186 Rue de Rivoli
+  city: Sao Paulo
+  postal_code: '73425'
+- country: IN
+  street: 5050 Cedar Lane
+  city: Rivertown
+  postal_code: 03486
+- country: IN
+  street: 2000 Rue de Rivoli
+  city: London
+  postal_code: '76064'
+- country: JP
+  street: 4873 Maple St
+  city: Springfield
+  postal_code: '75604'
+- country: RU
+  street: 7719 Avenida Paulista
+  city: Tokyo
+  postal_code: '61248'
+- country: FR
+  street: 9866 Rue de Rivoli
+  city: Tokyo
+  postal_code: '70027'
+- country: DE
+  street: 51 Avenida Paulista
+  city: London
+  postal_code: '45911'
+- country: DE
+  street: 9733 Avenida Paulista
+  city: Tokyo
+  postal_code: '77242'
+- country: JP
+  street: 340 Cedar Lane
+  city: Paris
+  postal_code: '93173'
+- country: DE
+  street: 816 Avenida Paulista
+  city: Sao Paulo
+  postal_code: '94215'
+- country: UK
+  street: 232 Rue de Rivoli
+  city: Sao Paulo
+  postal_code: '77133'
+- country: BR
+  street: 3103 Avenida Paulista
+  city: Springfield
+  postal_code: '62044'
+- country: FR
+  street: 3477 Avenida Paulista
+  city: Sao Paulo
+  postal_code: '94118'
+- country: IN
+  street: 3848 MG Road
+  city: Tokyo
+  postal_code: '99004'
+- country: FR
+  street: 4957 Avenida Paulista
+  city: Tokyo
+  postal_code: '28092'
+- country: RU
+  street: 5558 MG Road
+  city: Springfield
+  postal_code: '15862'
+- country: IN
+  street: 724 Pine Rd
+  city: Bengaluru
+  postal_code: '45644'
+- country: BR
+  street: 8471 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '25728'
+- country: RU
+  street: 872 Maple St
+  city: Springfield
+  postal_code: '03207'
+- country: RU
+  street: 7151 Oak Ave
+  city: Bengaluru
+  postal_code: 07587
+- country: UK
+  street: 2426 Oak Ave
+  city: Tokyo
+  postal_code: '13422'
+- country: BR
+  street: 9229 Maple St
+  city: Rivertown
+  postal_code: '89261'
+- country: UK
+  street: 5301 Pine Rd
+  city: Rivertown
+  postal_code: '17774'
+- country: US
+  street: 5398 Cedar Lane
+  city: Bengaluru
+  postal_code: '59230'
+- country: BR
+  street: 5295 Cedar Lane
+  city: Lakeview
+  postal_code: '89616'
+- country: JP
+  street: 6536 Oak Ave
+  city: Rivertown
+  postal_code: '32664'
+- country: DE
+  street: 1976 High Street
+  city: Bengaluru
+  postal_code: '64925'
+- country: IN
+  street: 8400 Maple St
+  city: Bengaluru
+  postal_code: '76749'
+- country: UK
+  street: 6923 Bahnhofstrasse
+  city: Springfield
+  postal_code: '66108'
+- country: RU
+  street: 3674 Pine Rd
+  city: Bengaluru
+  postal_code: '88147'
+- country: RU
+  street: 4922 Pine Rd
+  city: Springfield
+  postal_code: '43864'
+- country: UK
+  street: 739 Rue de Rivoli
+  city: Lakeview
+  postal_code: '86617'
+- country: BR
+  street: 5824 High Street
+  city: Lakeview
+  postal_code: '80172'
+- country: FR
+  street: 742 Oak Ave
+  city: Sao Paulo
+  postal_code: '45977'
+- country: BR
+  street: 5593 Pine Rd
+  city: London
+  postal_code: '21941'
+- country: US
+  street: 96 Avenida Paulista
+  city: Lakeview
+  postal_code: '02776'
+- country: RU
+  street: 4962 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '41220'
+- country: US
+  street: 3084 Cedar Lane
+  city: London
+  postal_code: '72368'
+- country: BR
+  street: 7593 Pine Rd
+  city: Bengaluru
+  postal_code: '60122'
+- country: RU
+  street: 7948 MG Road
+  city: Rivertown
+  postal_code: '79334'
+- country: FR
+  street: 835 Bahnhofstrasse
+  city: Rivertown
+  postal_code: '16679'
+- country: BR
+  street: 607 MG Road
+  city: Sao Paulo
+  postal_code: '78997'
+- country: US
+  street: 8656 Cedar Lane
+  city: Sao Paulo
+  postal_code: '95814'
+- country: FR
+  street: 7756 Oak Ave
+  city: Bengaluru
+  postal_code: '95760'
+- country: RU
+  street: 2149 High Street
+  city: Sao Paulo
+  postal_code: '65729'
+- country: UK
+  street: 7912 Pine Rd
+  city: Springfield
+  postal_code: '32971'
+- country: RU
+  street: 4976 Maple St
+  city: London
+  postal_code: '80054'
+- country: DE
+  street: 2863 Rue de Rivoli
+  city: Rivertown
+  postal_code: '15619'
+- country: JP
+  street: 7969 High Street
+  city: Tokyo
+  postal_code: '50842'
+- country: UK
+  street: 827 MG Road
+  city: Bengaluru
+  postal_code: '11991'
+- country: US
+  street: 8312 Oak Ave
+  city: Springfield
+  postal_code: '13524'
+- country: US
+  street: 4020 MG Road
+  city: Tokyo
+  postal_code: '48214'
+- country: FR
+  street: 5909 Maple St
+  city: Springfield
+  postal_code: '86326'
+- country: UK
+  street: 5543 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '26060'
+- country: DE
+  street: 9414 Cedar Lane
+  city: Paris
+  postal_code: '46684'
+- country: IN
+  street: 5639 Cedar Lane
+  city: Berlin
+  postal_code: '89267'
+- country: RU
+  street: 5657 Avenida Paulista
+  city: London
+  postal_code: '41085'
+- country: DE
+  street: 8528 Rue de Rivoli
+  city: Berlin
+  postal_code: '31884'
+- country: UK
+  street: 983 Bahnhofstrasse
+  city: Berlin
+  postal_code: '85101'
+- country: US
+  street: 7425 Bahnhofstrasse
+  city: London
+  postal_code: '99893'
+- country: BR
+  street: 9385 Pine Rd
+  city: Sao Paulo
+  postal_code: '83158'
+- country: IN
+  street: 7444 Oak Ave
+  city: Springfield
+  postal_code: '66110'
+- country: DE
+  street: 7803 Maple St
+  city: Bengaluru
+  postal_code: '15869'
+- country: FR
+  street: 4321 MG Road
+  city: Sao Paulo
+  postal_code: '77622'
+- country: RU
+  street: 7500 Pine Rd
+  city: Paris
+  postal_code: '81377'
+- country: DE
+  street: 9160 Bahnhofstrasse
+  city: Lakeview
+  postal_code: '96115'
+- country: US
+  street: 8566 Pine Rd
+  city: Lakeview
+  postal_code: '54544'
+- country: DE
+  street: 2329 Avenida Paulista
+  city: Rivertown
+  postal_code: '44327'
+- country: FR
+  street: 7787 Pine Rd
+  city: Springfield
+  postal_code: '87772'
+- country: RU
+  street: 4545 Oak Ave
+  city: Springfield
+  postal_code: 09481
+- country: UK
+  street: 3153 Rue de Rivoli
+  city: Rivertown
+  postal_code: '98378'
+- country: UK
+  street: 8714 Pine Rd
+  city: Rivertown
+  postal_code: '43397'
+- country: IN
+  street: 6584 Cedar Lane
+  city: Bengaluru
+  postal_code: '05626'
+- country: IN
+  street: 6259 High Street
+  city: Lakeview
+  postal_code: '11824'
+- country: BR
+  street: 1469 Pine Rd
+  city: Berlin
+  postal_code: '62095'
+- country: US
+  street: 4883 Avenida Paulista
+  city: Lakeview
+  postal_code: '52654'
+- country: UK
+  street: 850 Maple St
+  city: London
+  postal_code: '99378'
+- country: FR
+  street: 1886 High Street
+  city: Rivertown
+  postal_code: '57861'
+- country: FR
+  street: 3830 Cedar Lane
+  city: Berlin
+  postal_code: '89138'
+- country: DE
+  street: 4991 Avenida Paulista
+  city: Bengaluru
+  postal_code: '18325'
+- country: JP
+  street: 9588 Rue de Rivoli
+  city: Berlin
+  postal_code: 02891
+- country: IN
+  street: 5614 High Street
+  city: Bengaluru
+  postal_code: '43553'
+- country: IN
+  street: 261 Pine Rd
+  city: Rivertown
+  postal_code: '97002'
+- country: RU
+  street: 6436 Rue de Rivoli
+  city: Lakeview
+  postal_code: '18071'
+- country: RU
+  street: 154 Maple St
+  city: Rivertown
+  postal_code: '45319'
+- country: JP
+  street: 3839 MG Road
+  city: Tokyo
+  postal_code: 04793
+- country: FR
+  street: 1818 High Street
+  city: Paris
+  postal_code: '72839'
+- country: DE
+  street: 1071 Pine Rd
+  city: Lakeview
+  postal_code: '24938'
+- country: US
+  street: 5293 Avenida Paulista
+  city: Sao Paulo
+  postal_code: '41877'
+- country: US
+  street: 3679 Cedar Lane
+  city: Berlin
+  postal_code: '68750'
+- country: IN
+  street: 1341 Cedar Lane
+  city: London
+  postal_code: '61332'
+- country: UK
+  street: 1585 Cedar Lane
+  city: Bengaluru
+  postal_code: '60954'
+- country: RU
+  street: 3906 Bahnhofstrasse
+  city: Rivertown
+  postal_code: '58319'
+- country: UK
+  street: 7315 Oak Ave
+  city: Lakeview
+  postal_code: '00651'
+- country: US
+  street: 7241 Cedar Lane
+  city: Berlin
+  postal_code: '96110'
+- country: BR
+  street: 6250 Avenida Paulista
+  city: Lakeview
+  postal_code: '96399'
+- country: FR
+  street: 7606 Avenida Paulista
+  city: Lakeview
+  postal_code: '50785'
+- country: UK
+  street: 1683 Cedar Lane
+  city: Lakeview
+  postal_code: '93928'
+- country: FR
+  street: 7888 MG Road
+  city: Springfield
+  postal_code: '32002'
+- country: FR
+  street: 8408 Bahnhofstrasse
+  city: Berlin
+  postal_code: '98227'
+- country: IN
+  street: 4769 Bahnhofstrasse
+  city: Rivertown
+  postal_code: '89203'
+- country: US
+  street: 6916 Bahnhofstrasse
+  city: London
+  postal_code: '33153'
+- country: RU
+  street: 9827 Bahnhofstrasse
+  city: Tokyo
+  postal_code: '94652'
+- country: US
+  street: 8126 Maple St
+  city: Rivertown
+  postal_code: '33793'
+- country: IN
+  street: 6159 Maple St
+  city: Sao Paulo
+  postal_code: '20501'
+- country: UK
+  street: 2334 High Street
+  city: Bengaluru
+  postal_code: '39500'
+- country: BR
+  street: 2854 Maple St
+  city: Berlin
+  postal_code: '25832'
+- country: DE
+  street: 4290 Oak Ave
+  city: Rivertown
+  postal_code: '26153'
+- country: JP
+  street: 6057 Bahnhofstrasse
+  city: Springfield
+  postal_code: '89611'
+- country: JP
+  street: 757 Maple St
+  city: Paris
+  postal_code: '42530'
+- country: BR
+  street: 2072 Rue de Rivoli
+  city: Bengaluru
+  postal_code: '31791'
+- country: FR
+  street: 8343 Bahnhofstrasse
+  city: Bengaluru
+  postal_code: '87255'
+- country: RU
+  street: 8107 MG Road
+  city: Berlin
+  postal_code: '96903'
+- country: JP
+  street: 7407 Maple St
+  city: Sao Paulo
+  postal_code: '34669'
+- country: IN
+  street: 4171 Rue de Rivoli
+  city: Lakeview
+  postal_code: '21478'
+- country: US
+  street: 7623 Rue de Rivoli
+  city: Tokyo
+  postal_code: '67766'
+- country: RU
+  street: 5195 High Street
+  city: Sao Paulo
+  postal_code: '02734'
+- country: IN
+  street: 1351 High Street
+  city: Paris
+  postal_code: '88143'
+- country: UK
+  street: 5903 Cedar Lane
+  city: Paris
+  postal_code: '35354'
+- country: BR
+  street: 3124 Pine Rd
+  city: Paris
+  postal_code: '40445'
+- country: FR
+  street: 6648 Cedar Lane
+  city: Bengaluru
+  postal_code: '82633'
+- country: JP
+  street: 7774 Maple St
+  city: Paris
+  postal_code: '98775'
+- country: IN
+  street: 3078 Avenida Paulista
+  city: Sao Paulo
+  postal_code: '37780'
+- country: DE
+  street: 5007 Cedar Lane
+  city: Bengaluru
+  postal_code: '55366'
+- country: FR
+  street: 8809 High Street
+  city: Tokyo
+  postal_code: '90902'
+- country: IN
+  street: 9310 Avenida Paulista
+  city: Sao Paulo
+  postal_code: '36186'
+- country: UK
+  street: 5388 MG Road
+  city: Berlin
+  postal_code: '12182'
+- country: RU
+  street: 440 Pine Rd
+  city: London
+  postal_code: '16433'
+- country: UK
+  street: 7450 Cedar Lane
+  city: Tokyo
+  postal_code: '80256'
+- country: UK
+  street: 2116 Rue de Rivoli
+  city: Sao Paulo
+  postal_code: '71632'
+- country: BR
+  street: 7082 MG Road
+  city: Springfield
+  postal_code: '99493'
+- country: RU
+  street: 4513 Maple St
+  city: Rivertown
+  postal_code: '27169'
+- country: IN
+  street: 9327 MG Road
+  city: Bengaluru
+  postal_code: '79014'
+- country: RU
+  street: 5682 High Street
+  city: Sao Paulo
+  postal_code: '92632'
+- country: FR
+  street: 7502 Avenida Paulista
+  city: Springfield
+  postal_code: '91603'
+- country: DE
+  street: 4486 Rue de Rivoli
+  city: Berlin
+  postal_code: '13768'
+- country: IN
+  street: 1254 Oak Ave
+  city: Paris
+  postal_code: '56724'
+- country: US
+  street: 7573 Cedar Lane
+  city: Lakeview
+  postal_code: '76563'
+- country: US
+  street: 4106 Oak Ave
+  city: Springfield
+  postal_code: '57771'
+- country: JP
+  street: 7172 Pine Rd
+  city: Bengaluru
+  postal_code: '42209'
+- country: BR
+  street: 2035 Rue de Rivoli
+  city: Sao Paulo
+  postal_code: '21042'
+- country: DE
+  street: 3550 Cedar Lane
+  city: Paris
+  postal_code: '37081'
+- country: JP
+  street: 1498 Cedar Lane
+  city: Sao Paulo
+  postal_code: '00531'
+- country: UK
+  street: 2751 Pine Rd
+  city: Rivertown
+  postal_code: '68155'
+- country: JP
+  street: 3394 Rue de Rivoli
+  city: Sao Paulo
+  postal_code: '61331'
+- country: DE
+  street: 246 Avenida Paulista
+  city: Tokyo
+  postal_code: '06373'
+- country: UK
+  street: 8785 Pine Rd
+  city: Berlin
+  postal_code: '19562'
+- country: IN
+  street: 7900 Oak Ave
+  city: Tokyo
+  postal_code: 09976
+- country: JP
+  street: 8249 Cedar Lane
+  city: London
+  postal_code: 09143
+- country: JP
+  street: 1301 Cedar Lane
+  city: Springfield
+  postal_code: '57432'
+- country: US
+  street: 3901 MG Road
+  city: Tokyo
+  postal_code: '24508'
+- country: FR
+  street: 4727 Cedar Lane
+  city: London
+  postal_code: '55338'
+- country: JP
+  street: 3645 Avenida Paulista
+  city: Paris
+  postal_code: '52701'
+- country: UK
+  street: 3154 Cedar Lane
+  city: Springfield
+  postal_code: '32129'
+- country: JP
+  street: 3872 Rue de Rivoli
+  city: Lakeview
+  postal_code: '67423'
+- country: DE
+  street: 9927 Maple St
+  city: Berlin
+  postal_code: '49734'
+- country: RU
+  street: 1311 Bahnhofstrasse
+  city: Sao Paulo
+  postal_code: '62776'
+invalid_addresses:
+- country: UK
+  street: ''
+  city: ''
+  postal_code: ''
+- country: US
+  street: ''
+  city: ''
+  postal_code: ''
+- country: FR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: US
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: US
+  street: ''
+  city: ''
+  postal_code: ''
+- country: DE
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: JP
+  street: ''
+  city: ''
+  postal_code: ''
+- country: RU
+  street: ''
+  city: ''
+  postal_code: ''
+- country: FR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: DE
+  street: ''
+  city: ''
+  postal_code: ''
+- country: IN
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: RU
+  street: ''
+  city: ''
+  postal_code: ''
+- country: RU
+  street: ''
+  city: ''
+  postal_code: ''
+- country: JP
+  street: ''
+  city: ''
+  postal_code: ''
+- country: RU
+  street: ''
+  city: ''
+  postal_code: ''
+- country: FR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: DE
+  street: ''
+  city: ''
+  postal_code: ''
+- country: IN
+  street: ''
+  city: ''
+  postal_code: ''
+- country: IN
+  street: ''
+  city: ''
+  postal_code: ''
+- country: DE
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: FR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: FR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''
+- country: DE
+  street: ''
+  city: ''
+  postal_code: ''
+- country: BR
+  street: ''
+  city: ''
+  postal_code: ''

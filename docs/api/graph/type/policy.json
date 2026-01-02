@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {
+      "id": "atom-pol-fair-lending",
+      "type": "POLICY",
+      "label": "Fair Lending Policy"
+    },
+    {
+      "id": "atom-pol-trid-compliance",
+      "type": "POLICY",
+      "label": "TRID Compliance Policy"
+    }
+  ],
+  "edges": []
+}

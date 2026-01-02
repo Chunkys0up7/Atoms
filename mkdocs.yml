@@ -1,7 +1,7 @@
 site_name: GNDP Knowledge Graph
 site_description: Graph-Native Documentation Platform for interconnected documentation
 site_author: GNDP Team
-site_url: https://chunkys0up7.github.io/Atoms
+site_url: http://127.0.0.1:8001/
 
 # Repository
 repo_url: https://github.com/Chunkys0up7/Atoms
@@ -141,11 +141,11 @@ extra:
 
   generator: false  # Remove "Made with Material for MkDocs"
 
-  version:
-    provider: mike
+  # version:
+  #   provider: mike
 
 # Copyright
 copyright: Copyright &copy; 2025 GNDP Project
 
 # Development server
-dev_addr: 127.0.0.1:8000
+dev_addr: 127.0.0.1:8001

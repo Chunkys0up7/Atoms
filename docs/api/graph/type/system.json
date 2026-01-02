@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {
+      "id": "atom-sys-doc-management",
+      "type": "SYSTEM",
+      "label": "Document Management System"
+    },
+    {
+      "id": "atom-sys-los-platform",
+      "type": "SYSTEM",
+      "label": "Loan Origination System (LOS)"
+    }
+  ],
+  "edges": []
+}

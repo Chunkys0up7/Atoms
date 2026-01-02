@@ -1,0 +1,95 @@
+---
+title: "{{ module.name }}"
+description: "{{ module.description }}"
+tags:
+  - module
+  - {{ module.workflow_type | lower }}
+---
+
+# {{ module.module_id }}: {{ module.name }}
+
+<div class="module-card">
+  <div class="module-card-header">
+    <div>
+      <h2 class="module-card-title">{{ module.name }}</h2>
+      <span class="module-card-id">{{ module.module_id }}</span>
+    </div>
+    <span class="atom-type-badge">{{ module.workflow_type }}</span>
+  </div>
+  
+  <p>{{ module.description }}</p>
+  
+  <div class="module-stats">
+    <div class="module-stat">
+      <div class="module-stat-value">{{ module.atoms | length }}</div>
+      <div class="module-stat-label">Atoms</div>
+    </div>
+    <div class="module-stat">
+      <div class="module-stat-value">{{ module.entry_points | length }}</div>
+      <div class="module-stat-label">Entry Points</div>
+    </div>
+    <div class="module-stat">
+      <div class="module-stat-value">{{ module.exit_points | length }}</div>
+      <div class="module-stat-label">Exit Points</div>
+    </div>
+  </div>
+</div>
+
+## Module Graph
+
+<div id="module-graph-{{ module.module_id }}" class="graph-container" data-graph-src="{{ graph_json_url }}">
+  <div class="graph-controls">
+    <button class="graph-control-btn" data-action="zoom-in" title="Zoom In">+</button>
+    <button class="graph-control-btn" data-action="zoom-out" title="Zoom Out">-</button>
+    <button class="graph-control-btn" data-action="fit" title="Fit to View">⊡</button>
+    <button class="graph-control-btn" data-action="reset" title="Reset">↺</button>
+  </div>
+  <div class="graph-search">
+    <input type="text" placeholder="Search atoms..." />
+  </div>
+</div>
+
+## Entry Points
+
+{% for entry_id in module.entry_points %}
+- [{{ entry_id }}]({{ atoms[entry_id].url_path if entry_id in atoms else '#' }}){% if entry_id in atoms %} - {{ atoms[entry_id].name }}{% endif %}
+
+{% endfor %}
+
+## Exit Points
+
+{% for exit_id in module.exit_points %}
+- [{{ exit_id }}]({{ atoms[exit_id].url_path if exit_id in atoms else '#' }}){% if exit_id in atoms %} - {{ atoms[exit_id].name }}{% endif %}
+
+{% endfor %}
+
+## Atoms in This Module
+
+| ID | Name | Type | Status |
+|----|------|------|--------|
+{% for atom_id in module.atoms %}
+{% if atom_id in atoms %}
+| [{{ atom_id }}]({{ atoms[atom_id].url_path }}) | {{ atoms[atom_id].name }} | {{ atoms[atom_id].atom_type }} | {{ atoms[atom_id].status }} |
+{% else %}
+| {{ atom_id }} | *Not Found* | - | - |
+{% endif %}
+{% endfor %}
+
+{% if external_dependencies %}
+## External Dependencies
+
+This module depends on atoms from other modules:
+
+{% for dep in external_dependencies %}
+- [{{ dep.atom_id }}]({{ dep.url_path }}) ({{ dep.module_id }})
+{% endfor %}
+{% endif %}
+
+---
+
+<div class="module-footer">
+  <small>
+    <a href="{{ source_url }}">View Source</a> |
+    <a href="{{ history_url }}">View History</a>
+  </small>
+</div>

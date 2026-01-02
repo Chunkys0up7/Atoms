@@ -1,399 +1,97 @@
-import React, { useState, useEffect } from 'react';
-import ErrorBoundary from './components/ErrorBoundary';
-import Sidebar from './components/Sidebar';
-import GraphView from './components/GraphView';
-import AtomExplorer from './components/AtomExplorer';
-import ModuleExplorer from './components/ModuleExplorer';
-import EdgeExplorer from './components/EdgeExplorer';
-import ImpactAnalysisUI from './components/ImpactAnalysisUI';
-import AIAssistant from './components/AIAssistantEnhanced';
-import ValidationCenter from './components/ValidationCenter';
-import Publisher from './components/PublisherEnhanced';
-import IngestionEngine from './components/IngestionEngine';
-import OntologyBrowser from './components/OntologyBrowser';
-import DocumentLibrary from './components/DocumentLibrary';
-import MkDocsViewer from './components/MkDocsViewerEnhanced';
-import WorkflowBuilderEnhanced from './components/WorkflowBuilderEnhanced';
-import PhaseExplorer from './components/PhaseExplorer';
-import Glossary from './components/Glossary';
+import React, { useState } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import Sidebar from './components/ui/Sidebar';
+import Breadcrumb, { buildBreadcrumbs } from './components/ui/Breadcrumb';
+import ErrorBoundary from './components/ui/ErrorBoundary';
+import { useGraph } from './contexts/GraphContext';
+import { ViewType, Atom } from './types';
+import { ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS, API_ENDPOINTS } from './constants';
+
+// Feature Components
+import SmartDashboard from './components/features/dashboard/SmartDashboard';
+import GraphView from './components/features/graph/GraphView';
+import AtomExplorer from './components/features/ontology/AtomExplorer';
+import ModuleExplorer from './components/features/ontology/ModuleExplorer';
+import EdgeExplorer from './components/features/ontology/EdgeExplorer';
+import ImpactAnalysisUI from './components/features/analytics/ImpactAnalysisUI';
+import AIAssistant from './components/features/assistant/AIAssistantEnhanced';
+import ValidationCenter from './components/features/analytics/ValidationCenter';
+import Publisher from './components/features/ingestion/PublisherEnhanced';
+import IngestionEngine from './components/features/ingestion/IngestionEngine';
+import OntologyBrowser from './components/features/ontology/OntologyBrowser';
+import DocumentLibrary from './components/features/docs/DocumentLibrary';
+import MkDocsViewer from './components/features/docs/MkDocsViewerEnhanced';
+import WorkflowBuilderEnhanced from './components/features/workflow/WorkflowBuilderEnhanced';
+import PhaseExplorer from './components/features/ontology/PhaseExplorer';
+import Glossary from './components/features/docs/Glossary';
 import RuntimeSimulator from './components/RuntimeSimulator';
-import RuleManager from './components/RuleManager';
-import LineageViewer from './components/LineageViewer';
-import OptimizationDashboard from './components/OptimizationDashboard';
-import OwnershipDashboard from './components/OwnershipDashboard';
-import GraphAnalyticsDashboard from './components/GraphAnalyticsDashboard';
-import AnomalyDetectionDashboard from './components/AnomalyDetectionDashboard';
+import RuleManager from './components/features/ontology/RuleManager';
+import LineageViewer from './components/features/analytics/LineageViewer';
+import OptimizationDashboard from './components/features/analytics/OptimizationDashboard';
+import OwnershipDashboard from './components/features/analytics/OwnershipDashboard';
+import AnalyticsHub from './components/features/analytics/AnalyticsHub';
+import GraphAnalyticsDashboard from './components/features/analytics/GraphAnalyticsDashboard';
+import KnowledgeHub from './components/features/knowledge/KnowledgeHub';
+import AnomalyDetectionDashboard from './components/features/analytics/AnomalyDetectionDashboard';
 import CollaborativeAtomEditor from './components/CollaborativeAtomEditor';
-import ProcessMonitoringDashboard from './components/ProcessMonitoringDashboard';
-import Dashboard from './components/Dashboard';
-import Breadcrumb, { buildBreadcrumbs } from './components/Breadcrumb';
-import { API_ENDPOINTS, ATOM_COLORS, MOCK_PHASES, MOCK_JOURNEYS } from './constants';
-import { Atom, Module, ViewType, GraphContext, Phase, Journey } from './types';
+import ProcessMonitoringDashboard from './components/features/analytics/ProcessMonitoringDashboard';
+import AtomDetailsSidebar from './components/ui/AtomDetailsSidebar';
+
 import './styles.css';
 
-interface NavigationContext {
-  sourceView: ViewType;
-  targetView: ViewType;
-  context?: any;
-}
-
-interface NavigationHistory {
-  view: ViewType;
-  context?: any;
-  timestamp: number;
-}
-
 const App: React.FC = () => {
-  const [view, setView] = useState<ViewType>('dashboard');
+  const { atoms, modules, isLoading, error, loadData, ingestData, graphPlanner, governanceEngine, auditLog } = useGraph();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Local UI state that doesn't need to be global
   const [selectedAtom, setSelectedAtom] = useState<Atom | null>(null);
-  const [atoms, setAtoms] = useState<Atom[]>([]);
-  const [modules, setModules] = useState<Module[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [fullAtomData, setFullAtomData] = useState<Atom | null>(null);
-  const [graphContext, setGraphContext] = useState<GraphContext>({ mode: 'global' });
-  const [navigationHistory, setNavigationHistory] = useState<NavigationHistory[]>([]);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
   const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
-  const [showLineageViewer, setShowLineageViewer] = useState<boolean>(false);
+  const [graphContext, setGraphContext] = useState<any>({ mode: 'global' });
 
-  // Load data from API on mount
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Fetch atoms from API with full data (edges needed for graph/edge explorer)
-      // Load all atoms in batches
-      let allAtoms: Atom[] = [];
-      let offset = 0;
-      const batchSize = 1000;
-      let hasMore = true;
-
-      while (hasMore) {
-        const atomsResponse = await fetch(`${API_ENDPOINTS.atoms}?limit=${batchSize}&offset=${offset}`);
-        if (!atomsResponse.ok) {
-          throw new Error(`Failed to load atoms: ${atomsResponse.statusText}`);
-        }
-        const atomsData = await atomsResponse.json();
-        allAtoms = allAtoms.concat(atomsData.atoms || []);
-        hasMore = atomsData.has_more;
-        offset += batchSize;
-
-        // Safety limit to prevent infinite loops
-        if (offset > 10000) break;
-      }
-
-      setAtoms(allAtoms);
-
-      // Fetch modules from API
-      const modulesResponse = await fetch(API_ENDPOINTS.modules);
-      if (!modulesResponse.ok) {
-        throw new Error(`Failed to load modules: ${modulesResponse.statusText}`);
-      }
-      const modulesData = await modulesResponse.json();
-
-      // Normalize module data for frontend compatibility
-      const normalizedModules = modulesData.map((mod: any) => ({
-        id: mod.id || mod.module_id,
-        name: mod.name,
-        description: mod.description,
-        owner: mod.owner || (mod.metadata && mod.metadata.owner),
-        atoms: mod.atoms || mod.atom_ids || [],
-        phaseId: mod.phaseId
-      }));
-
-      setModules(normalizedModules);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
-      setError(errorMessage);
-      console.error('Error loading data:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadFullAtomDetails = async (atomId: string) => {
-    try {
-      const response = await fetch(`${API_ENDPOINTS.atoms}/${atomId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load atom details: ${response.statusText}`);
-      }
-      const fullAtom = await response.json();
-      setFullAtomData(fullAtom);
-    } catch (err) {
-      console.error('Error loading atom details:', err);
-      // Fallback to summary data if full fetch fails
-      const summaryAtom = atoms.find(a => a.id === atomId);
-      if (summaryAtom) {
-        setFullAtomData(summaryAtom);
-      }
-    }
+  // Map current path to ViewType for Sidebar compatibility
+  const getCurrentView = (): ViewType => {
+    const path = location.pathname.substring(1);
+    if (path === '') return 'dashboard';
+    return path as ViewType;
   };
 
   const handleAtomSelect = (atom: Atom) => {
     setSelectedAtom(atom);
-    // Load full atom details
-    loadFullAtomDetails(atom.id);
+    // Optionally navigate to details view or keep sidebar selection
+    // navigate(`/atoms/${atom.id}`); 
   };
 
-  const handleIngest = (data: { atoms: Atom[], module: Module }) => {
-    const newAtoms = data.atoms.filter(na => !atoms.some(a => a.id === na.id));
-    setAtoms(prev => [...prev, ...newAtoms]);
-    setModules(prev => [...prev, data.module]);
-    setView('modules');
-  };
-
-  // Navigation helper with history tracking
-  const navigateTo = (targetView: ViewType, context?: {
-    atomId?: string;
-    moduleId?: string;
-    phaseId?: string;
-    journeyId?: string;
-    graphContext?: GraphContext;
-  }) => {
-    // Add current view to history
-    setNavigationHistory(prev => [...prev, {
-      view,
-      context: {
-        selectedAtom: selectedAtom?.id,
-        selectedPhaseId,
-        selectedJourneyId,
-        selectedModuleId,
-        graphContext
-      },
-      timestamp: Date.now()
-    }]);
-
-    // Apply new context
-    if (context?.atomId) {
-      const atom = atoms.find(a => a.id === context.atomId);
-      if (atom) handleAtomSelect(atom);
-    }
-    if (context?.moduleId !== undefined) setSelectedModuleId(context.moduleId);
-    if (context?.phaseId !== undefined) setSelectedPhaseId(context.phaseId);
-    if (context?.journeyId !== undefined) setSelectedJourneyId(context.journeyId);
+  // Shared navigation handler for components
+  const handleNavigate = (view: string, context?: any) => {
+    if (context?.moduleId) setSelectedModuleId(context.moduleId);
+    if (context?.phaseId) setSelectedPhaseId(context.phaseId);
+    if (context?.journeyId) setSelectedJourneyId(context.journeyId);
     if (context?.graphContext) setGraphContext(context.graphContext);
 
-    // Clear phase/journey filters when navigating to modules without context
-    if (targetView === 'modules' && !context) {
-      setSelectedPhaseId(null);
-      setSelectedJourneyId(null);
-    }
-
-    // Navigate to target view
-    setView(targetView);
+    navigate(`/${view}`);
   };
 
-  // Navigate back in history
-  const navigateBack = () => {
-    if (navigationHistory.length === 0) return;
+  if (isLoading) {
+    return (
+      <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+        <div className="loading-spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }}></div>
+        <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Loading data from server...</div>
+      </div>
+    );
+  }
 
-    const previous = navigationHistory[navigationHistory.length - 1];
-    setNavigationHistory(prev => prev.slice(0, -1));
-
-    // Restore previous state
-    if (previous.context?.selectedAtom) {
-      const atom = atoms.find(a => a.id === previous.context.selectedAtom);
-      if (atom) setSelectedAtom(atom);
-    }
-    if (previous.context?.selectedPhaseId) setSelectedPhaseId(previous.context.selectedPhaseId);
-    if (previous.context?.selectedJourneyId) setSelectedJourneyId(previous.context.selectedJourneyId);
-    if (previous.context?.selectedModuleId) setSelectedModuleId(previous.context.selectedModuleId);
-    if (previous.context?.graphContext) setGraphContext(previous.context.graphContext);
-
-    setView(previous.view);
-  };
-
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
-          <div className="loading-spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }}></div>
-          <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Loading data from server...</div>
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ color: 'var(--color-error)', fontSize: '16px', fontWeight: '600' }}>Error Loading Data</div>
-          <div style={{ color: 'var(--color-text-secondary)', fontSize: '13px', maxWidth: '400px', textAlign: 'center' }}>{error}</div>
-          <button onClick={loadData} className="btn btn-primary">Retry</button>
-        </div>
-      );
-    }
-
-    switch (view) {
-      case 'dashboard':
-        return <Dashboard atoms={atoms} modules={modules} onNavigate={(targetView) => navigateTo(targetView as ViewType, {})} />;
-      case 'ontology':
-        return <OntologyBrowser atoms={atoms} modules={modules} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
-      case 'glossary':
-        return <Glossary />;
-      case 'workflow':
-        return <WorkflowBuilderEnhanced
-          atoms={atoms}
-          modules={modules}
-          onSelectAtom={(a) => { handleAtomSelect(a); }}
-          onNavigateToGraph={(journeyId) => navigateTo('graph', { journeyId, graphContext: { mode: 'journey', journeyId } })}
-          onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
-        />;
-      case 'phases':
-        return <PhaseExplorer
-          phases={MOCK_PHASES}
-          journeys={MOCK_JOURNEYS}
-          modules={modules}
-          atoms={atoms}
-          onPhaseSelect={(phase) => setSelectedPhaseId(phase.id)}
-          onNavigateToGraph={(phaseId) => navigateTo('graph', { phaseId, graphContext: { mode: 'phase', phaseId, showModuleBoundaries: true } })}
-          onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
-          selectedPhaseId={selectedPhaseId}
-        />;
-      case 'explorer':
-        return <AtomExplorer atoms={atoms} modules={modules} onSelect={(a) => { handleAtomSelect(a); }} />;
-      case 'modules':
-        return <ModuleExplorer
-          modules={modules}
-          atoms={atoms}
-          onSelectAtom={(a) => { handleAtomSelect(a); }}
-          onNavigateToGraph={(moduleId) => navigateTo('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
-          onClearFilter={() => {
-            setSelectedPhaseId(null);
-            setSelectedJourneyId(null);
-          }}
-          selectedModuleId={selectedModuleId}
-          selectedPhaseId={selectedPhaseId}
-          selectedJourneyId={selectedJourneyId}
-        />;
-      case 'graph':
-        return (
-          <ErrorBoundary>
-            <GraphView
-              atoms={atoms}
-              modules={modules}
-              phases={MOCK_PHASES}
-              journeys={MOCK_JOURNEYS}
-              context={graphContext}
-              onSelectAtom={(a) => { handleAtomSelect(a); }}
-              onContextChange={(ctx) => setGraphContext(ctx)}
-              onNavigateToJourney={(journeyId) => navigateTo('workflow', { journeyId })}
-              onNavigateToPhase={(phaseId) => navigateTo('phases', { phaseId })}
-              onNavigateToModule={(moduleId) => navigateTo('modules', { moduleId })}
-            />
-          </ErrorBoundary>
-        );
-      case 'edges':
-        return <EdgeExplorer atoms={atoms} onSelectAtom={(a) => { handleAtomSelect(a); }} />;
-      case 'health':
-        return (
-          <ErrorBoundary>
-            <ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); setView('explorer'); }} />
-          </ErrorBoundary>
-        );
-      case 'impact':
-        return (
-          <ErrorBoundary>
-            <ImpactAnalysisUI atoms={atoms} />
-          </ErrorBoundary>
-        );
-      case 'publisher':
-        return (
-          <ErrorBoundary>
-            <Publisher atoms={atoms} modules={modules} />
-          </ErrorBoundary>
-        );
-      case 'library':
-        return <DocumentLibrary />;
-      case 'docssite':
-        return <MkDocsViewer />;
-      case 'assistant':
-        return (
-          <ErrorBoundary>
-            <AIAssistant atoms={atoms} />
-          </ErrorBoundary>
-        );
-      case 'ingestion':
-        return (
-          <ErrorBoundary>
-            <IngestionEngine atoms={atoms} onIngest={handleIngest} />
-          </ErrorBoundary>
-        );
-      case 'runtime':
-        return <RuntimeSimulator />;
-      case 'rules':
-        return <RuleManager />;
-      case 'feedback':
-        return (
-          <ErrorBoundary>
-            <OptimizationDashboard />
-          </ErrorBoundary>
-        );
-      case 'ownership':
-        return <OwnershipDashboard />;
-      case 'analytics':
-        return (
-          <ErrorBoundary>
-            <GraphAnalyticsDashboard />
-          </ErrorBoundary>
-        );
-      case 'anomalies':
-        return (
-          <ErrorBoundary>
-            <AnomalyDetectionDashboard />
-          </ErrorBoundary>
-        );
-      case 'collaborate':
-        return selectedAtom ? (
-          <ErrorBoundary>
-            <CollaborativeAtomEditor
-              atom_id={selectedAtom.id}
-              user_id="user-demo"
-              user_name="Demo User"
-              onSave={async (atom) => {
-                // Update atom via API
-                const response = await fetch(`${API_ENDPOINTS.atoms}/${atom.id}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(atom)
-                });
-                if (!response.ok) {
-                  throw new Error('Failed to save atom');
-                }
-                // Reload data
-                await loadData();
-              }}
-              onConflict={(conflicts) => {
-                console.warn('Conflicts detected:', conflicts);
-              }}
-            />
-          </ErrorBoundary>
-        ) : (
-          <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ fontSize: '16px', color: 'var(--color-text-secondary)' }}>
-              Select an atom to collaborate on
-            </div>
-            <button onClick={() => setView('explorer')} className="btn btn-primary">
-              Go to Atom Explorer
-            </button>
-          </div>
-        );
-      case 'processes':
-        return (
-          <ErrorBoundary>
-            <ProcessMonitoringDashboard />
-          </ErrorBoundary>
-        );
-      default:
-        return <div className="content-area">Select a view from the sidebar</div>;
-    }
-  };
+  if (error) {
+    return (
+      <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ color: 'var(--color-error)', fontSize: '16px', fontWeight: '600' }}>Error Loading Data</div>
+        <div style={{ color: 'var(--color-text-secondary)', fontSize: '13px', maxWidth: '400px', textAlign: 'center' }}>{error}</div>
+        <button onClick={loadData} className="btn btn-primary">Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
@@ -404,7 +102,7 @@ const App: React.FC = () => {
             Documentation Registry
           </div>
         </div>
-        <Sidebar currentView={view} onViewChange={setView} />
+        <Sidebar currentView={getCurrentView()} onViewChange={(view) => navigate(`/${view === 'dashboard' ? '' : view}`)} />
       </aside>
 
       <main className="main-content" role="main">
@@ -413,7 +111,7 @@ const App: React.FC = () => {
             <span className="header-breadcrumb">System Registry</span>
             <span style={{ color: 'var(--color-border-dark)', margin: '0 8px' }}>/</span>
             <span className="header-view-name">
-              {view.replace('_', ' ').charAt(0).toUpperCase() + view.replace('_', ' ').slice(1)}
+              {getCurrentView().replace('_', ' ').charAt(0).toUpperCase() + getCurrentView().replace('_', ' ').slice(1)}
             </span>
           </div>
 
@@ -428,351 +126,168 @@ const App: React.FC = () => {
               title="Refresh data"
               aria-label="Refresh atom and module data"
             >
-              <svg
-                style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle' }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
+              <svg style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
         </header>
 
-        <Breadcrumb
-          items={buildBreadcrumbs(
-            view,
-            {
-              selectedAtom,
-              selectedPhaseId,
-              selectedJourneyId,
-              selectedModuleId,
-              phases: MOCK_PHASES,
-              journeys: MOCK_JOURNEYS,
-              modules
-            },
-            navigateTo
-          )}
-          canGoBack={navigationHistory.length > 0}
-          onGoBack={navigateBack}
-        />
-
-        <div className="content-area">
-          {renderContent()}
+        {/* 
+          TODO: Breadcrumb needs update to generic routing support 
+          For now, simplistic implementation
+        */}
+        <div style={{ padding: '0 var(--spacing-lg) var(--spacing-sm) var(--spacing-lg)' }}>
+          {/* Breadcrumb would go here */}
         </div>
 
-        {selectedAtom && (() => {
-          const displayAtom = fullAtomData || selectedAtom;
-          return (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '500px',
-              height: '100%',
-              backgroundColor: '#ffffff',
-              borderLeft: '2px solid var(--color-border)',
-              display: 'flex',
-              flexDirection: 'column',
-              zIndex: 1000,
-              boxShadow: 'var(--shadow-lg)'
-            }}>
-              <div style={{
-                padding: 'var(--spacing-lg)',
-                borderBottom: '1px solid var(--color-border)',
-                backgroundColor: 'var(--color-bg-tertiary)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                      Atom Details
-                    </div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--color-text-primary)' }}>
-                      {displayAtom.id}
-                    </h3>
-                    <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                      {displayAtom.name || displayAtom.title || 'Untitled'}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { setSelectedAtom(null); setFullAtomData(null); }}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      color: 'var(--color-text-tertiary)'
+        <div className="content-area">
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<SmartDashboard atoms={atoms} modules={modules} onNavigate={handleNavigate} />} />
+              <Route path="/dashboard" element={<Navigate to="/" replace />} />
+
+              <Route path="/knowledge" element={
+                <KnowledgeHub
+                  atoms={atoms}
+                  modules={modules}
+                  onSelectAtom={handleAtomSelect}
+                  onNavigateToGraph={(moduleId) => handleNavigate('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
+                />
+              } />
+              <Route path="/ontology" element={<Navigate to="/knowledge" replace />} />
+              <Route path="/explorer" element={<Navigate to="/knowledge" replace />} />
+              <Route path="/modules" element={<Navigate to="/knowledge" replace />} />
+              <Route path="/atoms" element={<Navigate to="/knowledge" replace />} />
+              <Route path="/glossary" element={<Glossary />} />
+
+              <Route path="/workflow" element={
+                <WorkflowBuilderEnhanced
+                  atoms={atoms}
+                  modules={modules}
+                  onSelectAtom={handleAtomSelect}
+                  onNavigateToGraph={(journeyId) => handleNavigate('graph', { journeyId, graphContext: { mode: 'journey', journeyId } })}
+                  onNavigateToPhase={(phaseId) => handleNavigate('phases', { phaseId })}
+                />
+              } />
+
+              <Route path="/phases" element={
+                <PhaseExplorer
+                  phases={MOCK_PHASES}
+                  journeys={MOCK_JOURNEYS}
+                  modules={modules}
+                  atoms={atoms}
+                  onPhaseSelect={(phase) => setSelectedPhaseId(phase.id)}
+                  onNavigateToGraph={(phaseId) => handleNavigate('graph', { phaseId, graphContext: { mode: 'phase', phaseId, showModuleBoundaries: true } })}
+                  onNavigateToModule={(moduleId) => handleNavigate('modules', { moduleId })}
+                  selectedPhaseId={selectedPhaseId}
+                />
+              } />
+
+              {/* Obsolete routes redirected to Knowledge Hub */}
+
+              <Route path="/graph" element={
+                <GraphView
+                  atoms={atoms}
+                  modules={modules}
+                  phases={MOCK_PHASES}
+                  journeys={MOCK_JOURNEYS}
+                  context={graphContext}
+                  onSelectAtom={handleAtomSelect}
+                  // onContextChange={setGraphContext} // Need to adapt to local state/URL
+                  onNavigateToJourney={(journeyId) => handleNavigate('workflow', { journeyId })}
+                  onNavigateToPhase={(phaseId) => handleNavigate('phases', { phaseId })}
+                  onNavigateToModule={(moduleId) => handleNavigate('modules', { moduleId })}
+                />
+              } />
+
+              <Route path="/edges" element={<EdgeExplorer atoms={atoms} onSelectAtom={handleAtomSelect} />} />
+
+              <Route path="/validation" element={<ValidationCenter atoms={atoms} modules={modules} onFocusAtom={(a) => { handleAtomSelect(a); navigate('/explorer'); }} />} />
+              <Route path="/health" element={<Navigate to="/validation" replace />} />
+
+              <Route path="/impact" element={<ImpactAnalysisUI atoms={atoms} />} />
+              <Route path="/publisher" element={<Publisher atoms={atoms} modules={modules} />} />
+              <Route path="/library" element={<DocumentLibrary />} />
+              <Route path="/documents" element={<Navigate to="/library" replace />} />
+              <Route path="/docssite" element={<MkDocsViewer />} />
+
+              <Route path="/assistant" element={
+                <AIAssistant
+                  atoms={atoms}
+                />
+              } />
+
+              <Route path="/ingestion" element={<IngestionEngine atoms={atoms} onIngest={ingestData} />} />
+              <Route path="/runtime" element={<RuntimeSimulator />} />
+              <Route path="/rules" element={<RuleManager />} />
+
+              {/* Analytics Hub Routes */}
+              <Route path="/analytics" element={<AnalyticsHub atoms={atoms} modules={modules} />} />
+              <Route path="/ownership" element={<Navigate to="/analytics" replace />} />
+              <Route path="/anomalies" element={<Navigate to="/analytics" replace />} />
+              <Route path="/optimization" element={<Navigate to="/analytics" replace />} />
+              <Route path="/feedback" element={<Navigate to="/analytics" replace />} />
+
+              <Route path="/collaborate" element={
+                selectedAtom ? (
+                  <CollaborativeAtomEditor
+                    atom_id={selectedAtom.id}
+                    user_id="user-demo"
+                    user_name="Demo User"
+                    onSave={async (atom) => {
+                      // Governance Check is now potentially internal to the context or we keep it here
+                      if (governanceEngine) {
+                        const ctx = { environment: 'production' as const, userRole: 'admin', licenseType: 'enterprise' };
+                        const policyCheck = governanceEngine.isActionAllowed('UPDATE', atom, ctx);
+                        if (!policyCheck.allowed) {
+                          alert(`Blocked by Policy: ${policyCheck.reason}`);
+                          throw new Error(policyCheck.reason);
+                        }
+                      }
+                      // API Save... logic
+                      // Ideally this moves to a useMutation or context method
+                      const response = await fetch(`${API_ENDPOINTS.atoms}/${atom.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(atom)
+                      });
+                      if (!response.ok) throw new Error('Failed to save atom');
+                      await loadData();
                     }}
-                  >
-                    <svg style={{ width: '18px', height: '18px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-lg)' }}>
-                {/* Basic Info */}
-                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', marginBottom: 'var(--spacing-md)' }}>
-                    <span className="badge badge-info">{displayAtom.type}</span>
-                    {displayAtom.status && <span className="badge badge-success">{displayAtom.status}</span>}
-                    {displayAtom.criticality && <span className="badge" style={{ backgroundColor: displayAtom.criticality === 'CRITICAL' ? '#ef4444' : displayAtom.criticality === 'HIGH' ? '#f59e0b' : '#6b7280' }}>{displayAtom.criticality}</span>}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                    {displayAtom.owner && <div><strong>Owner:</strong> {displayAtom.owner}</div>}
-                    {displayAtom.team && <div><strong>Team:</strong> {displayAtom.team}</div>}
-                    {displayAtom.version && <div><strong>Version:</strong> {displayAtom.version}</div>}
-                    {displayAtom.category && <div><strong>Category:</strong> {displayAtom.category}</div>}
-                  </div>
-                </div>
-
-                {/* Description */}
-                {displayAtom.content?.description && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Description
-                    </h5>
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
-                      {displayAtom.content.description}
-                    </p>
-                  </div>
-                )}
-
-                {/* Summary */}
-                {displayAtom.content?.summary && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Summary
-                    </h5>
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
-                      {displayAtom.content.summary}
-                    </p>
-                  </div>
-                )}
-
-                {/* Purpose */}
-                {displayAtom.content?.purpose && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Purpose
-                    </h5>
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
-                      {displayAtom.content.purpose}
-                    </p>
-                  </div>
-                )}
-
-                {/* Business Context */}
-                {displayAtom.content?.business_context && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Business Context
-                    </h5>
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
-                      {displayAtom.content.business_context}
-                    </p>
-                  </div>
-                )}
-
-                {/* Steps */}
-                {displayAtom.content?.steps && displayAtom.content.steps.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Process Steps
-                    </h5>
-                    <ol style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
-                      {displayAtom.content.steps.map((step: string, i: number) => (
-                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{step}</li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
-
-                {/* Inputs */}
-                {displayAtom.content?.inputs && displayAtom.content.inputs.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Inputs
-                    </h5>
-                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
-                      {displayAtom.content.inputs.map((input: string, i: number) => (
-                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{input}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Outputs */}
-                {displayAtom.content?.outputs && displayAtom.content.outputs.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Outputs
-                    </h5>
-                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
-                      {displayAtom.content.outputs.map((output: string, i: number) => (
-                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{output}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Prerequisites */}
-                {displayAtom.content?.prerequisites && displayAtom.content.prerequisites.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Prerequisites
-                    </h5>
-                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
-                      {displayAtom.content.prerequisites.map((prereq: string, i: number) => (
-                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{prereq}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Success Criteria */}
-                {displayAtom.content?.success_criteria && displayAtom.content.success_criteria.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Success Criteria
-                    </h5>
-                    <ul style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.8', paddingLeft: '20px' }}>
-                      {displayAtom.content.success_criteria.map((criteria: string, i: number) => (
-                        <li key={i} style={{ marginBottom: 'var(--spacing-xs)' }}>{criteria}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Metrics & Timing */}
-                {displayAtom.metrics && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)', padding: 'var(--spacing-md)', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '8px' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Metrics & Timing
-                    </h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)', fontSize: '12px' }}>
-                      <div><strong>Avg Cycle Time:</strong> {displayAtom.metrics.avg_cycle_time_mins} mins ({Math.round(displayAtom.metrics.avg_cycle_time_mins / 60)} hours)</div>
-                      <div><strong>Automation Level:</strong> {Math.round(displayAtom.metrics.automation_level * 100)}%</div>
-                      <div><strong>Error Rate:</strong> {Math.round(displayAtom.metrics.error_rate * 100)}%</div>
-                      <div><strong>Compliance Score:</strong> {Math.round(displayAtom.metrics.compliance_score * 100)}%</div>
+                    onConflict={(conflicts) => console.warn('Conflicts:', conflicts)}
+                  />
+                ) : (
+                  <div className="content-area" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ fontSize: '16px', color: 'var(--color-text-secondary)' }}>
+                      Select an atom to collaborate on
                     </div>
+                    <button onClick={() => navigate('/explorer')} className="btn btn-primary">
+                      Go to Atom Explorer
+                    </button>
                   </div>
-                )}
+                )
+              } />
 
-                {/* Exceptions */}
-                {displayAtom.content?.exceptions && displayAtom.content.exceptions.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Exceptions
-                    </h5>
-                    <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-                      {displayAtom.content.exceptions.map((exc: any, i: number) => (
-                        <div key={i} style={{ marginBottom: 'var(--spacing-sm)', padding: 'var(--spacing-sm)', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '4px' }}>
-                          <div style={{ fontWeight: '600', marginBottom: '4px' }}>Condition: {exc.condition}</div>
-                          <div>Action: {exc.action}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <Route path="/processes" element={<ProcessMonitoringDashboard />} />
 
-                {/* Regulatory Context */}
-                {displayAtom.content?.regulatory_context && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Regulatory Context
-                    </h5>
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
-                      {displayAtom.content.regulatory_context}
-                    </p>
-                  </div>
-                )}
+              <Route path="*" element={<div className="content-area">Page not found</div>} />
+            </Routes>
+          </ErrorBoundary>
+        </div>
 
-                {/* Edges/Relationships */}
-                {displayAtom.edges && displayAtom.edges.length > 0 && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Relationships ({displayAtom.edges.length})
-                    </h5>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                      {displayAtom.edges.map((edge: any, i: number) => {
-                        const targetAtom = atoms.find(a => a.id === edge.targetId);
-                        return (
-                          <div key={i} style={{ marginBottom: 'var(--spacing-xs)', padding: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-tertiary)', borderRadius: '4px' }}>
-                            <span style={{ fontWeight: '600', color: 'var(--color-primary)' }}>{edge.type}</span>
-                            {' → '}
-                            <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => handleAtomSelect(targetAtom || { id: edge.targetId } as Atom)}>
-                              {targetAtom?.name || edge.targetId}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Module & Phase Info */}
-                {(displayAtom.moduleId || displayAtom.phaseId) && (
-                  <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <h5 style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--spacing-sm)' }}>
-                      Organization
-                    </h5>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                      {displayAtom.moduleId && (
-                        <div style={{ marginBottom: '4px' }}>
-                          <strong>Module:</strong> {modules.find(m => m.id === displayAtom.moduleId)?.name || displayAtom.moduleId}
-                        </div>
-                      )}
-                      {displayAtom.phaseId && (
-                        <div>
-                          <strong>Phase:</strong> {displayAtom.phaseId.replace('phase-', '').replace('-', ' ')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }}>
-                <button
-                  onClick={() => setShowLineageViewer(true)}
-                  className="btn btn-primary"
-                  style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
-                >
-                  <svg style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle', marginRight: '6px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  View History
-                </button>
-                <button
-                  onClick={() => { setView('impact'); setSelectedAtom(null); setFullAtomData(null); }}
-                  className="btn"
-                  style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
-                >
-                  View Impact Analysis
-                </button>
-                <button
-                  onClick={() => { setView('edges'); setSelectedAtom(null); setFullAtomData(null); }}
-                  className="btn"
-                  style={{ width: '100%' }}
-                >
-                  View Edge Network
-                </button>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Lineage Viewer Modal */}
-        {showLineageViewer && selectedAtom && (
-          <LineageViewer
-            atomId={selectedAtom.id}
-            onClose={() => setShowLineageViewer(false)}
+        {/* Right Sidebar for Selected Atom Details */}
+        {selectedAtom && (
+          <AtomDetailsSidebar
+            atom={selectedAtom}
+            modules={modules}
+            allAtoms={atoms}
+            onClose={() => setSelectedAtom(null)}
+            onSelectAtom={handleAtomSelect}
+            onNavigate={(view) => navigate(`/${view}`)}
           />
         )}
+
       </main>
     </div>
   );

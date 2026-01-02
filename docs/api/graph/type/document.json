@@ -1,0 +1,41 @@
+{
+  "nodes": [
+    {
+      "id": "atom-cust-pre-approval-letter",
+      "type": "DOCUMENT",
+      "label": "Customer Receives Pre-Approval Letter"
+    },
+    {
+      "id": "atom-sys-closing-disclosure",
+      "type": "DOCUMENT",
+      "label": "System Generates Closing Disclosure"
+    }
+  ],
+  "edges": [
+    {
+      "source": "atom-sys-closing-disclosure",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-closing-disclosure",
+      "target": "",
+      "type": "GOVERNED_BY"
+    },
+    {
+      "source": "atom-sys-closing-disclosure",
+      "target": "",
+      "type": "ENABLES"
+    },
+    {
+      "source": "atom-sys-closing-disclosure",
+      "target": "",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-closing-disclosure",
+      "target": "",
+      "type": "RELATED_TO"
+    }
+  ]
+}

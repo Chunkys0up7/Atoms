@@ -16,7 +16,12 @@ export enum AtomType {
   METRIC = 'METRIC',
   RISK = 'RISK',
   POLICY = 'POLICY',
-  CONTROL = 'CONTROL'
+  CONTROL = 'CONTROL',
+  // Enhanced Graph Types
+  API = 'API',
+  CAPABILITY = 'CAPABILITY',
+  AGENT = 'AGENT',
+  VERSION = 'VERSION'
 }
 
 export enum EdgeType {
@@ -33,7 +38,12 @@ export enum EdgeType {
   REFERENCES = 'REFERENCES',
   SUPERSEDES = 'SUPERSEDES',
   REQUIRES_KNOWLEDGE_OF = 'REQUIRES_KNOWLEDGE_OF',
-  PERFORMED_BY = 'PERFORMED_BY'
+  PERFORMED_BY = 'PERFORMED_BY',
+  // Enhanced Graph Types
+  FORBIDDEN_FOR = 'FORBIDDEN_FOR',
+  REPLACED_BY = 'REPLACED_BY',
+  MIGRATED_TO = 'MIGRATED_TO',
+  VERSION_OF = 'VERSION_OF'
 }
 
 export type Criticality = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -85,6 +95,31 @@ export interface Atom {
     error_rate: number;
     compliance_score: number;
   };
+  enhancedMetadata?: OperationalMetadata;
+}
+
+export interface OperationalMetadata {
+  // Functional
+  domain?: string;
+
+  // Operational
+  rateLimitPerMinute?: number;
+  costPerRequest?: number;
+  typicalLatencyMs?: number;
+
+  // Governance
+  isDeprecated?: boolean;
+  deprecationDate?: Date;
+  licenseRequired?: string;
+  dataRetentionPolicy?: string;
+  allowedEnvironments?: string[];
+
+  // Reliability
+  uptime?: number;
+  healthStatus?: 'healthy' | 'degraded' | 'down';
+
+  // Fallback
+  fallbackIds?: string[]; // IDs of atoms that can replace this one
 }
 
 export interface GlossaryItem {
@@ -120,7 +155,7 @@ export interface Journey {
 
 export type NodeLevel = 'ATOM' | 'MODULE' | 'PHASE' | 'JOURNEY';
 
-export type ViewType = 'dashboard' | 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite' | 'analytics' | 'anomalies' | 'collaborate' | 'processes';
+export type ViewType = 'dashboard' | 'explorer' | 'modules' | 'phases' | 'graph' | 'edges' | 'impact' | 'assistant' | 'ingestion' | 'health' | 'publisher' | 'knowledge' | 'ontology' | 'glossary' | 'workflow' | 'runtime' | 'rules' | 'feedback' | 'ownership' | 'library' | 'docssite' | 'analytics' | 'anomalies' | 'collaborate' | 'processes';
 
 export interface ValidationIssue {
   type: string;

@@ -1,0 +1,65 @@
+# Large set of email fixtures (positive, negative, and edge cases)
+valid_emails:
+  - alice@bank.com
+  - bob.jones@enterprise.org
+  - oliver+sales@company.co.uk
+  - maria.garcía@empresa.es
+  - support@mail.company.io
+  - unicode_local_тест@пример.рф
+  - longlocalpart_abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz@longlocal.test
+  - subdomain.user@sub.mail.example.com
+  - quoted.name@"weird".example.com
+  - "\"quoted@local\""@example.com
+  - emoji.ok@domain.example
+  - mixed.case@Example.COM
+  - local-with-dash@domain-name.com
+  - underscore_local@sub_domain.example.com
+  - single-letter@x.io
+  - numeric-local-12345@numbers.example
+  - plus+filtering+test@providers.mail
+  - dot.local.part@company.co
+  - apostrophe.o'reilly@publisher.com
+  - percent%percent@chars.example
+  - ipv4-literal@[192.168.0.1]
+  - ipv6-literal@[IPv6:2001:db8::1]
+  - disposable@tempmail.test
+  - role-account@support.company.com
+  - admin@company.com
+  - postmaster@company.com
+  - escaped\ local@space.example
+  - very.long.localpart_" + "a"*150 + "@long.example
+
+invalid_emails:
+  - "missing-at-sign.example.com"
+  - "@no-local-part.com"
+  - "double@@sign.com"
+  - "trailing-dot.@example.com"
+  - "local-part-too-long-" + "a"*300 + "@example.com"
+  - "bad-characters-in-local-part!#$%\"()=+@example.com"
+  - "spaces in local@domain.com"
+  - "unbalanced"quotes@domain.com
+  - "domain-without-tld@localhost"
+  - "unicode-in-domain@examplé.com"  # domain IDN handling
+
+disposable_domains:
+  - trashmail.test
+  - tempmail.test
+  - mailinator.test
+  - yopmail.test
+
+role_addresses:
+  - admin@company.com
+  - support@company.com
+  - postmaster@company.com
+  - webmaster@company.com
+  - abuse@company.com
+
+dns_failures:
+  - nonexistent-domain-xyz12345.test
+  - no-mx-record.example.test
+
+notes: |
+  - Use `valid_emails` for positive format and MX checks.
+  - `invalid_emails` are for format rejection tests.
+  - `disposable_domains` and `role_addresses` cover policy-based rejects.
+  - `dns_failures` simulate MX/DNS lookup failures.

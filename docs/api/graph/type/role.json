@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "atom-role-loan-officer",
+      "type": "ROLE",
+      "label": "Loan Officer"
+    },
+    {
+      "id": "atom-role-processor",
+      "type": "ROLE",
+      "label": "Loan Processor"
+    },
+    {
+      "id": "atom-role-underwriter",
+      "type": "ROLE",
+      "label": "Underwriter"
+    }
+  ],
+  "edges": []
+}

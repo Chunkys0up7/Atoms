@@ -1,0 +1,62 @@
+# Expanded address fixtures for verify-address atom
+valid_addresses:
+  - country: US
+    street: "4326 Cedar Lane"
+    city: "Rivertown"
+    state: "CA"
+    postal_code: "90210"
+
+  - country: UK
+    street: "Flat 3, 12 High Street"
+    city: "London"
+    postal_code: "SW1A 1AA"
+
+  - country: DE
+    street: "Bahnhofstrasse 5"
+    city: "Berlin"
+    postal_code: "10115"
+
+  - country: JP
+    street: "1-2-3 Chiyoda"
+    city: "Tokyo"
+    postal_code: "100-0001"
+
+  - country: BR
+    street: "Avenida Paulista, 1000"
+    city: "Sao Paulo"
+    postal_code: "01310-100"
+
+invalid_addresses:
+  - country: US
+    street: ""
+    city: ""
+    state: ""
+    postal_code: ""
+
+  - country: Unknown
+    street: "Somewhere"
+    city: "Nowhere"
+    postal_code: "ABCDE"
+
+  - country: US
+    street: "123 Long Rd " + "a"*300
+    city: "Overflow"
+    postal_code: "00000"
+
+edge_cases:
+  - country: US
+    street: "PO Box 123"
+    city: "Rivertown"
+    postal_code: "90210"
+    note: "PO box – verify deliverability rules"
+
+  - country: UK
+    street: "Unit 5, Industrial Estate"
+    city: "Belfast"
+    postal_code: "BT1 1AA"
+    note: "Northern Ireland postcode format"
+
+notes: |
+  - `valid_addresses` should pass normalization and optional geocoding.
+  - `invalid_addresses` target missing or malformed fields.
+  - `edge_cases` include PO Boxes, non-Latin scripts, and unusually long street lines.

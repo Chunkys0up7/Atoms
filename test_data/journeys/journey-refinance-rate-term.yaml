@@ -1,0 +1,9 @@
+id: journey-refinance-rate-term
+name: Refinance — Rate & Term
+description: Refinance journey focused on lowering rate or adjusting term for existing borrowers.
+phases:
+  - phase-pre-application-refinance-rate-term
+  - phase-application-intake-refinance-rate-term
+  - phase-processing-refinance-rate-term
+  - phase-underwriting-refinance-rate-term
+  - phase-closing-refinance-rate-term

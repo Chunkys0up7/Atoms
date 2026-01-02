@@ -1,0 +1,39 @@
+---
+title: "{{ title }}"
+description: "{{ description }}"
+---
+
+# {{ title }}
+
+{{ description }}
+
+{% if stats %}
+<div class="impact-summary">
+{% for stat in stats %}
+  <div class="impact-card">
+    <div class="impact-card-value">{{ stat.value }}</div>
+    <div class="impact-card-label">{{ stat.label }}</div>
+  </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if items %}
+## {{ items_title }}
+
+{% for item in items %}
+{{ item }}
+{% endfor %}
+{% endif %}
+
+{% if graph_data %}
+## Visualization
+
+<div id="index-graph" class="graph-container" data-graph-src='{{ graph_data }}'>
+  <div class="graph-controls">
+    <button class="graph-control-btn" data-action="zoom-in" title="Zoom In">+</button>
+    <button class="graph-control-btn" data-action="zoom-out" title="Zoom Out">-</button>
+    <button class="graph-control-btn" data-action="fit" title="Fit to View">⊡</button>
+  </div>
+</div>
+{% endif %}

@@ -278,20 +278,28 @@ class Neo4jGraphPopulator:
                     print(f"  Warning: Failed to link journey {journey_id} -> phase {phase_id}: {e}")
 
 
+try:
+    import yaml
+except ImportError:
+    print("ERROR: PyYAML not installed. Run: pip install PyYAML")
+    pass
+
 def load_atoms_from_disk() -> List[Dict[str, Any]]:
-    """Load all atom JSON files."""
-    atoms_dir = Path(__file__).parent.parent / "data" / "atoms"
+    """Load all atom YAML files recursively."""
+    atoms_dir = Path(__file__).parent.parent / "atoms"
     atoms = []
 
     if not atoms_dir.exists():
         print(f"WARNING: Atoms directory not found at {atoms_dir}")
         return atoms
 
-    for file_path in sorted(atoms_dir.glob("atom-*.json")):
+    print(f"Scanning {atoms_dir} for atom definitions...")
+    for file_path in sorted(atoms_dir.rglob("*.yaml")):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                atom = json.load(f)
-                atoms.append(atom)
+                atom = yaml.safe_load(f)
+                if atom:
+                    atoms.append(atom)
         except Exception as e:
             print(f"WARNING: Failed to load {file_path.name}: {e}")
 

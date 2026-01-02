@@ -265,7 +265,7 @@ def get_documents_tree() -> Dict[str, Any]:
                 "module": frontmatter.get("module", "unknown"),
                 "created": frontmatter.get("created", None),
                 "updated": frontmatter.get("updated", None),
-                "url": f"/generated/published/{md_file.name}",
+                "url": f"/generated/published/{md_file.stem}/",
                 "size": md_file.stat().st_size,
                 "modified": datetime.fromtimestamp(md_file.stat().st_mtime).isoformat(),
             }
@@ -339,7 +339,7 @@ def search_documents(q: str = "", template_type: str = None, module: str = None)
                 "module": frontmatter.get("module", "unknown"),
                 "created": frontmatter.get("created", None),
                 "updated": frontmatter.get("updated", None),
-                "url": f"/generated/published/{md_file.name}",
+                "url": f"/generated/published/{md_file.stem}/",
                 "excerpt": content[:200].replace("---\n", "").strip()[:150] + "...",
             }
 
@@ -382,7 +382,7 @@ def get_recent_documents(limit: int = 10) -> List[Dict[str, Any]]:
                 "module": frontmatter.get("module", "unknown"),
                 "created": frontmatter.get("created", None),
                 "updated": frontmatter.get("updated", None),
-                "url": f"/generated/published/{md_file.name}",
+                "url": f"/generated/published/{md_file.stem}/",
                 "modified": md_file.stat().st_mtime,
             }
 
@@ -448,7 +448,7 @@ def get_document_metadata(filename: str) -> Dict[str, Any]:
             "module": frontmatter.get("module", "unknown"),
             "created": frontmatter.get("created", None),
             "updated": frontmatter.get("updated", None),
-            "url": f"/generated/published/{filename}",
+                "url": f"/generated/published/{filename.replace('.md', '')}/",
             "size": stats.st_size,
             "modified": datetime.fromtimestamp(stats.st_mtime).isoformat(),
             "word_count": len(content.split()),
@@ -526,7 +526,7 @@ async def semantic_search_documents(query: str, limit: int = 10) -> List[Dict[st
                         "title": frontmatter.get("title", filename),
                         "template_type": frontmatter.get("template_type", "unknown"),
                         "module": frontmatter.get("module", "unknown"),
-                        "url": f"/generated/published/{filename}",
+                            "url": f"/generated/published/{filename.replace('.md', '')}/",
                         "relevance_score": score_data["score"],
                         "matched_atoms": score_data["matched_atoms"][:5],  # Top 5 atoms
                         "excerpt": content[:300].replace("---\n", "").strip()[:200] + "...",
@@ -608,7 +608,7 @@ async def get_related_documents(filename: str, limit: int = 5) -> List[Dict[str,
                             "title": frontmatter.get("title", md_file.stem),
                             "template_type": frontmatter.get("template_type", "unknown"),
                             "module": frontmatter.get("module", "unknown"),
-                            "url": f"/generated/published/{md_file.name}",
+                            "url": f"/generated/published/{md_file.stem}/",
                             "similarity_score": score,
                             "shared_atoms_count": len(shared_atoms),
                             "shared_atoms": list(shared_atoms)[:10],  # Top 10
@@ -687,7 +687,7 @@ async def get_ai_recommendations(filename: str, limit: int = 5) -> Dict[str, Any
                             "title": doc_frontmatter.get("title", md_file.stem),
                             "template_type": doc_frontmatter.get("template_type", "unknown"),
                             "module": doc_frontmatter.get("module", "unknown"),
-                            "url": f"/generated/published/{md_file.name}",
+                            "url": f"/generated/published/{md_file.stem}/",
                             "ai_score": matches,
                             "reason": f"Contains {matches} atoms related to this document",
                         }
@@ -1401,7 +1401,7 @@ async def create_document_from_template(request: dict):
         return {
             "status": "success",
             "filename": filename,
-            "url": f"/generated/published/{filename}",
+                "url": f"/generated/published/{filename.replace('.md', '')}/",
             "message": f"Document created from {template['name']} template",
         }
 

@@ -1,0 +1,64 @@
+# Larger government ID fixtures
+valid_ids:
+  - type: passport
+    country: US
+    number: "123456789"
+    name: "SMITH, JOHN"
+    dob: "1980-05-12"
+    expiry: "2030-05-12"
+    mrz: "P<USASMITH<<JOHN<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+
+  - type: drivers_license
+    country: US
+    state: CA
+    number: "D1234567"
+    name: "LEE, JORDAN"
+    dob: "1990-11-01"
+    expiry: "2028-11-01"
+
+  - type: passport
+    country: GB
+    number: "987654321"
+    name: "GARCIA, RILEY"
+    dob: "1985-03-22"
+    expiry: "2029-03-22"
+
+  - type: passport
+    country: IN
+    number: "A1234567"
+    name: "नारायण, राज"
+    dob: "1978-07-07"
+    expiry: "2028-07-07"
+
+invalid_ids:
+  - type: passport
+    country: US
+    number: ""
+    name: "MISSING, NAME"
+    dob: ""
+    expiry: "2000-01-01"
+
+  - type: drivers_license
+    country: US
+    state: NY
+    number: "INVALID!!"
+    name: "BAD, DATA"
+
+edge_cases:
+  - type: passport
+    country: FR
+    number: "1234 5678"
+    name: "DUPONT, MARIE"
+    dob: "1992-02-02"
+    expiry: "2026-02-02"
+    note: "Spaces in number"
+
+  - type: national_id
+    country: CN
+    number: "11010519491231002X"
+    name: "张三"
+    dob: "1949-12-31"
+    expiry: "2039-12-31"
+
+notes: |
+  - Include MRZ parsing, expiry checks, format validation per country, and script handling.

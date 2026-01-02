@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    {
+      "id": "atom-ctrl-credit-policy",
+      "type": "CONTROL",
+      "label": "Credit Policy Control"
+    }
+  ],
+  "edges": []
+}
