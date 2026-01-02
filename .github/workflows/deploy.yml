@@ -37,7 +37,7 @@ jobs:
 
       - name: Build graph from atoms
         run: |
-          python docs/build_docs.py --source atoms --output docs/generated
+          python docs/build_docs.py --source . --output docs/generated
 
       - name: Validate generated graph
         run: |
