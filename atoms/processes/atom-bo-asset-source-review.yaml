@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Asset Source
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Risk Management
+owner: David Thompson
+team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -45,13 +45,8 @@ edges:
   targetId: atom-bo-gift-letter-review
 - type: ENABLES
   targetId: atom-bo-large-deposit-review
-- type: RELATED_TO
-  targetId: atom-bo-asset-verification-letter
-- type: RELATED_TO
-  targetId: atom-bo-down-payment-verification
 metrics:
-  automation_level: 0.2
-  avg_cycle_time_mins: 200
-  error_rate: 0.017
-  compliance_score: 0.96
-owning_team: Risk Management
+  automation_level: 0.29
+  avg_cycle_time_mins: 305
+  error_rate: 0.09
+  compliance_score: 0.94

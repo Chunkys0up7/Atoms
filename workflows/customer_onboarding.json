@@ -1,0 +1,31 @@
+{
+    "id": "customer_onboarding",
+    "name": "Customer Onboarding",
+    "version": "1.0.0",
+    "description": "This process describes the end-to-end flow for onboarding a new customer, including KYC checks and account provisioning.",
+    "start_step_id": null,
+    "roles": [
+        "user",
+        "system"
+    ],
+    "steps": [
+        {
+            "id": "Task_CollectDocs",
+            "name": "Collect ID Documents",
+            "type": "task",
+            "transitions": []
+        },
+        {
+            "id": "Task_ReviewKYC",
+            "name": "Review KYC",
+            "type": "task",
+            "transitions": []
+        },
+        {
+            "id": "Task_ProvisionAccount",
+            "name": "Provision Account",
+            "type": "automated",
+            "transitions": []
+        }
+    ]
+}

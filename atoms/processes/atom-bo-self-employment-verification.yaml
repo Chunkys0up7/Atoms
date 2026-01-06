@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Verifies Self-Employment Income
 version: 1.0.0
-status: DRAFT
-owner: Lisa Anderson
-team: Processing
+status: ACTIVE
+owner: Michael Rodriguez
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -28,8 +28,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.29
-  avg_cycle_time_mins: 120
-  error_rate: 0.017
-  compliance_score: 0.9
-owning_team: Processing
+  automation_level: 0.21
+  avg_cycle_time_mins: 311
+  error_rate: 0.064
+  compliance_score: 0.93

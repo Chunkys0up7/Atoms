@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reviews Large Deposits
 version: 1.0.0
-status: ACTIVE
-owner: Robert Kim
-team: Closing
+status: DRAFT
+owner: Sarah Chen
+team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -31,10 +31,9 @@ edges:
 - type: ENABLES
   targetId: atom-sys-reserve-calculation
 - type: RELATED_TO
-  targetId: atom-bo-down-payment-verification
+  targetId: atom-bo-reserves-verification
 metrics:
-  automation_level: 0.3
-  avg_cycle_time_mins: 327
-  error_rate: 0.063
-  compliance_score: 0.89
-owning_team: Closing
+  automation_level: 0.48
+  avg_cycle_time_mins: 322
+  error_rate: 0.093
+  compliance_score: 0.87

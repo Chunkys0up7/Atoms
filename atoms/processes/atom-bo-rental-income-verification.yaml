@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Rental Income
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Risk Management
+owner: Sarah Chen
+team: Underwriting
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.25
-  avg_cycle_time_mins: 424
-  error_rate: 0.048
-  compliance_score: 0.98
-owning_team: Risk Management
+  automation_level: 0.22
+  avg_cycle_time_mins: 441
+  error_rate: 0.054
+  compliance_score: 0.99

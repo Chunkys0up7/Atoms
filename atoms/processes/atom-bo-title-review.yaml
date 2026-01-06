@@ -4,7 +4,7 @@ type: PROCESS
 name: Processor Reviews Title Report
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
+owner: Amanda White
 team: Underwriting
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -43,10 +43,10 @@ edges:
   targetId: atom-sys-aus-submission
 - type: ENABLES
   targetId: atom-bo-title-issue-resolution
+- type: RELATED_TO
+  targetId: atom-bo-hazard-insurance-binder
 metrics:
-  automation_level: 0.19
-  avg_cycle_time_mins: 419
-  error_rate: 0.008
-  compliance_score: 0.86
-steward: Lisa Anderson
-owning_team: Underwriting
+  automation_level: 0.3
+  avg_cycle_time_mins: 57
+  error_rate: 0.085
+  compliance_score: 0.9

@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Loan Officer Calculates DTI
 version: 1.0.0
-status: ACTIVE
+status: DRAFT
 owner: Amanda White
-team: Underwriting
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-pre-application
@@ -36,8 +36,7 @@ edges:
 - type: PERFORMED_BY
   targetId: atom-role-loan-officer
 metrics:
-  automation_level: 0.33
-  avg_cycle_time_mins: 378
-  error_rate: 0.068
-  compliance_score: 0.88
-owning_team: Underwriting
+  automation_level: 0.26
+  avg_cycle_time_mins: 251
+  error_rate: 0.028
+  compliance_score: 0.93

@@ -1,0 +1,8 @@
+id: journey-refinance
+name: Refinance Journey
+description: Workflow for refinancing an existing mortgage to change rate or term
+owner: Head of Lending
+phases:
+- phase-refi-application
+- phase-refi-processing
+- phase-refi-closing

@@ -31,16 +31,11 @@ edges:
 - type: ENABLES
   targetId: atom-dec-loan-decision
 - type: RELATED_TO
-  targetId: atom-bo-compensating-factors-analysis
+  targetId: atom-bo-underwriting-exception-request
 - type: RELATED_TO
-  targetId: atom-sys-rate-lock-processing
-- type: RELATED_TO
-  targetId: atom-bo-loan-modification-review
-- type: RELATED_TO
-  targetId: atom-bo-appeal-review
+  targetId: atom-bo-exception-approval
 metrics:
-  automation_level: 0.03
-  avg_cycle_time_mins: 380
-  error_rate: 0.0
-  compliance_score: 0.97
-owning_team: Processing
+  automation_level: 0.2
+  avg_cycle_time_mins: 212
+  error_rate: 0.022
+  compliance_score: 0.96

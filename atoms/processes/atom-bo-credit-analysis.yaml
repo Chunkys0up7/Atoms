@@ -5,7 +5,7 @@ name: Processor Analyzes Credit Report
 version: 1.0.0
 status: ACTIVE
 owner: Michael Rodriguez
-team: Loan Origination
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-processing
@@ -48,14 +48,8 @@ edges:
   targetId: atom-ctrl-credit-policy
 - type: ENABLES
   targetId: atom-bo-debt-ratio-calculation
-- type: RELATED_TO
-  targetId: atom-bo-derogatory-review
-- type: RELATED_TO
-  targetId: atom-bo-credit-inquiry-review
 metrics:
-  automation_level: 0.08
-  avg_cycle_time_mins: 369
-  error_rate: 0.051
-  compliance_score: 0.94
-steward: Jennifer Park
-owning_team: Loan Origination
+  automation_level: 0.47
+  avg_cycle_time_mins: 282
+  error_rate: 0.046
+  compliance_score: 0.93

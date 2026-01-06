@@ -18,9 +18,11 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+import yaml
+
 # Data storage paths
-PHASES_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "phases.json"
-JOURNEYS_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "journeys.json"
+PHASES_DIR = Path(__file__).parent.parent.parent / "phases"
+JOURNEYS_DIR = Path(__file__).parent.parent.parent / "journeys"
 
 
 class Phase(BaseModel):
@@ -51,55 +53,79 @@ class Journey(BaseModel):
 
 
 def load_phases() -> List[Phase]:
-    """Load phases from JSON file."""
-    if not PHASES_DATA_PATH.exists():
+    """Load phases from YAML files in phases directory."""
+    phases = []
+    if not PHASES_DIR.exists():
         return get_default_phases()
 
+    for yaml_file in PHASES_DIR.glob("*.yaml"):
+        try:
+            with open(yaml_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                if data:
+                    phases.append(Phase(**data))
+        except Exception as e:
+            print(f"Error loading phase {yaml_file}: {e}", file=sys.stderr)
+
+    return phases if phases else get_default_phases()
+
+
+def save_phase_to_file(phase: Phase) -> None:
+    """Save a single phase to its YAML file."""
+    PHASES_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = PHASES_DIR / f"{phase.id}.yaml"
+    
     try:
-        with open(PHASES_DATA_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return [Phase(**p) for p in data]
+        with open(file_path, "w", encoding="utf-8") as f:
+            yaml.dump(phase.dict(), f, default_flow_style=False, sort_keys=False)
     except Exception as e:
-        print(f"Error loading phases: {e}", file=sys.stderr)
-        return get_default_phases()
+        print(f"Error saving phase {phase.id}: {e}", file=sys.stderr)
+        raise HTTPException(status_code=500, detail=f"Failed to save phase: {str(e)}")
 
 
-def save_phases(phases: List[Phase]) -> None:
-    """Save phases to JSON file."""
-    PHASES_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        with open(PHASES_DATA_PATH, "w", encoding="utf-8") as f:
-            json.dump([p.dict() for p in phases], f, indent=2)
-    except Exception as e:
-        print(f"Error saving phases: {e}", file=sys.stderr)
-        raise HTTPException(status_code=500, detail=f"Failed to save phases: {str(e)}")
+def delete_phase_file(phase_id: str) -> None:
+    """Delete a phase YAML file."""
+    file_path = PHASES_DIR / f"{phase_id}.yaml"
+    if file_path.exists():
+        file_path.unlink()
 
 
 def load_journeys() -> List[Journey]:
-    """Load journeys from JSON file."""
-    if not JOURNEYS_DATA_PATH.exists():
+    """Load journeys from YAML files in journeys directory."""
+    journeys = []
+    if not JOURNEYS_DIR.exists():
         return get_default_journeys()
 
+    for yaml_file in JOURNEYS_DIR.glob("*.yaml"):
+        try:
+            with open(yaml_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                if data:
+                    journeys.append(Journey(**data))
+        except Exception as e:
+            print(f"Error loading journey {yaml_file}: {e}", file=sys.stderr)
+            
+    return journeys if journeys else get_default_journeys()
+
+
+def save_journey_to_file(journey: Journey) -> None:
+    """Save a single journey to its YAML file."""
+    JOURNEYS_DIR.mkdir(parents=True, exist_ok=True)
+    file_path = JOURNEYS_DIR / f"{journey.id}.yaml"
+    
     try:
-        with open(JOURNEYS_DATA_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return [Journey(**j) for j in data]
+        with open(file_path, "w", encoding="utf-8") as f:
+            yaml.dump(journey.dict(), f, default_flow_style=False, sort_keys=False)
     except Exception as e:
-        print(f"Error loading journeys: {e}", file=sys.stderr)
-        return get_default_journeys()
+        print(f"Error saving journey {journey.id}: {e}", file=sys.stderr)
+        raise HTTPException(status_code=500, detail=f"Failed to save journey: {str(e)}")
 
 
-def save_journeys(journeys: List[Journey]) -> None:
-    """Save journeys to JSON file."""
-    JOURNEYS_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        with open(JOURNEYS_DATA_PATH, "w", encoding="utf-8") as f:
-            json.dump([j.dict() for j in journeys], f, indent=2)
-    except Exception as e:
-        print(f"Error saving journeys: {e}", file=sys.stderr)
-        raise HTTPException(status_code=500, detail=f"Failed to save journeys: {str(e)}")
+def delete_journey_file(journey_id: str) -> None:
+    """Delete a journey YAML file."""
+    file_path = JOURNEYS_DIR / f"{journey_id}.yaml"
+    if file_path.exists():
+        file_path.unlink()
 
 
 def get_default_phases() -> List[Phase]:
@@ -261,7 +287,7 @@ def create_phase(phase: Phase) -> Phase:
         raise HTTPException(status_code=400, detail=f"Phase with ID '{phase.id}' already exists")
 
     phases.append(phase)
-    save_phases(phases)
+    save_phase_to_file(phase)
 
     return phase
 
@@ -285,7 +311,7 @@ def update_phase(phase_id: str, phase: Phase) -> Phase:
         raise HTTPException(status_code=404, detail=f"Phase '{phase_id}' not found")
 
     phases[index] = phase
-    save_phases(phases)
+    save_phase_to_file(phase)
 
     return phase
 
@@ -302,9 +328,11 @@ def delete_phase(phase_id: str) -> Dict[str, Any]:
         Deletion confirmation
     """
     phases = load_phases()
-    phases = [p for p in phases if p.id != phase_id]
+    target = next((p for p in phases if p.id == phase_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Phase '{phase_id}' not found")
 
-    save_phases(phases)
+    delete_phase_file(phase_id)
 
     return {"status": "success", "message": f"Phase '{phase_id}' deleted"}
 
@@ -361,7 +389,7 @@ def create_journey(journey: Journey) -> Journey:
         raise HTTPException(status_code=400, detail=f"Journey with ID '{journey.id}' already exists")
 
     journeys.append(journey)
-    save_journeys(journeys)
+    save_journey_to_file(journey)
 
     return journey
 
@@ -385,7 +413,7 @@ def update_journey(journey_id: str, journey: Journey) -> Journey:
         raise HTTPException(status_code=404, detail=f"Journey '{journey_id}' not found")
 
     journeys[index] = journey
-    save_journeys(journeys)
+    save_journey_to_file(journey)
 
     return journey
 
@@ -402,9 +430,11 @@ def delete_journey(journey_id: str) -> Dict[str, Any]:
         Deletion confirmation
     """
     journeys = load_journeys()
-    journeys = [j for j in journeys if j.id != journey_id]
+    target = next((j for j in journeys if j.id == journey_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Journey '{journey_id}' not found")
 
-    save_journeys(journeys)
+    delete_journey_file(journey_id)
 
     return {"status": "success", "message": f"Journey '{journey_id}' deleted"}
 

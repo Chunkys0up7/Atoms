@@ -4,8 +4,8 @@ type: PROCESS
 name: Underwriter Documents Loan Denial
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
-team: Post-Closing
+owner: Sarah Chen
+team: Underwriting
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-underwriting
@@ -26,10 +26,11 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges: []
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-adverse-action-letter
 metrics:
-  automation_level: 0.48
-  avg_cycle_time_mins: 280
-  error_rate: 0.064
-  compliance_score: 0.89
-owning_team: Post-Closing
+  automation_level: 0.19
+  avg_cycle_time_mins: 400
+  error_rate: 0.04
+  compliance_score: 0.98

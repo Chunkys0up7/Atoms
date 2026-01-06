@@ -4,8 +4,8 @@ type: PROCESS
 name: System Submits to AUS (DU/LP)
 version: 1.0.0
 status: ACTIVE
-owner: Michael Rodriguez
-team: Loan Origination
+owner: Amanda White
+team: Risk Management
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-underwriting
@@ -43,17 +43,17 @@ edges:
 - type: ENABLES
   targetId: atom-bo-risk-assessment
 - type: RELATED_TO
-  targetId: atom-bo-underwriting-exception-request
+  targetId: atom-bo-program-eligibility-check
 - type: RELATED_TO
-  targetId: atom-bo-exception-approval
+  targetId: atom-bo-compensating-factors-analysis
+- type: RELATED_TO
+  targetId: atom-sys-rate-lock-processing
 - type: RELATED_TO
   targetId: atom-bo-manual-review-trigger
 - type: RELATED_TO
-  targetId: atom-bo-adverse-action-letter
+  targetId: atom-bo-appeal-review
 metrics:
-  automation_level: 0.83
-  avg_cycle_time_mins: 41
-  error_rate: 0.072
-  compliance_score: 0.95
-steward: Robert Kim
-owning_team: Loan Origination
+  automation_level: 0.76
+  avg_cycle_time_mins: 33
+  error_rate: 0.099
+  compliance_score: 0.96

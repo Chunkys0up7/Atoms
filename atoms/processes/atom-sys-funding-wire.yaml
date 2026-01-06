@@ -4,8 +4,8 @@ type: PROCESS
 name: System Initiates Funding Wire
 version: 1.0.0
 status: ACTIVE
-owner: Robert Kim
-team: Underwriting
+owner: Lisa Anderson
+team: Processing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-closing
@@ -38,10 +38,10 @@ edges:
   targetId: atom-sys-deed-recording
 - type: ENABLES
   targetId: atom-sys-wire-verification
+- type: RELATED_TO
+  targetId: atom-bo-funding-hold-review
 metrics:
-  automation_level: 0.8
-  avg_cycle_time_mins: 43
-  error_rate: 0.044
-  compliance_score: 0.88
-steward: David Thompson
-owning_team: Underwriting
+  automation_level: 0.86
+  avg_cycle_time_mins: 46
+  error_rate: 0.052
+  compliance_score: 1.0

@@ -1,0 +1,6 @@
+id: phase-refi-application
+name: Refinance Application
+description: Application intake for refinance, payoff request, and credit check
+modules: []
+journeyId: journey-refinance
+targetDurationDays: 3

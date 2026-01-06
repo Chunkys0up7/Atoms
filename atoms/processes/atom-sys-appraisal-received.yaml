@@ -40,9 +40,7 @@ edges:
 - type: ENABLES
   targetId: atom-bo-property-condition-review
 metrics:
-  automation_level: 0.92
-  avg_cycle_time_mins: 11
-  error_rate: 0.049
-  compliance_score: 0.93
-steward: James Martinez
-owning_team: Loan Origination
+  automation_level: 0.96
+  avg_cycle_time_mins: 16
+  error_rate: 0.013
+  compliance_score: 0.97

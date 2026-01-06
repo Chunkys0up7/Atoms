@@ -9,12 +9,14 @@ import { API_ENDPOINTS } from '../constants';
 interface GraphProviderContext {
     atoms: Atom[];
     modules: Module[];
+    phases: any[];
+    journeys: any[];
     isLoading: boolean;
     error: string | null;
     graphPlanner: GraphPlanner | null;
     governanceEngine: GovernanceEngine | null;
     auditLog: AuditLog;
-    loadData: () => Promise<void>;
+    loadData: (silent?: boolean) => Promise<void>;
     ingestData: (data: { atoms: Atom[], module: Module }) => void;
     rules: BusinessRule[];
 }
@@ -36,6 +38,8 @@ interface GraphProviderProps {
 export const GraphProvider: React.FC<GraphProviderProps> = ({ children }) => {
     const [atoms, setAtoms] = useState<Atom[]>([]);
     const [modules, setModules] = useState<Module[]>([]);
+    const [phases, setPhases] = useState<any[]>([]);
+    const [journeys, setJourneys] = useState<any[]>([]);
     const [rules, setRules] = useState<BusinessRule[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -51,8 +55,8 @@ export const GraphProvider: React.FC<GraphProviderProps> = ({ children }) => {
         }
     }, [atoms, rules]);
 
-    const loadData = async () => {
-        setIsLoading(true);
+    const loadData = async (silent = false) => {
+        if (!silent) setIsLoading(true);
         setError(null);
 
         try {
@@ -94,6 +98,28 @@ export const GraphProvider: React.FC<GraphProviderProps> = ({ children }) => {
 
             setModules(normalizedModules);
 
+            // Fetch phases
+            try {
+                const phasesResponse = await fetch('http://localhost:8000/api/phases');
+                if (phasesResponse.ok) {
+                    const phasesData = await phasesResponse.json();
+                    setPhases(phasesData);
+                }
+            } catch (e) {
+                console.warn('Failed to load phases', e);
+            }
+
+            // Fetch journeys
+            try {
+                const journeysResponse = await fetch('http://localhost:8000/api/journeys');
+                if (journeysResponse.ok) {
+                    const journeysData = await journeysResponse.json();
+                    setJourneys(journeysData);
+                }
+            } catch (e) {
+                console.warn('Failed to load journeys', e);
+            }
+
             // Fetch active rules
             try {
                 const rulesResponse = await fetch(`${API_ENDPOINTS.rules || 'http://localhost:8000/api/rules'}?active_only=true`);
@@ -114,7 +140,28 @@ export const GraphProvider: React.FC<GraphProviderProps> = ({ children }) => {
     };
 
     useEffect(() => {
+        // Initial load
         loadData();
+
+        // Polling interval (5 seconds)
+        const POLLING_INTERVAL = 5000;
+        let timeoutId: NodeJS.Timeout;
+
+        const pollData = async () => {
+            // Only poll if tab is visible
+            if (!document.hidden) {
+                // Pass silent=true to avoid triggering global loading state repeatedly
+                await loadData(true);
+            }
+            timeoutId = setTimeout(pollData, POLLING_INTERVAL);
+        };
+
+        // Start polling
+        timeoutId = setTimeout(pollData, POLLING_INTERVAL);
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     const ingestData = (data: { atoms: Atom[], module: Module }) => {
@@ -127,6 +174,8 @@ export const GraphProvider: React.FC<GraphProviderProps> = ({ children }) => {
         <GraphContext.Provider value={{
             atoms,
             modules,
+            phases,
+            journeys,
             isLoading,
             error,
             graphPlanner,

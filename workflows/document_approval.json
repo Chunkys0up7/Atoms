@@ -1,0 +1,79 @@
+{
+    "id": "doc_approval_v1",
+    "name": "Standard Document Approval",
+    "version": "1.0.0",
+    "description": "A standard workflow for reviewing and approving internal documents.",
+    "start_step_id": "draft_review",
+    "roles": [
+        "author",
+        "reviewer",
+        "legal"
+    ],
+    "steps": [
+        {
+            "id": "draft_review",
+            "name": "Initial Peer Review",
+            "type": "task",
+            "assign_to_role": "reviewer",
+            "transitions": [
+                {
+                    "target_step_id": "legal_check",
+                    "condition": {
+                        "field": "outcome",
+                        "operator": "eq",
+                        "value": "approved"
+                    }
+                },
+                {
+                    "target_step_id": "revise_draft",
+                    "condition": {
+                        "field": "outcome",
+                        "operator": "eq",
+                        "value": "rejected"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "revise_draft",
+            "name": "Revise Document",
+            "type": "task",
+            "assign_to_role": "author",
+            "transitions": [
+                {
+                    "target_step_id": "draft_review"
+                }
+            ]
+        },
+        {
+            "id": "legal_check",
+            "name": "Legal Compliance Check",
+            "type": "approval",
+            "assign_to_role": "legal",
+            "transitions": [
+                {
+                    "target_step_id": "publish_doc",
+                    "condition": {
+                        "field": "outcome",
+                        "operator": "eq",
+                        "value": "approved"
+                    }
+                },
+                {
+                    "target_step_id": "revise_draft",
+                    "condition": {
+                        "field": "outcome",
+                        "operator": "eq",
+                        "value": "rejected"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "publish_doc",
+            "name": "Publish Document",
+            "type": "script",
+            "transitions": []
+        }
+    ]
+}

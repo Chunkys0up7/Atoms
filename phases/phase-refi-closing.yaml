@@ -1,0 +1,6 @@
+id: phase-refi-closing
+name: Refinance Closing
+description: Closing disclosure, rescission period management, and payoff disbursement
+modules: []
+journeyId: journey-refinance
+targetDurationDays: 5

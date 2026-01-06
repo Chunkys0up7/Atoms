@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Rental History
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
-team: Technology
+owner: Amanda White
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -27,10 +27,9 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
-  targetId: atom-bo-credit-inquiry-review
+  targetId: atom-bo-credit-dispute-review
 metrics:
-  automation_level: 0.5
-  avg_cycle_time_mins: 105
-  error_rate: 0.053
-  compliance_score: 0.85
-owning_team: Technology
+  automation_level: 0.11
+  avg_cycle_time_mins: 375
+  error_rate: 0.042
+  compliance_score: 0.94

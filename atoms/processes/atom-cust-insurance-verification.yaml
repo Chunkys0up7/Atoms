@@ -4,7 +4,7 @@ type: PROCESS
 name: Customer Provides Hazard Insurance
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
+owner: Lisa Anderson
 team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -37,11 +37,8 @@ edges:
   targetId: atom-bo-closing-doc-prep
 - type: ENABLES
   targetId: atom-bo-homeowners-insurance-review
-- type: RELATED_TO
-  targetId: atom-bo-hazard-insurance-binder
 metrics:
-  automation_level: 0.63
-  avg_cycle_time_mins: 1727
-  error_rate: 0.017
-  compliance_score: 0.89
-owning_team: Loan Origination
+  automation_level: 0.65
+  avg_cycle_time_mins: 1754
+  error_rate: 0.008
+  compliance_score: 0.99

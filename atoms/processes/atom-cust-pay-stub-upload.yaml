@@ -4,8 +4,8 @@ type: PROCESS
 name: Customer Uploads Pay Stubs
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
-team: Loan Origination
+owner: Sarah Chen
+team: Compliance
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -31,9 +31,14 @@ content:
 edges:
 - type: ENABLES
   targetId: atom-bo-pay-stub-review
+- type: RELATED_TO
+  targetId: atom-bo-bonus-overtime-calculation
+- type: RELATED_TO
+  targetId: atom-bo-self-employment-verification
+- type: RELATED_TO
+  targetId: atom-bo-rental-income-verification
 metrics:
-  automation_level: 0.51
-  avg_cycle_time_mins: 962
-  error_rate: 0.008
-  compliance_score: 0.86
-owning_team: Loan Origination
+  automation_level: 0.43
+  avg_cycle_time_mins: 1419
+  error_rate: 0.051
+  compliance_score: 0.96

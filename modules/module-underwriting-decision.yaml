@@ -1,6 +1,4 @@
 id: module-underwriting-decision
-version: 1.0.0
-workflow_type: CUSTOM
 name: Underwriting Decision
 description: Automated underwriting system (AUS) submission, manual underwrite, and
   loan decision

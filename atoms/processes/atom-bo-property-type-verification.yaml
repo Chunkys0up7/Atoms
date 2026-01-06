@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Verifies Property Type
 version: 1.0.0
-status: DRAFT
-owner: Amanda White
-team: Compliance
+status: ACTIVE
+owner: James Martinez
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -26,12 +26,9 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges:
-- type: RELATED_TO
-  targetId: atom-bo-occupancy-verification
+edges: []
 metrics:
-  automation_level: 0.47
-  avg_cycle_time_mins: 132
-  error_rate: 0.084
-  compliance_score: 0.92
-owning_team: Compliance
+  automation_level: 0.01
+  avg_cycle_time_mins: 169
+  error_rate: 0.067
+  compliance_score: 0.96

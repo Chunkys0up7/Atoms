@@ -3,9 +3,9 @@ category: CUSTOMER_FACING
 type: DOCUMENT
 name: Customer Receives Pre-Approval Letter
 version: 1.0.0
-status: ACTIVE
-owner: Sarah Chen
-team: Post-Closing
+status: DRAFT
+owner: James Martinez
+team: Closing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-pre-application
@@ -33,9 +33,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.5
-  avg_cycle_time_mins: 316
-  error_rate: 0.068
+  automation_level: 0.51
+  avg_cycle_time_mins: 1493
+  error_rate: 0.066
   compliance_score: 0.97
-steward: Amanda White
-owning_team: Post-Closing

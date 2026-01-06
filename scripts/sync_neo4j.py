@@ -14,6 +14,9 @@ import os
 import re
 import sys
 from typing import Tuple
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def validate_graph(path: str) -> Tuple[int, int]:

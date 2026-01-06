@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Verifies Down Payment Source
 version: 1.0.0
-status: DEPRECATED
-owner: James Martinez
-team: Compliance
+status: ACTIVE
+owner: Sarah Chen
+team: Risk Management
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-processing
@@ -28,8 +28,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.39
-  avg_cycle_time_mins: 162
-  error_rate: 0.086
-  compliance_score: 0.95
-owning_team: Compliance
+  automation_level: 0.4
+  avg_cycle_time_mins: 31
+  error_rate: 0.058
+  compliance_score: 0.86

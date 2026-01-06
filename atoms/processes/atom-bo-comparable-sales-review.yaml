@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Comparable Sales
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
-team: Processing
+owner: Michael Rodriguez
+team: Closing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -30,9 +30,10 @@ content:
 edges:
 - type: ENABLES
   targetId: atom-bo-appraisal-review
+- type: RELATED_TO
+  targetId: atom-bo-property-condition-review
 metrics:
-  automation_level: 0.39
-  avg_cycle_time_mins: 111
-  error_rate: 0.1
-  compliance_score: 0.9
-owning_team: Processing
+  automation_level: 0.01
+  avg_cycle_time_mins: 60
+  error_rate: 0.01
+  compliance_score: 0.96

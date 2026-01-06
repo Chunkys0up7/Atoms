@@ -3,9 +3,9 @@ category: SYSTEM
 type: PROCESS
 name: System Pulls Full Credit Report
 version: 1.0.0
-status: DEPRECATED
+status: ACTIVE
 owner: Amanda White
-team: Risk Management
+team: Processing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-processing
@@ -43,16 +43,11 @@ edges:
 - type: ENABLES
   targetId: atom-bo-collection-account-review
 - type: RELATED_TO
-  targetId: atom-bo-derogatory-review
-- type: RELATED_TO
-  targetId: atom-bo-rental-history-verification
-- type: RELATED_TO
   targetId: atom-bo-credit-inquiry-review
 - type: RELATED_TO
-  targetId: atom-bo-credit-dispute-review
+  targetId: atom-bo-liability-verification
 metrics:
-  automation_level: 0.86
-  avg_cycle_time_mins: 37
-  error_rate: 0.023
-  compliance_score: 0.86
-owning_team: Risk Management
+  automation_level: 0.82
+  avg_cycle_time_mins: 9
+  error_rate: 0.041
+  compliance_score: 0.85

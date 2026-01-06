@@ -3,9 +3,9 @@ category: SYSTEM
 type: PROCESS
 name: System Processes Rate Lock
 version: 1.0.0
-status: DRAFT
-owner: Jennifer Park
-team: Closing
+status: ACTIVE
+owner: James Martinez
+team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-underwriting
@@ -39,12 +39,9 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-loan-modification-review
 - type: RELATED_TO
-  targetId: atom-sys-aus-findings-review
-- type: RELATED_TO
-  targetId: atom-bo-loan-denial-documentation
+  targetId: atom-bo-manual-review-trigger
 metrics:
-  automation_level: 0.75
-  avg_cycle_time_mins: 57
-  error_rate: 0.1
-  compliance_score: 0.88
-owning_team: Closing
+  automation_level: 0.8
+  avg_cycle_time_mins: 55
+  error_rate: 0.037
+  compliance_score: 0.99

@@ -4,7 +4,7 @@ type: ROLE
 name: Loan Processor
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
+owner: Jennifer Park
 team: Compliance
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -25,9 +25,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.21
-  avg_cycle_time_mins: 112
-  error_rate: 0.048
-  compliance_score: 0.87
-steward: James Martinez
-owning_team: Compliance
+  automation_level: 0.5
+  avg_cycle_time_mins: 379
+  error_rate: 0.056
+  compliance_score: 0.93

@@ -3,8 +3,8 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Verifies Funding Requirements
 version: 1.0.0
-status: ACTIVE
-owner: Amanda White
+status: DRAFT
+owner: Robert Kim
 team: Loan Origination
 ontologyDomain: Home Lending
 criticality: CRITICAL
@@ -30,8 +30,7 @@ edges:
 - type: ENABLES
   targetId: atom-sys-funding-wire
 metrics:
-  automation_level: 0.09
-  avg_cycle_time_mins: 391
-  error_rate: 0.017
-  compliance_score: 0.99
-owning_team: Loan Origination
+  automation_level: 0.39
+  avg_cycle_time_mins: 153
+  error_rate: 0.056
+  compliance_score: 0.85

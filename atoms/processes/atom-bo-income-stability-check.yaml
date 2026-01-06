@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Checks Income Stability
 version: 1.0.0
-status: DRAFT
-owner: David Thompson
-team: Technology
+status: DEPRECATED
+owner: Michael Rodriguez
+team: Processing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -31,12 +31,11 @@ edges:
 - type: ENABLES
   targetId: atom-sys-income-calculation
 - type: RELATED_TO
-  targetId: atom-bo-bonus-overtime-calculation
+  targetId: atom-bo-alimony-child-support-verification
 - type: RELATED_TO
-  targetId: atom-bo-employment-verification
+  targetId: atom-bo-self-employment-verification
 metrics:
-  automation_level: 0.14
-  avg_cycle_time_mins: 127
-  error_rate: 0.056
-  compliance_score: 0.99
-owning_team: Technology
+  automation_level: 0.38
+  avg_cycle_time_mins: 106
+  error_rate: 0.077
+  compliance_score: 0.98

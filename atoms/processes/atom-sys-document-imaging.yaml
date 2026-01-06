@@ -5,7 +5,7 @@ name: System Images Loan Documents
 version: 1.0.0
 status: ACTIVE
 owner: Lisa Anderson
-team: Compliance
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-post-closing
@@ -39,14 +39,11 @@ edges:
 - type: USES_COMPONENT
   targetId: atom-sys-doc-management
 - type: RELATED_TO
-  targetId: atom-bo-document-audit
+  targetId: atom-sys-loan-delivery-submission
 - type: RELATED_TO
-  targetId: atom-bo-data-accuracy-review
-- type: RELATED_TO
-  targetId: atom-bo-servicing-transfer-prep
+  targetId: atom-bo-investor-reporting
 metrics:
-  automation_level: 0.98
-  avg_cycle_time_mins: 59
-  error_rate: 0.037
-  compliance_score: 0.89
-owning_team: Compliance
+  automation_level: 0.95
+  avg_cycle_time_mins: 34
+  error_rate: 0.052
+  compliance_score: 0.96

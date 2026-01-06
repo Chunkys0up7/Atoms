@@ -6,12 +6,105 @@ import OntologySchemaEditor from './OntologySchemaEditor';
 interface OntologyBrowserProps {
   atoms: Atom[];
   modules: Module[];
+  phases?: any[];
+  journeys?: any[];
   onSelectAtom?: (atom: Atom) => void;
 }
 
-type BrowserView = 'hierarchy' | 'domains' | 'types' | 'edges' | 'attributes';
+type BrowserView = 'hierarchy' | 'structure' | 'domains' | 'types' | 'edges' | 'attributes';
 
-const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSelectAtom }) => {
+const StructureTreeItem: React.FC<{
+  title: string;
+  type: 'JOURNEY' | 'PHASE' | 'MODULE' | 'ATOM';
+  children?: React.ReactNode;
+  id: string;
+  details?: string;
+  onClick?: () => void;
+}> = ({ title, type, children, id, details, onClick }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const colors = {
+    JOURNEY: '#3b82f6',
+    PHASE: '#8b5cf6',
+    MODULE: '#10b981',
+    ATOM: '#f59e0b'
+  };
+
+  const icons = {
+    JOURNEY: '🌍',
+    PHASE: '🏁',
+    MODULE: '📦',
+    ATOM: '⚛️'
+  };
+
+  return (
+    <div style={{ marginLeft: 'var(--spacing-lg)', marginBottom: '8px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: onClick ? 'pointer' : 'default',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          backgroundColor: isOpen ? '#f3f4f6' : 'transparent',
+          transition: 'all 0.2s'
+        }}
+      >
+        {children && (
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+            style={{
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              fontSize: '10px',
+              width: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--color-text-tertiary)'
+            }}
+          >
+            {isOpen ? '▼' : '▶'}
+          </button>
+        )}
+        {!children && <div style={{ width: '16px' }} />}
+
+        <div
+          onClick={() => {
+            if (children) setIsOpen(!isOpen);
+            if (onClick) onClick();
+          }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}
+        >
+          <div style={{ fontSize: '16px' }}>{icons[type]}</div>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: '500', color: 'var(--color-text-primary)' }}>
+              {title}
+              <span className="badge" style={{ marginLeft: '8px', fontSize: '9px', backgroundColor: colors[type] }}>
+                {type}
+              </span>
+            </div>
+            {details && (
+              <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)' }}>
+                {details}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {isOpen && children && (
+        <div style={{ borderLeft: '1px solid var(--color-border)', marginLeft: '8px' }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, phases = [], journeys = [], onSelectAtom }) => {
   const [view, setView] = useState<BrowserView>('hierarchy');
   const [selectedType, setSelectedType] = useState<AtomType | null>(null);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
@@ -85,8 +178,8 @@ const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSel
         description: 'End-to-end business processes from start to completion',
         icon: '🌍',
         color: '#3b82f6',
-        count: 1,
-        examples: ['Purchase Loan Journey', 'Refinance Journey']
+        count: journeys.length,
+        examples: journeys.slice(0, 2).map(j => j.name)
       },
       {
         level: 'PHASE',
@@ -94,8 +187,8 @@ const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSel
         description: 'Major operational stages and milestones within a journey',
         icon: '🏁',
         color: '#8b5cf6',
-        count: 1,
-        examples: ['Processing', 'Underwriting', 'Closing']
+        count: phases.length,
+        examples: phases.slice(0, 3).map(p => p.name)
       },
       {
         level: 'MODULE',
@@ -195,6 +288,176 @@ const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSel
             </div>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  // Structure Tree View
+  const renderStructureView = () => {
+    // 1. Map Modules to their Atoms
+    const modulesWithAtoms = modules.map(mod => ({
+      ...mod,
+      childAtoms: atoms.filter(a => mod.atoms.includes(a.id))
+    }));
+
+    // Identify orphaned atoms (not in any module)
+    const allModuleAtomIds = new Set(modules.flatMap(m => m.atoms));
+    const orphanedAtoms = atoms.filter(a => !allModuleAtomIds.has(a.id));
+
+    // 2. Map Phases to their Modules
+    const phasesWithModules = phases.map(phase => ({
+      ...phase,
+      childModules: modulesWithAtoms.filter(m => phase.modules.includes(m.id))
+    }));
+
+    // Identify orphaned modules (not in any phase)
+    const allPhaseModuleIds = new Set(phases.flatMap(p => p.modules));
+    const orphanedModules = modulesWithAtoms.filter(m => !allPhaseModuleIds.has(m.id));
+
+    // 3. Map Journeys to their Phases
+    const journeysWithPhases = journeys.map(journey => ({
+      ...journey,
+      childPhases: phasesWithModules.filter(p => journey.phases.includes(p.id))
+    }));
+
+    // Identify orphaned phases (not in any journey)
+    const allJourneyPhaseIds = new Set(journeys.flatMap(j => j.phases));
+    const orphanedPhases = phasesWithModules.filter(p => !allJourneyPhaseIds.has(p.id));
+
+    return (
+      <div style={{ padding: 'var(--spacing-xl)' }}>
+        <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--color-text-primary)', marginBottom: '8px' }}>
+            Logical Structure
+          </h2>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+            Full hierarchical view of the system ontology
+          </p>
+        </div>
+
+        {journeysWithPhases.map(journey => (
+          <StructureTreeItem
+            key={journey.id}
+            title={journey.name}
+            type="JOURNEY"
+            id={journey.id}
+            details={journey.description}
+          >
+            {journey.childPhases.map(phase => (
+              <StructureTreeItem
+                key={phase.id}
+                title={phase.name}
+                type="PHASE"
+                id={phase.id}
+                details={phase.description}
+              >
+                {phase.childModules.map(mod => (
+                  <StructureTreeItem
+                    key={mod.id}
+                    title={mod.name}
+                    type="MODULE"
+                    id={mod.id}
+                    details={mod.description}
+                  >
+                    {mod.childAtoms.map(atom => (
+                      <StructureTreeItem
+                        key={atom.id}
+                        title={atom.name}
+                        type="ATOM"
+                        id={atom.id}
+                        details={atom.summary || atom.content.description || ''}
+                        onClick={() => onSelectAtom?.(atom)}
+                      />
+                    ))}
+                  </StructureTreeItem>
+                ))}
+              </StructureTreeItem>
+            ))}
+          </StructureTreeItem>
+        ))}
+
+        {orphanedPhases.length > 0 && (
+          <div style={{ marginTop: 'var(--spacing-xl)' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-tertiary)' }}>Unassigned Phases</h3>
+            {orphanedPhases.map(phase =>
+              <StructureTreeItem
+                key={phase.id}
+                title={phase.name}
+                type="PHASE"
+                id={phase.id}
+                details={phase.description}
+              >
+                {phase.childModules.map(mod => (
+                  <StructureTreeItem
+                    key={mod.id}
+                    title={mod.name}
+                    type="MODULE"
+                    id={mod.id}
+                    details={mod.description}
+                  >
+                    {mod.childAtoms.map(atom => (
+                      <StructureTreeItem
+                        key={atom.id}
+                        title={atom.name}
+                        type="ATOM"
+                        id={atom.id}
+                        details={atom.summary || atom.content.description || ''}
+                        onClick={() => onSelectAtom?.(atom)}
+                      />
+                    ))}
+                  </StructureTreeItem>
+                ))}
+              </StructureTreeItem>
+            )}
+          </div>
+        )}
+
+        {orphanedModules.length > 0 && (
+          <div style={{ marginTop: 'var(--spacing-xl)' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-tertiary)' }}>Unassigned Modules</h3>
+            {orphanedModules.map(mod =>
+              <StructureTreeItem
+                key={mod.id}
+                title={mod.name}
+                type="MODULE"
+                id={mod.id}
+                details={mod.description}
+              >
+                {mod.childAtoms.map(atom => (
+                  <StructureTreeItem
+                    key={atom.id}
+                    title={atom.name}
+                    type="ATOM"
+                    id={atom.id}
+                    details={atom.summary || atom.content.description || ''}
+                    onClick={() => onSelectAtom?.(atom)}
+                  />
+                ))}
+              </StructureTreeItem>
+            )}
+          </div>
+        )}
+
+        {orphanedAtoms.length > 0 && (
+          <div style={{ marginTop: 'var(--spacing-xl)' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-tertiary)' }}>Unassigned Atoms</h3>
+            {orphanedAtoms.slice(0, 50).map(atom =>
+              <StructureTreeItem
+                key={atom.id}
+                title={atom.name}
+                type="ATOM"
+                id={atom.id}
+                details={atom.summary || atom.content.description || ''}
+                onClick={() => onSelectAtom?.(atom)}
+              />
+            )}
+            {orphanedAtoms.length > 50 && (
+              <div style={{ marginLeft: 'var(--spacing-xl)', fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
+                ...and {orphanedAtoms.length - 50} more
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -502,6 +765,7 @@ const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSel
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)', borderBottom: '1px solid var(--color-border)', marginTop: 'var(--spacing-md)' }}>
           {[
             { id: 'hierarchy' as BrowserView, label: 'Hierarchy' },
+            { id: 'structure' as BrowserView, label: 'Structure' },
             { id: 'domains' as BrowserView, label: 'Domains' },
             { id: 'types' as BrowserView, label: 'Types' },
             { id: 'edges' as BrowserView, label: 'Relationships' }
@@ -535,6 +799,7 @@ const OntologyBrowser: React.FC<OntologyBrowserProps> = ({ atoms, modules, onSel
       {/* Content Area */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {view === 'hierarchy' && renderHierarchyView()}
+        {view === 'structure' && renderStructureView()}
         {view === 'domains' && renderDomainView()}
         {view === 'types' && renderTypeView()}
         {view === 'edges' && renderEdgeView()}

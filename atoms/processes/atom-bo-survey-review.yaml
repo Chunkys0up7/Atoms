@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Property Survey
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Loan Origination
+owner: Robert Kim
+team: Compliance
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -28,8 +28,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.17
-  avg_cycle_time_mins: 182
-  error_rate: 0.089
-  compliance_score: 0.91
-owning_team: Loan Origination
+  automation_level: 0.2
+  avg_cycle_time_mins: 154
+  error_rate: 0.051
+  compliance_score: 0.94

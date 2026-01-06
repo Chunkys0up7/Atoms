@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Obtains Hazard Insurance Binder
 version: 1.0.0
 status: ACTIVE
-owner: Lisa Anderson
-team: Compliance
+owner: Jennifer Park
+team: Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -28,10 +28,9 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
-  targetId: atom-bo-survey-review
+  targetId: atom-bo-title-commitment-review
 metrics:
-  automation_level: 0.43
-  avg_cycle_time_mins: 135
-  error_rate: 0.035
-  compliance_score: 0.94
-owning_team: Compliance
+  automation_level: 0.22
+  avg_cycle_time_mins: 358
+  error_rate: 0.04
+  compliance_score: 0.97

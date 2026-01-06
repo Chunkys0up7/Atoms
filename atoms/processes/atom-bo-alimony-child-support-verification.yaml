@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Alimony and Child Support
 version: 1.0.0
 status: ACTIVE
-owner: Lisa Anderson
-team: Post-Closing
+owner: Robert Kim
+team: Technology
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -27,12 +27,9 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
-  targetId: atom-bo-retirement-income-verification
-- type: RELATED_TO
-  targetId: atom-bo-self-employment-verification
+  targetId: atom-bo-rental-income-verification
 metrics:
-  automation_level: 0.19
-  avg_cycle_time_mins: 282
-  error_rate: 0.091
+  automation_level: 0.07
+  avg_cycle_time_mins: 420
+  error_rate: 0.01
   compliance_score: 0.91
-owning_team: Post-Closing

@@ -40,7 +40,7 @@ import AtomDetailsSidebar from './components/ui/AtomDetailsSidebar';
 import './styles.css';
 
 const App: React.FC = () => {
-  const { atoms, modules, isLoading, error, loadData, ingestData, graphPlanner, governanceEngine, auditLog } = useGraph();
+  const { atoms, modules, phases, journeys, isLoading, error, loadData, ingestData, graphPlanner, governanceEngine, auditLog } = useGraph();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -151,6 +151,8 @@ const App: React.FC = () => {
                 <KnowledgeHub
                   atoms={atoms}
                   modules={modules}
+                  phases={phases}
+                  journeys={journeys}
                   onSelectAtom={handleAtomSelect}
                   onNavigateToGraph={(moduleId) => handleNavigate('graph', { moduleId, graphContext: { mode: 'module', moduleId, expandDependencies: true } })}
                 />
@@ -173,8 +175,8 @@ const App: React.FC = () => {
 
               <Route path="/phases" element={
                 <PhaseExplorer
-                  phases={MOCK_PHASES}
-                  journeys={MOCK_JOURNEYS}
+                  phases={phases.length > 0 ? phases : MOCK_PHASES}
+                  journeys={journeys.length > 0 ? journeys : MOCK_JOURNEYS}
                   modules={modules}
                   atoms={atoms}
                   onPhaseSelect={(phase) => setSelectedPhaseId(phase.id)}
@@ -190,8 +192,8 @@ const App: React.FC = () => {
                 <GraphView
                   atoms={atoms}
                   modules={modules}
-                  phases={MOCK_PHASES}
-                  journeys={MOCK_JOURNEYS}
+                  phases={phases.length > 0 ? phases : MOCK_PHASES}
+                  journeys={journeys.length > 0 ? journeys : MOCK_JOURNEYS}
                   context={graphContext}
                   onSelectAtom={handleAtomSelect}
                   // onContextChange={setGraphContext} // Need to adapt to local state/URL

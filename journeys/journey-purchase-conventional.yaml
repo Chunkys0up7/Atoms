@@ -1,0 +1,12 @@
+id: journey-purchase-conventional
+name: Purchase Loan Journey
+description: Standard workflow for originating a conventional mortgage for a home
+  purchase
+owner: Head of Lending
+phases:
+- phase-pre-application
+- phase-application-intake
+- phase-processing
+- phase-underwriting
+- phase-closing
+- phase-post-closing

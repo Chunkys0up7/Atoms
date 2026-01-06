@@ -1,6 +1,4 @@
 id: module-application-intake
-version: 1.0.0
-workflow_type: BPM
 name: Application Intake
 description: 1003 form completion, initial document upload, and application completeness
   validation

@@ -4,8 +4,8 @@ type: DOCUMENT
 name: System Generates Closing Disclosure
 version: 1.0.0
 status: ACTIVE
-owner: Michael Rodriguez
-team: Underwriting
+owner: Lisa Anderson
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-closing
@@ -42,12 +42,8 @@ edges:
   targetId: atom-bo-closing-disclosure-review
 - type: RELATED_TO
   targetId: atom-bo-cash-to-close-calculation
-- type: RELATED_TO
-  targetId: atom-bo-closing-wire-instructions
 metrics:
-  automation_level: 0.73
-  avg_cycle_time_mins: 11
-  error_rate: 0.032
-  compliance_score: 0.94
-steward: David Thompson
-owning_team: Underwriting
+  automation_level: 0.75
+  avg_cycle_time_mins: 58
+  error_rate: 0.03
+  compliance_score: 0.99

@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reviews Derogatory Items
 version: 1.0.0
-status: ACTIVE
-owner: James Martinez
-team: Post-Closing
+status: DRAFT
+owner: Sarah Chen
+team: Underwriting
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -35,12 +35,11 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
-  targetId: atom-bo-debt-ratio-calculation
+  targetId: atom-bo-payment-history-review
 - type: RELATED_TO
-  targetId: atom-bo-credit-inquiry-review
+  targetId: atom-bo-credit-dispute-review
 metrics:
-  automation_level: 0.21
-  avg_cycle_time_mins: 345
-  error_rate: 0.016
-  compliance_score: 1.0
-owning_team: Post-Closing
+  automation_level: 0.38
+  avg_cycle_time_mins: 289
+  error_rate: 0.017
+  compliance_score: 0.87

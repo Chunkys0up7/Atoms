@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
+import json
+from pathlib import Path
 
 from ..database import get_postgres_client
 
@@ -134,8 +136,8 @@ class WorkflowEngine:
                     priority,
                     sla_target_mins,
                     due_date,
-                    input_data or {},
-                    business_context or {},
+                    json.dumps(input_data or {}),
+                    json.dumps(business_context or {}),
                 ),
                 returning=True,
             )
@@ -151,6 +153,16 @@ class WorkflowEngine:
             )
 
             logger.info(f"Started process {process['id']}: {process_name}")
+
+            # [BPM] Check for workflow definition and start first step if exists
+            try:
+                definition = self._load_definition(process_definition_id)
+                if definition and "start_step_id" in definition:
+                    self._create_step_task(process["id"], definition, definition["start_step_id"], initiated_by)
+            except Exception as e:
+                logger.warning(f"Could not initialize workflow from definition: {e}") 
+                # Continue without error to maintain backward compatibility
+
             return process
 
         except Exception as e:
@@ -196,7 +208,7 @@ class WorkflowEngine:
                 updates.append("progress_percentage = 100")
                 if output_data:
                     updates.append("output_data = %s")
-                    params.append(output_data)
+                    params.append(json.dumps(output_data))
 
             if new_status == ProcessStatus.FAILED:
                 if error_message:
@@ -346,7 +358,7 @@ class WorkflowEngine:
                     priority or process["priority"],
                     sla_target_mins,
                     due_date,
-                    input_data or {},
+                    json.dumps(input_data or {}),
                 ),
                 returning=True,
             )
@@ -496,7 +508,7 @@ class WorkflowEngine:
             """
 
             task = self.db.execute_command(
-                query, (TaskStatus.COMPLETED.value, output_data or {}, str(task_id)), returning=True
+                query, (TaskStatus.COMPLETED.value, json.dumps(output_data or {}), str(task_id)), returning=True
             )
 
             # Log event
@@ -512,6 +524,12 @@ class WorkflowEngine:
 
             # Check if we should advance the process
             self._check_process_progress(task["process_instance_id"])
+            
+            # [BPM] Evaluate transitions based on workflow definition
+            try:
+                self._evaluate_transitions(task["process_instance_id"], task_id, output_data)
+            except Exception as e:
+                logger.error(f"Error evaluating transitions for task {task_id}: {e}")
 
             logger.info(f"Task {task_id} completed by {user_id}")
             return task
@@ -603,6 +621,112 @@ class WorkflowEngine:
         except Exception as e:
             logger.error(f"Failed to check SLA compliance: {e}")
             raise
+
+    # ========================================================================
+    # BPM Workflow Logic
+    # ========================================================================
+
+    def _load_definition(self, definition_id: str) -> Optional[Dict[str, Any]]:
+        """Load workflow definition from file"""
+        try:
+            # Assume workflows are in project_root/workflows
+            # Current file is api/orchestrator/workflow_engine.py
+            workflow_dir = Path(__file__).resolve().parent.parent.parent / "workflows"
+            file_path = workflow_dir / f"{definition_id}.json"
+            
+            if not file_path.exists():
+                return None
+                
+            with open(file_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load definition {definition_id}: {e}")
+            return None
+
+    def _create_step_task(self, process_id: UUID, definition: Dict, step_id: str, user_id: str):
+        """Create a task for a specific workflow step"""
+        steps = {s["id"]: s for s in definition.get("steps", [])}
+        step = steps.get(step_id)
+        if not step:
+            logger.error(f"Step {step_id} not found in definition {definition['id']}")
+            return
+
+        # Determine assignment
+        assigned_to = None
+        # valid roles mapping would go here, for now simpler logic:
+        # If the step has a specific internal assignee or logic, handle it.
+        # For this MVP, we leave unassigned unless specified.
+
+        self.create_task(
+            process_instance_id=process_id,
+            task_definition_id=step_id, # Using step_id as definition id
+            task_name=step["name"],
+            task_type=step["type"],
+            assigned_to=assigned_to,
+            input_data={"workflow_step": True}
+        )
+
+    def _evaluate_transitions(self, process_id: UUID, completed_task_id: UUID, output: Dict):
+        """Evaluate workflow transitions after task completion"""
+        # 1. Get Process to find definition ID
+        process = self.db.execute_query(
+            "SELECT process_definition_id, initiated_by FROM process_instances WHERE id = %s", 
+            (str(process_id),), 
+            fetch="one"
+        )
+        if not process: 
+            return
+
+        definition = self._load_definition(process["process_definition_id"])
+        if not definition:
+            return
+
+        # 2. Get the completed task to find which step it was
+        task = self.db.execute_query(
+            "SELECT task_definition_id FROM tasks WHERE id = %s", 
+            (str(completed_task_id),), 
+            fetch="one"
+        )
+        current_step_id = task["task_definition_id"]
+
+        # 3. Find step definition
+        steps = {s["id"]: s for s in definition.get("steps", [])}
+        current_step = steps.get(current_step_id)
+        if not current_step:
+            return
+
+        # 4. Check transitions
+        transitions = current_step.get("transitions", [])
+        next_step_id = None
+
+        for transition in transitions:
+            condition = transition.get("condition")
+            if not condition:
+                # Default transition (always taken if no previous condition matched)
+                next_step_id = transition["target_step_id"]
+                break
+            
+            # Evaluate condition
+            field = condition.get("field")
+            value = condition.get("value")
+            operator = condition.get("operator", "eq")
+            
+            actual_value = (output or {}).get(field)
+            
+            match = False
+            if operator == "eq":
+                match = str(actual_value) == str(value)
+            elif operator == "neq":
+                match = str(actual_value) != str(value)
+            # Add more operators as needed
+            
+            if match:
+                next_step_id = transition["target_step_id"]
+                break
+
+        if next_step_id:
+            logger.info(f"Transitioning process {process_id} from {current_step_id} to {next_step_id}")
+            self._create_step_task(process_id, definition, next_step_id, process["initiated_by"])
 
     # ========================================================================
     # Internal Helpers

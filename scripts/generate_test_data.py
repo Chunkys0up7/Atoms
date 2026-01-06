@@ -35,6 +35,7 @@ OUT = os.path.join(ROOT, "test_data")
 ATOMS_BASE = os.path.join(ROOT, "atoms")
 MODULES_DIR = os.path.join(ROOT, "modules")
 PHASES_DIR = os.path.join(ROOT, "phases")  # If phases API exists
+JOURNEYS_DIR = os.path.join(ROOT, "journeys")
 DOCS = os.path.join(OUT, "docs")
 
 
@@ -49,6 +50,7 @@ def ensure_dirs() -> None:
     os.makedirs(os.path.join(ATOMS_BASE, "documents"), exist_ok=True)
     os.makedirs(MODULES_DIR, exist_ok=True)
     os.makedirs(PHASES_DIR, exist_ok=True)
+    os.makedirs(JOURNEYS_DIR, exist_ok=True)
     os.makedirs(DOCS, exist_ok=True)
 
 
@@ -127,6 +129,44 @@ PHASES = [
         "description": "Quality control, document imaging, loan sale preparation, and servicing transfer",
         "targetDurationDays": 5,
         "journeyId": "journey-purchase-conventional",
+    },
+    # Refinance Phases
+    {
+        "id": "phase-refi-application",
+        "name": "Refinance Application",
+        "description": "Application intake for refinance, payoff request, and credit check",
+        "targetDurationDays": 3,
+        "journeyId": "journey-refinance",
+    },
+    {
+        "id": "phase-refi-processing",
+        "name": "Refinance Processing",
+        "description": "Appraisal waiver check, title work on existing property, income verification",
+        "targetDurationDays": 8,
+        "journeyId": "journey-refinance",
+    },
+    {
+        "id": "phase-refi-closing",
+        "name": "Refinance Closing",
+        "description": "Closing disclosure, rescission period management, and payoff disbursement",
+        "targetDurationDays": 5,
+        "journeyId": "journey-refinance",
+    },
+]
+
+# Define Journeys
+JOURNEYS = [
+    {
+        "id": "journey-purchase-conventional",
+        "name": "Purchase Loan Journey",
+        "description": "Standard workflow for originating a conventional mortgage for a home purchase",
+        "owner": "Head of Lending",
+    },
+    {
+        "id": "journey-refinance",
+        "name": "Refinance Journey",
+        "description": "Workflow for refinancing an existing mortgage to change rate or term",
+        "owner": "Head of Lending",
     },
 ]
 
@@ -2330,6 +2370,18 @@ def write_phase(phase: Dict) -> None:
             json.dump(phase, fh, indent=2)
 
 
+def write_journey(journey: Dict) -> None:
+    """Write journey to YAML file."""
+    fname = f"{journey['id']}.yaml"
+    path = os.path.join(JOURNEYS_DIR, fname)
+    if yaml:
+        with open(path, "w", encoding="utf-8") as fh:
+            yaml.safe_dump(journey, fh, sort_keys=False, default_flow_style=False)
+    else:
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(journey, fh, indent=2)
+
+
 def generate(count: int = 200) -> None:
     """Generate test data."""
     import shutil
@@ -2345,6 +2397,7 @@ def generate(count: int = 200) -> None:
         os.path.join(ATOMS_BASE, "procedures"),
         os.path.join(ATOMS_BASE, "validations"),
         os.path.join(ATOMS_BASE, "risks"),
+        JOURNEYS_DIR,
     ]
     for old_dir in old_dirs:
         if os.path.exists(old_dir):
@@ -2411,6 +2464,21 @@ def generate(count: int = 200) -> None:
 
     print(f"Created {len(phases)} phases")
 
+    # Create journeys with their phases
+    journeys = []
+    for journey_template in JOURNEYS:
+        journey = {
+            "id": journey_template["id"],
+            "name": journey_template["name"],
+            "description": journey_template["description"],
+            "owner": journey_template["owner"],
+            "phases": [phase["id"] for phase in phases if phase.get("journeyId") == journey_template["id"]],
+        }
+        journeys.append(journey)
+        write_journey(journey)
+        
+    print(f"Created {len(journeys)} journeys")
+
     # Create graph.json
     nodes = []
     for atom in atoms:
@@ -2421,6 +2489,9 @@ def generate(count: int = 200) -> None:
 
     for phase in phases:
         nodes.append({"id": phase["id"], "type": "Phase"})
+        
+    for journey in journeys:
+        nodes.append({"id": journey["id"], "type": "Journey"})
 
     graph = {"nodes": nodes, "edges": edges}
 

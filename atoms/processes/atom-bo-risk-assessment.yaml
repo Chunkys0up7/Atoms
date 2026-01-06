@@ -4,8 +4,8 @@ type: PROCESS
 name: Underwriter Performs Risk Assessment
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
-team: Underwriting
+owner: James Martinez
+team: Compliance
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-underwriting
@@ -33,18 +33,19 @@ edges:
 - type: ENABLES
   targetId: atom-bo-compensating-factors-analysis
 - type: RELATED_TO
+  targetId: atom-sys-rate-lock-processing
+- type: RELATED_TO
+  targetId: atom-bo-exception-approval
+- type: RELATED_TO
   targetId: atom-bo-loan-modification-review
 - type: RELATED_TO
   targetId: atom-sys-aus-findings-review
 - type: RELATED_TO
-  targetId: atom-bo-manual-review-trigger
+  targetId: atom-bo-loan-denial-documentation
 - type: RELATED_TO
   targetId: atom-bo-adverse-action-letter
-- type: RELATED_TO
-  targetId: atom-bo-appeal-review
 metrics:
-  automation_level: 0.18
-  avg_cycle_time_mins: 332
-  error_rate: 0.027
+  automation_level: 0.05
+  avg_cycle_time_mins: 137
+  error_rate: 0.055
   compliance_score: 0.9
-owning_team: Underwriting

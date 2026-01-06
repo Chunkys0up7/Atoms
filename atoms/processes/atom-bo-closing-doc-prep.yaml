@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Closing Coordinator Prepares Documents
 version: 1.0.0
-status: DRAFT
-owner: Robert Kim
-team: Technology
+status: DEPRECATED
+owner: James Martinez
+team: Processing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-closing
@@ -38,14 +38,8 @@ edges:
   targetId: atom-cust-closing-signing
 - type: ENABLES
   targetId: atom-bo-closing-package-assembly
-- type: RELATED_TO
-  targetId: atom-bo-notary-coordination
-- type: RELATED_TO
-  targetId: atom-bo-cash-to-close-calculation
 metrics:
-  automation_level: 0.05
-  avg_cycle_time_mins: 359
-  error_rate: 0.061
-  compliance_score: 0.96
-steward: David Thompson
-owning_team: Technology
+  automation_level: 0.02
+  avg_cycle_time_mins: 441
+  error_rate: 0.056
+  compliance_score: 0.92

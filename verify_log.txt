@@ -1,0 +1,16 @@
+--- Starting BPM Verification ---
+
+1. Starting 'document_approval' process...
+   Success! Process ID: b80c56af-bad8-4ea8-bea6-b010928fc997
+
+2. Checking for initial task (draft_review)...
+   Found task: Initial Peer Review (ID: 79b4fcbb-5b5a-4d61-bfb2-4fd517b65593)
+   Success! Initial task matches workflow definition.
+
+3. Completing initial task with outcome='approved'...
+   Task completed successfully.
+
+4. Verifying transition to 'legal_check'...
+   Success! Transitioned to: Legal Compliance Check (legal_check)
+
+--- Verification Complete ---

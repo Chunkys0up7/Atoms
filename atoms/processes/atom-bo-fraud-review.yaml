@@ -4,8 +4,8 @@ type: PROCESS
 name: Fraud Analyst Reviews Flagged Applications
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Processing
+owner: Amanda White
+team: Risk Management
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-application-intake
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.24
-  avg_cycle_time_mins: 308
-  error_rate: 0.054
-  compliance_score: 0.9
-owning_team: Processing
+  automation_level: 0.49
+  avg_cycle_time_mins: 404
+  error_rate: 0.053
+  compliance_score: 0.94

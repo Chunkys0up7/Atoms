@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Credit Disputes
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Post-Closing
+owner: Sarah Chen
+team: Underwriting
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.44
-  avg_cycle_time_mins: 286
-  error_rate: 0.05
-  compliance_score: 0.92
-owning_team: Post-Closing
+  automation_level: 0.26
+  avg_cycle_time_mins: 377
+  error_rate: 0.041
+  compliance_score: 0.96

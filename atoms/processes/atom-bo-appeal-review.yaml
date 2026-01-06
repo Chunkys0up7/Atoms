@@ -4,8 +4,8 @@ type: PROCESS
 name: Underwriting Manager Reviews Appeal
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Loan Origination
+owner: Lisa Anderson
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-underwriting
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.08
-  avg_cycle_time_mins: 461
-  error_rate: 0.041
-  compliance_score: 0.98
-owning_team: Loan Origination
+  automation_level: 0.35
+  avg_cycle_time_mins: 401
+  error_rate: 0.056
+  compliance_score: 0.91

@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reviews Payment History
 version: 1.0.0
-status: DRAFT
-owner: Lisa Anderson
-team: Underwriting
+status: ACTIVE
+owner: Sarah Chen
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -29,9 +29,14 @@ content:
 edges:
 - type: ENABLES
   targetId: atom-bo-credit-analysis
+- type: RELATED_TO
+  targetId: atom-bo-debt-ratio-calculation
+- type: RELATED_TO
+  targetId: atom-bo-rental-history-verification
+- type: RELATED_TO
+  targetId: atom-bo-credit-dispute-review
 metrics:
-  automation_level: 0.09
-  avg_cycle_time_mins: 122
-  error_rate: 0.073
-  compliance_score: 0.88
-owning_team: Underwriting
+  automation_level: 0.43
+  avg_cycle_time_mins: 419
+  error_rate: 0.093
+  compliance_score: 0.92

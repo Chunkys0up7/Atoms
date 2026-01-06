@@ -1,0 +1,6 @@
+id: phase-refi-processing
+name: Refinance Processing
+description: Appraisal waiver check, title work on existing property, income verification
+modules: []
+journeyId: journey-refinance
+targetDurationDays: 8

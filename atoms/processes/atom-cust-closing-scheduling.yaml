@@ -4,8 +4,8 @@ type: PROCESS
 name: Customer Schedules Closing
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Loan Origination
+owner: Lisa Anderson
+team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-closing
@@ -37,10 +37,9 @@ edges:
 - type: ENABLES
   targetId: atom-bo-closing-doc-prep
 - type: RELATED_TO
-  targetId: atom-bo-closing-wire-instructions
+  targetId: atom-sys-redisclosure-trigger
 metrics:
-  automation_level: 0.6
-  avg_cycle_time_mins: 147
-  error_rate: 0.066
-  compliance_score: 0.96
-owning_team: Loan Origination
+  automation_level: 0.76
+  avg_cycle_time_mins: 2590
+  error_rate: 0.019
+  compliance_score: 0.94

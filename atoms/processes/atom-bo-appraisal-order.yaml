@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Orders Property Appraisal
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
-team: Technology
+owner: Amanda White
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -40,17 +40,8 @@ edges:
   targetId: atom-sys-appraisal-received
 - type: RELATED_TO
   targetId: atom-bo-appraisal-review
-- type: RELATED_TO
-  targetId: atom-bo-comparable-sales-review
-- type: RELATED_TO
-  targetId: atom-bo-property-condition-review
-- type: RELATED_TO
-  targetId: atom-bo-property-type-verification
-- type: RELATED_TO
-  targetId: atom-bo-occupancy-verification
 metrics:
-  automation_level: 0.15
-  avg_cycle_time_mins: 120
-  error_rate: 0.062
-  compliance_score: 0.87
-owning_team: Technology
+  automation_level: 0.0
+  avg_cycle_time_mins: 163
+  error_rate: 0.079
+  compliance_score: 0.93

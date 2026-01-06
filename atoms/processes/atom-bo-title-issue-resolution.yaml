@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Resolves Title Issues
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Post-Closing
+owner: James Martinez
+team: Closing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-processing
@@ -31,14 +31,11 @@ edges:
 - type: ENABLES
   targetId: atom-sys-aus-submission
 - type: RELATED_TO
-  targetId: atom-bo-flood-insurance-verification
-- type: RELATED_TO
-  targetId: atom-bo-homeowners-insurance-review
+  targetId: atom-bo-title-commitment-review
 - type: RELATED_TO
   targetId: atom-bo-survey-review
 metrics:
-  automation_level: 0.35
-  avg_cycle_time_mins: 258
-  error_rate: 0.056
-  compliance_score: 0.93
-owning_team: Post-Closing
+  automation_level: 0.16
+  avg_cycle_time_mins: 62
+  error_rate: 0.014
+  compliance_score: 0.89

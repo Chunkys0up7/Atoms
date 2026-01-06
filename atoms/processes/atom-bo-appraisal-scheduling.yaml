@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Schedules Property Appraisal
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Compliance
+owner: Lisa Anderson
+team: Processing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -29,14 +29,11 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
-  targetId: atom-bo-comparable-sales-review
-- type: RELATED_TO
   targetId: atom-bo-property-type-verification
 - type: RELATED_TO
   targetId: atom-bo-occupancy-verification
 metrics:
-  automation_level: 0.45
-  avg_cycle_time_mins: 303
-  error_rate: 0.022
+  automation_level: 0.43
+  avg_cycle_time_mins: 351
+  error_rate: 0.016
   compliance_score: 0.86
-owning_team: Compliance

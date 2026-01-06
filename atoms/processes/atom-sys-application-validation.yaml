@@ -1,10 +1,10 @@
 id: atom-sys-application-validation
 category: SYSTEM
-type: PROCESS
+type: VALIDATION
 name: System Validates Application Completeness
 version: 1.0.0
 status: ACTIVE
-owner: Lisa Anderson
+owner: Sarah Chen
 team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -39,11 +39,8 @@ edges:
   targetId: atom-sys-los-platform
 - type: RELATED_TO
   targetId: atom-sys-identity-verification
-- type: RELATED_TO
-  targetId: atom-bo-fraud-review
 metrics:
   automation_level: 0.71
-  avg_cycle_time_mins: 33
-  error_rate: 0.068
-  compliance_score: 0.86
-owning_team: Customer Experience
+  avg_cycle_time_mins: 39
+  error_rate: 0.079
+  compliance_score: 0.94

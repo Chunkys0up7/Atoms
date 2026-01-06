@@ -4,8 +4,8 @@ type: PROCESS
 name: Underwriting Manager Approves Exception
 version: 1.0.0
 status: ACTIVE
-owner: Robert Kim
-team: Underwriting
+owner: Sarah Chen
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-underwriting
@@ -27,12 +27,11 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
-  targetId: atom-sys-aus-findings-review
+  targetId: atom-bo-loan-modification-review
 - type: RELATED_TO
-  targetId: atom-bo-appeal-review
+  targetId: atom-sys-aus-findings-review
 metrics:
-  automation_level: 0.38
-  avg_cycle_time_mins: 212
-  error_rate: 0.025
-  compliance_score: 0.96
-owning_team: Underwriting
+  automation_level: 0.02
+  avg_cycle_time_mins: 57
+  error_rate: 0.021
+  compliance_score: 0.92

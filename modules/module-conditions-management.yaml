@@ -1,6 +1,4 @@
 id: module-conditions-management
-version: 1.0.0
-workflow_type: BPM
 name: Conditions Management
 description: Condition generation, condition fulfillment tracking, and condition clearance
 owner: Underwriting

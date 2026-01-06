@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Employment
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Technology
+owner: Robert Kim
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -27,10 +27,13 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges: []
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-retirement-income-verification
+- type: RELATED_TO
+  targetId: atom-bo-rental-income-verification
 metrics:
-  automation_level: 0.5
-  avg_cycle_time_mins: 337
-  error_rate: 0.03
-  compliance_score: 0.9
-owning_team: Technology
+  automation_level: 0.07
+  avg_cycle_time_mins: 453
+  error_rate: 0.054
+  compliance_score: 0.93

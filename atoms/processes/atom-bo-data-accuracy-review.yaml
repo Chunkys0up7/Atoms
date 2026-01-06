@@ -4,8 +4,8 @@ type: PROCESS
 name: QC Auditor Reviews Data Accuracy
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
-team: Post-Closing
+owner: James Martinez
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-post-closing
@@ -29,14 +29,13 @@ edges:
 - type: ENABLES
   targetId: atom-bo-loan-delivery-prep
 - type: RELATED_TO
-  targetId: atom-sys-loan-delivery-submission
-- type: RELATED_TO
   targetId: atom-bo-servicing-transfer-prep
 - type: RELATED_TO
   targetId: atom-bo-investor-reporting
+- type: RELATED_TO
+  targetId: atom-bo-compliance-audit
 metrics:
-  automation_level: 0.14
-  avg_cycle_time_mins: 399
-  error_rate: 0.025
-  compliance_score: 0.98
-owning_team: Post-Closing
+  automation_level: 0.06
+  avg_cycle_time_mins: 342
+  error_rate: 0.073
+  compliance_score: 0.96

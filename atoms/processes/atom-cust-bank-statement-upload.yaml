@@ -4,7 +4,7 @@ type: PROCESS
 name: Customer Uploads Bank Statements
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
+owner: Lisa Anderson
 team: Risk Management
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -38,11 +38,9 @@ edges:
 - type: RELATED_TO
   targetId: atom-sys-reserve-calculation
 - type: RELATED_TO
-  targetId: atom-bo-reserves-verification
+  targetId: atom-bo-large-deposit-review
 metrics:
-  automation_level: 0.77
-  avg_cycle_time_mins: 2815
-  error_rate: 0.053
-  compliance_score: 0.86
-steward: Sarah Chen
-owning_team: Risk Management
+  automation_level: 0.3
+  avg_cycle_time_mins: 1389
+  error_rate: 0.033
+  compliance_score: 0.9

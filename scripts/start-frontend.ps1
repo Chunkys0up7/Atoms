@@ -1,13 +1,4 @@
-$host.UI.RawUI.WindowTitle = "GNDP Frontend"
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "GNDP Frontend Service" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Application URL: http://localhost:5174" -ForegroundColor Green
-Write-Host "                 (or check output below)" -ForegroundColor Gray
-Write-Host ""
-Write-Host "Starting Vite dev server..." -ForegroundColor Yellow
-Write-Host ""
-
-Set-Location "F:\Projects\FullSytem"
+﻿$host.UI.RawUI.WindowTitle = "GNDP Frontend"
+Write-Host "Starting Vite..."
+Set-Location "C:\Users\camer\Projects\atoms\Atoms"
 npm run dev

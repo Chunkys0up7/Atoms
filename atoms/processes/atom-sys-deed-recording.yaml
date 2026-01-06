@@ -4,8 +4,8 @@ type: PROCESS
 name: System Records Deed
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
-team: Post-Closing
+owner: James Martinez
+team: Technology
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-closing
@@ -38,12 +38,8 @@ edges:
   targetId: atom-sys-document-imaging
 - type: ENABLES
   targetId: atom-bo-document-audit
-- type: RELATED_TO
-  targetId: atom-sys-wire-verification
 metrics:
-  automation_level: 0.71
-  avg_cycle_time_mins: 22
-  error_rate: 0.1
-  compliance_score: 0.95
-steward: Lisa Anderson
-owning_team: Post-Closing
+  automation_level: 0.98
+  avg_cycle_time_mins: 9
+  error_rate: 0.076
+  compliance_score: 0.87

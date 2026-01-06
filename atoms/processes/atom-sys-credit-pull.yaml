@@ -3,9 +3,9 @@ category: SYSTEM
 type: PROCESS
 name: System Pulls Soft Credit
 version: 1.0.0
-status: DEPRECATED
-owner: Michael Rodriguez
-team: Customer Experience
+status: DRAFT
+owner: Amanda White
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-pre-application
@@ -79,9 +79,7 @@ edges:
 - type: DATA_FLOWS_TO
   targetId: atom-bo-credit-analysis
 metrics:
-  automation_level: 0.76
-  avg_cycle_time_mins: 22
-  error_rate: 0.072
+  automation_level: 0.98
+  avg_cycle_time_mins: 38
+  error_rate: 0.055
   compliance_score: 0.89
-steward: Sarah Chen
-owning_team: Customer Experience

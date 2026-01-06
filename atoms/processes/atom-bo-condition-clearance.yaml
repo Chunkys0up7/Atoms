@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Underwriter Clears Conditions
 version: 1.0.0
-status: DRAFT
-owner: Jennifer Park
-team: Technology
+status: ACTIVE
+owner: Robert Kim
+team: Compliance
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-underwriting
@@ -41,9 +41,7 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-expired-condition-review
 metrics:
-  automation_level: 0.5
-  avg_cycle_time_mins: 197
-  error_rate: 0.096
-  compliance_score: 0.86
-steward: Lisa Anderson
-owning_team: Technology
+  automation_level: 0.29
+  avg_cycle_time_mins: 248
+  error_rate: 0.037
+  compliance_score: 0.92

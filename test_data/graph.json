@@ -691,6 +691,26 @@
     {
       "id": "phase-post-closing",
       "type": "Phase"
+    },
+    {
+      "id": "phase-refi-application",
+      "type": "Phase"
+    },
+    {
+      "id": "phase-refi-processing",
+      "type": "Phase"
+    },
+    {
+      "id": "phase-refi-closing",
+      "type": "Phase"
+    },
+    {
+      "id": "journey-purchase-conventional",
+      "type": "Journey"
+    },
+    {
+      "id": "journey-refinance",
+      "type": "Journey"
     }
   ],
   "edges": [
@@ -1306,42 +1326,32 @@
     },
     {
       "source": "atom-cust-application-submit",
-      "target": "atom-bo-fraud-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-application-validation",
       "target": "atom-sys-identity-verification",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-application-validation",
-      "target": "atom-bo-fraud-review",
+      "target": "atom-sys-identity-verification",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-cust-initial-doc-upload",
-      "target": "atom-bo-fraud-detection",
+      "target": "atom-sys-loan-estimate-generation",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-completeness-review",
-      "target": "atom-sys-identity-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-completeness-review",
-      "target": "atom-bo-fraud-detection",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-completeness-review",
-      "target": "atom-bo-fraud-review",
+      "target": "atom-sys-loan-estimate-generation",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-loan-estimate-generation",
-      "target": "atom-bo-fraud-review",
+      "target": "atom-bo-fraud-detection",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-identity-verification",
+      "target": "atom-bo-fraud-detection",
       "type": "RELATED_TO"
     },
     {
@@ -1351,32 +1361,17 @@
     },
     {
       "source": "atom-cust-w2-upload",
-      "target": "atom-bo-voi-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-cust-w2-upload",
-      "target": "atom-cust-pay-stub-upload",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-cust-w2-upload",
-      "target": "atom-bo-pay-stub-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-cust-w2-upload",
-      "target": "atom-bo-rental-income-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-w2-review",
       "target": "atom-bo-tax-return-analysis",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-w2-review",
+      "source": "atom-cust-w2-upload",
       "target": "atom-bo-voi-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-w2-upload",
+      "target": "atom-bo-bonus-overtime-calculation",
       "type": "RELATED_TO"
     },
     {
@@ -1386,7 +1381,22 @@
     },
     {
       "source": "atom-cust-tax-return-upload",
-      "target": "atom-sys-income-calculation",
+      "target": "atom-bo-voi-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-tax-return-upload",
+      "target": "atom-bo-bonus-overtime-calculation",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-tax-return-upload",
+      "target": "atom-bo-alimony-child-support-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-tax-return-upload",
+      "target": "atom-bo-retirement-income-verification",
       "type": "RELATED_TO"
     },
     {
@@ -1406,12 +1416,7 @@
     },
     {
       "source": "atom-bo-tax-return-analysis",
-      "target": "atom-bo-alimony-child-support-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-income-calculation",
-      "target": "atom-cust-pay-stub-upload",
+      "target": "atom-bo-self-employment-verification",
       "type": "RELATED_TO"
     },
     {
@@ -1426,62 +1431,87 @@
     },
     {
       "source": "atom-sys-income-calculation",
-      "target": "atom-bo-self-employment-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-voi-verification",
       "target": "atom-bo-retirement-income-verification",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-voi-verification",
-      "target": "atom-bo-self-employment-verification",
+      "target": "atom-bo-pay-stub-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-voi-verification",
+      "target": "atom-bo-bonus-overtime-calculation",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-voi-verification",
+      "target": "atom-bo-self-employment-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-pay-stub-upload",
+      "target": "atom-bo-bonus-overtime-calculation",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-pay-stub-upload",
+      "target": "atom-bo-self-employment-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-cust-pay-stub-upload",
       "target": "atom-bo-rental-income-verification",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-pay-stub-review",
-      "target": "atom-bo-employment-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-income-stability-check",
-      "target": "atom-bo-bonus-overtime-calculation",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-income-stability-check",
-      "target": "atom-bo-employment-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-bonus-overtime-calculation",
       "target": "atom-bo-alimony-child-support-verification",
       "type": "RELATED_TO"
     },
     {
+      "source": "atom-bo-income-stability-check",
+      "target": "atom-bo-alimony-child-support-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-income-stability-check",
+      "target": "atom-bo-self-employment-verification",
+      "type": "RELATED_TO"
+    },
+    {
       "source": "atom-bo-bonus-overtime-calculation",
       "target": "atom-bo-self-employment-verification",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-alimony-child-support-verification",
+      "source": "atom-bo-bonus-overtime-calculation",
+      "target": "atom-bo-rental-income-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-employment-verification",
       "target": "atom-bo-retirement-income-verification",
       "type": "RELATED_TO"
     },
     {
+      "source": "atom-bo-employment-verification",
+      "target": "atom-bo-rental-income-verification",
+      "type": "RELATED_TO"
+    },
+    {
       "source": "atom-bo-alimony-child-support-verification",
-      "target": "atom-bo-self-employment-verification",
+      "target": "atom-bo-rental-income-verification",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-retirement-income-verification",
       "target": "atom-bo-self-employment-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-retirement-income-verification",
+      "target": "atom-bo-rental-income-verification",
       "type": "RELATED_TO"
     },
     {
@@ -1491,22 +1521,7 @@
     },
     {
       "source": "atom-cust-bank-statement-upload",
-      "target": "atom-bo-reserves-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-asset-source-review",
-      "target": "atom-bo-asset-verification-letter",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-asset-source-review",
-      "target": "atom-bo-down-payment-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-reserve-calculation",
-      "target": "atom-cust-asset-statement-upload",
+      "target": "atom-bo-large-deposit-review",
       "type": "RELATED_TO"
     },
     {
@@ -1516,16 +1531,6 @@
     },
     {
       "source": "atom-sys-reserve-calculation",
-      "target": "atom-bo-reserves-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-gift-letter-review",
-      "target": "atom-bo-large-deposit-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-gift-letter-review",
       "target": "atom-bo-asset-verification-letter",
       "type": "RELATED_TO"
     },
@@ -1536,57 +1541,67 @@
     },
     {
       "source": "atom-bo-large-deposit-review",
+      "target": "atom-bo-reserves-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-asset-verification-letter",
       "target": "atom-bo-down-payment-verification",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-credit-report-pull",
-      "target": "atom-bo-derogatory-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-credit-report-pull",
-      "target": "atom-bo-rental-history-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-credit-report-pull",
       "target": "atom-bo-credit-inquiry-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-credit-report-pull",
+      "target": "atom-bo-liability-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-derogatory-review",
+      "target": "atom-bo-payment-history-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-derogatory-review",
       "target": "atom-bo-credit-dispute-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-credit-analysis",
-      "target": "atom-bo-derogatory-review",
+      "source": "atom-bo-credit-score-analysis",
+      "target": "atom-bo-payment-history-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-credit-analysis",
+      "source": "atom-bo-credit-score-analysis",
+      "target": "atom-bo-collection-account-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-credit-score-analysis",
       "target": "atom-bo-credit-inquiry-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-derogatory-review",
+      "source": "atom-bo-credit-score-analysis",
+      "target": "atom-bo-credit-dispute-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-payment-history-review",
       "target": "atom-bo-debt-ratio-calculation",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-derogatory-review",
-      "target": "atom-bo-credit-inquiry-review",
+      "source": "atom-bo-payment-history-review",
+      "target": "atom-bo-rental-history-verification",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-credit-score-analysis",
-      "target": "atom-bo-credit-inquiry-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-credit-score-analysis",
-      "target": "atom-bo-liability-verification",
+      "source": "atom-bo-payment-history-review",
+      "target": "atom-bo-credit-dispute-review",
       "type": "RELATED_TO"
     },
     {
@@ -1596,12 +1611,17 @@
     },
     {
       "source": "atom-bo-debt-ratio-calculation",
+      "target": "atom-bo-credit-dispute-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-collection-account-review",
       "target": "atom-bo-credit-inquiry-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-rental-history-verification",
-      "target": "atom-bo-credit-inquiry-review",
+      "target": "atom-bo-credit-dispute-review",
       "type": "RELATED_TO"
     },
     {
@@ -1615,33 +1635,18 @@
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-appraisal-order",
-      "target": "atom-bo-comparable-sales-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-appraisal-order",
-      "target": "atom-bo-property-condition-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-appraisal-order",
-      "target": "atom-bo-property-type-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-appraisal-order",
-      "target": "atom-bo-occupancy-verification",
-      "type": "RELATED_TO"
-    },
-    {
       "source": "atom-bo-appraisal-review",
       "target": "atom-bo-appraisal-scheduling",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-appraisal-scheduling",
-      "target": "atom-bo-comparable-sales-review",
+      "source": "atom-bo-appraisal-review",
+      "target": "atom-bo-property-condition-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-appraisal-review",
+      "target": "atom-bo-occupancy-verification",
       "type": "RELATED_TO"
     },
     {
@@ -1655,28 +1660,23 @@
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-property-type-verification",
-      "target": "atom-bo-occupancy-verification",
+      "source": "atom-bo-comparable-sales-review",
+      "target": "atom-bo-property-condition-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-title-order",
-      "target": "atom-cust-insurance-verification",
+      "target": "atom-sys-flood-determination",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-sys-title-order",
-      "target": "atom-bo-title-issue-resolution",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-title-order",
+      "source": "atom-bo-title-review",
       "target": "atom-bo-hazard-insurance-binder",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-sys-title-order",
-      "target": "atom-bo-title-commitment-review",
+      "source": "atom-sys-flood-determination",
+      "target": "atom-cust-insurance-verification",
       "type": "RELATED_TO"
     },
     {
@@ -1685,28 +1685,23 @@
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-cust-insurance-verification",
-      "target": "atom-bo-hazard-insurance-binder",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-title-issue-resolution",
-      "target": "atom-bo-flood-insurance-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-title-issue-resolution",
+      "source": "atom-sys-flood-determination",
       "target": "atom-bo-homeowners-insurance-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-flood-determination",
+      "target": "atom-bo-survey-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-title-issue-resolution",
+      "target": "atom-bo-title-commitment-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-title-issue-resolution",
       "target": "atom-bo-survey-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-homeowners-insurance-review",
-      "target": "atom-bo-hazard-insurance-binder",
       "type": "RELATED_TO"
     },
     {
@@ -1716,112 +1711,122 @@
     },
     {
       "source": "atom-bo-hazard-insurance-binder",
-      "target": "atom-bo-survey-review",
+      "target": "atom-bo-title-commitment-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-aus-submission",
-      "target": "atom-bo-underwriting-exception-request",
+      "target": "atom-bo-program-eligibility-check",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-aus-submission",
-      "target": "atom-bo-exception-approval",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-aus-submission",
-      "target": "atom-bo-manual-review-trigger",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-aus-submission",
-      "target": "atom-bo-adverse-action-letter",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-manual-underwrite",
-      "target": "atom-sys-aus-findings-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-manual-underwrite",
-      "target": "atom-bo-loan-denial-documentation",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-manual-underwrite",
-      "target": "atom-bo-adverse-action-letter",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-dec-loan-decision",
-      "target": "atom-bo-underwriting-exception-request",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-dec-loan-decision",
-      "target": "atom-bo-manual-review-trigger",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-dec-loan-decision",
-      "target": "atom-bo-appeal-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-risk-assessment",
-      "target": "atom-bo-loan-modification-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-risk-assessment",
-      "target": "atom-sys-aus-findings-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-risk-assessment",
-      "target": "atom-bo-manual-review-trigger",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-risk-assessment",
-      "target": "atom-bo-adverse-action-letter",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-risk-assessment",
-      "target": "atom-bo-appeal-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-program-eligibility-check",
       "target": "atom-bo-compensating-factors-analysis",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-program-eligibility-check",
+      "source": "atom-sys-aus-submission",
       "target": "atom-sys-rate-lock-processing",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-program-eligibility-check",
-      "target": "atom-bo-loan-modification-review",
+      "source": "atom-sys-aus-submission",
+      "target": "atom-bo-manual-review-trigger",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-program-eligibility-check",
+      "source": "atom-sys-aus-submission",
       "target": "atom-bo-appeal-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-compensating-factors-analysis",
+      "source": "atom-bo-manual-underwrite",
+      "target": "atom-bo-exception-approval",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "atom-bo-manual-review-trigger",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "atom-bo-adverse-action-letter",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-manual-underwrite",
+      "target": "atom-bo-appeal-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "atom-bo-exception-approval",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "atom-bo-loan-modification-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-dec-loan-decision",
+      "target": "atom-bo-loan-denial-documentation",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "atom-sys-rate-lock-processing",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "atom-bo-exception-approval",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "atom-bo-loan-modification-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "atom-sys-aus-findings-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "atom-bo-loan-denial-documentation",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-risk-assessment",
+      "target": "atom-bo-adverse-action-letter",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
       "target": "atom-bo-underwriting-exception-request",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-program-eligibility-check",
+      "target": "atom-bo-exception-approval",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-compensating-factors-analysis",
       "target": "atom-bo-exception-approval",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-compensating-factors-analysis",
+      "target": "atom-bo-loan-modification-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-compensating-factors-analysis",
+      "target": "atom-bo-manual-review-trigger",
       "type": "RELATED_TO"
     },
     {
@@ -1841,37 +1846,37 @@
     },
     {
       "source": "atom-sys-rate-lock-processing",
-      "target": "atom-sys-aus-findings-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-rate-lock-processing",
-      "target": "atom-bo-loan-denial-documentation",
+      "target": "atom-bo-manual-review-trigger",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-underwriting-exception-request",
+      "target": "atom-bo-exception-approval",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-exception-approval",
+      "target": "atom-bo-loan-modification-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-exception-approval",
+      "target": "atom-sys-aus-findings-review",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-modification-review",
       "target": "atom-bo-loan-denial-documentation",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-exception-approval",
-      "target": "atom-sys-aus-findings-review",
+      "source": "atom-sys-aus-findings-review",
+      "target": "atom-bo-manual-review-trigger",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-exception-approval",
-      "target": "atom-bo-appeal-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-loan-modification-review",
-      "target": "atom-sys-aus-findings-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-loan-modification-review",
-      "target": "atom-bo-adverse-action-letter",
+      "source": "atom-sys-aus-findings-review",
+      "target": "atom-bo-loan-denial-documentation",
       "type": "RELATED_TO"
     },
     {
@@ -1880,8 +1885,18 @@
       "type": "RELATED_TO"
     },
     {
+      "source": "atom-bo-loan-denial-documentation",
+      "target": "atom-bo-adverse-action-letter",
+      "type": "RELATED_TO"
+    },
+    {
       "source": "atom-sys-condition-generation",
       "target": "atom-bo-condition-verification",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-condition-tracking",
+      "target": "atom-bo-expired-condition-review",
       "type": "RELATED_TO"
     },
     {
@@ -1890,17 +1905,7 @@
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-prior-to-doc-conditions",
-      "target": "atom-bo-condition-aging-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-prior-to-doc-conditions",
-      "target": "atom-bo-expired-condition-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-condition-aging-review",
+      "source": "atom-bo-prior-to-funding-conditions",
       "target": "atom-bo-condition-verification",
       "type": "RELATED_TO"
     },
@@ -1910,58 +1915,28 @@
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-sys-closing-disclosure",
-      "target": "atom-bo-cash-to-close-calculation",
+      "source": "atom-bo-condition-verification",
+      "target": "atom-bo-expired-condition-review",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-sys-closing-disclosure",
-      "target": "atom-bo-closing-wire-instructions",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-closing-doc-prep",
-      "target": "atom-bo-notary-coordination",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-closing-doc-prep",
       "target": "atom-bo-cash-to-close-calculation",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-cust-closing-scheduling",
-      "target": "atom-bo-closing-wire-instructions",
+      "target": "atom-sys-redisclosure-trigger",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-closing-disclosure-review",
-      "target": "atom-bo-notary-coordination",
+      "target": "atom-bo-closing-package-assembly",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-closing-disclosure-review",
       "target": "atom-bo-closing-cost-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-closing-disclosure-review",
-      "target": "atom-bo-cash-to-close-calculation",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-closing-package-assembly",
-      "target": "atom-sys-redisclosure-trigger",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-notary-coordination",
-      "target": "atom-sys-redisclosure-trigger",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-notary-coordination",
-      "target": "atom-bo-closing-wire-instructions",
       "type": "RELATED_TO"
     },
     {
@@ -1976,72 +1951,57 @@
     },
     {
       "source": "atom-cust-closing-signing",
-      "target": "atom-sys-deed-recording",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-cust-closing-signing",
-      "target": "atom-sys-wire-verification",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-cust-closing-signing",
       "target": "atom-bo-funding-hold-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-sys-deed-recording",
-      "target": "atom-sys-wire-verification",
+      "source": "atom-sys-funding-wire",
+      "target": "atom-bo-funding-hold-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-funding-reconciliation",
+      "source": "atom-sys-wire-verification",
       "target": "atom-bo-funding-package-review",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-funding-package-review",
-      "target": "atom-bo-funding-hold-review",
+      "source": "atom-bo-post-closing-audit",
+      "target": "atom-bo-loan-sale-prep",
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-sys-document-imaging",
-      "target": "atom-bo-document-audit",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-document-imaging",
-      "target": "atom-bo-data-accuracy-review",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-sys-document-imaging",
-      "target": "atom-bo-servicing-transfer-prep",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-loan-sale-prep",
-      "target": "atom-bo-document-audit",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-loan-sale-prep",
-      "target": "atom-bo-loan-delivery-prep",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-loan-sale-prep",
+      "source": "atom-bo-post-closing-audit",
       "target": "atom-sys-loan-delivery-submission",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-post-closing-audit",
+      "target": "atom-bo-investor-reporting",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "atom-sys-loan-delivery-submission",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-document-imaging",
+      "target": "atom-bo-investor-reporting",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-sale-prep",
+      "target": "atom-bo-document-audit",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-loan-sale-prep",
+      "target": "atom-bo-investor-reporting",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-document-audit",
-      "target": "atom-sys-loan-delivery-submission",
-      "type": "RELATED_TO"
-    },
-    {
-      "source": "atom-bo-data-accuracy-review",
-      "target": "atom-sys-loan-delivery-submission",
+      "target": "atom-bo-investor-reporting",
       "type": "RELATED_TO"
     },
     {
@@ -2055,13 +2015,18 @@
       "type": "RELATED_TO"
     },
     {
-      "source": "atom-bo-loan-delivery-prep",
-      "target": "atom-bo-servicing-transfer-prep",
+      "source": "atom-bo-data-accuracy-review",
+      "target": "atom-bo-compliance-audit",
       "type": "RELATED_TO"
     },
     {
       "source": "atom-bo-loan-delivery-prep",
-      "target": "atom-bo-compliance-audit",
+      "target": "atom-bo-investor-reporting",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-sys-loan-delivery-submission",
+      "target": "atom-bo-servicing-transfer-prep",
       "type": "RELATED_TO"
     },
     {
@@ -2070,7 +2035,17 @@
       "type": "RELATED_TO"
     },
     {
+      "source": "atom-sys-loan-delivery-submission",
+      "target": "atom-bo-compliance-audit",
+      "type": "RELATED_TO"
+    },
+    {
       "source": "atom-bo-servicing-transfer-prep",
+      "target": "atom-bo-compliance-audit",
+      "type": "RELATED_TO"
+    },
+    {
+      "source": "atom-bo-investor-reporting",
       "target": "atom-bo-compliance-audit",
       "type": "RELATED_TO"
     }

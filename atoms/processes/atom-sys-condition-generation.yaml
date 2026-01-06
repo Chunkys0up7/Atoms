@@ -3,8 +3,8 @@ category: SYSTEM
 type: PROCESS
 name: System Generates Conditions
 version: 1.0.0
-status: ACTIVE
-owner: James Martinez
+status: DRAFT
+owner: Sarah Chen
 team: Compliance
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -43,8 +43,7 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-condition-verification
 metrics:
-  automation_level: 0.9
-  avg_cycle_time_mins: 18
-  error_rate: 0.034
-  compliance_score: 1.0
-owning_team: Compliance
+  automation_level: 0.83
+  avg_cycle_time_mins: 6
+  error_rate: 0.051
+  compliance_score: 0.97

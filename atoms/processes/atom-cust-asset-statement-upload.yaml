@@ -4,8 +4,8 @@ type: PROCESS
 name: Customer Uploads Asset Statements
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
-team: Underwriting
+owner: Jennifer Park
+team: Risk Management
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -31,8 +31,7 @@ edges:
 - type: ENABLES
   targetId: atom-bo-asset-source-review
 metrics:
-  automation_level: 0.54
-  avg_cycle_time_mins: 1433
-  error_rate: 0.064
-  compliance_score: 0.91
-owning_team: Underwriting
+  automation_level: 0.41
+  avg_cycle_time_mins: 2470
+  error_rate: 0.035
+  compliance_score: 0.99

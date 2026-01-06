@@ -1,6 +1,4 @@
 id: module-funding-recording
-version: 1.0.0
-workflow_type: BPM
 name: Funding & Recording
 description: Wire transfer, loan funding, deed recording, and post-closing document
   collection

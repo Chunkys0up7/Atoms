@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Analyzes Tax Returns
 version: 1.0.0
-status: DEPRECATED
-owner: David Thompson
-team: Post-Closing
+status: ACTIVE
+owner: Sarah Chen
+team: Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -45,10 +45,9 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-employment-verification
 - type: RELATED_TO
-  targetId: atom-bo-alimony-child-support-verification
+  targetId: atom-bo-self-employment-verification
 metrics:
-  automation_level: 0.11
-  avg_cycle_time_mins: 107
-  error_rate: 0.039
-  compliance_score: 0.92
-owning_team: Post-Closing
+  automation_level: 0.16
+  avg_cycle_time_mins: 444
+  error_rate: 0.057
+  compliance_score: 0.91

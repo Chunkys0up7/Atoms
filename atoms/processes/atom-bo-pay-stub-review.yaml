@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Pay Stubs
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Risk Management
+owner: David Thompson
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -33,10 +33,9 @@ edges:
 - type: ENABLES
   targetId: atom-bo-bonus-overtime-calculation
 - type: RELATED_TO
-  targetId: atom-bo-employment-verification
+  targetId: atom-bo-alimony-child-support-verification
 metrics:
-  automation_level: 0.39
-  avg_cycle_time_mins: 231
-  error_rate: 0.074
-  compliance_score: 0.93
-owning_team: Risk Management
+  automation_level: 0.3
+  avg_cycle_time_mins: 198
+  error_rate: 0.037
+  compliance_score: 0.94

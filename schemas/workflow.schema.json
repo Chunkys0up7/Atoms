@@ -1,0 +1,124 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Workflow Definition",
+    "description": "Schema for defining business process workflows in Atoms",
+    "type": "object",
+    "required": [
+        "id",
+        "name",
+        "version",
+        "steps",
+        "start_step_id"
+    ],
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Unique identifier for the workflow definition"
+        },
+        "name": {
+            "type": "string",
+            "description": "Human-readable name of the workflow"
+        },
+        "version": {
+            "type": "string",
+            "description": "Semantic version of this definition"
+        },
+        "description": {
+            "type": "string"
+        },
+        "start_step_id": {
+            "type": "string",
+            "description": "The ID of the first step to execute"
+        },
+        "roles": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "List of roles involved in this workflow"
+        },
+        "steps": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/step"
+            }
+        }
+    },
+    "definitions": {
+        "step": {
+            "type": "object",
+            "required": [
+                "id",
+                "type",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "task",
+                        "approval",
+                        "notification",
+                        "script"
+                    ]
+                },
+                "task_definition_id": {
+                    "type": "string",
+                    "description": "Reference to a standard task definition if applicable"
+                },
+                "assign_to_role": {
+                    "type": "string"
+                },
+                "transitions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/transition"
+                    }
+                }
+            }
+        },
+        "transition": {
+            "type": "object",
+            "required": [
+                "target_step_id"
+            ],
+            "properties": {
+                "target_step_id": {
+                    "type": "string"
+                },
+                "condition": {
+                    "type": "object",
+                    "properties": {
+                        "field": {
+                            "type": "string"
+                        },
+                        "operator": {
+                            "type": "string",
+                            "enum": [
+                                "eq",
+                                "neq",
+                                "gt",
+                                "lt",
+                                "contains"
+                            ]
+                        },
+                        "value": {
+                            "type": [
+                                "string",
+                                "number",
+                                "boolean"
+                            ]
+                        }
+                    },
+                    "description": "Condition to match for this transition. If omitted, it's a default transition."
+                }
+            }
+        }
+    }
+}

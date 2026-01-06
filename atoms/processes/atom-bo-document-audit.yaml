@@ -4,8 +4,8 @@ type: PROCESS
 name: QC Auditor Performs Document Audit
 version: 1.0.0
 status: ACTIVE
-owner: Robert Kim
-team: Risk Management
+owner: Amanda White
+team: Closing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-post-closing
@@ -29,10 +29,9 @@ edges:
 - type: ENABLES
   targetId: atom-bo-post-closing-audit
 - type: RELATED_TO
-  targetId: atom-sys-loan-delivery-submission
+  targetId: atom-bo-investor-reporting
 metrics:
-  automation_level: 0.03
-  avg_cycle_time_mins: 314
+  automation_level: 0.16
+  avg_cycle_time_mins: 188
   error_rate: 0.07
-  compliance_score: 0.91
-owning_team: Risk Management
+  compliance_score: 0.93

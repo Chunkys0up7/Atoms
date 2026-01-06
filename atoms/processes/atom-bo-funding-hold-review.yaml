@@ -3,8 +3,8 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reviews Funding Holds
 version: 1.0.0
-status: ACTIVE
-owner: David Thompson
+status: DEPRECATED
+owner: Jennifer Park
 team: Compliance
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.44
-  avg_cycle_time_mins: 230
-  error_rate: 0.025
-  compliance_score: 1.0
-owning_team: Compliance
+  automation_level: 0.07
+  avg_cycle_time_mins: 386
+  error_rate: 0.031
+  compliance_score: 0.99

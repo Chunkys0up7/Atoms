@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Analyzes Credit Scores
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
-team: Technology
+owner: David Thompson
+team: Closing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-processing
@@ -31,12 +31,15 @@ edges:
 - type: ENABLES
   targetId: atom-bo-credit-analysis
 - type: RELATED_TO
+  targetId: atom-bo-payment-history-review
+- type: RELATED_TO
+  targetId: atom-bo-collection-account-review
+- type: RELATED_TO
   targetId: atom-bo-credit-inquiry-review
 - type: RELATED_TO
-  targetId: atom-bo-liability-verification
+  targetId: atom-bo-credit-dispute-review
 metrics:
-  automation_level: 0.18
-  avg_cycle_time_mins: 82
-  error_rate: 0.028
-  compliance_score: 0.88
-owning_team: Technology
+  automation_level: 0.24
+  avg_cycle_time_mins: 220
+  error_rate: 0.052
+  compliance_score: 0.86

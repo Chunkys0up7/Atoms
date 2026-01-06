@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.09
-  avg_cycle_time_mins: 281
-  error_rate: 0.044
-  compliance_score: 0.99
-owning_team: Compliance
+  automation_level: 0.15
+  avg_cycle_time_mins: 380
+  error_rate: 0.071
+  compliance_score: 0.89

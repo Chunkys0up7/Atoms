@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Completes Investor Reporting
 version: 1.0.0
-status: ACTIVE
-owner: Lisa Anderson
-team: Post-Closing
+status: DRAFT
+owner: Robert Kim
+team: Technology
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-post-closing
@@ -26,10 +26,11 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges: []
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-compliance-audit
 metrics:
-  automation_level: 0.05
-  avg_cycle_time_mins: 194
-  error_rate: 0.011
-  compliance_score: 1.0
-owning_team: Post-Closing
+  automation_level: 0.12
+  avg_cycle_time_mins: 161
+  error_rate: 0.048
+  compliance_score: 0.92

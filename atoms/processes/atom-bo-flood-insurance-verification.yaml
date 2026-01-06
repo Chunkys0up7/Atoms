@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Flood Insurance
 version: 1.0.0
 status: ACTIVE
-owner: Sarah Chen
-team: Customer Experience
+owner: Jennifer Park
+team: Technology
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -31,8 +31,7 @@ edges:
 - type: ENABLES
   targetId: atom-bo-closing-doc-prep
 metrics:
-  automation_level: 0.1
-  avg_cycle_time_mins: 190
-  error_rate: 0.041
-  compliance_score: 0.91
-owning_team: Customer Experience
+  automation_level: 0.46
+  avg_cycle_time_mins: 432
+  error_rate: 0.092
+  compliance_score: 0.98

@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reviews Property Condition
 version: 1.0.0
-status: ACTIVE
-owner: David Thompson
-team: Risk Management
+status: DRAFT
+owner: James Martinez
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -31,8 +31,7 @@ edges:
 - type: ENABLES
   targetId: atom-bo-condition-tracking
 metrics:
-  automation_level: 0.04
-  avg_cycle_time_mins: 338
-  error_rate: 0.043
-  compliance_score: 0.86
-owning_team: Risk Management
+  automation_level: 0.48
+  avg_cycle_time_mins: 101
+  error_rate: 0.016
+  compliance_score: 0.89

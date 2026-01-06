@@ -4,8 +4,8 @@ type: PROCESS
 name: System Triggers Manual Underwriting Review
 version: 1.0.0
 status: ACTIVE
-owner: Michael Rodriguez
-team: Risk Management
+owner: David Thompson
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-underwriting
@@ -30,8 +30,7 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-loan-denial-documentation
 metrics:
-  automation_level: 0.83
-  avg_cycle_time_mins: 6
-  error_rate: 0.09
-  compliance_score: 0.94
-owning_team: Risk Management
+  automation_level: 0.72
+  avg_cycle_time_mins: 24
+  error_rate: 0.065
+  compliance_score: 0.95

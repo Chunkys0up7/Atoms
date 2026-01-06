@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Retirement Income
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
-team: Customer Experience
+owner: Lisa Anderson
+team: Closing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-processing
@@ -28,9 +28,10 @@ content:
 edges:
 - type: RELATED_TO
   targetId: atom-bo-self-employment-verification
+- type: RELATED_TO
+  targetId: atom-bo-rental-income-verification
 metrics:
-  automation_level: 0.24
-  avg_cycle_time_mins: 125
-  error_rate: 0.097
-  compliance_score: 0.9
-owning_team: Customer Experience
+  automation_level: 0.18
+  avg_cycle_time_mins: 351
+  error_rate: 0.07
+  compliance_score: 0.93

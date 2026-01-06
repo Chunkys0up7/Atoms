@@ -3,8 +3,8 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Prepares Loan for Servicing Transfer
 version: 1.0.0
-status: ACTIVE
-owner: Lisa Anderson
+status: DRAFT
+owner: James Martinez
 team: Risk Management
 ontologyDomain: Home Lending
 criticality: MEDIUM
@@ -30,8 +30,7 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-compliance-audit
 metrics:
-  automation_level: 0.1
-  avg_cycle_time_mins: 302
-  error_rate: 0.099
+  automation_level: 0.23
+  avg_cycle_time_mins: 63
+  error_rate: 0.03
   compliance_score: 0.9
-owning_team: Risk Management

@@ -1,6 +1,4 @@
 id: module-asset-verification
-version: 1.0.0
-workflow_type: BPM
 name: Asset Verification
 description: Bank statement review, asset source documentation, and reserve calculation
 owner: Processing

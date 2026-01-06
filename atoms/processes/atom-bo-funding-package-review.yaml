@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Funding Package
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
-team: Underwriting
+owner: Lisa Anderson
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-closing
@@ -25,12 +25,9 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges:
-- type: RELATED_TO
-  targetId: atom-bo-funding-hold-review
+edges: []
 metrics:
-  automation_level: 0.17
-  avg_cycle_time_mins: 156
-  error_rate: 0.07
-  compliance_score: 0.94
-owning_team: Underwriting
+  automation_level: 0.03
+  avg_cycle_time_mins: 68
+  error_rate: 0.082
+  compliance_score: 0.89

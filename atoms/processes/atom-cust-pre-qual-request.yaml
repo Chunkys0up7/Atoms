@@ -4,7 +4,7 @@ type: PROCESS
 name: Customer Requests Pre-Qualification
 version: 1.0.0
 status: ACTIVE
-owner: Amanda White
+owner: Lisa Anderson
 team: Customer Experience
 ontologyDomain: Home Lending
 criticality: MEDIUM
@@ -65,8 +65,7 @@ edges:
 - type: ENABLES
   targetId: atom-bo-dti-calculation
 metrics:
-  automation_level: 0.34
-  avg_cycle_time_mins: 2040
-  error_rate: 0.079
+  automation_level: 0.41
+  avg_cycle_time_mins: 437
+  error_rate: 0.06
   compliance_score: 0.99
-owning_team: Customer Experience

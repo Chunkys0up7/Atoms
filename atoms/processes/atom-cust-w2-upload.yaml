@@ -3,9 +3,9 @@ category: CUSTOMER_FACING
 type: PROCESS
 name: Customer Uploads W-2 Forms
 version: 1.0.0
-status: DEPRECATED
+status: ACTIVE
 owner: Amanda White
-team: Processing
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -85,16 +85,13 @@ edges:
 - type: ENABLES
   targetId: atom-bo-w2-review
 - type: RELATED_TO
+  targetId: atom-bo-tax-return-analysis
+- type: RELATED_TO
   targetId: atom-bo-voi-verification
 - type: RELATED_TO
-  targetId: atom-cust-pay-stub-upload
-- type: RELATED_TO
-  targetId: atom-bo-pay-stub-review
-- type: RELATED_TO
-  targetId: atom-bo-rental-income-verification
+  targetId: atom-bo-bonus-overtime-calculation
 metrics:
-  automation_level: 0.37
-  avg_cycle_time_mins: 1737
-  error_rate: 0.001
-  compliance_score: 0.89
-owning_team: Processing
+  automation_level: 0.33
+  avg_cycle_time_mins: 2262
+  error_rate: 0.078
+  compliance_score: 0.94

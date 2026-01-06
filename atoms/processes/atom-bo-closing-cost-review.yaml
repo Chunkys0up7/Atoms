@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Reviews Closing Costs
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Processing
+owner: Amanda White
+team: Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-closing
@@ -29,8 +29,7 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-closing-wire-instructions
 metrics:
-  automation_level: 0.42
-  avg_cycle_time_mins: 263
-  error_rate: 0.034
-  compliance_score: 0.92
-owning_team: Processing
+  automation_level: 0.43
+  avg_cycle_time_mins: 150
+  error_rate: 0.071
+  compliance_score: 0.94

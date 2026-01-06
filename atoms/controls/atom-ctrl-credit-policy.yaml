@@ -4,8 +4,8 @@ type: CONTROL
 name: Credit Policy Control
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
-team: Loan Origination
+owner: Michael Rodriguez
+team: Customer Experience
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: null
@@ -34,9 +34,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.47
-  avg_cycle_time_mins: 71
-  error_rate: 0.071
-  compliance_score: 0.88
-steward: Robert Kim
-owning_team: Loan Origination
+  automation_level: 0.34
+  avg_cycle_time_mins: 376
+  error_rate: 0.001
+  compliance_score: 0.96

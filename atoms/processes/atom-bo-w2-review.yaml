@@ -4,7 +4,7 @@ type: PROCESS
 name: Processor Reviews W-2 Forms
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
+owner: Lisa Anderson
 team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -46,15 +46,9 @@ edges:
 - type: ENABLES
   targetId: atom-bo-income-stability-check
 - type: RELATED_TO
-  targetId: atom-bo-tax-return-analysis
-- type: RELATED_TO
-  targetId: atom-bo-voi-verification
-- type: RELATED_TO
   targetId: atom-bo-pay-stub-review
 metrics:
-  automation_level: 0.2
-  avg_cycle_time_mins: 300
-  error_rate: 0.047
-  compliance_score: 0.99
-steward: Sarah Chen
-owning_team: Processing
+  automation_level: 0.5
+  avg_cycle_time_mins: 314
+  error_rate: 0.099
+  compliance_score: 0.98

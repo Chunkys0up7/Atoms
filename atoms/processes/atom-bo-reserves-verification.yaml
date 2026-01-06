@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies Reserves
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
-team: Loan Origination
+owner: Amanda White
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.01
-  avg_cycle_time_mins: 437
-  error_rate: 0.024
-  compliance_score: 0.94
-owning_team: Loan Origination
+  automation_level: 0.37
+  avg_cycle_time_mins: 375
+  error_rate: 0.075
+  compliance_score: 0.96

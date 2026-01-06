@@ -4,8 +4,8 @@ type: PROCESS
 name: System Triggers Redisclosure Requirements
 version: 1.0.0
 status: DRAFT
-owner: Robert Kim
-team: Underwriting
+owner: Jennifer Park
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-closing
@@ -35,8 +35,7 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-closing-cost-review
 metrics:
-  automation_level: 0.71
-  avg_cycle_time_mins: 50
-  error_rate: 0.002
-  compliance_score: 0.93
-owning_team: Underwriting
+  automation_level: 0.79
+  avg_cycle_time_mins: 44
+  error_rate: 0.086
+  compliance_score: 0.98

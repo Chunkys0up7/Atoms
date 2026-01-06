@@ -3,8 +3,8 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reviews AUS Findings
 version: 1.0.0
-status: ACTIVE
-owner: Sarah Chen
+status: DEPRECATED
+owner: David Thompson
 team: Technology
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -25,10 +25,13 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges: []
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-manual-review-trigger
+- type: RELATED_TO
+  targetId: atom-bo-loan-denial-documentation
 metrics:
-  automation_level: 0.27
-  avg_cycle_time_mins: 303
-  error_rate: 0.099
-  compliance_score: 0.9
-owning_team: Technology
+  automation_level: 0.41
+  avg_cycle_time_mins: 349
+  error_rate: 0.047
+  compliance_score: 0.91

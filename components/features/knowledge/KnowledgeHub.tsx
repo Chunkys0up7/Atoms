@@ -8,6 +8,8 @@ import { BookOpen, Box, Database, Network } from 'lucide-react';
 interface KnowledgeHubProps {
     atoms: Atom[];
     modules: Module[];
+    phases?: any[];
+    journeys?: any[];
     onSelectAtom: (atom: Atom) => void;
     onNavigateToGraph?: (moduleId: string) => void;
 }
@@ -17,6 +19,8 @@ type KnowledgeTab = 'atoms' | 'modules' | 'ontology';
 const KnowledgeHub: React.FC<KnowledgeHubProps> = ({
     atoms,
     modules,
+    phases = [],
+    journeys = [],
     onSelectAtom,
     onNavigateToGraph
 }) => {
@@ -103,6 +107,8 @@ const KnowledgeHub: React.FC<KnowledgeHubProps> = ({
                         <OntologyBrowser
                             atoms={atoms}
                             modules={modules}
+                            phases={phases}
+                            journeys={journeys}
                             onSelectAtom={onSelectAtom}
                         />
                     </div>

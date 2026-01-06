@@ -4,8 +4,8 @@ type: PROCESS
 name: System Orders Title Search
 version: 1.0.0
 status: DRAFT
-owner: Sarah Chen
-team: Closing
+owner: Jennifer Park
+team: Compliance
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-processing
@@ -36,16 +36,9 @@ edges:
 - type: ENABLES
   targetId: atom-bo-title-review
 - type: RELATED_TO
-  targetId: atom-cust-insurance-verification
-- type: RELATED_TO
-  targetId: atom-bo-title-issue-resolution
-- type: RELATED_TO
-  targetId: atom-bo-hazard-insurance-binder
-- type: RELATED_TO
-  targetId: atom-bo-title-commitment-review
+  targetId: atom-sys-flood-determination
 metrics:
-  automation_level: 0.73
-  avg_cycle_time_mins: 2
-  error_rate: 0.003
+  automation_level: 0.96
+  avg_cycle_time_mins: 39
+  error_rate: 0.054
   compliance_score: 0.92
-owning_team: Closing

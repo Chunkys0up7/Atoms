@@ -1,6 +1,4 @@
 id: module-property-appraisal
-version: 1.0.0
-workflow_type: BPM
 name: Property Appraisal
 description: Appraisal ordering, property inspection, value determination, and appraisal
   review

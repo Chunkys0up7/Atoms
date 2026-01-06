@@ -3,9 +3,9 @@ category: SYSTEM
 type: PROCESS
 name: System Verifies Wire Transfer
 version: 1.0.0
-status: ACTIVE
-owner: Lisa Anderson
-team: Closing
+status: DEPRECATED
+owner: Sarah Chen
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-closing
@@ -30,9 +30,10 @@ edges:
   targetId: atom-bo-funding-reconciliation
 - type: USES_COMPONENT
   targetId: atom-sys-los-platform
+- type: RELATED_TO
+  targetId: atom-bo-funding-package-review
 metrics:
-  automation_level: 0.76
-  avg_cycle_time_mins: 32
-  error_rate: 0.017
-  compliance_score: 0.87
-owning_team: Closing
+  automation_level: 0.75
+  avg_cycle_time_mins: 34
+  error_rate: 0.001
+  compliance_score: 0.97

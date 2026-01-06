@@ -99,30 +99,18 @@ markdown_extensions:
 # Navigation
 nav:
   - Home: index.md
-  - Atoms:
-      - Overview: generated/atoms/index.md
-      - Requirements: generated/atoms/requirements/
-      - Designs: generated/atoms/designs/
-      - Procedures: generated/atoms/procedures/
-      - Validations: generated/atoms/validations/
-      - Policies: generated/atoms/policys/
-      - Risks: generated/atoms/risks/
-  - Modules:
-      - Overview: generated/modules/index.md
-      - Authentication: generated/modules/auth_system/index.md
-      - API Gateway: generated/modules/api_gateway/index.md
-      - Data Layer: generated/modules/data_layer/index.md
-      - Knowledge Graph: generated/modules/knowledge_graph/index.md
-      - AI Agent: generated/modules/ai_agent/index.md
+  - Ontology: documentation/ontology/
+  - Knowledge Graph:
+      - Journeys: documentation/knowledge_graph/journeys/
+      - Phases: documentation/knowledge_graph/phases/
+      - Modules: documentation/knowledge_graph/modules/
+      - Atoms: documentation/knowledge_graph/atoms/
+  - Processes: documentation/processes/
   - Graph Visualization: graph.md
-  - Published Documents:
-      - Overview: generated/published/index.md
-      - Documents: generated/published/
   - Documentation:
       - Architecture: docs/GNDP-Architecture.md
       - Action Plan: docs/ACTION_PLAN.md
       - Agent Integration: docs/agent.md
-      - Claude Integration: docs/claude.md
       - Implementation Roadmap: docs/implementation-roadmap.md
   - Contributing: CONTRIBUTING.md
 

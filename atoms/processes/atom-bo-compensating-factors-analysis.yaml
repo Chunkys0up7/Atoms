@@ -4,8 +4,8 @@ type: PROCESS
 name: Underwriter Analyzes Compensating Factors
 version: 1.0.0
 status: ACTIVE
-owner: Robert Kim
-team: Closing
+owner: Jennifer Park
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: MEDIUM
 phaseId: phase-underwriting
@@ -31,12 +31,13 @@ edges:
 - type: ENABLES
   targetId: atom-bo-manual-underwrite
 - type: RELATED_TO
-  targetId: atom-bo-underwriting-exception-request
-- type: RELATED_TO
   targetId: atom-bo-exception-approval
+- type: RELATED_TO
+  targetId: atom-bo-loan-modification-review
+- type: RELATED_TO
+  targetId: atom-bo-manual-review-trigger
 metrics:
-  automation_level: 0.3
-  avg_cycle_time_mins: 179
-  error_rate: 0.026
-  compliance_score: 0.89
-owning_team: Closing
+  automation_level: 0.28
+  avg_cycle_time_mins: 156
+  error_rate: 0.037
+  compliance_score: 0.97

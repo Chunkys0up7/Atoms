@@ -3,9 +3,9 @@ category: SYSTEM
 type: SYSTEM
 name: Document Management System
 version: 1.0.0
-status: ACTIVE
+status: DRAFT
 owner: Michael Rodriguez
-team: Risk Management
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: null
@@ -26,9 +26,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.84
-  avg_cycle_time_mins: 1
-  error_rate: 0.068
-  compliance_score: 1.0
-steward: David Thompson
-owning_team: Risk Management
+  automation_level: 0.82
+  avg_cycle_time_mins: 8
+  error_rate: 0.086
+  compliance_score: 0.9

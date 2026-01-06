@@ -4,7 +4,7 @@ type: PROCESS
 name: System Performs Identity Verification
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
+owner: Robert Kim
 team: Underwriting
 ontologyDomain: Home Lending
 criticality: HIGH
@@ -27,10 +27,11 @@ content:
   - Status updated in system
 edges:
 - type: RELATED_TO
+  targetId: atom-bo-fraud-detection
+- type: RELATED_TO
   targetId: atom-bo-fraud-review
 metrics:
-  automation_level: 0.88
-  avg_cycle_time_mins: 20
-  error_rate: 0.064
-  compliance_score: 0.89
-owning_team: Underwriting
+  automation_level: 0.9
+  avg_cycle_time_mins: 14
+  error_rate: 0.063
+  compliance_score: 0.93

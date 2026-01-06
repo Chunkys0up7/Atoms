@@ -4,8 +4,8 @@ type: PROCESS
 name: Processor Verifies All Liabilities
 version: 1.0.0
 status: ACTIVE
-owner: James Martinez
-team: Post-Closing
+owner: Jennifer Park
+team: Processing
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-processing
@@ -27,8 +27,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.42
-  avg_cycle_time_mins: 205
-  error_rate: 0.023
-  compliance_score: 0.88
-owning_team: Post-Closing
+  automation_level: 0.38
+  avg_cycle_time_mins: 275
+  error_rate: 0.093
+  compliance_score: 0.87

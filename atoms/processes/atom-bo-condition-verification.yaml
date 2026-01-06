@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Verifies Condition Fulfillment
 version: 1.0.0
-status: ACTIVE
+status: DRAFT
 owner: James Martinez
-team: Technology
+team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-underwriting
@@ -26,10 +26,11 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges: []
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-expired-condition-review
 metrics:
-  automation_level: 0.28
-  avg_cycle_time_mins: 471
-  error_rate: 0.016
-  compliance_score: 0.92
-owning_team: Technology
+  automation_level: 0.2
+  avg_cycle_time_mins: 454
+  error_rate: 0.047
+  compliance_score: 0.99

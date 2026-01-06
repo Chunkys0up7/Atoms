@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
     metrics: `${API_BASE_URL}/api/rag/metrics`,
     query: `${API_BASE_URL}/api/rag/query`,
   },
+  processes: `${API_BASE_URL}/api/processes`,
+  tasks: `${API_BASE_URL}/api/tasks`,
 };
 
 export const ATOM_COLORS: Record<AtomType, string> = {

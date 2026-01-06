@@ -3,9 +3,9 @@ category: BACK_OFFICE
 type: PROCESS
 name: Processor Reconciles Funding Amount
 version: 1.0.0
-status: DEPRECATED
-owner: Michael Rodriguez
-team: Underwriting
+status: ACTIVE
+owner: Lisa Anderson
+team: Post-Closing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-closing
@@ -29,11 +29,8 @@ content:
 edges:
 - type: ENABLES
   targetId: atom-sys-deed-recording
-- type: RELATED_TO
-  targetId: atom-bo-funding-package-review
 metrics:
-  automation_level: 0.44
-  avg_cycle_time_mins: 462
-  error_rate: 0.036
-  compliance_score: 0.86
-owning_team: Underwriting
+  automation_level: 0.27
+  avg_cycle_time_mins: 194
+  error_rate: 0.08
+  compliance_score: 0.91

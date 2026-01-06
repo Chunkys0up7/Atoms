@@ -4,8 +4,8 @@ type: ROLE
 name: Loan Officer
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Loan Origination
+owner: Amanda White
+team: Processing
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: null
@@ -25,9 +25,7 @@ content:
   - Status updated in system
 edges: []
 metrics:
-  automation_level: 0.31
-  avg_cycle_time_mins: 143
-  error_rate: 0.015
-  compliance_score: 0.97
-steward: Sarah Chen
-owning_team: Loan Origination
+  automation_level: 0.03
+  avg_cycle_time_mins: 262
+  error_rate: 0.059
+  compliance_score: 0.98

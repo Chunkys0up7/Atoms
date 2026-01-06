@@ -3,6 +3,9 @@ import secrets
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from .routes import (
     anomaly_detection,

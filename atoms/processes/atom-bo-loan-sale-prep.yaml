@@ -5,7 +5,7 @@ name: Processor Prepares Loan for Sale
 version: 1.0.0
 status: ACTIVE
 owner: Michael Rodriguez
-team: Risk Management
+team: Technology
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-post-closing
@@ -37,12 +37,9 @@ edges:
 - type: RELATED_TO
   targetId: atom-bo-document-audit
 - type: RELATED_TO
-  targetId: atom-bo-loan-delivery-prep
-- type: RELATED_TO
-  targetId: atom-sys-loan-delivery-submission
+  targetId: atom-bo-investor-reporting
 metrics:
-  automation_level: 0.01
-  avg_cycle_time_mins: 430
-  error_rate: 0.013
-  compliance_score: 0.9
-owning_team: Risk Management
+  automation_level: 0.49
+  avg_cycle_time_mins: 380
+  error_rate: 0.069
+  compliance_score: 0.91

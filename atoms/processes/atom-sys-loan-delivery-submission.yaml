@@ -3,9 +3,9 @@ category: SYSTEM
 type: PROCESS
 name: System Submits Loan to Secondary Market
 version: 1.0.0
-status: ACTIVE
-owner: James Martinez
-team: Technology
+status: DRAFT
+owner: Amanda White
+team: Underwriting
 ontologyDomain: Home Lending
 criticality: HIGH
 phaseId: phase-post-closing
@@ -30,10 +30,13 @@ edges:
 - type: USES_COMPONENT
   targetId: atom-sys-los-platform
 - type: RELATED_TO
+  targetId: atom-bo-servicing-transfer-prep
+- type: RELATED_TO
   targetId: atom-bo-investor-reporting
+- type: RELATED_TO
+  targetId: atom-bo-compliance-audit
 metrics:
-  automation_level: 0.89
-  avg_cycle_time_mins: 18
-  error_rate: 0.079
-  compliance_score: 0.95
-owning_team: Technology
+  automation_level: 0.85
+  avg_cycle_time_mins: 49
+  error_rate: 0.037
+  compliance_score: 0.96

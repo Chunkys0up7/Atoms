@@ -4,8 +4,8 @@ type: DECISION
 name: Loan Decision (Approve/Deny/Suspend)
 version: 1.0.0
 status: ACTIVE
-owner: Jennifer Park
-team: Underwriting
+owner: Sarah Chen
+team: Loan Origination
 ontologyDomain: Home Lending
 criticality: CRITICAL
 phaseId: phase-underwriting
@@ -39,14 +39,13 @@ edges:
 - type: GOVERNED_BY
   targetId: atom-ctrl-credit-policy
 - type: RELATED_TO
-  targetId: atom-bo-underwriting-exception-request
+  targetId: atom-bo-exception-approval
 - type: RELATED_TO
-  targetId: atom-bo-manual-review-trigger
+  targetId: atom-bo-loan-modification-review
 - type: RELATED_TO
-  targetId: atom-bo-appeal-review
+  targetId: atom-bo-loan-denial-documentation
 metrics:
-  automation_level: 0.05
-  avg_cycle_time_mins: 31
-  error_rate: 0.087
-  compliance_score: 0.87
-owning_team: Underwriting
+  automation_level: 0.32
+  avg_cycle_time_mins: 120
+  error_rate: 0.099
+  compliance_score: 0.99

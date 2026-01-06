@@ -4,7 +4,7 @@ type: PROCESS
 name: Processor Requests Asset Verification Letter
 version: 1.0.0
 status: ACTIVE
-owner: David Thompson
+owner: Jennifer Park
 team: Underwriting
 ontologyDomain: Home Lending
 criticality: MEDIUM
@@ -27,10 +27,11 @@ content:
   - Process completed successfully
   - All required outputs generated
   - Status updated in system
-edges: []
+edges:
+- type: RELATED_TO
+  targetId: atom-bo-down-payment-verification
 metrics:
-  automation_level: 0.07
-  avg_cycle_time_mins: 382
+  automation_level: 0.26
+  avg_cycle_time_mins: 389
   error_rate: 0.034
   compliance_score: 0.98
-owning_team: Underwriting

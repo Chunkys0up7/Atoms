@@ -1,6 +1,4 @@
 id: module-pre-qualification
-version: 1.0.0
-workflow_type: BPM
 name: Pre-Qualification
 description: Initial credit check, debt-to-income calculation, and pre-approval letter
   generation

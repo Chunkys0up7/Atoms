@@ -1,0 +1,22 @@
+---
+title: Customer Requests Pre-Qualification
+id: atom-cust-pre-qual-request
+type: PROCESS
+---
+# Customer Requests Pre-Qualification
+
+**ID:** `atom-cust-pre-qual-request`  
+
+**Type:** `PROCESS`  
+
+**Category:** `CUSTOMER_FACING`  
+
+
+
+## Content
+
+{'summary': 'Customer initiates pre-qualification through online portal or phone call to determine initial loan eligibility', 'description': 'The pre-qualification request is the first step in the home lending journey where a prospective borrower expresses interest in obtaining a mortgage loan. This process allows customers to understand their borrowing capacity before committing to a full application. The bank uses this opportunity to capture initial customer information, assess basic eligibility, and provide a preliminary loan amount estimate. This is a non-binding process that helps customers shop for homes within their price range and gives the bank an early view of potential loan volume.', 'steps': ['Customer accesses pre-qualification portal via bank website or mobile app', 'Customer provides basic information including: full name, contact information, employment status, estimated annual income, estimated monthly debts, desired loan amount, and property type', 'Customer consents to soft credit inquiry (does not impact credit score)', 'System validates input data format and completeness', 'System creates pre-qualification request record in LOS', 'Customer receives confirmation email with request ID'], 'purpose': 'Enable customers to quickly assess their mortgage eligibility and obtain a preliminary loan amount estimate without the commitment of a full application. This improves customer experience by providing transparency early in the process and helps the bank identify qualified leads.', 'business_context': 'Pre-qualification is a critical customer acquisition tool in competitive mortgage markets. It allows the bank to engage customers early, build trust, and position themselves as the preferred lender. The process must be fast (typically under 24 hours) and user-friendly to compete with digital-first lenders. Pre-qualification letters are often required by real estate agents before showing properties, making this a gatekeeper process.', 'inputs': ['Customer name and contact information', 'Estimated annual income', 'Estimated monthly debt payments', 'Desired loan amount', 'Property type (purchase/refinance)', 'Customer consent for credit inquiry'], 'outputs': ['Pre-qualification request record', 'Request ID for tracking', 'Confirmation notification to customer'], 'prerequisites': ['Customer must be 18 years or older', 'Customer must provide valid contact information', 'Customer must consent to credit inquiry'], 'success_criteria': ['Request successfully created in system', 'Customer receives confirmation within 5 minutes', 'All required fields captured accurately', 'Request routed to appropriate loan officer within 1 hour']}
+
+## Relationships
+
+*No direct relationships defined.*

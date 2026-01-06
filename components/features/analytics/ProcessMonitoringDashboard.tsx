@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../../constants';
 
 interface Process {
   id: string;
@@ -67,6 +68,9 @@ export default function ProcessMonitoringDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<'overview' | 'processes' | 'tasks' | 'workload'>('overview');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showStartModal, setShowStartModal] = useState(false);
+  const [newProcessDefId, setNewProcessDefId] = useState('document_approval');
+  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -82,10 +86,10 @@ export default function ProcessMonitoringDashboard() {
 
       // Load all data in parallel
       const [processesRes, tasksRes, statsRes, workloadRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/processes?limit=50`),
-        fetch(`http://localhost:8000/api/tasks?limit=50`),
-        fetch(`http://localhost:8000/api/processes/stats/summary`),
-        fetch(`http://localhost:8000/api/tasks/stats/workload`)
+        fetch(`${API_ENDPOINTS.processes}?limit=50`),
+        fetch(`${API_ENDPOINTS.tasks}?limit=50`),
+        fetch(`${API_ENDPOINTS.processes}/stats/summary`),
+        fetch(`${API_ENDPOINTS.tasks}/stats/workload`)
       ]);
 
       if (processesRes.ok) {
@@ -332,75 +336,75 @@ export default function ProcessMonitoringDashboard() {
             {processes
               .filter(p => statusFilter === 'all' || p.status === statusFilter)
               .map((process, idx) => (
-              <tr key={process.id} style={{ borderBottom: idx < processes.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                <td style={{ padding: '12px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{process.process_name}</div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>{process.process_type}</div>
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    backgroundColor: getStatusColor(process.status) + '20',
-                    color: getStatusColor(process.status)
-                  }}>
-                    {process.status}
-                  </span>
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <div style={{ width: '100px' }}>
-                    <div style={{
-                      height: '8px',
-                      backgroundColor: '#e5e7eb',
-                      borderRadius: '4px',
-                      overflow: 'hidden'
+                <tr key={process.id} style={{ borderBottom: idx < processes.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{process.process_name}</div>
+                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{process.process_type}</div>
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      backgroundColor: getStatusColor(process.status) + '20',
+                      color: getStatusColor(process.status)
                     }}>
+                      {process.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ width: '100px' }}>
                       <div style={{
-                        height: '100%',
-                        width: `${process.progress_percentage}%`,
-                        backgroundColor: '#3b82f6',
-                        transition: 'width 0.3s'
-                      }} />
+                        height: '8px',
+                        backgroundColor: '#e5e7eb',
+                        borderRadius: '4px',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${process.progress_percentage}%`,
+                          backgroundColor: '#3b82f6',
+                          transition: 'width 0.3s'
+                        }} />
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                        {Math.round(process.progress_percentage)}%
+                      </div>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
-                      {Math.round(process.progress_percentage)}%
-                    </div>
-                  </div>
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    backgroundColor: getSLAColor(process.sla_status) + '20',
-                    color: getSLAColor(process.sla_status)
-                  }}>
-                    {process.sla_status.replace('_', ' ')}
-                  </span>
-                </td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    backgroundColor: getPriorityColor(process.priority) + '20',
-                    color: getPriorityColor(process.priority)
-                  }}>
-                    {process.priority}
-                  </span>
-                </td>
-                <td style={{ padding: '12px', fontSize: '13px', color: '#374151' }}>
-                  {process.assigned_to || 'Unassigned'}
-                </td>
-                <td style={{ padding: '12px', fontSize: '12px', color: '#6b7280' }}>
-                  {formatDate(process.created_at)}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      backgroundColor: getSLAColor(process.sla_status) + '20',
+                      color: getSLAColor(process.sla_status)
+                    }}>
+                      {process.sla_status.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      backgroundColor: getPriorityColor(process.priority) + '20',
+                      color: getPriorityColor(process.priority)
+                    }}>
+                      {process.priority}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', fontSize: '13px', color: '#374151' }}>
+                    {process.assigned_to || 'Unassigned'}
+                  </td>
+                  <td style={{ padding: '12px', fontSize: '12px', color: '#6b7280' }}>
+                    {formatDate(process.created_at)}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
         {processes.filter(p => statusFilter === 'all' || p.status === statusFilter).length === 0 && (
@@ -610,7 +614,84 @@ export default function ProcessMonitoringDashboard() {
           </svg>
           Refresh
         </button>
+        <button
+          onClick={() => setShowStartModal(true)}
+          className="btn btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}
+        >
+          <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Start Request
+        </button>
       </div>
+
+      {showStartModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '24px', width: '400px' }}>
+            <h3 style={{ marginTop: 0 }}>Start New Process</h3>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Process Definition ID</label>
+              <input
+                type="text"
+                value={newProcessDefId}
+                onChange={(e) => setNewProcessDefId(e.target.value)}
+                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+              />
+              <small style={{ color: '#666' }}>Try 'document_approval'</small>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowStartModal(false)}
+                style={{ padding: '8px 16px', background: 'none', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!newProcessDefId) return;
+                  setStarting(true);
+                  try {
+                    const res = await fetch(API_ENDPOINTS.processes, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        process_definition_id: newProcessDefId,
+                        process_name: `${newProcessDefId} - ${new Date().toLocaleTimeString()}`,
+                        process_type: 'workflow',
+                        initiated_by: 'user-demo'
+                      })
+                    });
+                    if (!res.ok) throw new Error('Failed to start process');
+                    setShowStartModal(false);
+                    loadDashboardData();
+                  } catch (e) {
+                    alert('Error starting process: ' + e);
+                  } finally {
+                    setStarting(false);
+                  }
+                }}
+                disabled={starting}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: starting ? 'wait' : 'pointer',
+                  opacity: starting ? 0.7 : 1
+                }}
+              >
+                {starting ? 'Starting...' : 'Start'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Tabs */}
       <div style={{
@@ -650,6 +731,6 @@ export default function ProcessMonitoringDashboard() {
       {selectedTab === 'processes' && renderProcesses()}
       {selectedTab === 'tasks' && renderTasks()}
       {selectedTab === 'workload' && renderWorkload()}
-    </div>
+    </div >
   );
 }
