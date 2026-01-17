@@ -1,0 +1,1712 @@
+# Process-Aware Knowledge Base Architecture
+## LangGraph + RAG with Ontology-Driven Retrieval
+
+**Version:** 1.0 POC  
+**Tech Stack:** LangGraph, LangChain, Bedrock, S3, Streamlit  
+**Date:** January 2026
+
+---
+
+## Table of Contents
+1. [Architecture Overview](#architecture-overview)
+2. [Knowledge Metadata Schema](#knowledge-metadata-schema)
+3. [LangGraph State Management](#langgraph-state-management)
+4. [Tiered Retrieval Strategy](#tiered-retrieval-strategy)
+5. [Complete Implementation](#complete-implementation)
+6. [Deployment Guide](#deployment-guide)
+
+---
+
+## Architecture Overview
+
+### Core Principles
+- **Process Fidelity**: Graph structure mirrors business process flow
+- **Ontology Awareness**: Agent understands current context and process position
+- **Tiered Retrieval**: Prioritize step-relevant knowledge while maintaining global access
+- **Context Preservation**: Track customer data, completed steps, and conversation flow
+
+### High-Level Flow
+```
+Customer Query
+    ↓
+[LangGraph State] → Current Step Context
+    ↓
+[Tiered Retrieval] → Primary (step-scoped) + Secondary (global)
+    ↓
+[LLM with Context] → Process-aware response
+    ↓
+[State Update] → Track data, intent, progress
+    ↓
+[Routing Decision] → Stay, progress, or handle tangent
+```
+
+---
+
+## Knowledge Metadata Schema
+
+### 1. Document Metadata Structure
+
+Each knowledge document stored in S3 includes rich metadata for retrieval and contextualization.
+
+```json
+{
+  "doc_id": "escrow_payments_explained",
+  "doc_type": "knowledge_article",
+  "version": "2.1",
+  "created_at": "2024-12-15",
+  "updated_at": "2025-01-10",
+  
+  "content": {
+    "title": "Understanding Escrow Payments",
+    "summary": "Explanation of how escrow accounts work for mortgage payments",
+    "body_path": "s3://kb-bucket/knowledge/escrow_payments_explained.md",
+    "format": "markdown"
+  },
+  
+  "process_mapping": {
+    "primary_steps": [
+      "mortgage_servicing",
+      "payment_management",
+      "escrow_analysis"
+    ],
+    "secondary_steps": [
+      "loan_application",
+      "closing_process"
+    ],
+    "lifecycle_stage": "servicing"
+  },
+  
+  "semantic_tags": {
+    "topics": ["escrow", "payments", "insurance", "property_tax", "impound"],
+    "products": ["conventional_mortgage", "fha_loan", "va_loan"],
+    "customer_segments": ["homeowner", "first_time_buyer"],
+    "regulatory": ["RESPA", "Regulation_X"]
+  },
+  
+  "intent_mapping": {
+    "common_questions": [
+      "how does escrow work",
+      "why did my payment change",
+      "escrow shortage explanation",
+      "can I pay taxes myself",
+      "escrow refund"
+    ],
+    "keywords": [
+      "escrow account",
+      "impound account", 
+      "payment increase",
+      "escrow analysis",
+      "cushion"
+    ]
+  },
+  
+  "retrieval_config": {
+    "priority_weight": 0.8,
+    "min_relevance_score": 0.65,
+    "max_chunk_size": 512,
+    "overlap": 50
+  },
+  
+  "relationships": {
+    "prerequisites": ["mortgage_basics", "property_tax_overview"],
+    "related_docs": ["payment_shock_explained", "tax_assessment_changes"],
+    "supersedes": ["escrow_payments_v1"]
+  },
+  
+  "compliance": {
+    "review_required": false,
+    "approved_by": "compliance_team",
+    "restricted_states": [],
+    "disclaimers": ["general_info_only"]
+  }
+}
+```
+
+### 2. Process Ontology Schema
+
+Defines the business process structure and knowledge requirements.
+
+```json
+{
+  "process_definition": {
+    "process_id": "mortgage_lifecycle",
+    "process_name": "Mortgage Customer Journey",
+    "version": "3.2",
+    "owner": "customer_experience_team"
+  },
+  
+  "steps": {
+    "loan_application": {
+      "step_id": "loan_application",
+      "step_name": "Loan Application",
+      "sequence": 1,
+      "description": "Customer applies for mortgage loan",
+      
+      "required_data": [
+        {
+          "field": "employment_type",
+          "type": "string",
+          "validation": ["W2", "self_employed", "retired", "other"]
+        },
+        {
+          "field": "monthly_income",
+          "type": "number",
+          "validation": {"min": 0}
+        },
+        {
+          "field": "property_address",
+          "type": "address",
+          "validation": "required"
+        }
+      ],
+      
+      "knowledge_requirements": {
+        "primary_knowledge": [
+          "doc://income_verification_guide.md",
+          "doc://acceptable_documents.md",
+          "doc://self_employment_requirements.md"
+        ],
+        "supporting_knowledge": [
+          "doc://loan_programs_overview.md",
+          "doc://credit_requirements.md"
+        ],
+        "tags": ["application", "income", "documentation", "prequalification"]
+      },
+      
+      "transitions": {
+        "on_complete": {
+          "conditions": [
+            {"all_required_data": true},
+            {"documents_uploaded": true}
+          ],
+          "next_step": "document_review"
+        },
+        "on_incomplete": {
+          "stay": true,
+          "prompt_missing": true
+        },
+        "allowed_jumps": ["product_selection", "faq"]
+      },
+      
+      "common_intents": [
+        "what_documents_needed",
+        "income_calculation",
+        "self_employed_verification",
+        "timeline_question",
+        "eligibility_check"
+      ],
+      
+      "off_topic_handling": {
+        "allow_tangents": true,
+        "return_prompt": "Is there anything else about your loan application I can help with?",
+        "escalation_triggers": ["rate_lock", "appraisal_issues"]
+      }
+    },
+    
+    "mortgage_servicing": {
+      "step_id": "mortgage_servicing",
+      "step_name": "Loan Servicing",
+      "sequence": 5,
+      "description": "Ongoing mortgage payment and account management",
+      
+      "required_data": [
+        {
+          "field": "account_number",
+          "type": "string",
+          "validation": "^[0-9]{10}$"
+        }
+      ],
+      
+      "knowledge_requirements": {
+        "primary_knowledge": [
+          "doc://escrow_payments_explained.md",
+          "doc://payment_methods.md",
+          "doc://escrow_analysis_process.md",
+          "doc://property_tax_changes.md"
+        ],
+        "supporting_knowledge": [
+          "doc://autopay_setup.md",
+          "doc://payment_history.md",
+          "doc://principal_prepayment.md"
+        ],
+        "tags": ["servicing", "payments", "escrow", "account_management"]
+      },
+      
+      "transitions": {
+        "on_complete": null,
+        "allowed_jumps": [
+          "refinance_inquiry",
+          "payoff_request", 
+          "modification_request",
+          "insurance_products"
+        ]
+      },
+      
+      "common_intents": [
+        "payment_amount_question",
+        "escrow_shortage",
+        "payment_method_change",
+        "payment_history_request",
+        "prepayment_question",
+        "tax_insurance_changes"
+      ],
+      
+      "off_topic_handling": {
+        "allow_tangents": true,
+        "common_tangents": ["insurance_products", "heloc_inquiry", "refinance"],
+        "return_prompt": "Anything else about your mortgage account I can help with today?"
+      }
+    },
+    
+    "insurance_products": {
+      "step_id": "insurance_products",
+      "step_name": "Insurance Products",
+      "sequence": null,
+      "description": "Optional insurance product inquiries (tangential)",
+      "is_tangential": true,
+      
+      "required_data": [],
+      
+      "knowledge_requirements": {
+        "primary_knowledge": [
+          "doc://pet_insurance_options.md",
+          "doc://home_warranty_coverage.md",
+          "doc://life_insurance_products.md"
+        ],
+        "supporting_knowledge": [],
+        "tags": ["insurance", "optional_products", "cross_sell"]
+      },
+      
+      "transitions": {
+        "return_to_primary": true,
+        "track_interest": true
+      },
+      
+      "common_intents": [
+        "pet_insurance_inquiry",
+        "home_warranty_question",
+        "life_insurance_options"
+      ]
+    }
+  },
+  
+  "global_knowledge": {
+    "always_available": [
+      "doc://faq_general.md",
+      "doc://contact_information.md",
+      "doc://hours_of_operation.md",
+      "doc://privacy_policy.md"
+    ],
+    "tags": ["faq", "general", "contact"]
+  }
+}
+```
+
+### 3. Vector Store Metadata Format
+
+Metadata attached to each embedded chunk for filtering during retrieval.
+
+```python
+# Example metadata for vector store (FAISS/Chroma/OpenSearch)
+chunk_metadata = {
+    # Document identity
+    "doc_id": "escrow_payments_explained",
+    "chunk_id": "escrow_payments_explained_chunk_3",
+    "chunk_index": 3,
+    
+    # Process mapping (for filtering)
+    "primary_steps": ["mortgage_servicing", "payment_management"],
+    "secondary_steps": ["loan_application"],
+    "is_global": False,
+    
+    # Semantic tagging
+    "topics": ["escrow", "payments", "insurance"],
+    "product_types": ["conventional_mortgage", "fha_loan"],
+    
+    # Retrieval hints
+    "priority_weight": 0.8,
+    "content_type": "explanation",
+    
+    # Source tracking
+    "source_path": "s3://kb-bucket/knowledge/escrow_payments_explained.md",
+    "section": "How Escrow Works",
+    
+    # Versioning
+    "doc_version": "2.1",
+    "last_updated": "2025-01-10"
+}
+```
+
+---
+
+## LangGraph State Management
+
+### 1. Process State Schema
+
+The state object that flows through the LangGraph, tracking all context.
+
+```python
+from typing import TypedDict, Annotated, List, Dict, Optional
+from langgraph.graph import add_messages
+from datetime import datetime
+
+class ProcessState(TypedDict):
+    """Complete state for process-aware conversation"""
+    
+    # ============ CONVERSATION CONTEXT ============
+    messages: Annotated[List[dict], add_messages]  # Chat history
+    current_question: str  # Latest user query
+    
+    # ============ PROCESS TRACKING ============
+    process_id: str  # e.g., "mortgage_lifecycle"
+    current_step: str  # e.g., "mortgage_servicing"
+    step_sequence: int  # Position in process
+    
+    completed_steps: List[str]  # Steps user has finished
+    skipped_steps: List[str]  # Steps user explicitly skipped
+    
+    step_progress: Dict[str, float]  # {step_id: completion_percentage}
+    
+    # ============ CUSTOMER DATA ============
+    customer_data: Dict[str, any]  # Collected structured data
+    customer_id: Optional[str]  # If identified
+    session_id: str  # Unique session identifier
+    
+    # Required vs collected tracking
+    required_fields: Dict[str, List[str]]  # {step_id: [field_names]}
+    collected_fields: Dict[str, Dict[str, any]]  # {step_id: {field: value}}
+    
+    # ============ INTENT & CONTEXT ============
+    last_intent: str  # on_topic, off_topic, navigation, clarification
+    intent_confidence: float  # 0.0 - 1.0
+    intent_history: List[Dict[str, any]]  # Track intent changes
+    
+    conversation_topic: str  # High-level topic tracking
+    topic_switches: int  # Count of off-topic diversions
+    
+    # ============ KNOWLEDGE CONTEXT ============
+    knowledge_sources: Dict[str, List[str]]  # {priority_level: [doc_ids]}
+    # Example: {"primary": ["doc1", "doc2"], "secondary": ["doc3"]}
+    
+    relevant_docs: List[Dict[str, any]]  # Retrieved docs with metadata
+    retrieval_scores: Dict[str, float]  # {doc_id: relevance_score}
+    
+    # Track what knowledge has been used
+    knowledge_used: List[str]  # doc_ids presented to customer
+    
+    # ============ ROUTING & FLOW ============
+    next_possible_steps: List[str]  # Valid transitions from current step
+    can_progress: bool  # Ready to move to next step?
+    
+    routing_reason: str  # Why we're in current state
+    should_escalate: bool  # Needs human handoff?
+    escalation_reason: Optional[str]
+    
+    # ============ ANALYTICS & DEBUGGING ============
+    turn_count: int  # Number of exchanges
+    started_at: datetime
+    last_updated: datetime
+    
+    # Track all retrieval operations
+    retrieval_history: List[Dict[str, any]]
+    
+    # Agent decision log
+    agent_decisions: List[Dict[str, any]]
+    
+    # ============ ERROR HANDLING ============
+    errors: List[Dict[str, any]]  # Track any issues
+    retry_count: int
+```
+
+### 2. State Initialization
+
+```python
+def initialize_state(process_id: str, session_id: str) -> ProcessState:
+    """Initialize a new process state"""
+    
+    # Load process ontology
+    ontology = load_process_ontology(process_id)
+    first_step = ontology['steps'][0]['step_id']
+    
+    return ProcessState(
+        # Conversation
+        messages=[],
+        current_question="",
+        
+        # Process
+        process_id=process_id,
+        current_step=first_step,
+        step_sequence=0,
+        completed_steps=[],
+        skipped_steps=[],
+        step_progress={},
+        
+        # Customer
+        customer_data={},
+        customer_id=None,
+        session_id=session_id,
+        required_fields={},
+        collected_fields={},
+        
+        # Intent
+        last_intent="",
+        intent_confidence=0.0,
+        intent_history=[],
+        conversation_topic="",
+        topic_switches=0,
+        
+        # Knowledge
+        knowledge_sources={"primary": [], "secondary": []},
+        relevant_docs=[],
+        retrieval_scores={},
+        knowledge_used=[],
+        
+        # Routing
+        next_possible_steps=get_valid_transitions(first_step, ontology),
+        can_progress=False,
+        routing_reason="initial_state",
+        should_escalate=False,
+        escalation_reason=None,
+        
+        # Analytics
+        turn_count=0,
+        started_at=datetime.now(),
+        last_updated=datetime.now(),
+        retrieval_history=[],
+        agent_decisions=[],
+        
+        # Errors
+        errors=[],
+        retry_count=0
+    )
+```
+
+### 3. State Update Functions
+
+```python
+def update_state_with_message(state: ProcessState, role: str, content: str) -> ProcessState:
+    """Add message to conversation history"""
+    return {
+        **state,
+        "messages": state["messages"] + [{"role": role, "content": content}],
+        "turn_count": state["turn_count"] + 1,
+        "last_updated": datetime.now()
+    }
+
+def update_state_with_retrieval(
+    state: ProcessState, 
+    primary_docs: List[Dict], 
+    secondary_docs: List[Dict]
+) -> ProcessState:
+    """Record knowledge retrieval operation"""
+    
+    retrieval_record = {
+        "timestamp": datetime.now().isoformat(),
+        "query": state["current_question"],
+        "step": state["current_step"],
+        "primary_doc_count": len(primary_docs),
+        "secondary_doc_count": len(secondary_docs),
+        "primary_docs": [d["doc_id"] for d in primary_docs],
+        "secondary_docs": [d["doc_id"] for d in secondary_docs]
+    }
+    
+    return {
+        **state,
+        "knowledge_sources": {
+            "primary": [d["doc_id"] for d in primary_docs],
+            "secondary": [d["doc_id"] for d in secondary_docs]
+        },
+        "relevant_docs": primary_docs + secondary_docs,
+        "retrieval_scores": {
+            d["doc_id"]: d.get("score", 0.0) 
+            for d in (primary_docs + secondary_docs)
+        },
+        "retrieval_history": state["retrieval_history"] + [retrieval_record],
+        "last_updated": datetime.now()
+    }
+
+def update_state_with_intent(
+    state: ProcessState, 
+    intent: str, 
+    confidence: float
+) -> ProcessState:
+    """Track intent classification"""
+    
+    intent_record = {
+        "timestamp": datetime.now().isoformat(),
+        "intent": intent,
+        "confidence": confidence,
+        "question": state["current_question"],
+        "step": state["current_step"]
+    }
+    
+    # Track topic switches
+    topic_switches = state["topic_switches"]
+    if intent == "off_topic":
+        topic_switches += 1
+    
+    return {
+        **state,
+        "last_intent": intent,
+        "intent_confidence": confidence,
+        "intent_history": state["intent_history"] + [intent_record],
+        "topic_switches": topic_switches,
+        "last_updated": datetime.now()
+    }
+
+def update_state_with_data(
+    state: ProcessState,
+    field: str,
+    value: any
+) -> ProcessState:
+    """Collect customer data"""
+    
+    current_step = state["current_step"]
+    
+    # Update collected fields for current step
+    collected = state["collected_fields"].get(current_step, {})
+    collected[field] = value
+    
+    # Update customer data
+    customer_data = {**state["customer_data"], field: value}
+    
+    # Check if step is now complete
+    required = state["required_fields"].get(current_step, [])
+    can_progress = all(f in collected for f in required)
+    
+    return {
+        **state,
+        "customer_data": customer_data,
+        "collected_fields": {
+            **state["collected_fields"],
+            current_step: collected
+        },
+        "can_progress": can_progress,
+        "last_updated": datetime.now()
+    }
+
+def transition_to_step(
+    state: ProcessState,
+    next_step: str,
+    reason: str
+) -> ProcessState:
+    """Move to a different process step"""
+    
+    ontology = load_process_ontology(state["process_id"])
+    step_config = ontology["steps"][next_step]
+    
+    # Mark current step as complete if progressing
+    completed = state["completed_steps"]
+    if reason == "step_complete" and state["current_step"] not in completed:
+        completed = completed + [state["current_step"]]
+    
+    # Record decision
+    decision_record = {
+        "timestamp": datetime.now().isoformat(),
+        "from_step": state["current_step"],
+        "to_step": next_step,
+        "reason": reason,
+        "data_complete": state["can_progress"]
+    }
+    
+    return {
+        **state,
+        "current_step": next_step,
+        "step_sequence": step_config.get("sequence", state["step_sequence"] + 1),
+        "completed_steps": completed,
+        "next_possible_steps": get_valid_transitions(next_step, ontology),
+        "can_progress": False,  # Reset for new step
+        "routing_reason": reason,
+        "required_fields": {
+            **state["required_fields"],
+            next_step: [f["field"] for f in step_config.get("required_data", [])]
+        },
+        "agent_decisions": state["agent_decisions"] + [decision_record],
+        "last_updated": datetime.now()
+    }
+```
+
+### 4. State Persistence
+
+```python
+import json
+import boto3
+
+class StateManager:
+    """Manage state persistence in S3 or DynamoDB"""
+    
+    def __init__(self, s3_bucket: str):
+        self.s3 = boto3.client('s3')
+        self.bucket = s3_bucket
+    
+    def save_state(self, session_id: str, state: ProcessState):
+        """Persist state to S3"""
+        key = f"sessions/{session_id}/state.json"
+        
+        # Convert datetime objects to strings
+        serializable_state = self._prepare_for_serialization(state)
+        
+        self.s3.put_object(
+            Bucket=self.bucket,
+            Key=key,
+            Body=json.dumps(serializable_state, indent=2),
+            ContentType='application/json'
+        )
+    
+    def load_state(self, session_id: str) -> Optional[ProcessState]:
+        """Load state from S3"""
+        key = f"sessions/{session_id}/state.json"
+        
+        try:
+            response = self.s3.get_object(Bucket=self.bucket, Key=key)
+            state_dict = json.loads(response['Body'].read())
+            return self._deserialize_state(state_dict)
+        except self.s3.exceptions.NoSuchKey:
+            return None
+    
+    def _prepare_for_serialization(self, state: ProcessState) -> dict:
+        """Convert state for JSON serialization"""
+        state_copy = dict(state)
+        state_copy['started_at'] = state['started_at'].isoformat()
+        state_copy['last_updated'] = state['last_updated'].isoformat()
+        return state_copy
+    
+    def _deserialize_state(self, state_dict: dict) -> ProcessState:
+        """Convert JSON back to ProcessState"""
+        state_dict['started_at'] = datetime.fromisoformat(state_dict['started_at'])
+        state_dict['last_updated'] = datetime.fromisoformat(state_dict['last_updated'])
+        return ProcessState(**state_dict)
+```
+
+---
+
+## Tiered Retrieval Strategy
+
+### 1. Multi-Tier Retrieval Pipeline
+
+```python
+from langchain.vectorstores import FAISS
+from langchain_aws import BedrockEmbeddings
+from typing import List, Dict
+
+class TieredRetriever:
+    """Implements ontology-aware tiered retrieval"""
+    
+    def __init__(
+        self,
+        vector_store: FAISS,
+        process_ontology: dict,
+        primary_weight: float = 0.7,
+        secondary_weight: float = 0.3
+    ):
+        self.vector_store = vector_store
+        self.ontology = process_ontology
+        self.primary_weight = primary_weight
+        self.secondary_weight = secondary_weight
+    
+    async def retrieve(
+        self,
+        query: str,
+        current_step: str,
+        top_k: int = 5
+    ) -> Dict[str, List[Dict]]:
+        """
+        Tier 1: Step-scoped retrieval (high priority)
+        Tier 2: Global retrieval (fallback)
+        Tier 3: Related steps (medium priority)
+        """
+        
+        # Get step configuration
+        step_config = self.ontology["steps"].get(current_step, {})
+        primary_tags = step_config.get("knowledge_requirements", {}).get("tags", [])
+        
+        # === TIER 1: Primary (Current Step) ===
+        primary_docs = await self._retrieve_step_scoped(
+            query=query,
+            step_id=current_step,
+            tags=primary_tags,
+            k=3
+        )
+        
+        # === TIER 2: Secondary (Related Steps) ===
+        secondary_steps = self._get_related_steps(current_step)
+        secondary_docs = await self._retrieve_related_steps(
+            query=query,
+            related_steps=secondary_steps,
+            k=3
+        )
+        
+        # === TIER 3: Global (All Knowledge) ===
+        global_docs = await self._retrieve_global(
+            query=query,
+            exclude_steps=[current_step] + secondary_steps,
+            k=4
+        )
+        
+        # === Score Boosting ===
+        primary_docs = self._boost_scores(primary_docs, self.primary_weight)
+        secondary_docs = self._boost_scores(secondary_docs, self.secondary_weight)
+        
+        # === Deduplication ===
+        all_docs = self._deduplicate(
+            primary_docs + secondary_docs + global_docs
+        )
+        
+        # === Sort by boosted score ===
+        all_docs.sort(key=lambda x: x.get("boosted_score", 0), reverse=True)
+        
+        return {
+            "primary": primary_docs[:3],
+            "secondary": secondary_docs[:2],
+            "global": global_docs[:2],
+            "all_ranked": all_docs[:top_k]
+        }
+    
+    async def _retrieve_step_scoped(
+        self,
+        query: str,
+        step_id: str,
+        tags: List[str],
+        k: int
+    ) -> List[Dict]:
+        """Retrieve documents tagged for current step"""
+        
+        # Metadata filter for primary step
+        filter_dict = {
+            "$or": [
+                {"primary_steps": {"$in": [step_id]}},
+                {"topics": {"$in": tags}}
+            ]
+        }
+        
+        results = await self.vector_store.asimilarity_search_with_score(
+            query=query,
+            k=k,
+            filter=filter_dict
+        )
+        
+        return [
+            {
+                "doc_id": doc.metadata["doc_id"],
+                "content": doc.page_content,
+                "metadata": doc.metadata,
+                "score": score,
+                "tier": "primary",
+                "source": f"step:{step_id}"
+            }
+            for doc, score in results
+        ]
+    
+    async def _retrieve_related_steps(
+        self,
+        query: str,
+        related_steps: List[str],
+        k: int
+    ) -> List[Dict]:
+        """Retrieve from related/adjacent process steps"""
+        
+        filter_dict = {
+            "primary_steps": {"$in": related_steps}
+        }
+        
+        results = await self.vector_store.asimilarity_search_with_score(
+            query=query,
+            k=k,
+            filter=filter_dict
+        )
+        
+        return [
+            {
+                "doc_id": doc.metadata["doc_id"],
+                "content": doc.page_content,
+                "metadata": doc.metadata,
+                "score": score,
+                "tier": "secondary",
+                "source": f"related_steps"
+            }
+            for doc, score in results
+        ]
+    
+    async def _retrieve_global(
+        self,
+        query: str,
+        exclude_steps: List[str],
+        k: int
+    ) -> List[Dict]:
+        """Retrieve from entire knowledge base"""
+        
+        # Exclude already-searched steps
+        filter_dict = {
+            "primary_steps": {"$nin": exclude_steps}
+        } if exclude_steps else {}
+        
+        results = await self.vector_store.asimilarity_search_with_score(
+            query=query,
+            k=k,
+            filter=filter_dict if filter_dict else None
+        )
+        
+        return [
+            {
+                "doc_id": doc.metadata["doc_id"],
+                "content": doc.page_content,
+                "metadata": doc.metadata,
+                "score": score,
+                "tier": "global",
+                "source": "global_kb"
+            }
+            for doc, score in results
+        ]
+    
+    def _get_related_steps(self, current_step: str) -> List[str]:
+        """Get steps related to current step"""
+        step_config = self.ontology["steps"].get(current_step, {})
+        
+        related = []
+        
+        # Add allowed jumps
+        related.extend(
+            step_config.get("transitions", {}).get("allowed_jumps", [])
+        )
+        
+        # Add steps that reference this one
+        for step_id, config in self.ontology["steps"].items():
+            if step_id == current_step:
+                continue
+            
+            knowledge_req = config.get("knowledge_requirements", {})
+            if current_step in knowledge_req.get("primary_steps", []):
+                related.append(step_id)
+        
+        return list(set(related))
+    
+    def _boost_scores(
+        self,
+        docs: List[Dict],
+        weight: float
+    ) -> List[Dict]:
+        """Apply boosting weight to scores"""
+        for doc in docs:
+            original_score = doc.get("score", 0.0)
+            doc["boosted_score"] = original_score * weight
+            doc["boost_weight"] = weight
+        return docs
+    
+    def _deduplicate(self, docs: List[Dict]) -> List[Dict]:
+        """Remove duplicate documents, keeping highest scored version"""
+        seen = {}
+        for doc in docs:
+            doc_id = doc["doc_id"]
+            if doc_id not in seen:
+                seen[doc_id] = doc
+            else:
+                # Keep version with higher boosted score
+                if doc.get("boosted_score", 0) > seen[doc_id].get("boosted_score", 0):
+                    seen[doc_id] = doc
+        
+        return list(seen.values())
+```
+
+### 2. Intent Classification
+
+```python
+from langchain_aws import ChatBedrock
+
+class IntentClassifier:
+    """Classify query intent relative to process context"""
+    
+    def __init__(self, llm: ChatBedrock):
+        self.llm = llm
+    
+    async def classify(
+        self,
+        query: str,
+        current_step: str,
+        step_ontology: dict
+    ) -> Dict[str, any]:
+        """
+        Classify intent:
+        - on_topic: Related to current step
+        - off_topic: Unrelated but valid question
+        - navigation: Wants to move to different step
+        - clarification: Process-level question
+        - data_collection: Providing required information
+        """
+        
+        prompt = f"""You are analyzing a customer query in context of a business process.
+
+CURRENT PROCESS STEP: {current_step}
+STEP DESCRIPTION: {step_ontology.get('description', 'N/A')}
+STEP PURPOSE: {', '.join(step_ontology.get('common_intents', []))}
+
+CUSTOMER QUERY: "{query}"
+
+Classify the query intent:
+1. "on_topic" - Question directly relates to {current_step}
+2. "off_topic" - Valid question but unrelated to {current_step}
+3. "navigation" - Customer wants to move to different step
+4. "clarification" - Asking about overall process
+5. "data_collection" - Providing required information
+
+Return JSON:
+{{
+    "intent": "<intent_type>",
+    "confidence": <0.0-1.0>,
+    "reasoning": "<brief explanation>",
+    "detected_step_reference": "<step_id if navigation>",
+    "extracted_data": {{<field: value if data_collection>}}
+}}
+"""
+        
+        response = await self.llm.ainvoke(prompt)
+        
+        # Parse JSON response
+        import json
+        result = json.loads(response.content)
+        
+        return result
+```
+
+### 3. Context-Aware Prompt Builder
+
+```python
+class PromptBuilder:
+    """Build prompts with full ontology and retrieval context"""
+    
+    def build_agent_prompt(
+        self,
+        state: ProcessState,
+        retrieved_docs: Dict[str, List[Dict]],
+        intent: Dict[str, any]
+    ) -> str:
+        """Construct comprehensive prompt for LLM"""
+        
+        ontology = load_process_ontology(state["process_id"])
+        current_step_config = ontology["steps"][state["current_step"]]
+        
+        # === Build knowledge context ===
+        primary_knowledge = self._format_knowledge(
+            retrieved_docs.get("primary", []),
+            "PRIMARY (Current Step)"
+        )
+        
+        secondary_knowledge = self._format_knowledge(
+            retrieved_docs.get("secondary", []),
+            "SECONDARY (Related Steps)"
+        )
+        
+        global_knowledge = self._format_knowledge(
+            retrieved_docs.get("global", []),
+            "GLOBAL (Other Topics)"
+        )
+        
+        # === Build data collection status ===
+        required_fields = state["required_fields"].get(state["current_step"], [])
+        collected_fields = state["collected_fields"].get(state["current_step"], {})
+        missing_fields = [f for f in required_fields if f not in collected_fields]
+        
+        # === Build conversation history context ===
+        recent_messages = state["messages"][-6:]  # Last 3 exchanges
+        conversation_context = "\n".join([
+            f"{msg['role'].upper()}: {msg['content']}"
+            for msg in recent_messages
+        ])
+        
+        # === Construct full prompt ===
+        prompt = f"""You are an intelligent customer service agent helping with: {state['process_id']}
+
+═══════════════════════════════════════════════════════════════
+PROCESS CONTEXT
+═══════════════════════════════════════════════════════════════
+
+Current Step: {state['current_step']}
+Step Description: {current_step_config.get('description', 'N/A')}
+Completed Steps: {', '.join(state['completed_steps']) or 'None'}
+Progress: Step {state['step_sequence']} of process
+
+═══════════════════════════════════════════════════════════════
+DATA COLLECTION STATUS
+═══════════════════════════════════════════════════════════════
+
+Required for this step: {', '.join(required_fields) or 'None'}
+Already collected: {', '.join(collected_fields.keys()) or 'None'}
+Still needed: {', '.join(missing_fields) or 'None - step complete!'}
+
+Can progress to next step: {"YES" if state['can_progress'] else "NO"}
+
+═══════════════════════════════════════════════════════════════
+CUSTOMER QUERY ANALYSIS
+═══════════════════════════════════════════════════════════════
+
+Query: "{state['current_question']}"
+Detected Intent: {intent['intent']} (confidence: {intent['confidence']:.2f})
+Reasoning: {intent['reasoning']}
+
+═══════════════════════════════════════════════════════════════
+KNOWLEDGE CONTEXT (Tiered Retrieval)
+═══════════════════════════════════════════════════════════════
+
+{primary_knowledge}
+
+{secondary_knowledge}
+
+{global_knowledge}
+
+═══════════════════════════════════════════════════════════════
+RECENT CONVERSATION
+═══════════════════════════════════════════════════════════════
+
+{conversation_context}
+
+═══════════════════════════════════════════════════════════════
+YOUR INSTRUCTIONS
+═══════════════════════════════════════════════════════════════
+
+1. ANSWER THE QUESTION:
+   - If intent is "on_topic": Use PRIMARY knowledge to answer
+   - If intent is "off_topic": Use SECONDARY or GLOBAL knowledge
+   - Be conversational and helpful
+
+2. HANDLE OFF-TOPIC GRACEFULLY:
+   - Answer off-topic questions fully using available knowledge
+   - After answering, gently redirect: "{current_step_config.get('off_topic_handling', {}).get('return_prompt', 'Anything else I can help with?')}"
+   - Don't refuse to answer legitimate questions
+
+3. TRACK DATA COLLECTION:
+   - If customer provides required information, extract it clearly
+   - Acknowledge what you've collected
+   - Let them know what's still needed
+
+4. GUIDE PROGRESS:
+   - If all required data collected, offer to move to next step
+   - Don't force progression - let customer control pace
+
+5. ESCALATION:
+   - If question is outside knowledge base, say so clearly
+   - If customer seems frustrated, offer human assistance
+
+Your response:"""
+
+        return prompt
+    
+    def _format_knowledge(self, docs: List[Dict], section_title: str) -> str:
+        """Format knowledge documents for prompt"""
+        if not docs:
+            return f"**{section_title}**: (No relevant knowledge found)"
+        
+        formatted = [f"**{section_title}**:"]
+        
+        for i, doc in enumerate(docs, 1):
+            formatted.append(
+                f"\n[{i}] {doc['doc_id']} (score: {doc.get('score', 0):.3f})"
+            )
+            formatted.append(f"    {doc['content'][:300]}...")
+        
+        return "\n".join(formatted)
+```
+
+---
+
+## Complete Implementation
+
+### 1. LangGraph Workflow
+
+```python
+from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+class ProcessAwareWorkflow:
+    """Complete LangGraph workflow with tiered retrieval"""
+    
+    def __init__(
+        self,
+        process_ontology: dict,
+        vector_store: FAISS,
+        llm: ChatBedrock,
+        state_manager: StateManager
+    ):
+        self.ontology = process_ontology
+        self.retriever = TieredRetriever(vector_store, process_ontology)
+        self.intent_classifier = IntentClassifier(llm)
+        self.prompt_builder = PromptBuilder()
+        self.llm = llm
+        self.state_manager = state_manager
+        
+        # Build graph
+        self.workflow = self._build_graph()
+    
+    def _build_graph(self) -> StateGraph:
+        """Construct the LangGraph workflow"""
+        
+        workflow = StateGraph(ProcessState)
+        
+        # === NODES ===
+        workflow.add_node("classify_intent", self.classify_intent_node)
+        workflow.add_node("retrieve_knowledge", self.retrieve_knowledge_node)
+        workflow.add_node("generate_response", self.generate_response_node)
+        workflow.add_node("extract_data", self.extract_data_node)
+        workflow.add_node("update_progress", self.update_progress_node)
+        workflow.add_node("route_next", self.route_next_node)
+        
+        # === EDGES ===
+        workflow.set_entry_point("classify_intent")
+        
+        workflow.add_edge("classify_intent", "retrieve_knowledge")
+        workflow.add_edge("retrieve_knowledge", "generate_response")
+        workflow.add_edge("generate_response", "extract_data")
+        workflow.add_edge("extract_data", "update_progress")
+        workflow.add_edge("update_progress", "route_next")
+        
+        # Conditional routing from route_next
+        workflow.add_conditional_edges(
+            "route_next",
+            self.decide_next_action,
+            {
+                "continue_step": END,
+                "progress_step": END,
+                "handle_navigation": END,
+                "escalate": END
+            }
+        )
+        
+        return workflow
+    
+    # === NODE IMPLEMENTATIONS ===
+    
+    async def classify_intent_node(self, state: ProcessState) -> ProcessState:
+        """Classify user intent"""
+        
+        step_config = self.ontology["steps"][state["current_step"]]
+        
+        intent_result = await self.intent_classifier.classify(
+            query=state["current_question"],
+            current_step=state["current_step"],
+            step_ontology=step_config
+        )
+        
+        return update_state_with_intent(
+            state,
+            intent=intent_result["intent"],
+            confidence=intent_result["confidence"]
+        )
+    
+    async def retrieve_knowledge_node(self, state: ProcessState) -> ProcessState:
+        """Perform tiered retrieval"""
+        
+        retrieved = await self.retriever.retrieve(
+            query=state["current_question"],
+            current_step=state["current_step"],
+            top_k=5
+        )
+        
+        return update_state_with_retrieval(
+            state,
+            primary_docs=retrieved["primary"],
+            secondary_docs=retrieved["secondary"] + retrieved["global"]
+        )
+    
+    async def generate_response_node(self, state: ProcessState) -> ProcessState:
+        """Generate LLM response"""
+        
+        # Get intent result
+        intent_record = state["intent_history"][-1]
+        
+        # Build prompt
+        prompt = self.prompt_builder.build_agent_prompt(
+            state=state,
+            retrieved_docs={
+                "primary": [
+                    d for d in state["relevant_docs"] 
+                    if d.get("tier") == "primary"
+                ],
+                "secondary": [
+                    d for d in state["relevant_docs"]
+                    if d.get("tier") == "secondary"
+                ],
+                "global": [
+                    d for d in state["relevant_docs"]
+                    if d.get("tier") == "global"
+                ]
+            },
+            intent=intent_record
+        )
+        
+        # Get response
+        response = await self.llm.ainvoke(prompt)
+        
+        # Update state
+        return update_state_with_message(
+            state,
+            role="assistant",
+            content=response.content
+        )
+    
+    async def extract_data_node(self, state: ProcessState) -> ProcessState:
+        """Extract structured data from conversation"""
+        
+        # Get required fields for current step
+        required = state["required_fields"].get(state["current_step"], [])
+        
+        if not required:
+            return state  # No data to collect
+        
+        # Use LLM to extract data
+        extraction_prompt = f"""
+Extract structured data from this customer message:
+"{state['current_question']}"
+
+Required fields for {state['current_step']}:
+{json.dumps(required, indent=2)}
+
+Return JSON with any fields found, or empty object if none.
+"""
+        
+        result = await self.llm.ainvoke(extraction_prompt)
+        extracted = json.loads(result.content)
+        
+        # Update state with extracted fields
+        updated_state = state
+        for field, value in extracted.items():
+            updated_state = update_state_with_data(
+                updated_state,
+                field=field,
+                value=value
+            )
+        
+        return updated_state
+    
+    async def update_progress_node(self, state: ProcessState) -> ProcessState:
+        """Calculate step completion progress"""
+        
+        current_step = state["current_step"]
+        required = state["required_fields"].get(current_step, [])
+        collected = state["collected_fields"].get(current_step, {})
+        
+        if not required:
+            progress = 1.0
+        else:
+            progress = len(collected) / len(required)
+        
+        return {
+            **state,
+            "step_progress": {
+                **state["step_progress"],
+                current_step: progress
+            }
+        }
+    
+    async def route_next_node(self, state: ProcessState) -> ProcessState:
+        """Determine routing decision"""
+        
+        # Check if should escalate
+        if state["topic_switches"] > 3:
+            return {
+                **state,
+                "should_escalate": True,
+                "escalation_reason": "multiple_topic_switches"
+            }
+        
+        # Check if can progress
+        if state["can_progress"]:
+            # Ask if user wants to move forward
+            return state
+        
+        return state
+    
+    def decide_next_action(self, state: ProcessState) -> str:
+        """Conditional edge: decide what to do next"""
+        
+        if state["should_escalate"]:
+            return "escalate"
+        
+        intent = state["last_intent"]
+        
+        if intent == "navigation":
+            return "handle_navigation"
+        
+        if state["can_progress"] and intent != "off_topic":
+            return "progress_step"
+        
+        return "continue_step"
+    
+    # === EXECUTION ===
+    
+    async def run(self, session_id: str, user_message: str) -> ProcessState:
+        """Execute workflow for a user message"""
+        
+        # Load or initialize state
+        state = self.state_manager.load_state(session_id)
+        if not state:
+            state = initialize_state(
+                process_id="mortgage_lifecycle",
+                session_id=session_id
+            )
+        
+        # Add user message
+        state = update_state_with_message(state, "user", user_message)
+        state["current_question"] = user_message
+        
+        # Compile and run graph
+        app = self.workflow.compile()
+        
+        result = await app.ainvoke(state)
+        
+        # Save state
+        self.state_manager.save_state(session_id, result)
+        
+        return result
+```
+
+### 2. Streamlit UI
+
+```python
+import streamlit as st
+import uuid
+from datetime import datetime
+
+# === PAGE CONFIG ===
+st.set_page_config(
+    page_title="Process-Aware Assistant",
+    page_icon="🤖",
+    layout="wide"
+)
+
+# === INITIALIZATION ===
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+    st.session_state.workflow = initialize_workflow()
+    st.session_state.state = None
+
+# === SIDEBAR: Process Progress ===
+st.sidebar.header("📊 Your Progress")
+
+if st.session_state.state:
+    state = st.session_state.state
+    
+    # Show current step
+    st.sidebar.subheader(f"Current: {state['current_step']}")
+    st.sidebar.progress(
+        state["step_progress"].get(state["current_step"], 0.0)
+    )
+    
+    # Show completed steps
+    st.sidebar.write("**Completed Steps:**")
+    for step in state["completed_steps"]:
+        st.sidebar.write(f"✅ {step}")
+    
+    # Show required data
+    required = state["required_fields"].get(state["current_step"], [])
+    collected = state["collected_fields"].get(state["current_step"], {})
+    
+    if required:
+        st.sidebar.write("**Required Information:**")
+        for field in required:
+            status = "✅" if field in collected else "⭕"
+            st.sidebar.write(f"{status} {field}")
+
+# === SIDEBAR: Knowledge Context ===
+st.sidebar.divider()
+st.sidebar.header("📚 Knowledge Sources")
+
+if st.session_state.state and st.session_state.state.get("knowledge_sources"):
+    with st.sidebar.expander("View Sources", expanded=False):
+        primary = st.session_state.state["knowledge_sources"].get("primary", [])
+        secondary = st.session_state.state["knowledge_sources"].get("secondary", [])
+        
+        if primary:
+            st.write("**Current Step:**")
+            for doc_id in primary:
+                st.write(f"📘 {doc_id}")
+        
+        if secondary:
+            st.write("**Additional:**")
+            for doc_id in secondary:
+                st.write(f"📗 {doc_id}")
+
+# === MAIN CHAT INTERFACE ===
+st.title("🤖 Process-Aware Assistant")
+
+# Show intent indicator
+if st.session_state.state:
+    intent = st.session_state.state.get("last_intent", "")
+    if intent == "off_topic":
+        st.info("💡 Answering from general knowledge (not current step)")
+
+# Chat messages
+if st.session_state.state:
+    for msg in st.session_state.state["messages"]:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+
+# Chat input
+if prompt := st.chat_input("Ask me anything..."):
+    # Show user message
+    with st.chat_message("user"):
+        st.write(prompt)
+    
+    # Process through workflow
+    with st.spinner("Thinking..."):
+        result_state = await st.session_state.workflow.run(
+            session_id=st.session_state.session_id,
+            user_message=prompt
+        )
+        st.session_state.state = result_state
+    
+    # Show assistant response
+    with st.chat_message("assistant"):
+        last_message = result_state["messages"][-1]
+        st.write(last_message["content"])
+    
+    st.rerun()
+
+# === DEBUG PANEL ===
+with st.expander("🔧 Debug Info", expanded=False):
+    if st.session_state.state:
+        st.json({
+            "session_id": st.session_state.session_id,
+            "current_step": st.session_state.state["current_step"],
+            "last_intent": st.session_state.state.get("last_intent"),
+            "can_progress": st.session_state.state.get("can_progress"),
+            "turn_count": st.session_state.state.get("turn_count"),
+            "topic_switches": st.session_state.state.get("topic_switches")
+        })
+```
+
+### 3. Initialize Everything
+
+```python
+# setup.py
+
+import boto3
+from langchain.vectorstores import FAISS
+from langchain_aws import BedrockEmbeddings, ChatBedrock
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import json
+
+def initialize_workflow():
+    """Initialize all components"""
+    
+    # === AWS Clients ===
+    bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+    s3 = boto3.client('s3')
+    
+    # === Embeddings ===
+    embeddings = BedrockEmbeddings(
+        client=bedrock,
+        model_id="amazon.titan-embed-text-v2:0"
+    )
+    
+    # === LLM ===
+    llm = ChatBedrock(
+        client=bedrock,
+        model_id="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        model_kwargs={"temperature": 0.7}
+    )
+    
+    # === Load Process Ontology ===
+    with open("process_ontology.json", "r") as f:
+        ontology = json.load(f)
+    
+    # === Build Vector Store ===
+    vector_store = build_vector_store(
+        s3_bucket="your-kb-bucket",
+        embeddings=embeddings
+    )
+    
+    # === State Manager ===
+    state_manager = StateManager(s3_bucket="your-state-bucket")
+    
+    # === Create Workflow ===
+    workflow = ProcessAwareWorkflow(
+        process_ontology=ontology,
+        vector_store=vector_store,
+        llm=llm,
+        state_manager=state_manager
+    )
+    
+    return workflow
+
+def build_vector_store(s3_bucket: str, embeddings: BedrockEmbeddings) -> FAISS:
+    """Build FAISS vector store from S3 knowledge base"""
+    
+    s3 = boto3.client('s3')
+    
+    # List all markdown files
+    response = s3.list_objects_v2(
+        Bucket=s3_bucket,
+        Prefix="knowledge/"
+    )
+    
+    documents = []
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=512,
+        chunk_overlap=50
+    )
+    
+    for obj in response.get('Contents', []):
+        if obj['Key'].endswith('.md'):
+            # Download document
+            doc_obj = s3.get_object(Bucket=s3_bucket, Key=obj['Key'])
+            content = doc_obj['Body'].read().decode('utf-8')
+            
+            # Load metadata
+            doc_id = obj['Key'].split('/')[-1].replace('.md', '')
+            metadata_key = f"metadata/{doc_id}.json"
+            
+            try:
+                meta_obj = s3.get_object(Bucket=s3_bucket, Key=metadata_key)
+                metadata = json.loads(meta_obj['Body'].read())
+            except:
+                metadata = {"doc_id": doc_id}
+            
+            # Split into chunks
+            chunks = text_splitter.create_documents(
+                texts=[content],
+                metadatas=[{
+                    **metadata.get("process_mapping", {}),
+                    **metadata.get("semantic_tags", {}),
+                    "doc_id": doc_id,
+                    "source_path": f"s3://{s3_bucket}/{obj['Key']}"
+                }]
+            )
+            
+            documents.extend(chunks)
+    
+    # Create FAISS index
+    vector_store = FAISS.from_documents(
+        documents=documents,
+        embedding=embeddings
+    )
+    
+    return vector_store
+```
+
+---
+
+## Deployment Guide
+
+### 1. Project Structure
+
+```
+project/
+├── src/
+│   ├── __init__.py
+│   ├── state.py              # ProcessState, state management
+│   ├── retrieval.py          # TieredRetriever
+│   ├── intent.py             # IntentClassifier
+│   ├── prompts.py            # PromptBuilder
+│   ├── workflow.py           # ProcessAwareWorkflow
+│   └── utils.py              # Helper functions
+├── data/
+│   ├── process_ontology.json # Process definition
+│   └── metadata/             # Document metadata
+├── knowledge/                # Markdown knowledge docs
+├── streamlit_app.py          # UI
+├── setup.py                  # Initialization
+├── requirements.txt
+└── README.md
+```
+
+### 2. Requirements
+
+```txt
+# requirements.txt
+
+langchain==0.1.0
+langgraph==0.0.40
+langchain-aws==0.1.0
+streamlit==1.30.0
+boto3==1.34.0
+faiss-cpu==1.7.4
+python-dotenv==1.0.0
+```
+
+### 3. Environment Setup
+
+```bash
+# .env
+
+AWS_REGION=us-east-1
+S3_KB_BUCKET=your-knowledge-bucket
+S3_STATE_BUCKET=your-state-bucket
+BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
+EMBED_MODEL_ID=amazon.titan-embed-text-v2:0
+```
+
+### 4. Deployment Steps
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Upload knowledge to S3
+aws s3 sync ./knowledge/ s3://your-knowledge-bucket/knowledge/
+aws s3 sync ./data/metadata/ s3://your-knowledge-bucket/metadata/
+
+# 3. Build vector store (one-time)
+python -c "from setup import build_vector_store; build_vector_store()"
+
+# 4. Run Streamlit
+streamlit run streamlit_app.py
+```
+
+### 5. AWS Infrastructure
+
+```yaml
+# CloudFormation template (simplified)
+
+Resources:
+  KnowledgeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: your-knowledge-bucket
+  
+  StateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: your-state-bucket
+  
+  BedrockExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+```
+
+---
+
+## Next Steps & Enhancements
+
+### Phase 2 Features
+- **Vector store upgrade**: Move from FAISS to OpenSearch for better filtering
+- **Conversation memory**: Implement conversation summarization for long chats
+- **Multi-user support**: DynamoDB for state management
+- **Analytics dashboard**: Track step completion rates, common questions
+
+### Phase 3 Features
+- **Human handoff**: Integrate with ticketing system
+- **Feedback loop**: Collect user ratings on responses
+- **A/B testing**: Compare retrieval strategies
+- **Multi-language**: Support for Spanish, etc.
+
+---
+
+## Conclusion
+
+This architecture provides:
+
+✅ **Process fidelity** - Graph mirrors business flow  
+✅ **Ontology awareness** - Agent knows context at all times  
+✅ **Flexible retrieval** - Prioritizes relevant knowledge without limiting scope  
+✅ **Data tracking** - Collects structured information  
+✅ **Graceful tangents** - Handles off-topic questions naturally  
+✅ **Scalable foundation** - Ready for production enhancements  
+
+The key insight: **prioritize without restricting**. Customers don't follow scripts, so we tier retrieval to boost relevant knowledge while keeping all knowledge accessible.
